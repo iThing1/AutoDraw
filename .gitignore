@@ -44,6 +44,7 @@ $RECYCLE.BIN/
 
 
 Assets/00_ThirdParty/
+Assets/00_ThirdParty.meta
 
 # Unity-generated solution (slnx)
 *.slnx

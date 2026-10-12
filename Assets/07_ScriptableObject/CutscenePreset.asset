@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39664a35abf180a42ab853c9b9eeda29, type: 3}
+  m_Name: CutscenePreset
+  m_EditorClassIdentifier: Assembly-CSharp::CutscenePreset
+  _cinematic:
+    _letterboxHeightRatio: 0.12
+    _letterboxInDuration: 0.35
+    _letterboxOutDuration: 0.35
+    _enterBlendDuration: 0.8
+    _exitBlendDuration: 0.6
+    _enterSound: {fileID: 8300000, guid: 50fd2ff187c1bb349a27ed90afbb8560, type: 3}
+    _exitSound: {fileID: 0}
+  _delayBeforeDrop: 0.2
+  _bossDropHeight: 12
+  _bossDropDuration: 0.45
+  _bossDropEase: 5
+  _landImpact:
+    _shakeForce: 1.5
+    _sound: {fileID: 8300000, guid: c0d8972d38d3fe84fab073047861b628, type: 3}
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0, g: 0, b: 0, a: 1}
+    _effectScale: 2.5
+    _effectLifetime: 3
+  _bannerInDuration: 0.3
+  _bannerHoldDuration: 1.4
+  _bannerOutDuration: 0.3
+  _bannerSound: {fileID: 8300000, guid: ae1c3efd82e6ff242a23a830d0e42356, type: 3}

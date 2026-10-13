@@ -1,0 +1,29 @@
+using System;
+using UnityEngine;
+
+// 투사체 한 발의 성질. 단발·연사·파편 조각이 모두 이 설정을 재사용한다.
+[Serializable]
+public class ShotSettings
+{
+    [SerializeField, Min(0.1f)] private float _projectileScale = 1f;
+    [SerializeField] private TrajectorySettings[] _trajectories = { new() };
+
+    [SerializeField] private IntRange _damage = new(5, 10);
+    [SerializeField, Range(0f, 1f)] private float _criticalChance = 0.2f;
+    [SerializeField, Min(1f)] private float _criticalMultiplier = 2f;
+
+    [SerializeField] private HitFeedbackPreset _normalHit;
+    [SerializeField] private HitFeedbackPreset _criticalHit;
+
+    public float ProjectileScale { get { return _projectileScale; } }
+    public TrajectorySettings[] Trajectories { get { return _trajectories; } }
+
+    public IntRange Damage { get { return _damage; } }
+    public float CriticalChance { get { return _criticalChance; } }
+    public float CriticalMultiplier { get { return _criticalMultiplier; } }
+
+    public HitFeedbackPreset GetHitFeedback(bool isCritical)
+    {
+        return isCritical && null != _criticalHit ? _criticalHit : _normalHit;
+    }
+}

@@ -6,6 +6,9 @@ public class BattleUnitData : ScriptableObject
     [Header("이동")]
     [SerializeField, Min(0f)] private float _moveSpeed = 3f;
 
+    [Header("배회")]
+    [SerializeField] private WanderSettings _wander = new();
+
     [Header("체력")]
     [SerializeField, Min(1)] private int _maxHp = 100;
 
@@ -31,6 +34,8 @@ public class BattleUnitData : ScriptableObject
     [SerializeField] private string _bannerSubtitle;
 
     public float MoveSpeed { get { return _moveSpeed; } }
+
+    public WanderSettings Wander { get { return _wander; } }
 
     public int MaxHp { get { return _maxHp; } }
 

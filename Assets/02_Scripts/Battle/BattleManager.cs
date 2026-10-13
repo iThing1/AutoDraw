@@ -28,6 +28,7 @@ public class BattleManager : MonoBehaviour
     private BattleUnit _player;
     private PlayerAutoMover _playerMover;
     private BattleUnit _boss;
+    private WanderMover _bossWander;
     private BattleHudUI _hud;
 
     private BattlePhase _phase = BattlePhase.None;
@@ -124,6 +125,7 @@ public class BattleManager : MonoBehaviour
 
         _boss = Instantiate(_bossPrefab, _bossSpawnPoint.position, Quaternion.identity, transform);
         _boss.name = _bossPrefab.name;
+        _bossWander = _boss.GetComponent<WanderMover>();
 
         _boss.gameObject.SetActive(false);
     }
@@ -200,6 +202,11 @@ public class BattleManager : MonoBehaviour
             _player.Attacker.RunAsync(_boss, _paintCanvas, battleSource.Token).Forget();
             _boss.Attacker.RunAsync(_player, _paintCanvas, battleSource.Token).Forget();
 
+            if (null != _bossWander)
+            {
+                _bossWander.RunAsync(_bossSpawnPoint.position, battleSource.Token).Forget();
+            }
+
             // WhenAny는 먼저 끝난 작업의 순서 번호를 돌려준다. 0은 보스, 1은 플레이어가 먼저 쓰러진 것이다.
             int defeatedIndex = await UniTask.WhenAny(
                 _boss.Health.WaitForDeathAsync(token),
@@ -229,5 +236,26 @@ public class BattleManager : MonoBehaviour
         Debug.Log($"전투 단계 : {phase}");
 
         OnPhaseChanged?.Invoke(phase);
+    }
+
+    // 배회 범위를 데이터로 바꿀 때 화면 안에 들어오는지 씬 뷰에서 바로 확인하기 위해 그린다.
+    private void OnDrawGizmosSelected()
+    {
+        if (null == _bossSpawnPoint || null == _bossPrefab || null == _bossPrefab.Data)
+        {
+            return;
+        }
+
+        WanderSettings wander = _bossPrefab.Data.Wander;
+
+        if (false == wander.UseWander)
+        {
+            return;
+        }
+
+        Vector2 halfSize = wander.AreaHalfSize;
+
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireCube(_bossSpawnPoint.position, new Vector3(halfSize.x * 2f, halfSize.y * 2f, 0f));
     }
 }

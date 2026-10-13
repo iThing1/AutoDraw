@@ -28,6 +28,8 @@ MonoBehaviour:
       _duration:
         _min: 0.5
         _max: 0.6
+    _trailTime: 0.3
+    _trailWidth: 0.25
     _damage:
       _min: 0
       _max: 0
@@ -77,6 +79,8 @@ MonoBehaviour:
         _duration:
           _min: 0.35
           _max: 0.55
+      _trailTime: 0.15
+      _trailWidth: 0.1
       _damage:
         _min: 4
         _max: 7

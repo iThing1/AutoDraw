@@ -86,7 +86,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 2
-  m_Size: {x: 60, y: 40}
+  m_Size: {x: 80, y: 6}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -339,6 +339,7 @@ MonoBehaviour:
   - {fileID: 106053368, guid: 37bddedf64c075b4db53b6d7d78f3c76, type: 3}
   _maxSplatCount: 300
   _appearDuration: 0.12
+  _appearEase: 27
 --- !u!1 &8120992787737956099
 GameObject:
   m_ObjectHideFlags: 0

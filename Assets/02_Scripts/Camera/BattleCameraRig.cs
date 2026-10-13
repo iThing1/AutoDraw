@@ -52,9 +52,10 @@ public class BattleCameraRig : MonoBehaviour
     // 플레이어와 보스를 한 화면에 담는 전투 카메라를 준비만 하고, 실제 전환은 ReturnToGameplay에서 한다.
     public void PrepareBattleFraming(BattleUnit player, BattleUnit boss)
     {
+        // 넉백은 자식 Body만 흔들므로, 루트를 따라가야 맞을 때마다 카메라가 함께 흔들리지 않는다.
         _battleTargetGroup.Targets.Clear();
-        _battleTargetGroup.AddMember(player.Body, 1f, player.Data.FramingRadius);
-        _battleTargetGroup.AddMember(boss.Body, 1f, boss.Data.FramingRadius);
+        _battleTargetGroup.AddMember(player.transform, 1f, player.Data.FramingRadius);
+        _battleTargetGroup.AddMember(boss.transform, 1f, boss.Data.FramingRadius);
 
         _battleCamera.Follow = _battleTargetGroup.transform;
 

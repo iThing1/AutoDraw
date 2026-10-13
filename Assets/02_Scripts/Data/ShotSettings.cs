@@ -8,6 +8,10 @@ public class ShotSettings
     [SerializeField, Min(0.1f)] private float _projectileScale = 1f;
     [SerializeField] private TrajectorySettings[] _trajectories = { new() };
 
+    // 꼬리 길이(초)가 0이면 궤적을 그리지 않는다.
+    [SerializeField, Min(0f)] private float _trailTime = 0.2f;
+    [SerializeField, Min(0f)] private float _trailWidth = 0.2f;
+
     [SerializeField] private IntRange _damage = new(5, 10);
     [SerializeField, Range(0f, 1f)] private float _criticalChance = 0.2f;
     [SerializeField, Min(1f)] private float _criticalMultiplier = 2f;
@@ -17,6 +21,9 @@ public class ShotSettings
 
     public float ProjectileScale { get { return _projectileScale; } }
     public TrajectorySettings[] Trajectories { get { return _trajectories; } }
+
+    public float TrailTime { get { return _trailTime; } }
+    public float TrailWidth { get { return _trailWidth; } }
 
     public IntRange Damage { get { return _damage; } }
     public float CriticalChance { get { return _criticalChance; } }

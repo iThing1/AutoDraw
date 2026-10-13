@@ -34,6 +34,18 @@ public class PoolManager
         return instance;
     }
 
+    // UI처럼 특정 부모(Canvas) 아래에 있어야 하는 오브젝트용. 위치는 호출하는 쪽에서 맞춘다.
+    public GameObject Spawn(GameObject prefab, Transform parent)
+    {
+        Queue<GameObject> pool = GetPool(prefab);
+
+        GameObject instance = 0 < pool.Count ? pool.Dequeue() : CreateInstance(prefab);
+        instance.transform.SetParent(parent, false);
+        instance.SetActive(true);
+
+        return instance;
+    }
+
     public void Despawn(GameObject instance)
     {
         if (null == instance)

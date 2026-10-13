@@ -1,0 +1,40 @@
+using UnityEngine;
+
+// 프리셋 하나로 히트 스톱, 플래시, 넉백, 임팩트, 물감 자국을 한 번에 재생한다.
+// 일반 타격, 치명타, 플레이어 피격이 같은 코드를 쓰고 프리셋만 다르다.
+public static class HitFeedbackPlayer
+{
+    public static void Play(HitFeedbackPreset preset, BattleUnit target, DamageInfo info, PaintCanvas canvas)
+    {
+        if (null == preset)
+        {
+            return;
+        }
+
+        GameManager.HitStop.Play(preset.HitStopDuration, preset.HitStopTimeScale);
+
+        UnitView view = target.View;
+
+        if (null != view)
+        {
+            view.Flash(preset.FlashColor, preset.FlashDuration);
+
+            // 공격자에게서 멀어지는 쪽으로 밀어낸다. 공격자를 모르면 오른쪽으로 민다.
+            Vector3 direction = Vector3.right;
+
+            if (null != info.Attacker)
+            {
+                direction = target.Body.position - info.Attacker.Body.position;
+            }
+
+            view.Knockback(target.Body, direction, preset.KnockbackDistance, preset.KnockbackDuration);
+        }
+
+        ImpactPlayer.Play(preset.Impact, info.HitPoint, info.PaintColor);
+
+        if (null != canvas)
+        {
+            canvas.LeaveSplats(info.HitPoint, info.PaintColor, info.IsInk, preset);
+        }
+    }
+}

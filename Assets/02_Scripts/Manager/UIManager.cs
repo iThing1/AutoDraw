@@ -1,5 +1,6 @@
 using UnityEngine;
 
+// UI를 언제 열고 닫을지는 각 화면을 가진 쪽(전투 매니저 등)이 정하고, 이 클래스는 생성·레이어 정렬·파괴만 맡는다.
 public class UIManager
 {
     private const int LAYER_SORTING_STEP = 10;
@@ -8,6 +9,7 @@ public class UIManager
 
     private CinematicUI _cinematic;
 
+    // 레터박스·배너는 등장 컷신과 엔딩이 함께 쓰므로 공용으로 미리 열어 둔다.
     public CinematicUI Cinematic { get { return _cinematic; } }
 
     public void Init(CinematicUI cinematicPrefab)
@@ -37,5 +39,15 @@ public class UIManager
         }
 
         return ui;
+    }
+
+    public void Close(Component ui)
+    {
+        if (null == ui)
+        {
+            return;
+        }
+
+        Object.Destroy(ui.gameObject);
     }
 }

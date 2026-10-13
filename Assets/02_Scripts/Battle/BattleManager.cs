@@ -10,8 +10,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Transform _bossSpawnPoint;
 
     [Header("유닛 프리팹")]
-    [SerializeField] private PlayerAutoMover _playerPrefab;
-    [SerializeField] private BossUnit _bossPrefab;
+    [SerializeField] private BattleUnit _playerPrefab;
+    [SerializeField] private BattleUnit _bossPrefab;
 
     [Header("접근")]
     [SerializeField] private BossIntroTrigger _introTrigger;
@@ -19,15 +19,19 @@ public class BattleManager : MonoBehaviour
     [Header("보스 등장")]
     [SerializeField] private BossIntroCutscene _introCutscene;
 
+    [Header("전투")]
+    [SerializeField] private PaintCanvas _paintCanvas;
+    [SerializeField] private BattleHudUI _hudPrefab;
+
     public event Action<BattlePhase> OnPhaseChanged;
 
-    private PlayerAutoMover _player;
-    private BossUnit _boss;
+    private BattleUnit _player;
+    private PlayerAutoMover _playerMover;
+    private BattleUnit _boss;
+    private BattleHudUI _hud;
 
     private BattlePhase _phase = BattlePhase.None;
 
-    public PlayerAutoMover Player { get { return _player; } }
-    public BossUnit Boss { get { return _boss; } }
     public BattlePhase Phase { get { return _phase; } }
 
     private void Start()
@@ -41,6 +45,8 @@ public class BattleManager : MonoBehaviour
 
         GameManager.CameraRig.FollowPlayer(_player.transform);
 
+        WarnIfAutoHealCannotSave();
+
         RunAsync(destroyCancellationToken).Forget();
     }
 
@@ -52,9 +58,9 @@ public class BattleManager : MonoBehaviour
             return false;
         }
 
-        if (null == _playerPrefab)
+        if (null == _playerPrefab || null == _playerPrefab.GetComponent<PlayerAutoMover>())
         {
-            Debug.LogError("전투 매니저 : 플레이어 프리팹이 지정되지 않았습니다.");
+            Debug.LogError("전투 매니저 : 플레이어 프리팹이 없거나 PlayerAutoMover가 붙어 있지 않습니다.");
             return false;
         }
 
@@ -82,8 +88,21 @@ public class BattleManager : MonoBehaviour
             return false;
         }
 
+        if (null == _paintCanvas)
+        {
+            Debug.LogError("전투 매니저 : PaintCanvas가 지정되지 않았습니다.");
+            return false;
+        }
+
+        if (null == _hudPrefab)
+        {
+            Debug.LogError("전투 매니저 : 전투 HUD 프리팹이 지정되지 않았습니다.");
+            return false;
+        }
+
         // 하위 컴포넌트는 빠진 항목을 직접 로그로 남기므로 결과만 확인한다.
-        if (false == _introCutscene.HasRequiredReferences() || false == GameManager.CameraRig.HasRequiredReferences())
+        if (false == _introCutscene.HasRequiredReferences() || false == GameManager.CameraRig.HasRequiredReferences()
+            || false == _paintCanvas.HasRequiredReferences())
         {
             return false;
         }
@@ -101,11 +120,34 @@ public class BattleManager : MonoBehaviour
     {
         _player = Instantiate(_playerPrefab, _playerSpawnPoint.position, Quaternion.identity, transform);
         _player.name = _playerPrefab.name;
+        _playerMover = _player.GetComponent<PlayerAutoMover>();
 
         _boss = Instantiate(_bossPrefab, _bossSpawnPoint.position, Quaternion.identity, transform);
         _boss.name = _bossPrefab.name;
 
         _boss.gameObject.SetActive(false);
+    }
+
+    // 자동 회복은 맞은 직후 기준선 아래인지로 시작하므로, 기준선 체력이 보스의 최대 한 방보다 낮으면 회복 전에 쓰러질 수 있다.
+    private void WarnIfAutoHealCannotSave()
+    {
+        BattleUnitData playerData = _player.Data;
+        BattleUnitData bossData = _boss.Data;
+
+        if (null == playerData || null == bossData || null == bossData.AttackStyle || false == playerData.UseAutoHeal)
+        {
+            return;
+        }
+
+        ShotSettings bossShot = bossData.AttackStyle.Shot;
+
+        int thresholdHp = Mathf.RoundToInt(playerData.MaxHp * playerData.AutoHealThresholdRatio);
+        int bossMaxHit = Mathf.RoundToInt(bossShot.Damage.Max * bossShot.CriticalMultiplier);
+
+        if (thresholdHp <= bossMaxHit)
+        {
+            Debug.LogWarning($"전투 매니저 : 자동 회복 기준 체력({thresholdHp})이 보스의 최대 한 방({bossMaxHit}) 이하라 회복 전에 쓰러질 수 있습니다.");
+        }
     }
 
     private async UniTaskVoid RunAsync(CancellationToken token)
@@ -127,26 +169,49 @@ public class BattleManager : MonoBehaviour
     {
         SetPhase(BattlePhase.Approach);
 
-        _player.StartMoving();
+        _playerMover.StartMoving();
 
         await _introTrigger.WaitForEnterAsync(token);
 
-        _player.Stop();
+        _playerMover.Stop();
     }
 
     private async UniTask PlayIntroAsync(CancellationToken token)
     {
         SetPhase(BattlePhase.Intro);
 
+        GameManager.CameraRig.PrepareBattleFraming(_player, _boss);
+
         await _introCutscene.PlayAsync(_boss, _bossSpawnPoint, token);
     }
 
-    // M3에서 자동 전투로 채운다.
     private async UniTask PlayBattleAsync(CancellationToken token)
     {
         SetPhase(BattlePhase.Battle);
 
-        await UniTask.Yield(token);
+        // 전투 HUD는 전투에서만 쓰므로 전투 매니저가 직접 열고, 엔딩(M4)에서 닫는다.
+        _hud = GameManager.UI.Open(_hudPrefab, UILayer.HUD);
+        _hud.Bind(_player, _boss);
+        _hud.Show();
+
+        // 보스가 쓰러지면 전투 토큰을 취소해, 남은 공격 루프와 날아가던 투사체를 함께 정리한다.
+        using (CancellationTokenSource battleSource = CancellationTokenSource.CreateLinkedTokenSource(token))
+        {
+            _player.Attacker.RunAsync(_boss, _paintCanvas, battleSource.Token).Forget();
+            _boss.Attacker.RunAsync(_player, _paintCanvas, battleSource.Token).Forget();
+
+            // WhenAny는 먼저 끝난 작업의 순서 번호를 돌려준다. 0은 보스, 1은 플레이어가 먼저 쓰러진 것이다.
+            int defeatedIndex = await UniTask.WhenAny(
+                _boss.Health.WaitForDeathAsync(token),
+                _player.Health.WaitForDeathAsync(token));
+
+            battleSource.Cancel();
+
+            if (1 == defeatedIndex)
+            {
+                Debug.LogWarning("전투 매니저 : 플레이어가 먼저 쓰러졌습니다. PlayerData의 자동 회복 설정을 확인해 주세요.");
+            }
+        }
     }
 
     // M4에서 처치와 엔딩으로 채운다.

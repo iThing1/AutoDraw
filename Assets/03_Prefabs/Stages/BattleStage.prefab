@@ -77,8 +77,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1830564127
+  m_SortingLayer: -2
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 3f7b792a8ea0e4245ba9a0ff5c380267, type: 3}
@@ -249,6 +249,7 @@ Transform:
   - {fileID: 7026516416245836906}
   - {fileID: 2935112580148223958}
   - {fileID: 4119412269189890622}
+  - {fileID: 638694570505087024}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2969957242831443143
@@ -265,10 +266,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BattleDirector
   _playerSpawnPoint: {fileID: 7026516416245836906}
   _bossSpawnPoint: {fileID: 2935112580148223958}
-  _playerPrefab: {fileID: 2423366118189221037, guid: 2c1ee4e491c0cc44890185f99d222d9b, type: 3}
+  _playerPrefab: {fileID: 5628677625872867307, guid: 2c1ee4e491c0cc44890185f99d222d9b, type: 3}
   _bossPrefab: {fileID: 5673451803158972909, guid: 2e8d6d477003ae54baf0cd0c464cf3ce, type: 3}
   _introTrigger: {fileID: 7753745094576344584}
   _introCutscene: {fileID: 8588949236467943965}
+  _paintCanvas: {fileID: 6145387518109863596}
+  _hudPrefab: {fileID: 7728036517409257316, guid: 6130fac36af31ba4aa2ce4787a21c635, type: 3}
 --- !u!114 &8588949236467943965
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -282,6 +285,60 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossIntroCutscene
   _preset: {fileID: 11400000, guid: dc1e97273fb1c3047a906b9959ccd0e4, type: 2}
+--- !u!1 &7604822164757181108
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 638694570505087024}
+  - component: {fileID: 6145387518109863596}
+  m_Layer: 0
+  m_Name: PaintCanvas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &638694570505087024
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7604822164757181108}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8873060262263899674}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6145387518109863596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7604822164757181108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46319c0ecb59dc443815d1f85982c5af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PaintCanvas
+  _splatPrefab: {fileID: 2687638166152425016, guid: fc2e34d7d7d952645a48fbcb16f7d1a5, type: 3}
+  _splatSprites:
+  - {fileID: -7058793229908712487, guid: 37bddedf64c075b4db53b6d7d78f3c76, type: 3}
+  - {fileID: -648247221, guid: 37bddedf64c075b4db53b6d7d78f3c76, type: 3}
+  - {fileID: -2010281902, guid: 37bddedf64c075b4db53b6d7d78f3c76, type: 3}
+  - {fileID: -430598979, guid: 37bddedf64c075b4db53b6d7d78f3c76, type: 3}
+  - {fileID: -1262140049, guid: 37bddedf64c075b4db53b6d7d78f3c76, type: 3}
+  - {fileID: 106053368, guid: 37bddedf64c075b4db53b6d7d78f3c76, type: 3}
+  _maxSplatCount: 300
+  _appearDuration: 0.12
 --- !u!1 &8120992787737956099
 GameObject:
   m_ObjectHideFlags: 0

@@ -38,8 +38,23 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Ground
+    uniqueID: 1830564127
+    locked: 0
+  - name: Paint
+    uniqueID: 2947105383
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Unit
+    uniqueID: 3561940277
+    locked: 0
+  - name: Projectile
+    uniqueID: 1204873519
+    locked: 0
+  - name: Effect
+    uniqueID: 4102658893
     locked: 0
   m_RenderingLayers:
   - Default

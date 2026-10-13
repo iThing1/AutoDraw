@@ -13,3 +13,14 @@ MonoBehaviour:
   m_Name: PlayerData
   m_EditorClassIdentifier: Assembly-CSharp::BattleUnitData
   _moveSpeed: 3
+  _maxHp: 100
+  _useAutoHeal: 1
+  _autoHealThresholdRatio: 0.3
+  _autoHealTargetRatio: 0.8
+  _autoHealDuration: 1
+  _attackStyle: {fileID: 11400000, guid: 3c74d8da002e5b642a82aa46f39fe1af, type: 2}
+  _projectilePrefab: {fileID: 7624588648995017096, guid: dd8bc6d1b75476545ad3bfa488ffd6ee, type: 3}
+  _palette: {fileID: 11400000, guid: 073348c3e2bf9df4fa51d06e2836c5e1, type: 2}
+  _framingRadius: 1.5
+  _bannerTitle: 
+  _bannerSubtitle: 

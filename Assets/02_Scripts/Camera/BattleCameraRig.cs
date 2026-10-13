@@ -62,15 +62,19 @@ public class BattleCameraRig : MonoBehaviour
         _gameplayCamera = _battleCamera;
     }
 
+    // 처치 슬로 모션 중에도 정해진 시간 안에 보스에게 도착하도록, 시네마틱 카메라 이동은 시간 배율을 무시한다.
     public void FocusTarget(Transform target, float blendDuration)
     {
+        _brain.IgnoreTimeScale = true;
         _cinematicCamera.Follow = target;
 
         SetActiveCamera(_cinematicCamera, blendDuration);
     }
 
+    // 전투 중에는 히트 스톱에 맞춰 카메라 추적도 함께 멈춰야 타격이 묵직하게 보인다.
     public void ReturnToGameplay(float blendDuration)
     {
+        _brain.IgnoreTimeScale = false;
         SetActiveCamera(_gameplayCamera, blendDuration);
     }
 

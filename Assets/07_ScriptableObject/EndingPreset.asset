@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3c9d6120a9f08a7b2eac50031354922, type: 3}
+  m_Name: EndingPreset
+  m_EditorClassIdentifier: Assembly-CSharp::EndingPreset
+  _slowTimeScale: 0.2
+  _slowDuration: 1
+  _cinematic:
+    _letterboxHeightRatio: 0.12
+    _letterboxInDuration: 0.35
+    _letterboxOutDuration: 0.35
+    _letterboxEase: 9
+    _enterBlendDuration: 0.8
+    _exitBlendDuration: 0.6
+    _enterSound: {fileID: 8300000, guid: 50fd2ff187c1bb349a27ed90afbb8560, type: 3}
+    _exitSound: {fileID: 0}
+  _delayBeforeShatter: 0.8
+  _shatter:
+    _columns: 4
+    _rows: 4
+    _spreadDistance:
+      _min: 1.5
+      _max: 3.5
+    _maxRotation: 360
+    _flyDuration: 0.8
+    _flyEase: 9
+    _fadeDelay:
+      _min: 0.3
+      _max: 1
+    _fadeDuration: 0.6
+    _impact:
+      _shakeForce: 2
+      _sounds:
+      - {fileID: 8300000, guid: 719f60a1210744d4991b5897a355751c, type: 3}
+      - {fileID: 8300000, guid: 62a4fc432d1e58e4aac35a1475bbb55e, type: 3}
+      - {fileID: 8300000, guid: 5e95f80ee2bdeb74f855d71d29c4798e, type: 3}
+      - {fileID: 8300000, guid: 8971f7a68f22c9b44820eb809462ddea, type: 3}
+      - {fileID: 8300000, guid: cd91ce3fb6b714a4691491fdf3b7c7c2, type: 3}
+      _pitch:
+        _min: 0.8
+        _max: 0.95
+      _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+      _effectColor: {r: 0, g: 0, b: 0, a: 1}
+      _effectScale: 3
+      _effectLifetime: 2
+  _inkFadeDuration: 1.5
+  _inkFadeDelay:
+    _min: 0
+    _max: 0.8
+  _inkFadeEase: 5
+  _stageClear:
+    _text: STAGE CLEAR
+    _letterPalette: {fileID: 11400000, guid: 073348c3e2bf9df4fa51d06e2836c5e1, type: 2}
+    _delayBefore: 0.3
+    _letterInterval: 0.08
+    _letterPopDuration: 0.3
+    _letterEase: 27
+    _letterSound: {fileID: 8300000, guid: f6abb264e6544cc3ab5c32813549058d, type: 3}
+    _finishSound: {fileID: 8300000, guid: dc8a45bbe587f89478717840437313c6, type: 3}
+    _finishPunch: 0.15

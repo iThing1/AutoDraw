@@ -11,6 +11,7 @@ public class AutoAttacker : MonoBehaviour
     private int _paletteIndex;
 
     private BattleUnit _target;
+    private PaintCanvas _paintCanvas;
     private CancellationToken _battleToken;
     private bool _isRunning;
 
@@ -21,9 +22,11 @@ public class AutoAttacker : MonoBehaviour
     }
 
     // 공격 간격은 게임 시간으로 재서, 히트 스톱 동안에는 다음 공격도 함께 멈춘다.
-    public async UniTask RunAsync(BattleUnit target, CancellationToken token)
+    // 물감 캔버스는 전투를 시작하는 쪽이 넘겨줘, 공격 컴포넌트가 전투 매니저를 직접 찾지 않게 한다.
+    public async UniTask RunAsync(BattleUnit target, PaintCanvas paintCanvas, CancellationToken token)
     {
         _target = target;
+        _paintCanvas = paintCanvas;
         _battleToken = token;
         _isRunning = true;
 
@@ -154,7 +157,7 @@ public class AutoAttacker : MonoBehaviour
 
         _target.Health.TakeDamage(info);
 
-        HitFeedbackPlayer.Play(shot.GetHitFeedback(info.IsCritical), _target, info, GameManager.Battle.PaintCanvas);
+        HitFeedbackPlayer.Play(shot.GetHitFeedback(info.IsCritical), _target, info, _paintCanvas);
 
         if (null != _skillGauge && 0f < gaugeGain)
         {

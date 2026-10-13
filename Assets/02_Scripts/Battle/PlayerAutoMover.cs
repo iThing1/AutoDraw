@@ -9,8 +9,6 @@ public class PlayerAutoMover : MonoBehaviour
     private Rigidbody2D _rigidbody;
     private bool _isMoving;
 
-    public bool IsMoving { get { return _isMoving; } }
-
     private void Awake()
     {
         _unit = GetComponent<BattleUnit>();

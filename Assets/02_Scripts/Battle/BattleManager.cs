@@ -32,10 +32,7 @@ public class BattleManager : MonoBehaviour
 
     private BattlePhase _phase = BattlePhase.None;
 
-    public BattleUnit Player { get { return _player; } }
-    public BattleUnit Boss { get { return _boss; } }
     public BattlePhase Phase { get { return _phase; } }
-    public PaintCanvas PaintCanvas { get { return _paintCanvas; } }
 
     private void Start()
     {
@@ -200,8 +197,8 @@ public class BattleManager : MonoBehaviour
         // 보스가 쓰러지면 전투 토큰을 취소해, 남은 공격 루프와 날아가던 투사체를 함께 정리한다.
         using (CancellationTokenSource battleSource = CancellationTokenSource.CreateLinkedTokenSource(token))
         {
-            _player.Attacker.RunAsync(_boss, battleSource.Token).Forget();
-            _boss.Attacker.RunAsync(_player, battleSource.Token).Forget();
+            _player.Attacker.RunAsync(_boss, _paintCanvas, battleSource.Token).Forget();
+            _boss.Attacker.RunAsync(_player, _paintCanvas, battleSource.Token).Forget();
 
             // WhenAny는 먼저 끝난 작업의 순서 번호를 돌려준다. 0은 보스, 1은 플레이어가 먼저 쓰러진 것이다.
             int defeatedIndex = await UniTask.WhenAny(

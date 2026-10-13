@@ -1,6 +1,5 @@
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class BattleCameraRig : MonoBehaviour
 {
@@ -9,7 +8,7 @@ public class BattleCameraRig : MonoBehaviour
 
     [SerializeField] private CinemachineBrain _brain;
     [SerializeField] private CinemachineCamera _playerCamera;
-    [SerializeField, FormerlySerializedAs("_bossCamera")] private CinemachineCamera _cinematicCamera;
+    [SerializeField] private CinemachineCamera _cinematicCamera;
     [SerializeField] private CinemachineCamera _battleCamera;
     [SerializeField] private CinemachineTargetGroup _battleTargetGroup;
     [SerializeField] private CinemachineImpulseSource _impulseSource;

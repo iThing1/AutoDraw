@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class GameManager : SingletonBehaviour<GameManager>
 {
@@ -14,7 +13,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     [SerializeField] private BattleCameraRig _cameraRig;
 
     [Header("프리팹")]
-    [SerializeField, FormerlySerializedAs("_battleUIPrefab")] private CinematicUI _cinematicUIPrefab;
+    [SerializeField] private CinematicUI _cinematicUIPrefab;
     [SerializeField] private BattleManager _battleStagePrefab;
 
     private SoundManager _soundManager = new();

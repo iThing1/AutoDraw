@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using System;
 using System.Threading;
 using UnityEngine;
 
@@ -37,14 +36,14 @@ public class BossIntroCutscene : MonoBehaviour
 
         return UniTask.WhenAll(
             GameManager.UI.Cinematic.Letterbox.ShowAsync(cinematic.LetterboxHeightRatio, cinematic.LetterboxInDuration, cinematic.LetterboxEase, token),
-            DelayAsync(cinematic.EnterBlendDuration, token));
+            RealtimeDelay.WaitAsync(cinematic.EnterBlendDuration, token));
     }
 
     private async UniTask PlayDropAsync(BattleUnit boss, Vector3 landingPosition, CancellationToken token)
     {
         boss.transform.position = landingPosition + Vector3.up * _preset.BossDropHeight;
 
-        await DelayAsync(_preset.DelayBeforeDrop, token);
+        await RealtimeDelay.WaitAsync(_preset.DelayBeforeDrop, token);
 
         boss.gameObject.SetActive(true);
 
@@ -84,12 +83,6 @@ public class BossIntroCutscene : MonoBehaviour
 
         return UniTask.WhenAll(
             GameManager.UI.Cinematic.Letterbox.HideAsync(cinematic.LetterboxOutDuration, cinematic.LetterboxEase, token),
-            DelayAsync(cinematic.ExitBlendDuration, token));
-    }
-
-    // 컷신 연출은 대기·트윈 모두 실제 시간 기준이라, 히트 스톱이나 슬로 모션의 영향을 받지 않는다.
-    private UniTask DelayAsync(float seconds, CancellationToken token)
-    {
-        return UniTask.Delay(TimeSpan.FromSeconds(seconds), ignoreTimeScale: true, cancellationToken: token);
+            RealtimeDelay.WaitAsync(cinematic.ExitBlendDuration, token));
     }
 }

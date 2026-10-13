@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using System;
 using System.Threading;
 using TMPro;
 using UnityEngine;
@@ -36,7 +35,7 @@ public class BossBanner : MonoBehaviour
 
         await enter.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
 
-        await UniTask.Delay(TimeSpan.FromSeconds(settings.HoldDuration), ignoreTimeScale: true, cancellationToken: token);
+        await RealtimeDelay.WaitAsync(settings.HoldDuration, token);
 
         Sequence exit = DOTween.Sequence()
             .Join(_canvasGroup.DOFade(0f, settings.OutDuration))

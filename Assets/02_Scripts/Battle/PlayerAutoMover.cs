@@ -1,11 +1,11 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(BattleUnit), typeof(Rigidbody2D))]
 public class PlayerAutoMover : MonoBehaviour
 {
-    [SerializeField] private BattleUnitData _data;
     [SerializeField] private Vector2 _direction = Vector2.right;
 
+    private BattleUnit _unit;
     private Rigidbody2D _rigidbody;
     private bool _isMoving;
 
@@ -13,6 +13,7 @@ public class PlayerAutoMover : MonoBehaviour
 
     private void Awake()
     {
+        _unit = GetComponent<BattleUnit>();
         _rigidbody = GetComponent<Rigidbody2D>();
     }
 
@@ -23,16 +24,16 @@ public class PlayerAutoMover : MonoBehaviour
             return;
         }
 
-        Vector2 step = _direction.normalized * _data.MoveSpeed * Time.fixedDeltaTime;
+        Vector2 step = _direction.normalized * _unit.Data.MoveSpeed * Time.fixedDeltaTime;
 
         _rigidbody.MovePosition(_rigidbody.position + step);
     }
 
     public void StartMoving()
     {
-        if (null == _data)
+        if (null == _unit.Data)
         {
-            Debug.LogError("자동 이동 : BattleUnitData가 지정되지 않았습니다.");
+            Debug.LogError($"자동 이동 : {name}에 BattleUnitData가 지정되지 않았습니다.");
             return;
         }
 

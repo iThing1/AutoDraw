@@ -10,6 +10,8 @@ public class BattleCameraRig : MonoBehaviour
     [SerializeField] private CinemachineBrain _brain;
     [SerializeField] private CinemachineCamera _playerCamera;
     [SerializeField, FormerlySerializedAs("_bossCamera")] private CinemachineCamera _cinematicCamera;
+    [SerializeField] private CinemachineCamera _battleCamera;
+    [SerializeField] private CinemachineTargetGroup _battleTargetGroup;
     [SerializeField] private CinemachineImpulseSource _impulseSource;
 
     [Header("흔들림")]
@@ -20,11 +22,17 @@ public class BattleCameraRig : MonoBehaviour
     private float _lastShakeTime = float.NegativeInfinity;
     private float _lastShakeForce;
 
+    // 컷신이 끝나고 돌아갈 카메라. 접근 중에는 플레이어 카메라, 전투가 준비되면 전투 카메라가 된다.
+    private CinemachineCamera _gameplayCamera;
+
+    public Camera OutputCamera { get { return _brain.OutputCamera; } }
+
     public bool HasRequiredReferences()
     {
-        if (null == _brain || null == _playerCamera || null == _cinematicCamera || null == _impulseSource)
+        if (null == _brain || null == _playerCamera || null == _cinematicCamera || null == _battleCamera
+            || null == _battleTargetGroup || null == _impulseSource)
         {
-            Debug.LogError("카메라 : 브레인, 플레이어·시네마틱 카메라, 임펄스 소스 중 지정되지 않은 것이 있습니다.");
+            Debug.LogError("카메라 : 브레인, 플레이어·시네마틱·전투 카메라, 전투 타깃 그룹, 임펄스 소스 중 지정되지 않은 것이 있습니다.");
             return false;
         }
 
@@ -38,7 +46,20 @@ public class BattleCameraRig : MonoBehaviour
         // 생성 위치에서 플레이어 위치까지 감쇠로 미끄러져 오지 않도록 첫 프레임은 바로 맞춘다.
         _playerCamera.PreviousStateIsValid = false;
 
+        _gameplayCamera = _playerCamera;
         SetActiveCamera(_playerCamera, 0f);
+    }
+
+    // 플레이어와 보스를 한 화면에 담는 전투 카메라를 준비만 하고, 실제 전환은 ReturnToGameplay에서 한다.
+    public void PrepareBattleFraming(BattleUnit player, BattleUnit boss)
+    {
+        _battleTargetGroup.Targets.Clear();
+        _battleTargetGroup.AddMember(player.Body, 1f, player.Data.FramingRadius);
+        _battleTargetGroup.AddMember(boss.Body, 1f, boss.Data.FramingRadius);
+
+        _battleCamera.Follow = _battleTargetGroup.transform;
+
+        _gameplayCamera = _battleCamera;
     }
 
     public void FocusTarget(Transform target, float blendDuration)
@@ -48,9 +69,9 @@ public class BattleCameraRig : MonoBehaviour
         SetActiveCamera(_cinematicCamera, blendDuration);
     }
 
-    public void FocusPlayer(float blendDuration)
+    public void ReturnToGameplay(float blendDuration)
     {
-        SetActiveCamera(_playerCamera, blendDuration);
+        SetActiveCamera(_gameplayCamera, blendDuration);
     }
 
     // 연사·파편처럼 짧은 간격으로 여러 번 맞아도 흔들림이 쌓이지 않도록, 직전 흔들림이 끝나기 전에 온 약한 흔들림은 건너뛴다.
@@ -85,5 +106,6 @@ public class BattleCameraRig : MonoBehaviour
 
         _playerCamera.Priority = target == _playerCamera ? ACTIVE_PRIORITY : INACTIVE_PRIORITY;
         _cinematicCamera.Priority = target == _cinematicCamera ? ACTIVE_PRIORITY : INACTIVE_PRIORITY;
+        _battleCamera.Priority = target == _battleCamera ? ACTIVE_PRIORITY : INACTIVE_PRIORITY;
     }
 }

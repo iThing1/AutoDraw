@@ -144,10 +144,8 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        ShotSettings bossShot = bossData.AttackStyle.Shot;
-
         int thresholdHp = Mathf.RoundToInt(playerData.MaxHp * playerData.AutoHealThresholdRatio);
-        int bossMaxHit = Mathf.RoundToInt(bossShot.Damage.Max * bossShot.CriticalMultiplier);
+        int bossMaxHit = bossData.AttackStyle.MaxHitDamage;
 
         if (thresholdHp <= bossMaxHit)
         {

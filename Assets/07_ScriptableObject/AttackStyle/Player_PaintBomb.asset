@@ -9,13 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7bf2750e53096674a82858b8d798be6f, type: 3}
+  m_Script: {fileID: 11500000, guid: 0d4f66289714c605eec1a730d8f8ee04, type: 3}
   m_Name: Player_PaintBomb
-  m_EditorClassIdentifier: Assembly-CSharp::AttackStyle
+  m_EditorClassIdentifier: Assembly-CSharp::ClusterAttackStyle
   _displayName: Bomb
   _iconColor: {r: 1, g: 0.92, b: 0.65, a: 1}
   _attackInterval: 1
-  _pattern: 2
   _gaugeGainPerHit: 0
   _shot:
     _projectileScale: 1.4
@@ -37,8 +36,6 @@ MonoBehaviour:
     _criticalMultiplier: 2
     _normalHit: {fileID: 0}
     _criticalHit: {fileID: 0}
-  _burstCount: 3
-  _burstInterval: 0.08
   _cluster:
     _splitRatio: 0.45
     _splitHeight: 5

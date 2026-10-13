@@ -145,7 +145,8 @@ public class AutoAttacker : MonoBehaviour
         // 피해량과 물감 색은 쏘는 순간 정해, 날아가는 투사체의 색과 맞은 자리의 물감 색이 같게 한다.
         DamageInfo info = RollDamage(shot);
 
-        bool hasArrived = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, _target.Body.position + landingOffset, info.PaintColor, token);
+        bool hasArrived = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, _target.Body.position + landingOffset,
+            _target.Body, info.PaintColor, token);
 
         if (false == hasArrived || _target.Health.IsDead)
         {

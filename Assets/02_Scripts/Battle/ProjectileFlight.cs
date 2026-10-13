@@ -5,8 +5,14 @@ using UnityEngine;
 
 public static class ProjectileFlight
 {
+    public static UniTask<bool> FlyAsync(GameObject prefab, ShotSettings shot, Vector3 start, Vector3 end, Color color, CancellationToken token)
+    {
+        return FlyAsync(prefab, shot, start, end, null, color, token);
+    }
+
     // 도착하면 true, 전투가 끝나 중간에 취소되면 false를 돌려준다.
-    public static async UniTask<bool> FlyAsync(GameObject prefab, ShotSettings shot, Vector3 start, Vector3 end, Color color, CancellationToken token)
+    public static async UniTask<bool> FlyAsync(GameObject prefab, ShotSettings shot, Vector3 start, Vector3 end, Transform followTarget,
+        Color color, CancellationToken token)
     {
         TrajectorySettings trajectory = PickTrajectory(shot.Trajectories);
 
@@ -24,11 +30,30 @@ public static class ProjectileFlight
             projectileRenderer.color = color;
         }
 
+        if (projectile.TryGetComponent(out TrailRenderer trail))
+        {
+            SetupTrail(trail, shot, color);
+        }
+
         float height = trajectory.Height.Pick();
         float duration = trajectory.Duration.Pick();
 
-        Tween flight = projectile.transform.DOPath(BuildPath(trajectory.Type, start, end, height), duration, PathType.CatmullRom)
+        Transform projectileTransform = projectile.transform;
+
+        Tween flight = projectileTransform.DOPath(BuildPath(trajectory.Type, start, end, height), duration, PathType.CatmullRom)
             .SetEase(Ease.Linear);
+
+        if (null != followTarget)
+        {
+            Vector3 targetStartPosition = followTarget.position;
+
+            // 궤적 모양은 쏘는 순간 정해 두고, 목표가 그동안 움직인 거리를 진행률만큼 더해 도착하는 순간 목표에 붙게 한다.
+            flight = flight.OnUpdate(() =>
+            {
+                Vector3 targetMoved = followTarget.position - targetStartPosition;
+                projectileTransform.position += targetMoved * flight.ElapsedPercentage();
+            });
+        }
 
         // 전투가 끝나 토큰이 취소되면 트윈을 멈추고, 예외를 던지는 대신 isCanceled를 true로 돌려받는다.
         bool isCanceled = await flight.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token).SuppressCancellationThrow();
@@ -36,6 +61,18 @@ public static class ProjectileFlight
         GameManager.Pool.Despawn(projectile);
 
         return false == isCanceled;
+    }
+
+    private static void SetupTrail(TrailRenderer trail, ShotSettings shot, Color color)
+    {
+        // 풀에서 다시 꺼낸 투사체에는 이전 비행의 꼬리가 남아 있어, 그대로 두면 이전 위치에서 새 출발점까지 선이 그어진다.
+        trail.Clear();
+
+        trail.emitting = 0f < shot.TrailTime;
+        trail.time = shot.TrailTime;
+        trail.widthMultiplier = shot.TrailWidth;
+        trail.startColor = color;
+        trail.endColor = new Color(color.r, color.g, color.b, 0f);
     }
 
     // 경로의 시작점은 투사체의 현재 위치라서 경유점과 도착점만 넣는다.

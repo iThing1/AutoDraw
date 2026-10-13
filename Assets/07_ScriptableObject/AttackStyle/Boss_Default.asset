@@ -19,6 +19,8 @@ MonoBehaviour:
   _gaugeGainPerHit: 0
   _shot:
     _projectileScale: 1
+    _trailTime: 0.2
+    _trailWidth: 0.2
     _trajectories:
     - _type: 1
       _weight: 2
@@ -63,6 +65,8 @@ MonoBehaviour:
     _landingSpread: 1.5
     _fragment:
       _projectileScale: 1
+      _trailTime: 0.15
+      _trailWidth: 0.1
       _trajectories:
       - _type: 0
         _weight: 1

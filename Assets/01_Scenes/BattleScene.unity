@@ -167,7 +167,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineGroupFraming
   FramingMode: 2
-  FramingSize: 0.8
+  FramingSize: 0.65
   CenterOffset: {x: 0, y: 0}
   Damping: 2
   SizeAdjustment: 2
@@ -255,7 +255,7 @@ MonoBehaviour:
     CustomLookAtTarget: 0
   Lens:
     FieldOfView: 40
-    OrthographicSize: 8
+    OrthographicSize: 9.5
     NearClipPlane: 0.1
     FarClipPlane: 5000
     Dutch: 0
@@ -380,7 +380,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 6
+  orthographic size: 9.5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -666,7 +666,7 @@ MonoBehaviour:
     CustomLookAtTarget: 0
   Lens:
     FieldOfView: 40
-    OrthographicSize: 8
+    OrthographicSize: 9.5
     NearClipPlane: 0.1
     FarClipPlane: 5000
     Dutch: 0

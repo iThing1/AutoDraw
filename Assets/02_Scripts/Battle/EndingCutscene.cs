@@ -26,11 +26,10 @@ public class EndingCutscene : MonoBehaviour
             await PlayFinishAsync(boss.transform, token);
             await PlayShatterAsync(boss, token);
 
-            UniTask inkFade = paintCanvas.FadeOutInkAsync(_preset.InkFadeDuration, _preset.InkFadeDelay, _preset.InkFadeEase, token);
-
-            await PlayExitAsync(token);
-            await PlayStageClearAsync(token);
-            await inkFade;
+            // 카메라가 돌아오는 동안 잉크가 함께 걷히고, 문구는 카메라가 돌아온 뒤에 나온다.
+            await UniTask.WhenAll(
+                PlayExitAndStageClearAsync(token),
+                paintCanvas.FadeOutInkAsync(_preset.InkFadeDuration, _preset.InkFadeDelay, _preset.InkFadeEase, token));
         }
         finally
         {
@@ -41,16 +40,10 @@ public class EndingCutscene : MonoBehaviour
     // 마지막 일격의 여운이 남도록 게임 시간을 늦춘 채로 카메라를 보스에게 옮긴다.
     private async UniTask PlayFinishAsync(Transform focusTarget, CancellationToken token)
     {
-        CinematicSettings cinematic = _preset.Cinematic;
-
         GameManager.HitStop.BaseTimeScale = _preset.SlowTimeScale;
 
-        GameManager.Sound.PlaySfx(cinematic.EnterSound);
-        GameManager.CameraRig.FocusTarget(focusTarget, cinematic.EnterBlendDuration);
-
         await UniTask.WhenAll(
-            GameManager.UI.Cinematic.Letterbox.ShowAsync(cinematic.LetterboxHeightRatio, cinematic.LetterboxInDuration, cinematic.LetterboxEase, token),
-            RealtimeDelay.WaitAsync(cinematic.EnterBlendDuration, token),
+            CinematicPlayer.EnterAsync(focusTarget, _preset.Cinematic, token),
             RealtimeDelay.WaitAsync(_preset.SlowDuration, token));
 
         GameManager.HitStop.BaseTimeScale = 1f;
@@ -70,23 +63,13 @@ public class EndingCutscene : MonoBehaviour
         }
     }
 
-    private UniTask PlayExitAsync(CancellationToken token)
-    {
-        CinematicSettings cinematic = _preset.Cinematic;
-
-        GameManager.Sound.PlaySfx(cinematic.ExitSound);
-        GameManager.CameraRig.ReturnToGameplay(cinematic.ExitBlendDuration);
-
-        return UniTask.WhenAll(
-            GameManager.UI.Cinematic.Letterbox.HideAsync(cinematic.LetterboxOutDuration, cinematic.LetterboxEase, token),
-            RealtimeDelay.WaitAsync(cinematic.ExitBlendDuration, token));
-    }
-
     // 엔딩 문구는 엔딩에서만 쓰므로 엔딩 컷신이 직접 연다. 열어 둔 채로 끝나 그림 위에 남는다.
-    private UniTask PlayStageClearAsync(CancellationToken token)
+    private async UniTask PlayExitAndStageClearAsync(CancellationToken token)
     {
+        await CinematicPlayer.ExitAsync(_preset.Cinematic, token);
+
         StageClearUI stageClear = GameManager.UI.Open(_stageClearPrefab, UILayer.Overlay);
 
-        return stageClear.PlayAsync(_preset.StageClear, token);
+        await stageClear.PlayAsync(_preset.StageClear, token);
     }
 }

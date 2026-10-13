@@ -37,7 +37,7 @@ public class StageClearUI : MonoBehaviour
 
         GameManager.Sound.PlaySfx(settings.FinishSound);
 
-        await _letterRoot.DOPunchScale(Vector3.one * settings.FinishPunch, settings.LetterPopDuration, 1, 0f)
+        await _letterRoot.DOPunchScale(Vector3.one * settings.FinishPunch, settings.LetterPopDuration, PunchTween.VIBRATO, PunchTween.ELASTICITY)
             .SetUpdate(true)
             .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
     }

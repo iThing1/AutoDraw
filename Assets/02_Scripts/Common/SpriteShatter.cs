@@ -6,6 +6,9 @@ using UnityEngine;
 
 public static class SpriteShatter
 {
+    // 조각 중심이 원본 중심과 거의 겹치면 날아갈 방향을 정할 수 없어 무작위 방향을 쓴다.
+    private const float MIN_DIRECTION_SQR_LENGTH = 0.0001f;
+
     // 조각은 원본 텍스처의 일부 영역만 쓰는 스프라이트라서 원래 그림이 그대로 쪼개진다.
     public static async UniTask PlayAsync(SpriteRenderer source, ShatterSettings settings, CancellationToken token)
     {
@@ -79,7 +82,7 @@ public static class SpriteShatter
 
         Vector3 direction = pieceTransform.position - center;
 
-        if (direction.sqrMagnitude < 0.0001f)
+        if (direction.sqrMagnitude < MIN_DIRECTION_SQR_LENGTH)
         {
             direction = Random.insideUnitCircle;
         }

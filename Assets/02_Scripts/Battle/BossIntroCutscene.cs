@@ -21,22 +21,10 @@ public class BossIntroCutscene : MonoBehaviour
     // 프리셋 값은 캐싱하지 않고 매번 읽어, 플레이 중에 바꾼 값이 다음 재생에 바로 반영되게 한다.
     public async UniTask PlayAsync(BattleUnit boss, Transform landingPoint, CancellationToken token)
     {
-        await PlayEnterAsync(landingPoint, token);
+        await CinematicPlayer.EnterAsync(landingPoint, _preset.Cinematic, token);
         await PlayDropAsync(boss, landingPoint.position, token);
         await PlayBannerAsync(boss.Data, token);
-        await PlayExitAsync(token);
-    }
-
-    private UniTask PlayEnterAsync(Transform focusTarget, CancellationToken token)
-    {
-        CinematicSettings cinematic = _preset.Cinematic;
-
-        GameManager.Sound.PlaySfx(cinematic.EnterSound);
-        GameManager.CameraRig.FocusTarget(focusTarget, cinematic.EnterBlendDuration);
-
-        return UniTask.WhenAll(
-            GameManager.UI.Cinematic.Letterbox.ShowAsync(cinematic.LetterboxHeightRatio, cinematic.LetterboxInDuration, cinematic.LetterboxEase, token),
-            RealtimeDelay.WaitAsync(cinematic.EnterBlendDuration, token));
+        await CinematicPlayer.ExitAsync(_preset.Cinematic, token);
     }
 
     private async UniTask PlayDropAsync(BattleUnit boss, Vector3 landingPosition, CancellationToken token)
@@ -72,17 +60,5 @@ public class BossIntroCutscene : MonoBehaviour
             bossData.BannerSubtitle,
             banner,
             token);
-    }
-
-    private UniTask PlayExitAsync(CancellationToken token)
-    {
-        CinematicSettings cinematic = _preset.Cinematic;
-
-        GameManager.Sound.PlaySfx(cinematic.ExitSound);
-        GameManager.CameraRig.ReturnToGameplay(cinematic.ExitBlendDuration);
-
-        return UniTask.WhenAll(
-            GameManager.UI.Cinematic.Letterbox.HideAsync(cinematic.LetterboxOutDuration, cinematic.LetterboxEase, token),
-            RealtimeDelay.WaitAsync(cinematic.ExitBlendDuration, token));
     }
 }

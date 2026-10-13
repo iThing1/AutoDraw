@@ -80,6 +80,6 @@ public class AttackSlotUI : MonoBehaviour
     private void Punch()
     {
         _rect.DOComplete();
-        _rect.DOPunchScale(Vector3.one * _selectPunch, _punchDuration, 1, 0f).SetUpdate(true);
+        _rect.DOPunchScale(Vector3.one * _selectPunch, _punchDuration, PunchTween.VIBRATO, PunchTween.ELASTICITY).SetUpdate(true);
     }
 }

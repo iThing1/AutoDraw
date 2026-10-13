@@ -40,6 +40,6 @@ public class UnitView : MonoBehaviour
         }
 
         body.DOComplete();
-        body.DOPunchPosition(direction.normalized * distance, duration, 1, 0f).SetUpdate(true);
+        body.DOPunchPosition(direction.normalized * distance, duration, PunchTween.VIBRATO, PunchTween.ELASTICITY).SetUpdate(true);
     }
 }

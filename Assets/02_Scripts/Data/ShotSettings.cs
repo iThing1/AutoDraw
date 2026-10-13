@@ -22,8 +22,14 @@ public class ShotSettings
     public float CriticalChance { get { return _criticalChance; } }
     public float CriticalMultiplier { get { return _criticalMultiplier; } }
 
+    // 치명타 프리셋이 비어 있으면 일반 프리셋으로 대신한다.
     public HitFeedbackPreset GetHitFeedback(bool isCritical)
     {
-        return isCritical && null != _criticalHit ? _criticalHit : _normalHit;
+        if (isCritical && null != _criticalHit)
+        {
+            return _criticalHit;
+        }
+
+        return _normalHit;
     }
 }

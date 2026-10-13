@@ -36,7 +36,7 @@ public class DamageText : MonoBehaviour
         float scale = isCritical ? settings.CriticalScale : settings.NormalScale;
         _rect.localScale = Vector3.one * scale * settings.PopScale;
 
-        // 크게 튀어나왔다가 제 크기로 줄고, 위로 떠오르며 사라진다.
+        // 크게 튀어나왔다가 제 크기로 줄고(Append), 동시에 위로 떠오르며(Join), 끝나기 직전부터 흐려진다(Insert).
         _sequence = DOTween.Sequence()
             .Append(_rect.DOScale(scale, settings.PopDuration).SetEase(settings.PopEase))
             .Join(_rect.DOMoveY(screenPosition.y + settings.RiseDistance, settings.Duration).SetEase(settings.RiseEase))

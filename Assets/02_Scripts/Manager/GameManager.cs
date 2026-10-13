@@ -38,7 +38,7 @@ public class GameManager : SingletonBehaviour<GameManager>
         _poolManager.Init();
         _hitStopManager.Init(destroyCancellationToken);
 
-        // 전투가 시작되자마자 UI를 쓰므로 UI를 먼저 만든다.
+        // 스테이지가 생성되자마자 등장 컷신이 시네마틱 UI를 쓰므로 UI를 먼저 만든다.
         _uiManager.Init(_cinematicUIPrefab);
 
         SpawnBattleStage();

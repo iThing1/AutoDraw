@@ -21,12 +21,14 @@ public class BattleManager : MonoBehaviour
 
     [Header("전투")]
     [SerializeField] private PaintCanvas _paintCanvas;
+    [SerializeField] private BattleHudUI _hudPrefab;
 
     public event Action<BattlePhase> OnPhaseChanged;
 
     private BattleUnit _player;
     private PlayerAutoMover _playerMover;
     private BattleUnit _boss;
+    private BattleHudUI _hud;
 
     private BattlePhase _phase = BattlePhase.None;
 
@@ -92,6 +94,12 @@ public class BattleManager : MonoBehaviour
         if (null == _paintCanvas)
         {
             Debug.LogError("전투 매니저 : PaintCanvas가 지정되지 않았습니다.");
+            return false;
+        }
+
+        if (null == _hudPrefab)
+        {
+            Debug.LogError("전투 매니저 : 전투 HUD 프리팹이 지정되지 않았습니다.");
             return false;
         }
 
@@ -183,6 +191,11 @@ public class BattleManager : MonoBehaviour
     private async UniTask PlayBattleAsync(CancellationToken token)
     {
         SetPhase(BattlePhase.Battle);
+
+        // 전투 HUD는 전투에서만 쓰므로 전투 매니저가 직접 열고, 엔딩(M4)에서 닫는다.
+        _hud = GameManager.UI.Open(_hudPrefab, UILayer.HUD);
+        _hud.Bind(_player, _boss);
+        _hud.Show();
 
         // 보스가 쓰러지면 전투 토큰을 취소해, 남은 공격 루프와 날아가던 투사체를 함께 정리한다.
         using (CancellationTokenSource battleSource = CancellationTokenSource.CreateLinkedTokenSource(token))

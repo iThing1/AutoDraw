@@ -2,8 +2,6 @@ using UnityEngine;
 
 public static class EffectSpawner
 {
-    private const string EFFECT_SORTING_LAYER = "Effect";
-
     public static void Spawn(GameObject prefab, Vector3 position, Color color, float scale, float lifetime)
     {
         if (null == prefab)
@@ -11,27 +9,14 @@ public static class EffectSpawner
             return;
         }
 
-        GameObject effect = Object.Instantiate(prefab, position, Quaternion.identity);
-        effect.transform.localScale = Vector3.one * scale;
+        GameObject instance = GameManager.Pool.Spawn(prefab, position, Quaternion.identity);
 
-        ParticleSystem[] particles = effect.GetComponentsInChildren<ParticleSystem>();
-
-        for (int i = 0; i < particles.Length; i++)
+        // 처음 꺼낸 인스턴스에만 붙고, 이후에는 캐싱된 파티클 목록을 재사용한다.
+        if (false == instance.TryGetComponent(out PooledEffect effect))
         {
-            ParticleSystem.MainModule main = particles[i].main;
-            main.startColor = color;
-
-            // 기본값(Local)은 부모 크기를 무시하므로, 루트 크기가 하위 파티클까지 적용되게 바꾼다.
-            main.scalingMode = ParticleSystemScalingMode.Hierarchy;
-
-            ParticleSystemRenderer particleRenderer = particles[i].GetComponent<ParticleSystemRenderer>();
-
-            if (null != particleRenderer)
-            {
-                particleRenderer.sortingLayerName = EFFECT_SORTING_LAYER;
-            }
+            effect = instance.AddComponent<PooledEffect>();
         }
 
-        Object.Destroy(effect, lifetime);
+        effect.Play(color, scale, lifetime);
     }
 }

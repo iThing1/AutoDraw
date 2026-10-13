@@ -7,6 +7,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     public static BattleCameraRig CameraRig { get { return Instance._cameraRig; } }
     public static UIManager UI { get { return Instance._uiManager; } }
     public static SoundManager Sound { get { return Instance._soundManager; } }
+    public static PoolManager Pool { get { return Instance._poolManager; } }
 
     [Header("씬")]
     [SerializeField] private BattleCameraRig _cameraRig;
@@ -17,6 +18,7 @@ public class GameManager : SingletonBehaviour<GameManager>
 
     private SoundManager _soundManager = new();
     private UIManager _uiManager = new();
+    private PoolManager _poolManager = new();
 
     private BattleManager _battle;
 
@@ -31,6 +33,7 @@ public class GameManager : SingletonBehaviour<GameManager>
         }
 
         _soundManager.Init(gameObject);
+        _poolManager.Init();
 
         // 전투가 시작되자마자 UI를 쓰므로 UI를 먼저 만든다.
         _uiManager.Init(_cinematicUIPrefab);

@@ -12,6 +12,14 @@ public class BattleCameraRig : MonoBehaviour
     [SerializeField, FormerlySerializedAs("_bossCamera")] private CinemachineCamera _cinematicCamera;
     [SerializeField] private CinemachineImpulseSource _impulseSource;
 
+    [Header("흔들림")]
+    [SerializeField, Min(0f)] private float _shakeScale = 1f;
+    [SerializeField, Min(0f)] private float _shakeMergeWindow = 0.2f;
+
+    // 첫 흔들림은 겹침 검사에 걸리지 않도록 아주 먼 과거로 시작한다.
+    private float _lastShakeTime = float.NegativeInfinity;
+    private float _lastShakeForce;
+
     public bool HasRequiredReferences()
     {
         if (null == _brain || null == _playerCamera || null == _cinematicCamera || null == _impulseSource)
@@ -45,9 +53,28 @@ public class BattleCameraRig : MonoBehaviour
         SetActiveCamera(_playerCamera, blendDuration);
     }
 
+    // 연사·파편처럼 짧은 간격으로 여러 번 맞아도 흔들림이 쌓이지 않도록, 직전 흔들림이 끝나기 전에 온 약한 흔들림은 건너뛴다.
+    // 히트 스톱 중에도 간격이 흘러가야 하므로 실제 시간으로 잰다.
     public void Shake(float force)
     {
-        _impulseSource.GenerateImpulseWithForce(force);
+        float scaledForce = force * _shakeScale;
+
+        if (0f >= scaledForce)
+        {
+            return;
+        }
+
+        bool isOverlapping = Time.unscaledTime - _lastShakeTime < _shakeMergeWindow;
+
+        if (isOverlapping && scaledForce <= _lastShakeForce)
+        {
+            return;
+        }
+
+        _lastShakeTime = Time.unscaledTime;
+        _lastShakeForce = scaledForce;
+
+        _impulseSource.GenerateImpulseWithForce(scaledForce);
     }
 
     private void SetActiveCamera(CinemachineCamera target, float blendDuration)

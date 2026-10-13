@@ -78,6 +78,8 @@ public class PoolManager
             {
                 return instance;
             }
+
+            _prefabByInstance.Remove(instance);
         }
 
         return CreateInstance(prefab);

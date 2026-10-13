@@ -8,10 +8,10 @@ public class GameManager : SingletonBehaviour<GameManager>
     public static UIManager UI { get { return Instance._uiManager; } }
     public static SoundManager Sound { get { return Instance._soundManager; } }
 
-    [Header("Scene")]
+    [Header("씬")]
     [SerializeField] private BattleCameraRig _cameraRig;
 
-    [Header("Prefabs")]
+    [Header("프리팹")]
     [SerializeField, FormerlySerializedAs("_battleUIPrefab")] private CinematicUI _cinematicUIPrefab;
     [SerializeField] private BattleManager _battleStagePrefab;
 

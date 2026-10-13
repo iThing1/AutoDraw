@@ -31,7 +31,10 @@ MonoBehaviour:
     _effectColor: {r: 0, g: 0, b: 0, a: 1}
     _effectScale: 2.5
     _effectLifetime: 3
-  _bannerInDuration: 0.3
-  _bannerHoldDuration: 1.4
-  _bannerOutDuration: 0.3
-  _bannerSound: {fileID: 8300000, guid: ae1c3efd82e6ff242a23a830d0e42356, type: 3}
+  _banner:
+    _inDuration: 0.3
+    _holdDuration: 1.4
+    _outDuration: 0.3
+    _startScale: 1.2
+    _exitMoveY: 40
+    _sound: {fileID: 8300000, guid: ae1c3efd82e6ff242a23a830d0e42356, type: 3}

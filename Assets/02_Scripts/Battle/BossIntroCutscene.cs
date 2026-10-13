@@ -36,7 +36,7 @@ public class BossIntroCutscene : MonoBehaviour
         GameManager.CameraRig.FocusTarget(focusTarget, cinematic.EnterBlendDuration);
 
         return UniTask.WhenAll(
-            GameManager.UI.Cinematic.Letterbox.ShowAsync(cinematic.LetterboxHeightRatio, cinematic.LetterboxInDuration, token),
+            GameManager.UI.Cinematic.Letterbox.ShowAsync(cinematic.LetterboxHeightRatio, cinematic.LetterboxInDuration, cinematic.LetterboxEase, token),
             DelayAsync(cinematic.EnterBlendDuration, token));
     }
 
@@ -49,7 +49,8 @@ public class BossIntroCutscene : MonoBehaviour
         boss.gameObject.SetActive(true);
 
         Tween drop = boss.transform.DOMove(landingPosition, _preset.BossDropDuration)
-            .SetEase(_preset.BossDropEase);
+            .SetEase(_preset.BossDropEase)
+            .SetUpdate(true);
 
         await drop.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
 
@@ -63,14 +64,14 @@ public class BossIntroCutscene : MonoBehaviour
             return;
         }
 
-        GameManager.Sound.PlaySfx(_preset.BannerSound);
+        BannerSettings banner = _preset.Banner;
+
+        GameManager.Sound.PlaySfx(banner.Sound);
 
         await GameManager.UI.Cinematic.BossBanner.PlayAsync(
             bossData.BannerTitle,
             bossData.BannerSubtitle,
-            _preset.BannerInDuration,
-            _preset.BannerHoldDuration,
-            _preset.BannerOutDuration,
+            banner,
             token);
     }
 
@@ -82,11 +83,11 @@ public class BossIntroCutscene : MonoBehaviour
         GameManager.CameraRig.FocusPlayer(cinematic.ExitBlendDuration);
 
         return UniTask.WhenAll(
-            GameManager.UI.Cinematic.Letterbox.HideAsync(cinematic.LetterboxOutDuration, token),
+            GameManager.UI.Cinematic.Letterbox.HideAsync(cinematic.LetterboxOutDuration, cinematic.LetterboxEase, token),
             DelayAsync(cinematic.ExitBlendDuration, token));
     }
 
-    // 히트 스톱이나 슬로 모션 중에도 연출 시간은 실제 시간 기준으로 잰다.
+    // 컷신 연출은 대기·트윈 모두 실제 시간 기준이라, 히트 스톱이나 슬로 모션의 영향을 받지 않는다.
     private UniTask DelayAsync(float seconds, CancellationToken token)
     {
         return UniTask.Delay(TimeSpan.FromSeconds(seconds), ignoreTimeScale: true, cancellationToken: token);

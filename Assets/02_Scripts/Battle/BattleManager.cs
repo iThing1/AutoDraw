@@ -5,18 +5,18 @@ using UnityEngine;
 
 public class BattleManager : MonoBehaviour
 {
-    [Header("Spawn Point")]
+    [Header("스폰 위치")]
     [SerializeField] private Transform _playerSpawnPoint;
     [SerializeField] private Transform _bossSpawnPoint;
 
-    [Header("Unit Prefab")]
+    [Header("유닛 프리팹")]
     [SerializeField] private PlayerAutoMover _playerPrefab;
     [SerializeField] private BossUnit _bossPrefab;
 
-    [Header("Approach")]
+    [Header("접근")]
     [SerializeField] private BossIntroTrigger _introTrigger;
 
-    [Header("Intro")]
+    [Header("보스 등장")]
     [SerializeField] private BossIntroCutscene _introCutscene;
 
     public event Action<BattlePhase> OnPhaseChanged;
@@ -70,15 +70,21 @@ public class BattleManager : MonoBehaviour
             return false;
         }
 
-        if (null == _introCutscene || false == _introCutscene.HasRequiredReferences())
+        if (null == _introCutscene)
         {
-            Debug.LogError("전투 매니저 : BossIntroCutscene 설정을 확인해 주세요.");
+            Debug.LogError("전투 매니저 : BossIntroCutscene이 지정되지 않았습니다.");
             return false;
         }
 
-        if (null == GameManager.CameraRig || false == GameManager.CameraRig.HasRequiredReferences())
+        if (null == GameManager.CameraRig)
         {
-            Debug.LogError("전투 매니저 : GameManager의 카메라 리그 설정을 확인해 주세요.");
+            Debug.LogError("전투 매니저 : GameManager에 카메라 리그가 지정되지 않았습니다.");
+            return false;
+        }
+
+        // 하위 컴포넌트는 빠진 항목을 직접 로그로 남기므로 결과만 확인한다.
+        if (false == _introCutscene.HasRequiredReferences() || false == GameManager.CameraRig.HasRequiredReferences())
+        {
             return false;
         }
 

@@ -17,10 +17,7 @@ public class CutscenePreset : ScriptableObject
     [SerializeField] private ImpactSettings _landImpact = new();
 
     [Header("보스 이름 배너")]
-    [SerializeField, Min(0f)] private float _bannerInDuration = 0.3f;
-    [SerializeField, Min(0f)] private float _bannerHoldDuration = 1.4f;
-    [SerializeField, Min(0f)] private float _bannerOutDuration = 0.3f;
-    [SerializeField] private AudioClip _bannerSound;
+    [SerializeField] private BannerSettings _banner = new();
 
     public CinematicSettings Cinematic { get { return _cinematic; } }
 
@@ -31,8 +28,5 @@ public class CutscenePreset : ScriptableObject
 
     public ImpactSettings LandImpact { get { return _landImpact; } }
 
-    public float BannerInDuration { get { return _bannerInDuration; } }
-    public float BannerHoldDuration { get { return _bannerHoldDuration; } }
-    public float BannerOutDuration { get { return _bannerOutDuration; } }
-    public AudioClip BannerSound { get { return _bannerSound; } }
+    public BannerSettings Banner { get { return _banner; } }
 }

@@ -29,7 +29,7 @@ MonoBehaviour:
   _autoHealThresholdRatio: 0.3
   _autoHealTargetRatio: 0.7
   _autoHealDuration: 1
-  _attackStyle: {fileID: 11400000, guid: ae6ac45b8aefad94eb71e68e76a19071, type: 2}
+  _attackStyle: {fileID: 11400000, guid: 56a8bcc61708d934784b3b85bf6b0fb9, type: 2}
   _projectilePrefab: {fileID: 7624588648995017096, guid: de381a618a5797b47a750c0113577fac, type: 3}
   _palette: {fileID: 11400000, guid: ffbed08809908924792318e46513ead8, type: 2}
   _framingRadius: 2.5

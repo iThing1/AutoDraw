@@ -12,6 +12,8 @@ public class WanderMover : MonoBehaviour
     private const float MIN_SPEED = 0.01f;
 
     private BattleUnit _unit;
+    private Tween _moveTween;
+    private bool _isPaused;
 
     private void Awake()
     {
@@ -25,6 +27,11 @@ public class WanderMover : MonoBehaviour
         {
             while (false == _unit.Health.IsDead)
             {
+                if (_isPaused)
+                {
+                    await UniTask.WaitWhile(() => _isPaused, cancellationToken: token);
+                }
+
                 WanderSettings settings = _unit.Data.Wander;
 
                 if (false == settings.UseWander)
@@ -36,9 +43,12 @@ public class WanderMover : MonoBehaviour
                 float distance = Vector3.Distance(transform.position, destination);
                 float duration = distance / Mathf.Max(MIN_SPEED, settings.Speed.Pick());
 
-                await transform.DOMove(destination, duration)
-                    .SetEase(settings.MoveEase)
-                    .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                _moveTween = transform.DOMove(destination, duration).SetEase(settings.MoveEase);
+
+                // Pause로 이동이 끊긴 경우도 취소로 끝날 수 있어, 예외 대신 결과로 받고 전투가 끝났을 때만 멈춘다.
+                await _moveTween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token).SuppressCancellationThrow();
+
+                token.ThrowIfCancellationRequested();
 
                 await UniTask.Delay(TimeSpan.FromSeconds(settings.Pause.Pick()), cancellationToken: token);
             }
@@ -47,6 +57,19 @@ public class WanderMover : MonoBehaviour
         {
             // 전투가 끝나 이동이 멈춘 경우라 따로 처리하지 않는다.
         }
+    }
+
+    // 보스 패턴이 직접 움직이는 동안 배회가 위치를 덮어쓰지 않도록, 진행 중인 이동을 끊고 멈춘다.
+    public void Pause()
+    {
+        _isPaused = true;
+        _moveTween?.Kill();
+    }
+
+    // 다시 움직일 때는 패턴이 끝난 현재 위치에서 다음 목적지를 고른다.
+    public void Resume()
+    {
+        _isPaused = false;
     }
 
     // 지금 위치에서 너무 가까운 지점은 움직임이 거의 보이지 않으므로, 최소 거리 이상 떨어진 지점을 고른다.

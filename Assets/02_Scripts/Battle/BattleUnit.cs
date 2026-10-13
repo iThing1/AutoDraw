@@ -9,6 +9,7 @@ public class BattleUnit : MonoBehaviour
     private Health _health;
     private AutoAttacker _attacker;
     private UnitView _view;
+    private WanderMover _mover;
 
     // 키로 고른 공격이 데이터 에셋을 고치지 않도록, 실행 중에만 쓰는 덮어쓰기 값을 따로 둔다.
     private AttackStyle _attackStyleOverride;
@@ -17,6 +18,9 @@ public class BattleUnit : MonoBehaviour
     public Health Health { get { return _health; } }
     public AutoAttacker Attacker { get { return _attacker; } }
     public UnitView View { get { return _view; } }
+
+    // 배회하지 않는 유닛은 null이다.
+    public WanderMover Mover { get { return _mover; } }
 
     // 넉백·플래시·투사체 조준의 기준점. 따로 지정하지 않으면 자기 자신을 쓴다.
     public Transform Body { get { return null != _body ? _body : transform; } }
@@ -28,6 +32,7 @@ public class BattleUnit : MonoBehaviour
         _health = GetComponent<Health>();
         _attacker = GetComponent<AutoAttacker>();
         _view = GetComponent<UnitView>();
+        TryGetComponent(out _mover);
 
         if (null == _data)
         {

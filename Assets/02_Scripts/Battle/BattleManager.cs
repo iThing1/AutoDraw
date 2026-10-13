@@ -5,27 +5,29 @@ using UnityEngine;
 
 public class BattleManager : MonoBehaviour
 {
-    [Header("Spawn Point")]
+    [Header("스폰 위치")]
     [SerializeField] private Transform _playerSpawnPoint;
     [SerializeField] private Transform _bossSpawnPoint;
 
-    [Header("Unit Prefab")]
+    [Header("유닛 프리팹")]
     [SerializeField] private PlayerAutoMover _playerPrefab;
-    // M3에서 보스 전용 컴포넌트가 생기면 그 타입으로 바꾼다.
-    [SerializeField] private GameObject _bossPrefab;
+    [SerializeField] private BossUnit _bossPrefab;
 
-    [Header("Approach")]
+    [Header("접근")]
     [SerializeField] private BossIntroTrigger _introTrigger;
+
+    [Header("보스 등장")]
+    [SerializeField] private BossIntroCutscene _introCutscene;
 
     public event Action<BattlePhase> OnPhaseChanged;
 
     private PlayerAutoMover _player;
-    private GameObject _boss;
+    private BossUnit _boss;
 
     private BattlePhase _phase = BattlePhase.None;
 
     public PlayerAutoMover Player { get { return _player; } }
-    public GameObject Boss { get { return _boss; } }
+    public BossUnit Boss { get { return _boss; } }
     public BattlePhase Phase { get { return _phase; } }
 
     private void Start()
@@ -68,9 +70,27 @@ public class BattleManager : MonoBehaviour
             return false;
         }
 
+        if (null == _introCutscene)
+        {
+            Debug.LogError("전투 매니저 : BossIntroCutscene이 지정되지 않았습니다.");
+            return false;
+        }
+
         if (null == GameManager.CameraRig)
         {
             Debug.LogError("전투 매니저 : GameManager에 카메라 리그가 지정되지 않았습니다.");
+            return false;
+        }
+
+        // 하위 컴포넌트는 빠진 항목을 직접 로그로 남기므로 결과만 확인한다.
+        if (false == _introCutscene.HasRequiredReferences() || false == GameManager.CameraRig.HasRequiredReferences())
+        {
+            return false;
+        }
+
+        if (null == GameManager.UI.Cinematic)
+        {
+            Debug.LogError("전투 매니저 : 시네마틱 UI가 생성되지 않았습니다.");
             return false;
         }
 
@@ -84,6 +104,8 @@ public class BattleManager : MonoBehaviour
 
         _boss = Instantiate(_bossPrefab, _bossSpawnPoint.position, Quaternion.identity, transform);
         _boss.name = _bossPrefab.name;
+
+        _boss.gameObject.SetActive(false);
     }
 
     private async UniTaskVoid RunAsync(CancellationToken token)
@@ -112,12 +134,11 @@ public class BattleManager : MonoBehaviour
         _player.Stop();
     }
 
-    // M2에서 보스 등장 컷신으로 채운다.
     private async UniTask PlayIntroAsync(CancellationToken token)
     {
         SetPhase(BattlePhase.Intro);
 
-        await UniTask.Yield(token);
+        await _introCutscene.PlayAsync(_boss, _bossSpawnPoint, token);
     }
 
     // M3에서 자동 전투로 채운다.

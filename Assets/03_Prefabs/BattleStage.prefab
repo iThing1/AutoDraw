@@ -224,6 +224,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8873060262263899674}
   - component: {fileID: 2969957242831443143}
+  - component: {fileID: 8588949236467943965}
   m_Layer: 0
   m_Name: BattleStage
   m_TagString: Untagged
@@ -265,8 +266,22 @@ MonoBehaviour:
   _playerSpawnPoint: {fileID: 7026516416245836906}
   _bossSpawnPoint: {fileID: 2935112580148223958}
   _playerPrefab: {fileID: 2423366118189221037, guid: 2c1ee4e491c0cc44890185f99d222d9b, type: 3}
-  _bossPrefab: {fileID: 5138856067173087867, guid: 2e8d6d477003ae54baf0cd0c464cf3ce, type: 3}
+  _bossPrefab: {fileID: 5673451803158972909, guid: 2e8d6d477003ae54baf0cd0c464cf3ce, type: 3}
   _introTrigger: {fileID: 7753745094576344584}
+  _introCutscene: {fileID: 8588949236467943965}
+--- !u!114 &8588949236467943965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5561326264097074974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95a59a6bbf5bd454a80114f2dfc6f757, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossIntroCutscene
+  _preset: {fileID: 11400000, guid: dc1e97273fb1c3047a906b9959ccd0e4, type: 2}
 --- !u!1 &8120992787737956099
 GameObject:
   m_ObjectHideFlags: 0

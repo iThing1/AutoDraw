@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9011993511449468608}
   - component: {fileID: 2346457411021539678}
+  - component: {fileID: 5673451803158972909}
   m_Layer: 15
   m_Name: Boss_01
   m_TagString: Untagged
@@ -91,3 +92,16 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &5673451803158972909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5138856067173087867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edd53dd1bc419f947b409d1b02d411d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossUnit
+  _data: {fileID: 11400000, guid: b9ebfe2506eaa8144a6968545e54e59f, type: 2}

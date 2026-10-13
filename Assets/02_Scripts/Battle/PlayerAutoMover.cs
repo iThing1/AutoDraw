@@ -23,7 +23,6 @@ public class PlayerAutoMover : MonoBehaviour
             return;
         }
 
-        // 속도는 매 프레임 데이터에서 읽어, 플레이 중에 값을 바꿔도 바로 반영되게 한다.
         Vector2 step = _direction.normalized * _data.MoveSpeed * Time.fixedDeltaTime;
 
         _rigidbody.MovePosition(_rigidbody.position + step);

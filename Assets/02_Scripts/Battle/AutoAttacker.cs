@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -122,7 +121,7 @@ public class AutoAttacker : MonoBehaviour
         Vector3 splitPoint = Vector3.Lerp(start, end, cluster.SplitRatio) + Vector3.up * cluster.SplitHeight;
 
         Color color = PickColor();
-        bool hasArrived = await FlyAsync(style.Shot, start, splitPoint, color, token);
+        bool hasArrived = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, style.Shot, start, splitPoint, color, token);
 
         if (false == hasArrived || _target.Health.IsDead)
         {
@@ -146,7 +145,7 @@ public class AutoAttacker : MonoBehaviour
         // 피해량과 물감 색은 쏘는 순간 정해, 날아가는 투사체의 색과 맞은 자리의 물감 색이 같게 한다.
         DamageInfo info = RollDamage(shot);
 
-        bool hasArrived = await FlyAsync(shot, start, _target.Body.position + landingOffset, info.PaintColor, token);
+        bool hasArrived = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, _target.Body.position + landingOffset, info.PaintColor, token);
 
         if (false == hasArrived || _target.Health.IsDead)
         {
@@ -163,102 +162,6 @@ public class AutoAttacker : MonoBehaviour
         {
             _skillGauge.Add(gaugeGain);
         }
-    }
-
-    // 모든 발사 패턴이 공유하는 비행. 경로를 따라 날아간 뒤 투사체를 풀에 돌려주고, 끝까지 도착했는지를 알려 준다.
-    private async UniTask<bool> FlyAsync(ShotSettings shot, Vector3 start, Vector3 end, Color color, CancellationToken token)
-    {
-        TrajectorySettings trajectory = PickTrajectory(shot.Trajectories);
-
-        if (null == trajectory)
-        {
-            Debug.LogError($"자동 공격 : {_owner.name}에 사용할 수 있는 궤적이 없습니다.");
-            return false;
-        }
-
-        GameObject prefab = _owner.Data.ProjectilePrefab;
-        GameObject projectile = GameManager.Pool.Spawn(prefab, start, Quaternion.identity);
-        projectile.transform.localScale = prefab.transform.localScale * shot.ProjectileScale;
-
-        if (projectile.TryGetComponent(out SpriteRenderer projectileRenderer))
-        {
-            projectileRenderer.color = color;
-        }
-
-        float height = trajectory.Height.Pick();
-        float duration = trajectory.Duration.Pick();
-
-        Tween flight = projectile.transform.DOPath(BuildPath(trajectory.Type, start, end, height), duration, PathType.CatmullRom)
-            .SetEase(Ease.Linear);
-
-        // 전투가 끝나 토큰이 취소되면 트윈을 멈추고, 예외를 던지는 대신 isCanceled를 true로 돌려받는다.
-        bool isCanceled = await flight.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token).SuppressCancellationThrow();
-
-        GameManager.Pool.Despawn(projectile);
-
-        return false == isCanceled;
-    }
-
-    // 시작점과 목표점 사이의 경유점만 바꿔 궤적 모양을 만든다. 경로의 시작점은 투사체의 현재 위치다.
-    private Vector3[] BuildPath(TrajectoryType type, Vector3 start, Vector3 end, float height)
-    {
-        switch (type)
-        {
-            case TrajectoryType.Straight:
-                return new Vector3[] { end };
-
-            case TrajectoryType.Wave:
-                // 날아가는 방향에 수직인 방향. 이 방향으로 위아래 번갈아 비켜 가며 물결을 만든다.
-                Vector3 normal = Vector3.Cross((end - start).normalized, Vector3.forward);
-
-                return new Vector3[]
-                {
-                    Vector3.Lerp(start, end, 0.33f) + normal * height,
-                    Vector3.Lerp(start, end, 0.66f) - normal * height,
-                    end,
-                };
-
-            default:
-                return new Vector3[]
-                {
-                    Vector3.Lerp(start, end, 0.5f) + Vector3.up * height,
-                    end,
-                };
-        }
-    }
-
-    private TrajectorySettings PickTrajectory(TrajectorySettings[] trajectories)
-    {
-        if (null == trajectories || 0 == trajectories.Length)
-        {
-            return null;
-        }
-
-        float totalWeight = 0f;
-
-        for (int i = 0; i < trajectories.Length; i++)
-        {
-            totalWeight += trajectories[i].Weight;
-        }
-
-        if (0f >= totalWeight)
-        {
-            return trajectories[0];
-        }
-
-        float pick = UnityEngine.Random.value * totalWeight;
-
-        for (int i = 0; i < trajectories.Length; i++)
-        {
-            pick -= trajectories[i].Weight;
-
-            if (0f >= pick)
-            {
-                return trajectories[i];
-            }
-        }
-
-        return trajectories[trajectories.Length - 1];
     }
 
     private DamageInfo RollDamage(ShotSettings shot)

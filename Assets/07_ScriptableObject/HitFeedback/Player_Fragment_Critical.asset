@@ -33,6 +33,7 @@ MonoBehaviour:
     _effectColor: {r: 0, g: 0, b: 0, a: 1}
     _effectScale: 0.8
     _effectLifetime: 2
+  _splatStyle: {fileID: 11400000, guid: 4027ab0e3c2d21f03e245a9be1fe0a29, type: 2}
   _splatCount:
     _min: 1
     _max: 2

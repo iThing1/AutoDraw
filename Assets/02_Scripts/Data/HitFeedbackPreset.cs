@@ -19,6 +19,8 @@ public class HitFeedbackPreset : ScriptableObject
     [SerializeField] private ImpactSettings _impact = new();
 
     [Header("물감 자국")]
+    // 비워 두면 맞아도 자국을 남기지 않는다.
+    [SerializeField] private SplatStyle _splatStyle;
     [SerializeField] private IntRange _splatCount = new(1, 3);
     [SerializeField] private FloatRange _splatScale = new(0.3f, 0.6f);
     [SerializeField, Min(0f)] private float _splatSpread = 1.5f;
@@ -34,6 +36,7 @@ public class HitFeedbackPreset : ScriptableObject
 
     public ImpactSettings Impact { get { return _impact; } }
 
+    public SplatStyle SplatStyle { get { return _splatStyle; } }
     public IntRange SplatCount { get { return _splatCount; } }
     public FloatRange SplatScale { get { return _splatScale; } }
     public float SplatSpread { get { return _splatSpread; } }

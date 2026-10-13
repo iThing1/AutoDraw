@@ -1,4 +1,6 @@
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using System.Threading;
 using UnityEngine;
 
 public class BattleHudUI : MonoBehaviour
@@ -55,10 +57,13 @@ public class BattleHudUI : MonoBehaviour
         _canvasGroup.DOFade(1f, _fadeDuration).SetUpdate(true);
     }
 
-    public void Hide()
+    public UniTask HideAsync(CancellationToken token)
     {
         _canvasGroup.DOKill();
-        _canvasGroup.DOFade(0f, _fadeDuration).SetUpdate(true);
+
+        return _canvasGroup.DOFade(0f, _fadeDuration)
+            .SetUpdate(true)
+            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
     }
 
     private void BindAttackSlots(PlayerAttackInput attackInput)

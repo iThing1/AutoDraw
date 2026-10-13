@@ -15,14 +15,14 @@ MonoBehaviour:
   _moveSpeed: 3
   _wander:
     _useWander: 1
-    _areaHalfSize: {x: 4, y: 2}
+    _areaHalfSize: {x: 7, y: 3.5}
     _speed:
-      _min: 1.5
-      _max: 3.5
+      _min: 2.5
+      _max: 5
     _pause:
-      _min: 0.4
-      _max: 1.2
-    _minMoveDistance: 1.5
+      _min: 0.3
+      _max: 0.9
+    _minMoveDistance: 3.5
     _moveEase: 4
   _maxHp: 1000
   _useAutoHeal: 0

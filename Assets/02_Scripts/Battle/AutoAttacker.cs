@@ -14,6 +14,9 @@ public class AutoAttacker : MonoBehaviour
     private CancellationToken _battleToken;
     private bool _isRunning;
 
+    public BattleUnit Owner { get { return _owner; } }
+    public BattleUnit Target { get { return _target; } }
+
     private void Awake()
     {
         _owner = GetComponent<BattleUnit>();
@@ -83,27 +86,7 @@ public class AutoAttacker : MonoBehaviour
 
         try
         {
-            // 새 패턴은 AttackPattern 값, 여기 case, AttackStyle의 전용 필드를 함께 추가한다.
-            // 패턴이 더 늘어나면 패턴마다 클래스를 나누는 추상 클래스(전략 패턴) 구조로 분리를 검토한다.
-            switch (style.Pattern)
-            {
-                case AttackPattern.Burst:
-                    for (int i = 0; i < style.BurstCount; i++)
-                    {
-                        FireShotAsync(style.Shot, _owner.Body.position, Vector3.zero, gaugeGain, token).Forget();
-
-                        await UniTask.Delay(TimeSpan.FromSeconds(style.BurstInterval), cancellationToken: token);
-                    }
-                    break;
-
-                case AttackPattern.Cluster:
-                    await FireClusterAsync(style, gaugeGain, token);
-                    break;
-
-                default:
-                    FireShotAsync(style.Shot, _owner.Body.position, Vector3.zero, gaugeGain, token).Forget();
-                    break;
-            }
+            await style.FireAsync(this, gaugeGain, token);
         }
         catch (OperationCanceledException)
         {
@@ -111,33 +94,16 @@ public class AutoAttacker : MonoBehaviour
         }
     }
 
-    // 덩어리가 공중의 분열 지점까지 날아가 터지고, 조각들이 시간차를 두고 목표 주변으로 쏟아진다.
-    private async UniTask FireClusterAsync(AttackStyle style, float gaugeGain, CancellationToken token)
+    // 공격 스타일들이 함께 쓰는 발사. 맞으면 피해, 타격 연출, 물감 자국, 게이지까지 처리한다.
+    public void FireShot(ShotSettings shot, Vector3 start, Vector3 landingOffset, float gaugeGain, CancellationToken token)
     {
-        ClusterSettings cluster = style.Cluster;
+        FireShotAsync(shot, start, landingOffset, gaugeGain, token).Forget();
+    }
 
-        Vector3 start = _owner.Body.position;
-        Vector3 end = _target.Body.position;
-        Vector3 splitPoint = Vector3.Lerp(start, end, cluster.SplitRatio) + Vector3.up * cluster.SplitHeight;
-
-        Color color = PickColor();
-        bool hasArrived = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, style.Shot, start, splitPoint, color, token);
-
-        if (false == hasArrived || _target.Health.IsDead)
-        {
-            return;
-        }
-
-        ImpactPlayer.Play(cluster.SplitImpact, splitPoint, color);
-
-        for (int i = 0; i < cluster.FragmentCount; i++)
-        {
-            Vector3 landingOffset = UnityEngine.Random.insideUnitCircle * cluster.LandingSpread;
-
-            FireShotAsync(cluster.Fragment, splitPoint, landingOffset, gaugeGain, token).Forget();
-
-            await UniTask.Delay(TimeSpan.FromSeconds(cluster.FragmentInterval), cancellationToken: token);
-        }
+    // 목표가 아닌 고정된 지점으로 날린다. 파편이 갈라지는 공중 지점처럼 맞히지 않는 비행에 쓴다.
+    public UniTask<bool> FlyToPointAsync(ShotSettings shot, Vector3 start, Vector3 end, Color color, CancellationToken token)
+    {
+        return ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, end, color, token);
     }
 
     private async UniTaskVoid FireShotAsync(ShotSettings shot, Vector3 start, Vector3 landingOffset, float gaugeGain, CancellationToken token)
@@ -187,7 +153,7 @@ public class AutoAttacker : MonoBehaviour
         };
     }
 
-    private Color PickColor()
+    public Color PickColor()
     {
         PaintPalette palette = _owner.Data.Palette;
 

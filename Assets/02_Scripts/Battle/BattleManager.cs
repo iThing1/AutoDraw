@@ -23,17 +23,14 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private PaintCanvas _paintCanvas;
     [SerializeField] private BattleHudUI _hudPrefab;
 
-    public event Action<BattlePhase> OnPhaseChanged;
+    [Header("엔딩")]
+    [SerializeField] private EndingCutscene _endingCutscene;
 
     private BattleUnit _player;
     private PlayerAutoMover _playerMover;
     private BattleUnit _boss;
     private WanderMover _bossWander;
     private BattleHudUI _hud;
-
-    private BattlePhase _phase = BattlePhase.None;
-
-    public BattlePhase Phase { get { return _phase; } }
 
     private void Start()
     {
@@ -101,9 +98,15 @@ public class BattleManager : MonoBehaviour
             return false;
         }
 
+        if (null == _endingCutscene)
+        {
+            Debug.LogError("전투 매니저 : EndingCutscene이 지정되지 않았습니다.");
+            return false;
+        }
+
         // 하위 컴포넌트는 빠진 항목을 직접 로그로 남기므로 결과만 확인한다.
         if (false == _introCutscene.HasRequiredReferences() || false == GameManager.CameraRig.HasRequiredReferences()
-            || false == _paintCanvas.HasRequiredReferences())
+            || false == _paintCanvas.HasRequiredReferences() || false == _endingCutscene.HasRequiredReferences())
         {
             return false;
         }
@@ -141,10 +144,8 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        ShotSettings bossShot = bossData.AttackStyle.Shot;
-
         int thresholdHp = Mathf.RoundToInt(playerData.MaxHp * playerData.AutoHealThresholdRatio);
-        int bossMaxHit = Mathf.RoundToInt(bossShot.Damage.Max * bossShot.CriticalMultiplier);
+        int bossMaxHit = bossData.AttackStyle.MaxHitDamage;
 
         if (thresholdHp <= bossMaxHit)
         {
@@ -158,8 +159,12 @@ public class BattleManager : MonoBehaviour
         {
             await PlayApproachAsync(token);
             await PlayIntroAsync(token);
-            await PlayBattleAsync(token);
-            await PlayEndingAsync(token);
+            bool isBossDefeated = await PlayBattleAsync(token);
+
+            if (isBossDefeated)
+            {
+                await PlayEndingAsync(token);
+            }
         }
         catch (OperationCanceledException)
         {
@@ -187,11 +192,11 @@ public class BattleManager : MonoBehaviour
         await _introCutscene.PlayAsync(_boss, _bossSpawnPoint, token);
     }
 
-    private async UniTask PlayBattleAsync(CancellationToken token)
+    private async UniTask<bool> PlayBattleAsync(CancellationToken token)
     {
         SetPhase(BattlePhase.Battle);
 
-        // 전투 HUD는 전투에서만 쓰므로 전투 매니저가 직접 열고, 엔딩(M4)에서 닫는다.
+        // 전투 HUD는 전투에서만 쓰므로 전투 매니저가 직접 열고, 엔딩이 시작되면 닫는다.
         _hud = GameManager.UI.Open(_hudPrefab, UILayer.HUD);
         _hud.Bind(_player, _boss);
         _hud.Show();
@@ -217,25 +222,33 @@ public class BattleManager : MonoBehaviour
             if (1 == defeatedIndex)
             {
                 Debug.LogWarning("전투 매니저 : 플레이어가 먼저 쓰러졌습니다. PlayerData의 자동 회복 설정을 확인해 주세요.");
+                return false;
             }
+
+            return true;
         }
     }
 
-    // M4에서 처치와 엔딩으로 채운다.
     private async UniTask PlayEndingAsync(CancellationToken token)
     {
         SetPhase(BattlePhase.Ending);
 
-        await UniTask.Yield(token);
+        await UniTask.WhenAll(
+            CloseHudAsync(token),
+            _endingCutscene.PlayAsync(_boss, _paintCanvas, token));
+    }
+
+    private async UniTask CloseHudAsync(CancellationToken token)
+    {
+        await _hud.HideAsync(token);
+
+        GameManager.UI.Close(_hud);
+        _hud = null;
     }
 
     private void SetPhase(BattlePhase phase)
     {
-        _phase = phase;
-
         Debug.Log($"전투 단계 : {phase}");
-
-        OnPhaseChanged?.Invoke(phase);
     }
 
     // 배회 범위를 데이터로 바꿀 때 화면 안에 들어오는지 씬 뷰에서 바로 확인하기 위해 그린다.

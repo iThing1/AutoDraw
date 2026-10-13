@@ -25,6 +25,11 @@ public class AttackSlotUI : MonoBehaviour
         _rect = GetComponent<RectTransform>();
     }
 
+    private void OnDestroy()
+    {
+        _rect.DOKill();
+    }
+
     public void Setup(int keyNumber, AttackStyle style)
     {
         _keyText.text = keyNumber.ToString();
@@ -75,6 +80,6 @@ public class AttackSlotUI : MonoBehaviour
     private void Punch()
     {
         _rect.DOComplete();
-        _rect.DOPunchScale(Vector3.one * _selectPunch, _punchDuration, 1, 0f).SetUpdate(true);
+        _rect.DOPunchScale(Vector3.one * _selectPunch, _punchDuration, PunchTween.VIBRATO, PunchTween.ELASTICITY).SetUpdate(true);
     }
 }

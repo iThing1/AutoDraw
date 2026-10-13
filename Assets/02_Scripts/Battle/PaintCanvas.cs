@@ -1,12 +1,13 @@
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 // 맞은 자리 주변에 물감 자국을 찍어 전장을 점점 칠한다. 자국은 풀에서 꺼내 쓰고, 상한을 넘으면 오래된 것부터 재사용한다.
 public class PaintCanvas : MonoBehaviour
 {
     [SerializeField] private GameObject _splatPrefab;
-    [SerializeField] private Sprite[] _splatSprites;
 
     [Header("자국")]
     [SerializeField, Min(1)] private int _maxSplatCount = 300;
@@ -22,18 +23,24 @@ public class PaintCanvas : MonoBehaviour
 
     public bool HasRequiredReferences()
     {
-        if (null == _splatPrefab || null == _splatSprites || 0 == _splatSprites.Length)
+        if (null == _splatPrefab)
         {
-            Debug.LogError("물감 캔버스 : 자국 프리팹 또는 자국 스프라이트가 지정되지 않았습니다.");
+            Debug.LogError("물감 캔버스 : 자국 프리팹이 지정되지 않았습니다.");
             return false;
         }
 
         return true;
     }
 
-    // 맞은 자리 주변 반경 안에 크기와 회전이 제각각인 물감 자국을 여러 개 찍어 흔적을 남긴다.
     public void LeaveSplats(Vector3 center, Color color, bool isInk, HitFeedbackPreset preset)
     {
+        SplatStyle style = preset.SplatStyle;
+
+        if (null == style || false == style.HasSprites)
+        {
+            return;
+        }
+
         int count = preset.SplatCount.Pick();
 
         for (int i = 0; i < count; i++)
@@ -42,11 +49,53 @@ public class PaintCanvas : MonoBehaviour
             Vector3 position = center + (Vector3)(Random.insideUnitCircle * preset.SplatSpread);
             float scale = preset.SplatScale.Pick();
 
-            SpawnSplat(position, color, isInk, scale);
+            SpawnSplat(position, style, color, isInk, scale);
         }
     }
 
-    private void SpawnSplat(Vector3 position, Color color, bool isInk, float scale)
+    // 자국마다 시작을 조금씩 늦춰 한꺼번에 꺼지지 않게 한다.
+    public async UniTask FadeOutInkAsync(float duration, FloatRange startDelay, Ease ease, CancellationToken token)
+    {
+        List<UniTask> fades = new List<UniTask>(_inkSplats.Count);
+
+        for (int i = 0; i < _inkSplats.Count; i++)
+        {
+            Tween fade = _inkSplats[i].SpriteRenderer.DOFade(0f, duration)
+                .SetDelay(startDelay.Pick())
+                .SetEase(ease)
+                .SetUpdate(true);
+
+            fades.Add(fade.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token));
+        }
+
+        await UniTask.WhenAll(fades);
+
+        RemoveAllInk();
+    }
+
+    // 큐 중간의 항목은 바로 뺄 수 없어서, 한 바퀴 돌며 잉크만 버리고 나머지는 순서대로 다시 넣는다.
+    private void RemoveAllInk()
+    {
+        int count = _splats.Count;
+
+        for (int i = 0; i < count; i++)
+        {
+            PaintSplat splat = _splats.Dequeue();
+
+            if (splat.IsInk)
+            {
+                DespawnSplat(splat);
+            }
+            else
+            {
+                _splats.Enqueue(splat);
+            }
+        }
+
+        _inkSplats.Clear();
+    }
+
+    private void SpawnSplat(Vector3 position, SplatStyle style, Color color, bool isInk, float scale)
     {
         if (_splats.Count >= _maxSplatCount)
         {
@@ -54,11 +103,11 @@ public class PaintCanvas : MonoBehaviour
         }
 
         GameObject instance = GameManager.Pool.Spawn(_splatPrefab, transform);
-        instance.transform.SetPositionAndRotation(position, Quaternion.Euler(0f, 0f, Random.Range(0f, 360f)));
+        instance.transform.SetPositionAndRotation(position, style.PickRotation());
 
         PaintSplat splat = instance.GetOrAddComponent<PaintSplat>();
 
-        splat.Show(_splatSprites[Random.Range(0, _splatSprites.Length)], color, isInk, NextSortingOrder());
+        splat.Show(style.PickSprite(), color, isInk, NextSortingOrder());
 
         Transform splatTransform = instance.transform;
         splatTransform.localScale = Vector3.zero;
@@ -98,7 +147,13 @@ public class PaintCanvas : MonoBehaviour
             _inkSplats.Remove(splat);
         }
 
+        DespawnSplat(splat);
+    }
+
+    private void DespawnSplat(PaintSplat splat)
+    {
         splat.transform.DOKill();
+        splat.SpriteRenderer.DOKill();
         GameManager.Pool.Despawn(splat.gameObject);
     }
 }

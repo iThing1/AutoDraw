@@ -14,8 +14,12 @@ public class HealthBar : MonoBehaviour
 
     private Health _health;
 
+    // HUD가 닫혀 파괴될 때 잔상 트윈이 지연 중이면, 파괴된 막대에 값을 쓰려다 경고가 나므로 함께 끈다.
     private void OnDestroy()
     {
+        _fill.DOKill();
+        _trail.DOKill();
+
         Unbind();
     }
 

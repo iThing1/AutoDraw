@@ -86,7 +86,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 2
-  m_Size: {x: 80, y: 6}
+  m_Size: {x: 80, y: 60}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -225,6 +225,7 @@ GameObject:
   - component: {fileID: 8873060262263899674}
   - component: {fileID: 2969957242831443143}
   - component: {fileID: 8588949236467943965}
+  - component: {fileID: 5973427622324177786}
   m_Layer: 0
   m_Name: BattleStage
   m_TagString: Untagged
@@ -272,6 +273,7 @@ MonoBehaviour:
   _introCutscene: {fileID: 8588949236467943965}
   _paintCanvas: {fileID: 6145387518109863596}
   _hudPrefab: {fileID: 7728036517409257316, guid: 6130fac36af31ba4aa2ce4787a21c635, type: 3}
+  _endingCutscene: {fileID: 5973427622324177786}
 --- !u!114 &8588949236467943965
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -285,6 +287,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossIntroCutscene
   _preset: {fileID: 11400000, guid: dc1e97273fb1c3047a906b9959ccd0e4, type: 2}
+--- !u!114 &5973427622324177786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5561326264097074974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04ed0b1e39213cc72687aed961f9460f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndingCutscene
+  _preset: {fileID: 11400000, guid: c811d056a521ef14e8abb4152b931a7a, type: 2}
+  _stageClearPrefab: {fileID: 1836262863735427526, guid: eb85a1febf1f4e8458132fe0bc7fab17, type: 3}
 --- !u!1 &7604822164757181108
 GameObject:
   m_ObjectHideFlags: 0
@@ -330,13 +346,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PaintCanvas
   _splatPrefab: {fileID: 2687638166152425016, guid: fc2e34d7d7d952645a48fbcb16f7d1a5, type: 3}
-  _splatSprites:
-  - {fileID: -7058793229908712487, guid: 37bddedf64c075b4db53b6d7d78f3c76, type: 3}
-  - {fileID: -648247221, guid: 37bddedf64c075b4db53b6d7d78f3c76, type: 3}
-  - {fileID: -2010281902, guid: 37bddedf64c075b4db53b6d7d78f3c76, type: 3}
-  - {fileID: -430598979, guid: 37bddedf64c075b4db53b6d7d78f3c76, type: 3}
-  - {fileID: -1262140049, guid: 37bddedf64c075b4db53b6d7d78f3c76, type: 3}
-  - {fileID: 106053368, guid: 37bddedf64c075b4db53b6d7d78f3c76, type: 3}
   _maxSplatCount: 300
   _appearDuration: 0.12
   _appearEase: 27

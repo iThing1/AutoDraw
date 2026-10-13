@@ -25,9 +25,7 @@ public class PoolManager
 
     public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation)
     {
-        Queue<GameObject> pool = GetPool(prefab);
-
-        GameObject instance = 0 < pool.Count ? pool.Dequeue() : CreateInstance(prefab);
+        GameObject instance = TakeInstance(prefab);
         instance.transform.SetPositionAndRotation(position, rotation);
         instance.SetActive(true);
 
@@ -37,9 +35,7 @@ public class PoolManager
     // UI처럼 특정 부모(Canvas) 아래에 있어야 하는 오브젝트용. 위치는 호출하는 쪽에서 맞춘다.
     public GameObject Spawn(GameObject prefab, Transform parent)
     {
-        Queue<GameObject> pool = GetPool(prefab);
-
-        GameObject instance = 0 < pool.Count ? pool.Dequeue() : CreateInstance(prefab);
+        GameObject instance = TakeInstance(prefab);
         instance.transform.SetParent(parent, false);
         instance.SetActive(true);
 
@@ -67,6 +63,24 @@ public class PoolManager
 
         instance.SetActive(false);
         _pools[prefab].Enqueue(instance);
+    }
+
+    // UI처럼 다른 부모 아래로 옮겨 둔 오브젝트는 그 부모가 파괴될 때 함께 파괴되므로, 꺼낼 때 파괴된 것은 버린다.
+    private GameObject TakeInstance(GameObject prefab)
+    {
+        Queue<GameObject> pool = GetPool(prefab);
+
+        while (0 < pool.Count)
+        {
+            GameObject instance = pool.Dequeue();
+
+            if (null != instance)
+            {
+                return instance;
+            }
+        }
+
+        return CreateInstance(prefab);
     }
 
     private Queue<GameObject> GetPool(GameObject prefab)

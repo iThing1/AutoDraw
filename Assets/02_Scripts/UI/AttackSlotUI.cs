@@ -25,6 +25,11 @@ public class AttackSlotUI : MonoBehaviour
         _rect = GetComponent<RectTransform>();
     }
 
+    private void OnDestroy()
+    {
+        _rect.DOKill();
+    }
+
     public void Setup(int keyNumber, AttackStyle style)
     {
         _keyText.text = keyNumber.ToString();

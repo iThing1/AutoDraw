@@ -20,6 +20,8 @@ MonoBehaviour:
     _projectileScale: 1
     _trailTime: 0.2
     _trailWidth: 0.2
+    _useTrailColor: 1
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
     _trajectories:
     - _type: 1
       _weight: 2

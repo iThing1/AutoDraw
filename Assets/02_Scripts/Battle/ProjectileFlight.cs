@@ -71,8 +71,10 @@ public static class ProjectileFlight
         trail.emitting = 0f < shot.TrailTime;
         trail.time = shot.TrailTime;
         trail.widthMultiplier = shot.TrailWidth;
-        trail.startColor = color;
-        trail.endColor = new Color(color.r, color.g, color.b, 0f);
+
+        Color trailColor = shot.UseTrailColor ? shot.TrailColor : color;
+        trail.startColor = trailColor;
+        trail.endColor = new Color(trailColor.r, trailColor.g, trailColor.b, 0f);
     }
 
     // 경로의 시작점은 투사체의 현재 위치라서 경유점과 도착점만 넣는다.

@@ -4,9 +4,13 @@ using System.Threading;
 using UnityEngine;
 
 // 여러 공격 스타일을 가중치로 섞어 쓰는 묶음. 보스처럼 패턴을 번갈아 쓰는 유닛에 연결한다.
+// 묶음 안에 묶음을 넣을 수 있다. 서로를 넣어 끝없이 도는 구성은 에디터에서 바로 알리고, 실행 중에는 깊이로 끊는다.
 [CreateAssetMenu(fileName = "AttackStyleSet", menuName = "Scriptable Objects/AttackStyle/Set")]
 public class AttackStyleSet : AttackStyle
 {
+    // 정상적인 구성이라면 이보다 깊게 묶을 일이 없으므로, 넘어가면 순환으로 본다.
+    private const int MAX_NESTING_DEPTH = 8;
+
     [Serializable]
     public class Entry
     {
@@ -20,40 +24,35 @@ public class AttackStyleSet : AttackStyle
     [Header("패턴")]
     [SerializeField] private Entry[] _entries;
 
-    public override int MaxHitDamage
-    {
-        get
-        {
-            int maxHitDamage = 0;
+    public override int MaxHitDamage { get { return GetMaxHitDamage(0); } }
 
-            if (null == _entries)
-            {
-                return maxHitDamage;
-            }
-
-            for (int i = 0; i < _entries.Length; i++)
-            {
-                if (IsValid(_entries[i]))
-                {
-                    maxHitDamage = Mathf.Max(maxHitDamage, _entries[i].Style.MaxHitDamage);
-                }
-            }
-
-            return maxHitDamage;
-        }
-    }
-
+    // 안쪽 묶음을 따라 내려가며 실제 공격 하나를 고른다. 재귀 대신 반복문이라 순환이 있어도 깊이 제한에서 멈춘다.
     public override AttackStyle PickStyle()
     {
-        Entry entry = PickEntry();
+        AttackStyleSet currentSet = this;
 
-        if (null == entry)
+        for (int depth = 0; depth < MAX_NESTING_DEPTH; depth++)
         {
-            Debug.LogError($"공격 스타일 묶음 : {name}에 고를 수 있는 공격 스타일이 없습니다.");
-            return this;
+            Entry entry = currentSet.PickEntry();
+
+            if (null == entry)
+            {
+                Debug.LogError($"공격 스타일 묶음 : {currentSet.name}에 고를 수 있는 공격 스타일이 없습니다.");
+                return this;
+            }
+
+            AttackStyleSet nestedSet = entry.Style as AttackStyleSet;
+
+            if (null == nestedSet)
+            {
+                return entry.Style;
+            }
+
+            currentSet = nestedSet;
         }
 
-        return entry.Style.PickStyle();
+        Debug.LogError($"공격 스타일 묶음 : {name}의 묶음이 너무 깊거나 서로를 포함하고 있습니다.");
+        return this;
     }
 
     // 자동 공격은 PickStyle로 고른 스타일을 직접 쏘므로, 이 묶음이 그대로 넘어온 경우에만 여기서 하나를 골라 쏜다.
@@ -71,18 +70,99 @@ public class AttackStyleSet : AttackStyle
 
     public override void Prewarm()
     {
-        if (null == _entries)
+        PrewarmEntries(0);
+    }
+
+    // 인스펙터에서 값을 바꿀 때마다 불려, 순환 구성을 실행하기 전에 바로 알려 준다.
+    private void OnValidate()
+    {
+        if (ContainsSet(this, 0))
+        {
+            Debug.LogError($"공격 스타일 묶음 : {name}이 다른 묶음을 거쳐 자기 자신을 다시 포함합니다. 패턴 목록을 확인해 주세요.", this);
+        }
+    }
+
+    private int GetMaxHitDamage(int depth)
+    {
+        int maxHitDamage = 0;
+
+        if (null == _entries || depth >= MAX_NESTING_DEPTH)
+        {
+            return maxHitDamage;
+        }
+
+        for (int i = 0; i < _entries.Length; i++)
+        {
+            if (false == IsValid(_entries[i]))
+            {
+                continue;
+            }
+
+            AttackStyleSet nestedSet = _entries[i].Style as AttackStyleSet;
+            int hitDamage = null != nestedSet ? nestedSet.GetMaxHitDamage(depth + 1) : _entries[i].Style.MaxHitDamage;
+
+            maxHitDamage = Mathf.Max(maxHitDamage, hitDamage);
+        }
+
+        return maxHitDamage;
+    }
+
+    private void PrewarmEntries(int depth)
+    {
+        if (null == _entries || depth >= MAX_NESTING_DEPTH)
         {
             return;
         }
 
         for (int i = 0; i < _entries.Length; i++)
         {
-            if (IsValid(_entries[i]))
+            if (false == IsValid(_entries[i]))
+            {
+                continue;
+            }
+
+            AttackStyleSet nestedSet = _entries[i].Style as AttackStyleSet;
+
+            if (null != nestedSet)
+            {
+                nestedSet.PrewarmEntries(depth + 1);
+            }
+            else
             {
                 _entries[i].Style.Prewarm();
             }
         }
+    }
+
+    // target이 이 묶음 아래 어딘가에 다시 나타나는지 찾는다. 깊이 제한을 넘으면 순환으로 본다.
+    private bool ContainsSet(AttackStyleSet target, int depth)
+    {
+        if (null == _entries)
+        {
+            return false;
+        }
+
+        if (depth >= MAX_NESTING_DEPTH)
+        {
+            return true;
+        }
+
+        for (int i = 0; i < _entries.Length; i++)
+        {
+            AttackStyleSet nestedSet = null != _entries[i] ? _entries[i].Style as AttackStyleSet : null;
+
+            if (null == nestedSet)
+            {
+                continue;
+            }
+
+            if (target == nestedSet || nestedSet.ContainsSet(target, depth + 1))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private Entry PickEntry()
@@ -127,7 +207,7 @@ public class AttackStyleSet : AttackStyle
         return null;
     }
 
-    // 자기 자신을 넣으면 고를 때마다 자기를 다시 골라 끝나지 않으므로 뺀다.
+    // 자기 자신을 바로 넣은 항목은 고를 때마다 자기를 다시 골라 끝나지 않으므로 뺀다.
     private bool IsValid(Entry entry)
     {
         return null != entry && null != entry.Style && this != entry.Style && 0f < entry.Weight;

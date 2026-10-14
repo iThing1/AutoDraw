@@ -36,5 +36,7 @@ MonoBehaviour:
     _criticalMultiplier: 2
     _normalHit: {fileID: 11400000, guid: 8f01e519d7e777a4fae5f35580a49372, type: 2}
     _criticalHit: {fileID: 11400000, guid: 83dcd58e110b1174b84b0be067d65ac6, type: 2}
-  _burstCount: 3
+  _shotCount:
+    _min: 3
+    _max: 3
   _burstInterval: 0.08

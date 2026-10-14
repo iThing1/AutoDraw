@@ -36,7 +36,7 @@ public class WanderMover : UnitMover
         if (IsTargetTooFar(settings))
         {
             // 다가간 자리를 새 배회 중심으로 삼아, 다가간 뒤 원래 자리로 되돌아가지 않게 한다.
-            destination = Unit.Attacker.Target.GetApproachPoint(transform.position, settings.ChaseStopDistance);
+            destination = ClampToStage(Unit.Attacker.Target.GetApproachPoint(transform.position, settings.ChaseStopDistance));
             _center = destination;
             speed = settings.Speed.Max;
         }
@@ -81,6 +81,13 @@ public class WanderMover : UnitMover
         return Vector3.Distance(transform.position, target.Unit.transform.position) > settings.ChaseDistance;
     }
 
+    private Vector3 ClampToStage(Vector3 position)
+    {
+        Vector2 clamped = ClampToMoveArea(position);
+
+        return new Vector3(clamped.x, clamped.y, position.z);
+    }
+
     // 지금 위치에서 너무 가까운 지점은 움직임이 거의 보이지 않으므로, 최소 거리 이상 떨어진 지점을 고른다.
     private Vector3 PickDestination(WanderSettings settings)
     {
@@ -92,7 +99,8 @@ public class WanderMover : UnitMover
             float x = UnityEngine.Random.Range(-halfSize.x, halfSize.x);
             float y = UnityEngine.Random.Range(-halfSize.y, halfSize.y);
 
-            destination = _center + new Vector3(x, y, 0f);
+            // 배회 중심이 가장자리 가까이 옮겨 가면 범위가 종이 밖으로 걸칠 수 있어, 고른 지점을 이동 범위 안으로 자른다.
+            destination = ClampToStage(_center + new Vector3(x, y, 0f));
 
             if (Vector3.Distance(transform.position, destination) >= settings.MinMoveDistance)
             {

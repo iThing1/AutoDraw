@@ -87,7 +87,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 2
-  m_Size: {x: 80, y: 60}
+  m_Size: {x: 96, y: 54}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -136,7 +136,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 80, y: 60}
+  m_Size: {x: 96, y: 54}
   m_EdgeRadius: 0
 --- !u!1 &4208822335133394052
 GameObject:
@@ -246,7 +246,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 60}
+  m_Size: {x: 1, y: 54}
   m_EdgeRadius: 0
 --- !u!114 &7753745094576344584
 MonoBehaviour:
@@ -317,13 +317,8 @@ MonoBehaviour:
   _bossSpawnPoint: {fileID: 2935112580148223958}
   _playerPrefab: {fileID: 5628677625872867307, guid: 2c1ee4e491c0cc44890185f99d222d9b, type: 3}
   _bossPrefab: {fileID: 5673451803158972909, guid: 2e8d6d477003ae54baf0cd0c464cf3ce, type: 3}
-  _playerMoveArea:
-    serializedVersion: 2
-    x: -39
-    y: -29
-    width: 78
-    height: 58
-  _cameraBounds: {fileID: 3418620957714306127}
+  _stageBounds: {fileID: 3418620957714306127}
+  _edgePadding: 0
   _introTrigger: {fileID: 7753745094576344584}
   _introCutscene: {fileID: 8588949236467943965}
   _paintCanvas: {fileID: 6145387518109863596}

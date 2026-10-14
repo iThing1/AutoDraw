@@ -207,15 +207,26 @@ public class AutoAttacker : MonoBehaviour
         }
         else if (FlightOutcome.Arrived == flight.Outcome)
         {
-            ApplyHit(shot, damage, flight.LandingPoint, gaugeGain);
+            // 큰 탄은 명중 반경 밖에서 몸 가장자리에 닿으므로, 비행이 이미 닿았다고 본 탄은 명중 반경으로 다시 거르지 않는다.
+            DealHit(shot, damage, flight.LandingPoint, gaugeGain);
         }
     }
 
-    // 막혔으면 피해·물감 자국·게이지 없이 끝난다. 막기 연출은 막은 쪽이 맡는다.
-    // 방패가 명중 반경보다 넓어서, 빗나갔는지보다 막혔는지를 먼저 본다.
+    // 방패가 명중 반경보다 넓어서, 명중 반경 밖이어도 방패 안이면 막기 판정으로 넘긴다.
     private void ApplyHit(ShotSettings hit, DamageInfo damage, Vector3 hitPoint, float gaugeGain)
     {
-        if (_target.IsDefeated || _target.TryBlockHit(hitPoint) || false == _target.IsHit(hitPoint))
+        if (false == _target.IsHit(hitPoint) && false == _target.IsBlockedAt(hitPoint, 0f))
+        {
+            return;
+        }
+
+        DealHit(hit, damage, hitPoint, gaugeGain);
+    }
+
+    // 막혔으면 피해·물감 자국·게이지 없이 끝난다. 막기 연출은 막은 쪽이 맡는다.
+    private void DealHit(ShotSettings hit, DamageInfo damage, Vector3 hitPoint, float gaugeGain)
+    {
+        if (_target.IsDefeated || _target.TryBlockHit(hitPoint))
         {
             return;
         }

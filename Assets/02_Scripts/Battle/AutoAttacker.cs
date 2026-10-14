@@ -110,7 +110,7 @@ public class AutoAttacker : MonoBehaviour
 
         FlightResult flight = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, end, color, token);
 
-        return flight.HasArrived;
+        return FlightOutcome.Arrived == flight.Outcome;
     }
 
     // 날아가는 과정 없이 바로 맞힌다. 근접 공격처럼 투사체가 없는 공격에 쓴다.
@@ -190,18 +190,14 @@ public class AutoAttacker : MonoBehaviour
         FlightResult flight = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, _target.GetAimPoint(landingOffset),
             _target, damage.PaintColor, token);
 
-        if (false == flight.HasArrived)
-        {
-            return;
-        }
-
-        if (flight.IsBlocked)
+        if (FlightOutcome.Blocked == flight.Outcome)
         {
             _target.NotifyBlocked(flight.LandingPoint);
-            return;
         }
-
-        ApplyHit(shot, damage, flight.LandingPoint, gaugeGain);
+        else if (FlightOutcome.Arrived == flight.Outcome)
+        {
+            ApplyHit(shot, damage, flight.LandingPoint, gaugeGain);
+        }
     }
 
     // 막혔으면 피해·물감 자국·게이지 없이 끝난다. 막기 연출은 막은 쪽이 맡는다.

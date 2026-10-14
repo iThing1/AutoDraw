@@ -18,7 +18,7 @@ public static class ProjectileFlight
         if (null == trajectory)
         {
             Debug.LogError($"투사체 비행 : {prefab.name}에 사용할 수 있는 궤적이 없습니다.");
-            return new FlightResult(false, start, false);
+            return new FlightResult(FlightOutcome.Canceled, start);
         }
 
         GameObject projectile = GameManager.Pool.Spawn(prefab, start, Quaternion.identity);
@@ -43,21 +43,37 @@ public static class ProjectileFlight
             .SetEase(Ease.Linear);
 
         bool isBlocked = false;
+        float flightSpeed = 0f < duration ? Vector3.Distance(start, end) / duration : 0f;
+        Vector3 lastPosition = start;
+        Vector3 velocity = 0f < flightSpeed ? (end - start).normalized * flightSpeed : Vector3.zero;
 
         if (null != target)
         {
             Transform followTarget = target.FollowTransform;
             Vector3 targetStartPosition = followTarget.position;
             float homing = shot.Homing;
+            float maxHomingSpeed = flightSpeed * homing;
+            Vector3 homingOffset = Vector3.zero;
 
-            // 목표가 움직인 거리를 진행률과 추적 강도만큼 더한다. 추적 강도가 1이면 도착하는 순간 목표에 붙는다.
-            // 도착 지점만 보면 방패를 가로질러 지나가도 막히지 않으므로, 날아오는 동안 매 프레임 방패에 닿았는지 본다.
+            // 보정이 따라가는 속도를 탄 속도 × 추적 강도로 묶어, 목표가 갑자기 움직여도 탄이 홱 꺾이지 않게 한다.
+            // 도착 지점만 보면 방패를 가로질러 지나가도 막히지 않아, 날아오는 동안 매 프레임 방패에 닿았는지 본다.
             flight = flight.OnUpdate(() =>
             {
-                Vector3 targetMoved = followTarget.position - targetStartPosition;
-                projectileTransform.position += targetMoved * (flight.ElapsedPercentage() * homing);
+                Vector3 desiredOffset = (followTarget.position - targetStartPosition) * (flight.ElapsedPercentage() * homing);
+                homingOffset = Vector3.MoveTowards(homingOffset, desiredOffset, maxHomingSpeed * Time.deltaTime);
+                projectileTransform.position += homingOffset;
 
-                if (target.IsBlockedAt(projectileTransform.position))
+                Vector3 currentPosition = projectileTransform.position;
+
+                // 빗나간 뒤 같은 속도로 이어 가도록 실제 속도를 기억한다. 마지막 프레임은 덜 움직여 넘긴다.
+                if (0f < Time.deltaTime && 1f > flight.ElapsedPercentage())
+                {
+                    velocity = (currentPosition - lastPosition) / Time.deltaTime;
+                }
+
+                lastPosition = currentPosition;
+
+                if (target.IsBlockedAt(currentPosition))
                 {
                     isBlocked = true;
                     flight.Kill();
@@ -69,11 +85,54 @@ public static class ProjectileFlight
         bool isCanceled = await flight.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token).SuppressCancellationThrow();
 
         Vector3 landingPoint = projectileTransform.position;
+        FlightOutcome outcome = GetOutcome(isBlocked, isCanceled, target, landingPoint);
+
+        if (FlightOutcome.Missed == outcome)
+        {
+            await FlyPastAsync(projectileTransform, velocity, shot.MissTravelTime, token);
+        }
 
         GameManager.Pool.Despawn(projectile);
 
-        // 방패에 막혀 직접 멈춘 경우는 취소로 끝나더라도 막힌 것으로 본다.
-        return new FlightResult(isBlocked || false == isCanceled, landingPoint, isBlocked);
+        return new FlightResult(outcome, landingPoint);
+    }
+
+    // 방패에 막혀 직접 멈춘 경우는 트윈이 취소로 끝나더라도 막힌 것으로 본다.
+    private static FlightOutcome GetOutcome(bool isBlocked, bool isCanceled, AttackTarget target, Vector3 landingPoint)
+    {
+        if (isBlocked)
+        {
+            return FlightOutcome.Blocked;
+        }
+
+        if (isCanceled)
+        {
+            return FlightOutcome.Canceled;
+        }
+
+        if (null != target && false == target.IsHit(landingPoint))
+        {
+            return FlightOutcome.Missed;
+        }
+
+        return FlightOutcome.Arrived;
+    }
+
+    // 외곽선 같은 자식까지 함께 사라지도록 색 대신 크기를 줄인다.
+    private static async UniTask FlyPastAsync(Transform projectile, Vector3 velocity, float travelTime, CancellationToken token)
+    {
+        if (0f >= travelTime)
+        {
+            return;
+        }
+
+        Vector3 destination = projectile.position + velocity * travelTime;
+
+        Sequence pass = DOTween.Sequence()
+            .Join(projectile.DOMove(destination, travelTime).SetEase(Ease.Linear))
+            .Join(projectile.DOScale(0f, travelTime).SetEase(Ease.InQuad));
+
+        await pass.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token).SuppressCancellationThrow();
     }
 
     private static void SetupTrail(TrailRenderer trail, ShotSettings shot, Color color)

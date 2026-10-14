@@ -17,6 +17,10 @@ public class BattleManager : MonoBehaviour
     // 스테이지 기준 범위. 바닥 종이 가장자리가 보이는 경계가 되도록, 종이에서 몸 크기만큼 안쪽으로 잡는다.
     [SerializeField] private Rect _playerMoveArea = new Rect(-39f, -29f, 78f, 58f);
 
+    [Header("카메라")]
+    // 카메라가 이 영역 밖을 비추지 않는다. 비워 두면 제한하지 않는다.
+    [SerializeField] private Collider2D _cameraBounds;
+
     [Header("접근")]
     [SerializeField] private BossIntroTrigger _introTrigger;
 
@@ -47,6 +51,11 @@ public class BattleManager : MonoBehaviour
 
         SpawnUnits();
         PrewarmPools();
+
+        if (null != _cameraBounds)
+        {
+            GameManager.CameraRig.SetCameraBounds(_cameraBounds);
+        }
 
         GameManager.CameraRig.FollowPlayer(_player.transform);
 

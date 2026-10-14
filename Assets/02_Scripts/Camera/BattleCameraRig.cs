@@ -5,6 +5,8 @@ public class BattleCameraRig : MonoBehaviour
 {
     private const int ACTIVE_PRIORITY = 20;
     private const int INACTIVE_PRIORITY = 10;
+    // 줌이 이만큼 바뀌었을 때만 경계 계산을 다시 한다. 매 프레임 다시 하면 비싸다.
+    private const float CONFINER_RECALCULATE_ORTHO_DELTA = 0.1f;
 
     [SerializeField] private CinemachineBrain _brain;
     [SerializeField] private CinemachineCamera _playerCamera;
@@ -24,7 +26,33 @@ public class BattleCameraRig : MonoBehaviour
     // 컷신이 끝나고 돌아갈 카메라. 접근 중에는 플레이어 카메라, 전투가 준비되면 전투 카메라가 된다.
     private CinemachineCamera _gameplayCamera;
 
+    private CinemachineCamera[] _confinedCameras;
+    private CinemachineConfiner2D[] _confiners;
+    private float[] _lastOrthoSizes;
+
     public Camera OutputCamera { get { return _brain.OutputCamera; } }
+
+    // Confiner2D는 효율 때문에 줌 변화를 스스로 반영하지 않는다. 전투 카메라는 두 유닛을 담으려고 줌이 계속 바뀌므로 직접 알린다.
+    private void LateUpdate()
+    {
+        if (null == _confiners)
+        {
+            return;
+        }
+
+        for (int i = 0; i < _confiners.Length; i++)
+        {
+            float orthoSize = _confinedCameras[i].State.Lens.OrthographicSize;
+
+            if (Mathf.Abs(orthoSize - _lastOrthoSizes[i]) < CONFINER_RECALCULATE_ORTHO_DELTA)
+            {
+                continue;
+            }
+
+            _lastOrthoSizes[i] = orthoSize;
+            _confiners[i].InvalidateLensCache();
+        }
+    }
 
     public bool HasRequiredReferences()
     {
@@ -36,6 +64,23 @@ public class BattleCameraRig : MonoBehaviour
         }
 
         return true;
+    }
+
+    // 경계는 스테이지마다 달라 스테이지가 넘겨준다. 모든 카메라가 이 영역 밖을 비추지 않는다.
+    public void SetCameraBounds(Collider2D bounds)
+    {
+        _confinedCameras = new CinemachineCamera[] { _playerCamera, _cinematicCamera, _battleCamera };
+        _confiners = new CinemachineConfiner2D[_confinedCameras.Length];
+        _lastOrthoSizes = new float[_confinedCameras.Length];
+
+        for (int i = 0; i < _confinedCameras.Length; i++)
+        {
+            CinemachineConfiner2D confiner = _confinedCameras[i].gameObject.GetOrAddComponent<CinemachineConfiner2D>();
+            confiner.BoundingShape2D = bounds;
+            confiner.InvalidateBoundingShapeCache();
+
+            _confiners[i] = confiner;
+        }
     }
 
     public void FollowPlayer(Transform player)

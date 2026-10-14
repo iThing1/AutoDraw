@@ -13,6 +13,10 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private BattleUnit _playerPrefab;
     [SerializeField] private BattleUnit _bossPrefab;
 
+    [Header("플레이어 이동")]
+    // 스테이지 기준 범위. 보스 배회 범위까지는 다가갈 수 있고, 화면 밖으로는 나가지 않게 막는다.
+    [SerializeField] private Rect _playerMoveArea = new Rect(-18f, -6f, 40f, 12f);
+
     [Header("접근")]
     [SerializeField] private BossIntroTrigger _introTrigger;
 
@@ -31,7 +35,6 @@ public class BattleManager : MonoBehaviour
     [SerializeField, Min(0)] private int _projectilePrewarmCount = 20;
 
     private BattleUnit _player;
-    private PlayerAutoMover _playerMover;
     private BattleUnit _boss;
     private BattleHudUI _hud;
 
@@ -73,9 +76,10 @@ public class BattleManager : MonoBehaviour
             return false;
         }
 
-        if (null == _playerPrefab.GetComponent<PlayerAutoMover>())
+        // 플레이어가 움직여야 등장 트리거에 닿아 다음 단계로 넘어간다.
+        if (null == _playerPrefab.GetComponent<UnitMover>())
         {
-            Debug.LogError("전투 매니저 : 플레이어 프리팹에 PlayerAutoMover가 붙어 있지 않습니다.");
+            Debug.LogError("전투 매니저 : 플레이어 프리팹에 이동 컴포넌트(UnitMover)가 붙어 있지 않습니다.");
             return false;
         }
 
@@ -102,7 +106,7 @@ public class BattleManager : MonoBehaviour
     {
         _player = Instantiate(_playerPrefab, _playerSpawnPoint.position, Quaternion.identity, transform);
         _player.name = _playerPrefab.name;
-        _playerMover = _player.GetComponent<PlayerAutoMover>();
+        _player.Mover.SetMoveArea(GetWorldPlayerMoveArea());
 
         _boss = Instantiate(_bossPrefab, _bossSpawnPoint.position, Quaternion.identity, transform);
         _boss.name = _bossPrefab.name;
@@ -175,13 +179,15 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    // 플레이어 이동은 여기서 한 번 시작해 스테이지가 끝날 때까지 돌고, 컷신 동안에는 상태(Idle)로 멈춘다.
     private async UniTask PlayApproachAsync(CancellationToken token)
     {
-        _playerMover.StartMoving();
+        _player.ChangeState(UnitState.Move);
+        _player.Mover.RunAsync(token).Forget();
 
         await _introTrigger.WaitForEnterAsync(token);
 
-        _playerMover.Stop();
+        _player.ChangeState(UnitState.Idle);
     }
 
     private async UniTask PlayIntroAsync(CancellationToken token)
@@ -203,6 +209,11 @@ public class BattleManager : MonoBehaviour
         {
             StartUnit(_player, _boss, battleSource.Token);
             StartUnit(_boss, _player, battleSource.Token);
+
+            if (null != _boss.Mover)
+            {
+                _boss.Mover.RunAsync(battleSource.Token).Forget();
+            }
 
             // WhenAny는 먼저 끝난 작업의 순서 번호를 돌려준다. 0은 보스, 1은 플레이어가 먼저 쓰러진 것이다.
             int defeatedIndex = await UniTask.WhenAny(
@@ -229,11 +240,11 @@ public class BattleManager : MonoBehaviour
     {
         unit.ChangeState(UnitState.Move);
         unit.Attacker.RunAsync(target, _paintCanvas, token).Forget();
+    }
 
-        if (null != unit.Mover)
-        {
-            unit.Mover.RunAsync(token).Forget();
-        }
+    private Rect GetWorldPlayerMoveArea()
+    {
+        return new Rect(_playerMoveArea.position + (Vector2)transform.position, _playerMoveArea.size);
     }
 
     private async UniTask PlayEndingAsync(CancellationToken token)
@@ -251,9 +262,14 @@ public class BattleManager : MonoBehaviour
         _hud = null;
     }
 
-    // 배회 범위를 데이터로 바꿀 때 화면 안에 들어오는지 씬 뷰에서 바로 확인하기 위해 그린다.
+    // 이동 범위를 바꿀 때 화면 안에 들어오는지 씬 뷰에서 바로 확인하기 위해 그린다.
     private void OnDrawGizmosSelected()
     {
+        Rect playerArea = GetWorldPlayerMoveArea();
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireCube(playerArea.center, new Vector3(playerArea.width, playerArea.height, 0f));
+
         if (null == _bossSpawnPoint || null == _bossPrefab || null == _bossPrefab.Data)
         {
             return;

@@ -193,7 +193,6 @@ GameObject:
   - component: {fileID: 5946075003864393431}
   - component: {fileID: 3537246984334658758}
   - component: {fileID: -7785593189395216596}
-  - component: {fileID: 2423366118189221037}
   - component: {fileID: 5747795057357951753}
   - component: {fileID: 8650631995990055002}
   - component: {fileID: 3753704952995598723}
@@ -201,6 +200,7 @@ GameObject:
   - component: {fileID: 6769664501310300376}
   - component: {fileID: 4450831803582169860}
   - component: {fileID: 5964630480403215121}
+  - component: {fileID: 3533665038697895136}
   m_Layer: 15
   m_Name: Player
   m_TagString: Player
@@ -288,19 +288,6 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
---- !u!114 &2423366118189221037
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9124088967955213027}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d28ed6d6925ad94b914fb4ebb788c03, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerAutoMover
-  _direction: {x: 1, y: 0}
 --- !u!114 &5747795057357951753
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -391,3 +378,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttackInput
   _loadout: {fileID: 11400000, guid: 4588523c7a01cf6479fc7d27f0a0450c, type: 2}
+--- !u!114 &3533665038697895136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9124088967955213027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03e6acb95bfffb7438f230f85b6a8ab0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInputMover
+  _moveAction: {fileID: -1680190386980627800, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

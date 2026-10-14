@@ -9,6 +9,9 @@ public abstract class UnitMover : MonoBehaviour
 {
     private BattleUnit _unit;
 
+    private bool _hasMoveArea;
+    private Rect _moveArea;
+
     protected BattleUnit Unit { get { return _unit; } }
 
     protected virtual void Awake()
@@ -24,6 +27,13 @@ public abstract class UnitMover : MonoBehaviour
     private void OnDisable()
     {
         _unit.OnStateChanged -= HandleStateChanged;
+    }
+
+    // 스테이지가 정해 준 범위. 지정하지 않으면 제한 없이 움직인다.
+    public void SetMoveArea(Rect area)
+    {
+        _moveArea = area;
+        _hasMoveArea = true;
     }
 
     public async UniTask RunAsync(CancellationToken token)
@@ -53,6 +63,19 @@ public abstract class UnitMover : MonoBehaviour
 
     protected virtual void OnRunStarted()
     {
+    }
+
+    protected Vector2 ClampToMoveArea(Vector2 position)
+    {
+        if (false == _hasMoveArea)
+        {
+            return position;
+        }
+
+        float x = Mathf.Clamp(position.x, _moveArea.xMin, _moveArea.xMax);
+        float y = Mathf.Clamp(position.y, _moveArea.yMin, _moveArea.yMax);
+
+        return new Vector2(x, y);
     }
 
     protected abstract UniTask MoveOnceAsync(CancellationToken token);

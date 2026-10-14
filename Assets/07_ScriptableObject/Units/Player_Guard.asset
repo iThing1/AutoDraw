@@ -17,6 +17,7 @@ MonoBehaviour:
   _guardDuration: 0.25
   _gaugeCost: 25
   _cooldown: 0.4
+  _guardRadius: 0.75
   _shieldAppearDuration: 0.08
   _shieldAppearEase: 27
   _shieldPunch: 0.3

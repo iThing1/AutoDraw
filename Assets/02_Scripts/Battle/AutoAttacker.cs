@@ -135,16 +135,20 @@ public class AutoAttacker : MonoBehaviour
     private async UniTask FireAsync(AttackStyle style, bool gainsGauge, CancellationToken token)
     {
         float gaugeGain = gainsGauge ? style.GaugeGainPerHit : 0f;
-        // WanderMover는 Unity 오브젝트라 ?. 대신 == null로 확인한다. ?.는 파괴된 오브젝트를 null로 보지 않는다.
-        WanderMover mover = style.StopsMovement ? _owner.Mover : null;
-
-        if (null != mover)
-        {
-            mover.Pause();
-        }
+        bool hasBegunAction = false;
 
         try
         {
+            if (style.StopsMovement)
+            {
+                hasBegunAction = await WaitAndBeginActionAsync(token);
+
+                if (false == hasBegunAction)
+                {
+                    return;
+                }
+            }
+
             await style.FireAsync(this, gaugeGain, token);
         }
         catch (OperationCanceledException)
@@ -153,11 +157,27 @@ public class AutoAttacker : MonoBehaviour
         }
         finally
         {
-            if (null != mover)
+            // 기다리다 취소됐으면 다른 패턴의 Action을 끝내지 않는다.
+            if (hasBegunAction)
             {
-                mover.Resume();
+                _owner.EndAction();
             }
         }
+    }
+
+    private async UniTask<bool> WaitAndBeginActionAsync(CancellationToken token)
+    {
+        while (false == _owner.TryBeginAction())
+        {
+            if (UnitState.Dead == _owner.State)
+            {
+                return false;
+            }
+
+            await UniTask.Yield(PlayerLoopTiming.Update, token);
+        }
+
+        return true;
     }
 
     private async UniTaskVoid FireShotAsync(ShotSettings shot, Vector3 start, Vector3 landingOffset, float gaugeGain, CancellationToken token)

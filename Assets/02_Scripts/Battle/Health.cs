@@ -7,6 +7,7 @@ public class Health : MonoBehaviour
 {
     public event Action<DamageInfo> OnDamaged;
     public event Action<int> OnHealed;
+    public event Action OnDied;
 
     // 죽는 순간 완료되는 작업. 전투 매니저가 이것을 await해서 쓰러질 때까지 기다린다.
     private UniTaskCompletionSource _deathSource = new();
@@ -38,6 +39,7 @@ public class Health : MonoBehaviour
 
         if (IsDead)
         {
+            OnDied?.Invoke();
             _deathSource.TrySetResult();
         }
     }

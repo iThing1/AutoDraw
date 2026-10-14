@@ -33,7 +33,6 @@ public class BattleManager : MonoBehaviour
     private BattleUnit _player;
     private PlayerAutoMover _playerMover;
     private BattleUnit _boss;
-    private WanderMover _bossWander;
     private BattleHudUI _hud;
 
     private void Start()
@@ -107,7 +106,6 @@ public class BattleManager : MonoBehaviour
 
         _boss = Instantiate(_bossPrefab, _bossSpawnPoint.position, Quaternion.identity, transform);
         _boss.name = _bossPrefab.name;
-        _bossWander = _boss.GetComponent<WanderMover>();
 
         _boss.gameObject.SetActive(false);
     }
@@ -203,13 +201,8 @@ public class BattleManager : MonoBehaviour
         // 보스가 쓰러지면 전투 토큰을 취소해, 남은 공격 루프와 날아가던 투사체를 함께 정리한다.
         using (CancellationTokenSource battleSource = CancellationTokenSource.CreateLinkedTokenSource(token))
         {
-            _player.Attacker.RunAsync(_boss, _paintCanvas, battleSource.Token).Forget();
-            _boss.Attacker.RunAsync(_player, _paintCanvas, battleSource.Token).Forget();
-
-            if (null != _bossWander)
-            {
-                _bossWander.RunAsync(_bossSpawnPoint.position, battleSource.Token).Forget();
-            }
+            StartUnit(_player, _boss, battleSource.Token);
+            StartUnit(_boss, _player, battleSource.Token);
 
             // WhenAny는 먼저 끝난 작업의 순서 번호를 돌려준다. 0은 보스, 1은 플레이어가 먼저 쓰러진 것이다.
             int defeatedIndex = await UniTask.WhenAny(
@@ -218,6 +211,10 @@ public class BattleManager : MonoBehaviour
 
             battleSource.Cancel();
 
+            // 쓰러진 쪽은 Dead라 그대로 남는다.
+            _player.ChangeState(UnitState.Idle);
+            _boss.ChangeState(UnitState.Idle);
+
             if (1 == defeatedIndex)
             {
                 Debug.LogWarning("전투 매니저 : 플레이어가 먼저 쓰러졌습니다. PlayerData의 자동 회복 설정을 확인해 주세요.");
@@ -225,6 +222,17 @@ public class BattleManager : MonoBehaviour
             }
 
             return true;
+        }
+    }
+
+    private void StartUnit(BattleUnit unit, BattleUnit target, CancellationToken token)
+    {
+        unit.ChangeState(UnitState.Move);
+        unit.Attacker.RunAsync(target, _paintCanvas, token).Forget();
+
+        if (null != unit.Mover)
+        {
+            unit.Mover.RunAsync(token).Forget();
         }
     }
 

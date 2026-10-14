@@ -188,25 +188,27 @@ public class AutoAttacker : MonoBehaviour
         DamageInfo damage = RollDamage(shot);
 
         FlightResult flight = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, _target.GetAimPoint(landingOffset),
-            _target.FollowTransform, damage.PaintColor, token);
+            _target, damage.PaintColor, token);
 
         if (false == flight.HasArrived)
         {
             return;
         }
 
-        ApplyHit(shot, damage, flight.LandingPoint, gaugeGain);
-    }
-
-    private void ApplyHit(ShotSettings hit, DamageInfo damage, Vector3 hitPoint, float gaugeGain)
-    {
-        if (_target.IsDefeated || false == _target.IsHit(hitPoint))
+        if (flight.IsBlocked)
         {
+            _target.NotifyBlocked(flight.LandingPoint);
             return;
         }
 
-        // 막혔으면 피해·물감 자국·게이지 없이 끝난다. 막기 연출은 막은 쪽이 맡는다.
-        if (_target.TryGuard(hitPoint))
+        ApplyHit(shot, damage, flight.LandingPoint, gaugeGain);
+    }
+
+    // 막혔으면 피해·물감 자국·게이지 없이 끝난다. 막기 연출은 막은 쪽이 맡는다.
+    // 방패가 명중 반경보다 넓어서, 빗나갔는지보다 막혔는지를 먼저 본다.
+    private void ApplyHit(ShotSettings hit, DamageInfo damage, Vector3 hitPoint, float gaugeGain)
+    {
+        if (_target.IsDefeated || _target.TryBlockHit(hitPoint) || false == _target.IsHit(hitPoint))
         {
             return;
         }

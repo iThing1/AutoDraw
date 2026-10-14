@@ -12,6 +12,8 @@ public class GuardPreset : ScriptableObject
     [SerializeField, Min(0f)] private float _guardDuration = 0.25f;
     [SerializeField, Min(0f)] private float _gaugeCost = 25f;
     [SerializeField, Min(0f)] private float _cooldown = 0.4f;
+    // 이 반경 안에 들어온 공격을 막는다. 방패 그림도 같은 크기로 맞춰 보이는 대로 막히게 한다.
+    [SerializeField, Min(0f)] private float _guardRadius = 1.1f;
 
     [Header("방패")]
     [SerializeField, Min(0f)] private float _shieldAppearDuration = 0.08f;
@@ -21,6 +23,8 @@ public class GuardPreset : ScriptableObject
 
     [Header("막았을 때")]
     [SerializeField] private ImpactSettings _blockImpact = new();
+    [SerializeField, Min(0f)] private float _blockHitStopDuration = 0.05f;
+    [SerializeField, Range(0f, 1f)] private float _blockHitStopTimeScale = 0.1f;
 
     public string DisplayName { get { return _displayName; } }
     public Color IconColor { get { return _iconColor; } }
@@ -28,6 +32,7 @@ public class GuardPreset : ScriptableObject
     public float GuardDuration { get { return _guardDuration; } }
     public float GaugeCost { get { return _gaugeCost; } }
     public float Cooldown { get { return _cooldown; } }
+    public float GuardRadius { get { return _guardRadius; } }
 
     public float ShieldAppearDuration { get { return _shieldAppearDuration; } }
     public Ease ShieldAppearEase { get { return _shieldAppearEase; } }
@@ -35,4 +40,6 @@ public class GuardPreset : ScriptableObject
     public float ShieldPunchDuration { get { return _shieldPunchDuration; } }
 
     public ImpactSettings BlockImpact { get { return _blockImpact; } }
+    public float BlockHitStopDuration { get { return _blockHitStopDuration; } }
+    public float BlockHitStopTimeScale { get { return _blockHitStopTimeScale; } }
 }

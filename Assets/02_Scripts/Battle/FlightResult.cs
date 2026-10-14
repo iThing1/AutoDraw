@@ -5,10 +5,13 @@ public readonly struct FlightResult
 {
     public readonly bool HasArrived;
     public readonly Vector3 LandingPoint;
+    // 날아오는 도중 방패에 닿아 그 자리에서 멈췄다.
+    public readonly bool IsBlocked;
 
-    public FlightResult(bool hasArrived, Vector3 landingPoint)
+    public FlightResult(bool hasArrived, Vector3 landingPoint, bool isBlocked)
     {
         HasArrived = hasArrived;
         LandingPoint = landingPoint;
+        IsBlocked = isBlocked;
     }
 }

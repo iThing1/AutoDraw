@@ -10,7 +10,7 @@ public static class ProjectileFlight
         return FlyAsync(prefab, shot, start, end, null, color, token);
     }
 
-    public static async UniTask<FlightResult> FlyAsync(GameObject prefab, ShotSettings shot, Vector3 start, Vector3 end, Transform followTarget,
+    public static async UniTask<FlightResult> FlyAsync(GameObject prefab, ShotSettings shot, Vector3 start, Vector3 end, AttackTarget target,
         Color color, CancellationToken token)
     {
         TrajectorySettings trajectory = PickTrajectory(shot.Trajectories);
@@ -18,7 +18,7 @@ public static class ProjectileFlight
         if (null == trajectory)
         {
             Debug.LogError($"투사체 비행 : {prefab.name}에 사용할 수 있는 궤적이 없습니다.");
-            return new FlightResult(false, start);
+            return new FlightResult(false, start, false);
         }
 
         GameObject projectile = GameManager.Pool.Spawn(prefab, start, Quaternion.identity);
@@ -42,16 +42,26 @@ public static class ProjectileFlight
         Tween flight = projectileTransform.DOPath(BuildPath(trajectory.Type, start, end, height), duration, PathType.CatmullRom)
             .SetEase(Ease.Linear);
 
-        if (null != followTarget && 0f < shot.Homing)
+        bool isBlocked = false;
+
+        if (null != target)
         {
+            Transform followTarget = target.FollowTransform;
             Vector3 targetStartPosition = followTarget.position;
             float homing = shot.Homing;
 
             // 목표가 움직인 거리를 진행률과 추적 강도만큼 더한다. 추적 강도가 1이면 도착하는 순간 목표에 붙는다.
+            // 도착 지점만 보면 방패를 가로질러 지나가도 막히지 않으므로, 날아오는 동안 매 프레임 방패에 닿았는지 본다.
             flight = flight.OnUpdate(() =>
             {
                 Vector3 targetMoved = followTarget.position - targetStartPosition;
                 projectileTransform.position += targetMoved * (flight.ElapsedPercentage() * homing);
+
+                if (target.IsBlockedAt(projectileTransform.position))
+                {
+                    isBlocked = true;
+                    flight.Kill();
+                }
             });
         }
 
@@ -62,7 +72,8 @@ public static class ProjectileFlight
 
         GameManager.Pool.Despawn(projectile);
 
-        return new FlightResult(false == isCanceled, landingPoint);
+        // 방패에 막혀 직접 멈춘 경우는 취소로 끝나더라도 막힌 것으로 본다.
+        return new FlightResult(isBlocked || false == isCanceled, landingPoint, isBlocked);
     }
 
     private static void SetupTrail(TrailRenderer trail, ShotSettings shot, Color color)

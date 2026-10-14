@@ -30,7 +30,7 @@ public class BattleUnit : MonoBehaviour
 
     public event Action<UnitState> OnStateChanged;
     // 막은 자리를 넘겨, 막은 쪽이 방패 연출과 막기 문구를 띄우게 한다.
-    public event Action<Vector3> OnGuarded;
+    public event Action<Vector3> OnBlocked;
 
     private Health _health;
     private AutoAttacker _attacker;
@@ -42,6 +42,7 @@ public class BattleUnit : MonoBehaviour
     private UnitState _stateBeforeAction;
 
     private int _guardCount;
+    private float _guardRadius;
 
     // 키로 고른 공격이 데이터 에셋을 고치지 않도록, 실행 중에만 쓰는 덮어쓰기 값을 따로 둔다.
     private AttackStyle _attackStyleOverride;
@@ -52,6 +53,7 @@ public class BattleUnit : MonoBehaviour
     public UnitView View { get { return _view; } }
     public UnitState State { get { return _state; } }
     public bool IsGuarding { get { return 0 < _guardCount; } }
+    public float GuardRadius { get { return _guardRadius; } }
 
     // 전투 중 움직이지 않는 유닛은 null이다.
     public UnitMover Mover { get { return _mover; } }
@@ -122,22 +124,17 @@ public class BattleUnit : MonoBehaviour
         ChangeState(_stateBeforeAction);
     }
 
-    public GuardScope BeginGuard()
+    public GuardScope BeginGuard(float radius)
     {
         _guardCount++;
+        _guardRadius = radius;
 
         return new GuardScope(this);
     }
 
-    public bool TryGuard(Vector3 hitPoint)
+    public void NotifyBlocked(Vector3 hitPoint)
     {
-        if (false == IsGuarding)
-        {
-            return false;
-        }
-
-        OnGuarded?.Invoke(hitPoint);
-        return true;
+        OnBlocked?.Invoke(hitPoint);
     }
 
     public void OverrideAttackStyle(AttackStyle attackStyle)

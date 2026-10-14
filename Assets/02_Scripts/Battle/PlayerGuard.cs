@@ -31,21 +31,25 @@ public class PlayerGuard : MonoBehaviour
         _unit = GetComponent<BattleUnit>();
         _skillGauge = GetComponent<SkillGauge>();
 
-        if (null != _shield)
-        {
-            _shieldScale = _shield.transform.localScale;
-            _shield.enabled = false;
-        }
-
         if (null == _guardAction || null == _preset)
         {
             Debug.LogError($"플레이어 막기 : {name}에 막기 입력 또는 GuardPreset이 지정되지 않았습니다.");
+            return;
+        }
+
+        if (null != _shield && null != _shield.sprite)
+        {
+            // 방패 그림 지름을 막기 반경의 두 배로 맞춰, 보이는 방패와 막히는 범위를 같게 한다.
+            float spriteDiameter = _shield.sprite.bounds.size.x;
+            _shieldScale = Vector3.one * (_preset.GuardRadius * 2f / spriteDiameter);
+            _shield.transform.localScale = _shieldScale;
+            _shield.enabled = false;
         }
     }
 
     private void OnEnable()
     {
-        _unit.OnGuarded += HandleGuarded;
+        _unit.OnBlocked += HandleBlocked;
 
         if (null != _guardAction)
         {
@@ -55,7 +59,7 @@ public class PlayerGuard : MonoBehaviour
 
     private void OnDisable()
     {
-        _unit.OnGuarded -= HandleGuarded;
+        _unit.OnBlocked -= HandleBlocked;
     }
 
     private void OnDestroy()
@@ -75,12 +79,12 @@ public class PlayerGuard : MonoBehaviour
 
         if (_guardAction.action.WasPressedThisFrame())
         {
-            TryGuard();
+            TryStartGuard();
         }
     }
 
     // 직접 움직일 수 있을 때만 쓴다. 컷신(Idle)이나 다른 동작(Action) 중에는 나가지 않는다.
-    private void TryGuard()
+    private void TryStartGuard()
     {
         if (UnitState.Move != _unit.State || Time.time < _readyTime || false == _skillGauge.CanConsume(_preset.GaugeCost))
         {
@@ -106,7 +110,7 @@ public class PlayerGuard : MonoBehaviour
 
         try
         {
-            using (_unit.BeginGuard())
+            using (_unit.BeginGuard(_preset.GuardRadius))
             {
                 await UniTask.Delay(TimeSpan.FromSeconds(_preset.GuardDuration), cancellationToken: token);
             }
@@ -122,8 +126,10 @@ public class PlayerGuard : MonoBehaviour
         }
     }
 
-    private void HandleGuarded(Vector3 hitPoint)
+    // 짧은 히트 스톱으로 막는 순간의 손맛을 준다.
+    private void HandleBlocked(Vector3 hitPoint)
     {
+        GameManager.TimeScale.PlayHitStop(_preset.BlockHitStopDuration, _preset.BlockHitStopTimeScale);
         ImpactPlayer.Play(_preset.BlockImpact, hitPoint);
 
         if (null == _shield)

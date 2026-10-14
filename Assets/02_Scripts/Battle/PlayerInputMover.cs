@@ -42,6 +42,12 @@ public class PlayerInputMover : UnitMover
         {
             await UniTask.Yield(PlayerLoopTiming.FixedUpdate, token);
 
+            // 기다리는 사이 막기나 컷신으로 상태가 바뀌었으면 한 걸음 더 가지 않고 멈춘다.
+            if (UnitState.Move != Unit.State)
+            {
+                return;
+            }
+
             Vector2 input = Vector2.ClampMagnitude(_moveAction.action.ReadValue<Vector2>(), 1f);
             Vector2 step = input * Unit.Data.MoveSpeed * Time.fixedDeltaTime;
 

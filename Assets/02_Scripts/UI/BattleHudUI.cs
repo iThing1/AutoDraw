@@ -106,7 +106,7 @@ public class BattleHudUI : MonoBehaviour
     private void BindGuard(BattleUnit player)
     {
         _player = player;
-        _player.OnGuarded += SpawnGuardText;
+        _player.OnBlocked += SpawnGuardText;
 
         _guard = player.GetComponent<PlayerGuard>();
 
@@ -127,7 +127,7 @@ public class BattleHudUI : MonoBehaviour
     {
         if (null != _player)
         {
-            _player.OnGuarded -= SpawnGuardText;
+            _player.OnBlocked -= SpawnGuardText;
             _player = null;
         }
 

@@ -12,10 +12,18 @@ public class WanderSettings
     [SerializeField, Min(0f)] private float _minMoveDistance = 1.5f;
     [SerializeField] private Ease _moveEase = Ease.InOutSine;
 
+    [Header("추격")]
+    // 목표가 이보다 멀어지면 다가간다. 0이면 다가가지 않고 처음 자리 주변만 배회한다.
+    [SerializeField, Min(0f)] private float _chaseDistance = 12f;
+    // 다가갈 때 목표에서 이만큼 떨어진 곳에서 멈춘다.
+    [SerializeField, Min(0f)] private float _chaseStopDistance = 7f;
+
     public bool UseWander { get { return _useWander; } }
     public Vector2 AreaHalfSize { get { return _areaHalfSize; } }
     public FloatRange Speed { get { return _speed; } }
     public FloatRange Pause { get { return _pause; } }
     public float MinMoveDistance { get { return _minMoveDistance; } }
     public Ease MoveEase { get { return _moveEase; } }
+    public float ChaseDistance { get { return _chaseDistance; } }
+    public float ChaseStopDistance { get { return _chaseStopDistance; } }
 }

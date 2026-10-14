@@ -15,24 +15,30 @@ public class EnvironmentHazard : MonoBehaviour
 
     private int _lastPatternIndex = -1;
 
-    public void Prewarm(GameObject projectilePrefab)
+    // Prewarm은 최소 개수를 맞추므로, 같은 프리팹을 여러 패턴이 써도 중복으로 만들지 않는다.
+    public void Prewarm(GameObject defaultPrefab)
     {
-        if (null == projectilePrefab || null == _patterns)
+        if (null == _patterns)
         {
             return;
         }
 
-        int maxCount = 0;
-
         for (int i = 0; i < _patterns.Length; i++)
         {
-            if (null != _patterns[i])
+            HazardPattern pattern = _patterns[i];
+
+            if (null == pattern)
             {
-                maxCount = Mathf.Max(maxCount, _patterns[i].MaxProjectileCount);
+                continue;
+            }
+
+            GameObject prefab = null != pattern.ProjectilePrefab ? pattern.ProjectilePrefab : defaultPrefab;
+
+            if (null != prefab)
+            {
+                GameManager.Pool.Prewarm(prefab, pattern.MaxProjectileCount);
             }
         }
-
-        GameManager.Pool.Prewarm(projectilePrefab, maxCount);
     }
 
     // 게임 시간으로 기다려, 히트 스톱과 슬로 모션 동안에는 다음 패턴도 함께 늦춘다.

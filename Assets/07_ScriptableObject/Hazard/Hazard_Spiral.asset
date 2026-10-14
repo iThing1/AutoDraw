@@ -30,6 +30,10 @@ MonoBehaviour:
       _duration:
         _min: 3.5
         _max: 3.5
+      _useSpeed: 1
+      _speed:
+        _min: 8.5
+        _max: 8.5
     _homing: 0
     _missTravelTime: 0.3
     _trailTime: 0.1

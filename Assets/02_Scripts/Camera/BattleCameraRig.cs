@@ -5,8 +5,8 @@ public class BattleCameraRig : MonoBehaviour
 {
     private const int ACTIVE_PRIORITY = 20;
     private const int INACTIVE_PRIORITY = 10;
-    // 줌이 이만큼 바뀌었을 때만 경계 계산을 다시 한다. 매 프레임 다시 하면 비싸다.
-    private const float CONFINER_RECALCULATE_ORTHO_DELTA = 0.1f;
+    // 줌이 이만큼 바뀔 때만 경계를 다시 계산한다. 매 프레임 계산은 비싸다.
+    private const float CONFINER_RECALCULATE_ORTHO_DELTA = 0.05f;
 
     [SerializeField] private CinemachineBrain _brain;
     [SerializeField] private CinemachineCamera _playerCamera;
@@ -78,9 +78,30 @@ public class BattleCameraRig : MonoBehaviour
             CinemachineConfiner2D confiner = _confinedCameras[i].gameObject.GetOrAddComponent<CinemachineConfiner2D>();
             confiner.BoundingShape2D = bounds;
             confiner.InvalidateBoundingShapeCache();
+            confiner.enabled = true;
 
             _confiners[i] = confiner;
         }
+    }
+
+    // 다음 스테이지에 이전 경계가 남지 않게 끈다.
+    public void ClearCameraBounds()
+    {
+        if (null != _confiners)
+        {
+            for (int i = 0; i < _confiners.Length; i++)
+            {
+                if (null != _confiners[i])
+                {
+                    _confiners[i].BoundingShape2D = null;
+                    _confiners[i].enabled = false;
+                }
+            }
+        }
+
+        _confinedCameras = null;
+        _confiners = null;
+        _lastOrthoSizes = null;
     }
 
     public void FollowPlayer(Transform player)

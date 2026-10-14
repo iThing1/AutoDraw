@@ -73,7 +73,7 @@ public class RadialHazardPattern : HazardPattern
             Vector2 direction = new Vector2(Mathf.Cos(radian), Mathf.Sin(radian));
 
             // 환경 탄막은 보스의 공격이 아니라서 게이지를 쌓지 않는다.
-            shooter.FireShotToward(_shot, origin, direction, _range, 0f, token);
+            shooter.FireShotToward(ProjectilePrefab, _shot, origin, direction, _range, 0f, token);
         }
     }
 

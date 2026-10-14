@@ -67,6 +67,15 @@ public class BattleManager : MonoBehaviour
         RunAsync(destroyCancellationToken).Forget();
     }
 
+    // 카메라 리그는 스테이지보다 오래 남아 경계를 풀어 둔다. 게임을 끌 때는 게임 매니저가 먼저 사라질 수 있다.
+    private void OnDestroy()
+    {
+        if (null != _stageBounds && null != GameManager.Instance && null != GameManager.CameraRig)
+        {
+            GameManager.CameraRig.ClearCameraBounds();
+        }
+    }
+
     private bool HasRequiredReferences()
     {
         // 앞에서부터 확인해 처음 비어 있는 참조에서 멈춘다.
@@ -141,7 +150,6 @@ public class BattleManager : MonoBehaviour
         PrewarmUnit(_player);
         PrewarmUnit(_boss);
 
-        // 환경 탄막은 보스의 투사체를 빌려 쓰므로, 한 번에 퍼지는 수만큼 보스 투사체를 더 만들어 둔다.
         if (null != _environmentHazard && null != _boss.Data)
         {
             _environmentHazard.Prewarm(_boss.Data.ProjectilePrefab);

@@ -101,14 +101,16 @@ public class AutoAttacker : MonoBehaviour
     }
 
     // 목표가 아닌 고정된 지점으로 날린다. 파편이 갈라지는 공중 지점처럼 맞히지 않는 비행에 쓴다.
-    public UniTask<bool> FlyToPointAsync(ShotSettings shot, Vector3 start, Vector3 end, Color color, CancellationToken token)
+    public async UniTask<bool> FlyToPointAsync(ShotSettings shot, Vector3 start, Vector3 end, Color color, CancellationToken token)
     {
         if (false == HasProjectilePrefab())
         {
-            return UniTask.FromResult(false);
+            return false;
         }
 
-        return ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, end, color, token);
+        FlightResult flight = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, end, color, token);
+
+        return flight.HasArrived;
     }
 
     // 날아가는 과정 없이 바로 맞힌다. 근접 공격처럼 투사체가 없는 공격에 쓴다.
@@ -185,15 +187,15 @@ public class AutoAttacker : MonoBehaviour
         // 피해량과 물감 색은 쏘는 순간 정해, 날아가는 투사체의 색과 맞은 자리의 물감 색이 같게 한다.
         DamageInfo damage = RollDamage(shot);
 
-        bool hasArrived = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, _target.GetAimPoint(landingOffset),
+        FlightResult flight = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, _target.GetAimPoint(landingOffset),
             _target.FollowTransform, damage.PaintColor, token);
 
-        if (false == hasArrived)
+        if (false == flight.HasArrived)
         {
             return;
         }
 
-        ApplyHit(shot, damage, _target.GetAimPoint(landingOffset), gaugeGain);
+        ApplyHit(shot, damage, flight.LandingPoint, gaugeGain);
     }
 
     private void ApplyHit(ShotSettings hit, DamageInfo damage, Vector3 hitPoint, float gaugeGain)

@@ -29,6 +29,7 @@ MonoBehaviour:
   _volleyInterval: 0.15
   _turretShot:
     _projectileScale: 0.7
+    _homing: 0.3
     _trajectories:
     - _type: 1
       _weight: 1
@@ -52,6 +53,7 @@ MonoBehaviour:
   _finaleDelay: 0.35
   _finaleShot:
     _projectileScale: 2.2
+    _homing: 0.7
     _trajectories:
     - _type: 0
       _weight: 1

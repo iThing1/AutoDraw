@@ -36,6 +36,14 @@ public class DashSlashAttackStyle : AttackStyle
 
     public override int MaxHitDamage { get { return _hit.MaxHitDamage; } }
 
+    public override void Prewarm()
+    {
+        if (null != _bladePrefab)
+        {
+            GameManager.Pool.Prewarm(_bladePrefab, 1);
+        }
+    }
+
     public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
     {
         Transform owner = attacker.Owner.transform;

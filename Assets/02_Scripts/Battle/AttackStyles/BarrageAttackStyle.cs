@@ -13,7 +13,9 @@ public class BarrageAttackStyle : AttackStyle
     [SerializeField] private GameObject _turretPrefab;
     [SerializeField] private Vector2[] _turretOffsets = { new Vector2(-2.5f, 1f), new Vector2(2.5f, 1f) };
     [SerializeField, Min(0f)] private float _turretAppearDuration = 0.25f;
+    [SerializeField] private Ease _turretAppearEase = Ease.OutBack;
     [SerializeField, Min(0f)] private float _turretDisappearDuration = 0.2f;
+    [SerializeField] private Ease _turretDisappearEase = Ease.InBack;
     [SerializeField, Min(0f)] private float _turretRecoil = 0.25f;
 
     [Header("일제사격")]
@@ -26,6 +28,15 @@ public class BarrageAttackStyle : AttackStyle
     [SerializeField] private ShotSettings _finaleShot = new();
 
     public override int MaxHitDamage { get { return Mathf.Max(_turretShot.MaxHitDamage, _finaleShot.MaxHitDamage); } }
+
+    // 일제사격은 끝나야 다음 공격을 하므로 포대는 위치 수만큼만 있으면 된다.
+    public override void Prewarm()
+    {
+        if (null != _turretPrefab)
+        {
+            GameManager.Pool.Prewarm(_turretPrefab, _turretOffsets.Length);
+        }
+    }
 
     public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
     {
@@ -73,7 +84,7 @@ public class BarrageAttackStyle : AttackStyle
             Transform turret = GameManager.Pool.Spawn(_turretPrefab, owner).transform;
             turret.localPosition = _turretOffsets[i];
             turret.localScale = Vector3.zero;
-            turret.DOScale(turretScale, _turretAppearDuration).SetEase(Ease.OutBack);
+            turret.DOScale(turretScale, _turretAppearDuration).SetEase(_turretAppearEase);
 
             turrets.Add(turret);
         }
@@ -95,7 +106,7 @@ public class BarrageAttackStyle : AttackStyle
 
             turret.DOComplete();
             turret.DOScale(0f, _turretDisappearDuration)
-                .SetEase(Ease.InBack)
+                .SetEase(_turretDisappearEase)
                 .OnComplete(() => GameManager.Pool.Despawn(turret.gameObject));
         }
     }

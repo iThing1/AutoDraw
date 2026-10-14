@@ -69,6 +69,22 @@ public class AttackStyleSet : AttackStyle
         return style.FireAsync(attacker, gaugeGain, token);
     }
 
+    public override void Prewarm()
+    {
+        if (null == _entries)
+        {
+            return;
+        }
+
+        for (int i = 0; i < _entries.Length; i++)
+        {
+            if (IsValid(_entries[i]))
+            {
+                _entries[i].Style.Prewarm();
+            }
+        }
+    }
+
     private Entry PickEntry()
     {
         if (null == _entries)

@@ -26,6 +26,10 @@ public class BattleManager : MonoBehaviour
     [Header("엔딩")]
     [SerializeField] private EndingCutscene _endingCutscene;
 
+    [Header("풀")]
+    // 첫 공격 때 투사체가 한꺼번에 생성되며 끊기지 않도록 유닛마다 미리 만들어 둘 개수.
+    [SerializeField, Min(0)] private int _projectilePrewarmCount = 20;
+
     private BattleUnit _player;
     private PlayerAutoMover _playerMover;
     private BattleUnit _boss;
@@ -40,6 +44,7 @@ public class BattleManager : MonoBehaviour
         }
 
         SpawnUnits();
+        PrewarmPools();
 
         GameManager.CameraRig.FollowPlayer(_player.transform);
 
@@ -131,6 +136,32 @@ public class BattleManager : MonoBehaviour
         _bossWander = _boss.GetComponent<WanderMover>();
 
         _boss.gameObject.SetActive(false);
+    }
+
+    private void PrewarmPools()
+    {
+        PrewarmUnit(_player);
+        PrewarmUnit(_boss);
+    }
+
+    private void PrewarmUnit(BattleUnit unit)
+    {
+        BattleUnitData data = unit.Data;
+
+        if (null == data)
+        {
+            return;
+        }
+
+        if (null != data.ProjectilePrefab)
+        {
+            GameManager.Pool.Prewarm(data.ProjectilePrefab, _projectilePrewarmCount);
+        }
+
+        if (null != data.AttackStyle)
+        {
+            data.AttackStyle.Prewarm();
+        }
     }
 
     // 자동 회복은 맞은 직후 기준선 아래인지로 시작하므로, 기준선 체력이 보스의 최대 한 방보다 낮으면 회복 전에 쓰러질 수 있다.

@@ -34,5 +34,10 @@ public abstract class AttackStyle : ScriptableObject
         return this;
     }
 
+    // 첫 공격 때 한꺼번에 생성되며 끊기지 않도록, 이 공격만 쓰는 프리팹(포대, 칼끝 등)을 풀에 미리 만들어 둔다.
+    public virtual void Prewarm()
+    {
+    }
+
     public abstract UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token);
 }

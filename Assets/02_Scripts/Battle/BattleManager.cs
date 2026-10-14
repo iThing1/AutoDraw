@@ -31,6 +31,10 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private PaintCanvas _paintCanvas;
     [SerializeField] private BattleHudUI _hudPrefab;
 
+    [Header("환경 패턴")]
+    // 비워 두면 환경 탄막 없이 보스 공격만 나온다.
+    [SerializeField] private EnvironmentHazard _environmentHazard;
+
     [Header("엔딩")]
     [SerializeField] private EndingCutscene _endingCutscene;
 
@@ -127,6 +131,12 @@ public class BattleManager : MonoBehaviour
     {
         PrewarmUnit(_player);
         PrewarmUnit(_boss);
+
+        // 환경 탄막은 보스의 투사체를 빌려 쓰므로, 한 번에 퍼지는 수만큼 보스 투사체를 더 만들어 둔다.
+        if (null != _environmentHazard && null != _boss.Data)
+        {
+            _environmentHazard.Prewarm(_boss.Data.ProjectilePrefab);
+        }
     }
 
     private void PrewarmUnit(BattleUnit unit)
@@ -222,6 +232,12 @@ public class BattleManager : MonoBehaviour
             if (null != _boss.Mover)
             {
                 _boss.Mover.RunAsync(battleSource.Token).Forget();
+            }
+
+            // 환경 탄막은 보스 자리에서 나오지만 보스 공격 순서와 따로 돈다.
+            if (null != _environmentHazard)
+            {
+                _environmentHazard.RunAsync(_boss.Attacker, battleSource.Token).Forget();
             }
 
             // WhenAny는 먼저 끝난 작업의 순서 번호를 돌려준다. 0은 보스, 1은 플레이어가 먼저 쓰러진 것이다.

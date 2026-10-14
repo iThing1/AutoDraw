@@ -97,7 +97,21 @@ public class AutoAttacker : MonoBehaviour
             return;
         }
 
-        FireShotAsync(shot, start, landingOffset, gaugeGain, token).Forget();
+        FireShotAsync(shot, start, _target.GetAimPoint(landingOffset), gaugeGain, token).Forget();
+    }
+
+    // 목표를 겨누지 않고 정해진 방향으로 사거리만큼 날린다. 날아가는 길에 목표가 닿으면 맞는다.
+    // 추적 강도가 0인 탄과 함께 써서, 플레이어가 피할 자리를 찾아 움직이게 하는 탄막에 쓴다.
+    public void FireShotToward(ShotSettings shot, Vector3 start, Vector2 direction, float range, float gaugeGain, CancellationToken token)
+    {
+        if (false == HasProjectilePrefab())
+        {
+            return;
+        }
+
+        Vector3 end = start + (Vector3)(direction.normalized * range);
+
+        FireShotAsync(shot, start, end, gaugeGain, token).Forget();
     }
 
     // 목표가 아닌 고정된 지점으로 날린다. 파편이 갈라지는 공중 지점처럼 맞히지 않는 비행에 쓴다.
@@ -193,13 +207,12 @@ public class AutoAttacker : MonoBehaviour
         return true;
     }
 
-    private async UniTaskVoid FireShotAsync(ShotSettings shot, Vector3 start, Vector3 landingOffset, float gaugeGain, CancellationToken token)
+    private async UniTaskVoid FireShotAsync(ShotSettings shot, Vector3 start, Vector3 end, float gaugeGain, CancellationToken token)
     {
         // 피해량과 물감 색은 쏘는 순간 정해, 날아가는 투사체의 색과 맞은 자리의 물감 색이 같게 한다.
         DamageInfo damage = RollDamage(shot);
 
-        FlightResult flight = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, _target.GetAimPoint(landingOffset),
-            _target, damage.PaintColor, token);
+        FlightResult flight = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, end, _target, damage.PaintColor, token);
 
         if (FlightOutcome.Blocked == flight.Outcome)
         {

@@ -25,16 +25,16 @@ public class Health : MonoBehaviour
         _currentHp = maxHp;
     }
 
-    public void TakeDamage(DamageInfo info)
+    public void TakeDamage(DamageInfo damage)
     {
         if (IsDead)
         {
             return;
         }
 
-        _currentHp = Mathf.Max(0, _currentHp - info.Amount);
+        _currentHp = Mathf.Max(0, _currentHp - damage.Amount);
 
-        OnDamaged?.Invoke(info);
+        OnDamaged?.Invoke(damage);
 
         if (IsDead)
         {

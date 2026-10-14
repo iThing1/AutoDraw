@@ -18,7 +18,7 @@ public struct IntRange
     public int Max { get { return Mathf.Max(_min, _max); } }
 
     // int 버전 Random.Range는 최대값을 포함하지 않으므로 1을 더한다.
-    public int Pick()
+    public int PickRandom()
     {
         return UnityEngine.Random.Range(Min, Max + 1);
     }

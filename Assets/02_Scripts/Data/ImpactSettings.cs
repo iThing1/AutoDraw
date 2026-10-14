@@ -34,6 +34,6 @@ public class ImpactSettings
     // 피치가 0이면 소리가 나지 않으므로 하한을 둔다.
     public float PickPitch()
     {
-        return Mathf.Max(MIN_PITCH, _pitch.Pick());
+        return Mathf.Max(MIN_PITCH, _pitch.PickRandom());
     }
 }

@@ -47,7 +47,7 @@ public class HealthBar : MonoBehaviour
     }
 
     // 깎인 만큼 흰 잔상이 잠깐 남았다가 따라 줄어들어, 얼마나 맞았는지 눈에 보이게 한다.
-    private void HandleDamaged(DamageInfo info)
+    private void HandleDamaged(DamageInfo damage)
     {
         float ratio = _health.Ratio;
 

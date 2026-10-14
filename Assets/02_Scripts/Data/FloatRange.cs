@@ -17,7 +17,7 @@ public struct FloatRange
     public float Min { get { return _min; } }
     public float Max { get { return Mathf.Max(_min, _max); } }
 
-    public float Pick()
+    public float PickRandom()
     {
         return UnityEngine.Random.Range(Min, Max);
     }

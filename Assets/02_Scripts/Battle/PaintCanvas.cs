@@ -41,13 +41,13 @@ public class PaintCanvas : MonoBehaviour
             return;
         }
 
-        int count = preset.SplatCount.Pick();
+        int count = preset.SplatCount.PickRandom();
 
         for (int i = 0; i < count; i++)
         {
             // insideUnitCircle은 Vector2라서, 위치에 더하려고 Vector3로 바꾼다.
             Vector3 position = center + (Vector3)(Random.insideUnitCircle * preset.SplatSpread);
-            float scale = preset.SplatScale.Pick();
+            float scale = preset.SplatScale.PickRandom();
 
             SpawnSplat(position, style, color, isInk, scale);
         }
@@ -61,7 +61,7 @@ public class PaintCanvas : MonoBehaviour
         for (int i = 0; i < _inkSplats.Count; i++)
         {
             Tween fade = _inkSplats[i].SpriteRenderer.DOFade(0f, duration)
-                .SetDelay(startDelay.Pick())
+                .SetDelay(startDelay.PickRandom())
                 .SetEase(ease)
                 .SetUpdate(true);
 

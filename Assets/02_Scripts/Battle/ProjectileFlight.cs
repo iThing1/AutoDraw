@@ -35,8 +35,8 @@ public static class ProjectileFlight
             SetupTrail(trail, shot, color);
         }
 
-        float height = trajectory.Height.Pick();
-        float duration = trajectory.Duration.Pick();
+        float height = trajectory.Height.PickRandom();
+        float duration = trajectory.Duration.PickRandom();
 
         Transform projectileTransform = projectile.transform;
 
@@ -124,13 +124,13 @@ public static class ProjectileFlight
             return trajectories[0];
         }
 
-        float pick = Random.value * totalWeight;
+        float remainingWeight = Random.value * totalWeight;
 
         for (int i = 0; i < trajectories.Length; i++)
         {
-            pick -= trajectories[i].Weight;
+            remainingWeight -= trajectories[i].Weight;
 
-            if (0f >= pick)
+            if (0f >= remainingWeight)
             {
                 return trajectories[i];
             }

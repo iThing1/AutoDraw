@@ -18,13 +18,13 @@ public class ClusterAttackStyle : AttackStyle
     public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
     {
         Vector3 start = attacker.Owner.Body.position;
-        Vector3 end = attacker.Target.Body.position;
+        Vector3 end = attacker.Target.GetAimPoint(Vector3.zero);
         Vector3 splitPoint = Vector3.Lerp(start, end, _cluster.SplitRatio) + Vector3.up * _cluster.SplitHeight;
 
         Color color = attacker.PickColor();
         bool hasArrived = await attacker.FlyToPointAsync(_shot, start, splitPoint, color, token);
 
-        if (false == hasArrived || attacker.Target.Health.IsDead)
+        if (false == hasArrived || attacker.Target.IsDefeated)
         {
             return;
         }

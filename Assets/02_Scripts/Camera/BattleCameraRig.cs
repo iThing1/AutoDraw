@@ -26,9 +26,13 @@ public class BattleCameraRig : MonoBehaviour
     // 컷신이 끝나고 돌아갈 카메라. 접근 중에는 플레이어 카메라, 전투가 준비되면 전투 카메라가 된다.
     private CinemachineCamera _gameplayCamera;
 
+    private Collider2D _cameraBounds;
     private CinemachineCamera[] _confinedCameras;
     private CinemachineConfiner2D[] _confiners;
     private float[] _lastOrthoSizes;
+
+    // 엔딩에서만 쓰여 씬에 두지 않고 처음 쓸 때 만든다.
+    private CinemachineCamera _overviewCamera;
 
     public Camera OutputCamera { get { return _brain.OutputCamera; } }
 
@@ -69,6 +73,7 @@ public class BattleCameraRig : MonoBehaviour
     // 경계는 스테이지마다 달라 스테이지가 넘겨준다. 모든 카메라가 이 영역 밖을 비추지 않는다.
     public void SetCameraBounds(Collider2D bounds)
     {
+        _cameraBounds = bounds;
         _confinedCameras = new CinemachineCamera[] { _playerCamera, _cinematicCamera, _battleCamera };
         _confiners = new CinemachineConfiner2D[_confinedCameras.Length];
         _lastOrthoSizes = new float[_confinedCameras.Length];
@@ -99,9 +104,41 @@ public class BattleCameraRig : MonoBehaviour
             }
         }
 
+        _cameraBounds = null;
         _confinedCameras = null;
         _confiners = null;
         _lastOrthoSizes = null;
+    }
+
+    // 엔딩 슬로 모션 중에도 정해진 시간에 끝나도록 시간 배율을 무시한다.
+    public bool TryShowWholeStage(float padding, float blendDuration)
+    {
+        if (null == _cameraBounds)
+        {
+            return false;
+        }
+
+        if (null == _overviewCamera)
+        {
+            _overviewCamera = CreateOverviewCamera();
+        }
+
+        Bounds bounds = _cameraBounds.bounds;
+        float halfHeight = bounds.extents.y + padding;
+        float halfWidth = bounds.extents.x + padding;
+
+        // 직교 크기는 화면 높이의 절반이라, 가로는 화면 비율로 나눠 높이 기준으로 바꾼다.
+        LensSettings lens = _battleCamera.Lens;
+        lens.OrthographicSize = Mathf.Max(halfHeight, halfWidth / OutputCamera.aspect);
+        _overviewCamera.Lens = lens;
+
+        float cameraZ = _battleCamera.transform.position.z;
+        _overviewCamera.transform.position = new Vector3(bounds.center.x, bounds.center.y, cameraZ);
+
+        _brain.IgnoreTimeScale = true;
+        SetActiveCamera(_overviewCamera, blendDuration);
+
+        return true;
     }
 
     public void FollowPlayer(Transform player)
@@ -177,5 +214,21 @@ public class BattleCameraRig : MonoBehaviour
         _playerCamera.Priority = target == _playerCamera ? ACTIVE_PRIORITY : INACTIVE_PRIORITY;
         _cinematicCamera.Priority = target == _cinematicCamera ? ACTIVE_PRIORITY : INACTIVE_PRIORITY;
         _battleCamera.Priority = target == _battleCamera ? ACTIVE_PRIORITY : INACTIVE_PRIORITY;
+
+        if (null != _overviewCamera)
+        {
+            _overviewCamera.Priority = target == _overviewCamera ? ACTIVE_PRIORITY : INACTIVE_PRIORITY;
+        }
+    }
+
+    private CinemachineCamera CreateOverviewCamera()
+    {
+        GameObject cameraObject = new GameObject("OverviewCamera");
+        cameraObject.transform.SetParent(transform, false);
+
+        CinemachineCamera overviewCamera = cameraObject.AddComponent<CinemachineCamera>();
+        overviewCamera.Priority = INACTIVE_PRIORITY;
+
+        return overviewCamera;
     }
 }

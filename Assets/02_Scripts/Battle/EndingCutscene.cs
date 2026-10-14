@@ -24,7 +24,7 @@ public class EndingCutscene : MonoBehaviour
         await PlayFinishAsync(boss.transform, token);
         await PlayShatterAsync(boss, token);
 
-        // 카메라가 돌아오는 동안 잉크가 함께 걷히고, 문구는 카메라가 돌아온 뒤에 나온다.
+        // 카메라가 뒤로 빠지는 동안 잉크가 함께 걷히고, 문구는 카메라가 멈춘 뒤에 나온다.
         await UniTask.WhenAll(
             PlayExitAndStageClearAsync(token),
             paintCanvas.FadeOutInkAsync(_preset.InkFadeDuration, _preset.InkFadeDelay, _preset.InkFadeEase, token));
@@ -58,10 +58,21 @@ public class EndingCutscene : MonoBehaviour
     // 엔딩 문구는 엔딩에서만 쓰므로 엔딩 컷신이 직접 연다. 열어 둔 채로 끝나 그림 위에 남는다.
     private async UniTask PlayExitAndStageClearAsync(CancellationToken token)
     {
-        await CinematicPlayer.ExitAsync(_preset.Cinematic, token);
+        await PlayExitAsync(token);
 
         StageClearUI stageClear = GameManager.UI.Open(_stageClearPrefab, UILayer.Overlay);
 
         await stageClear.PlayAsync(_preset.StageClear, token);
+    }
+
+    // 경계가 없는 스테이지는 전체를 담을 영역을 알 수 없어 전투 화면으로 돌아간다.
+    private UniTask PlayExitAsync(CancellationToken token)
+    {
+        if (GameManager.CameraRig.TryShowWholeStage(_preset.OverviewPadding, _preset.OverviewBlendDuration))
+        {
+            return CinematicPlayer.HideAsync(_preset.Cinematic, _preset.OverviewBlendDuration, token);
+        }
+
+        return CinematicPlayer.ExitAsync(_preset.Cinematic, token);
     }
 }

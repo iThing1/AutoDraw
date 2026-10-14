@@ -20,8 +20,16 @@ public class EndingPreset : ScriptableObject
     [SerializeField] private FloatRange _inkFadeDelay = new(0f, 0.8f);
     [SerializeField] private Ease _inkFadeEase = Ease.InQuad;
 
+    [Header("전체 보기")]
+    // 보스가 조각난 뒤 종이 전체를 담도록 카메라를 뒤로 빼는 시간.
+    [SerializeField, Min(0f)] private float _overviewBlendDuration = 1.5f;
+    [SerializeField, Min(0f)] private float _overviewPadding = 0f;
+
     [Header("스테이지 클리어 문구")]
     [SerializeField] private StageClearSettings _stageClear = new();
+
+    public float OverviewBlendDuration { get { return _overviewBlendDuration; } }
+    public float OverviewPadding { get { return _overviewPadding; } }
 
     public float SlowTimeScale { get { return _slowTimeScale; } }
     public float SlowDuration { get { return _slowDuration; } }

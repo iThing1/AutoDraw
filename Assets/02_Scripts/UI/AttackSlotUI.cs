@@ -30,12 +30,12 @@ public class AttackSlotUI : MonoBehaviour
         _rect.DOKill();
     }
 
-    public void Setup(int keyNumber, AttackStyle style)
+    public void Setup(string keyLabel, AttackStyle style)
     {
         string displayName = null != style ? style.DisplayName : string.Empty;
         Color iconColor = null != style ? style.IconColor : Color.white;
 
-        Setup(keyNumber.ToString(), displayName, iconColor);
+        Setup(keyLabel, displayName, iconColor);
     }
 
     public void Setup(string keyLabel, string displayName, Color iconColor)

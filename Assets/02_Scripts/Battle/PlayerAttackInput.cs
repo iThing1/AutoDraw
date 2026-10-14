@@ -2,19 +2,14 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// 숫자 키로 기본 공격을 고르고, 게이지가 가득 차면 다음 숫자 키로 특수 스킬을 발동한다.
+// 기본 공격 키로 공격을 고르고, 게이지가 가득 차면 스킬 키로 특수 스킬을 발동한다. 키 배치는 입력 에셋에서 바꾼다.
 [RequireComponent(typeof(BattleUnit), typeof(SkillGauge))]
 public class PlayerAttackInput : MonoBehaviour
 {
-    // 앞에서부터 기본 공격에 차례로 쓰고, 기본 공격 다음 키를 특수 스킬이 쓴다.
-    // 그래서 기본 공격은 키 개수보다 하나 적은 8개까지 받는다.
-    private static readonly Key[] NUMBER_KEYS =
-    {
-        Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4, Key.Digit5,
-        Key.Digit6, Key.Digit7, Key.Digit8, Key.Digit9,
-    };
-
     [SerializeField] private PlayerAttackLoadout _loadout;
+    // 로드아웃의 기본 공격과 같은 순서로 넣는다. 0번 입력이 0번 기본 공격을 고른다.
+    [SerializeField] private InputActionReference[] _basicAttackActions;
+    [SerializeField] private InputActionReference _skillAction;
 
     public event Action<int> OnBasicStyleChanged;
     public event Action OnSkillFired;
@@ -26,20 +21,19 @@ public class PlayerAttackInput : MonoBehaviour
     public PlayerAttackLoadout Loadout { get { return _loadout; } }
     public SkillGauge SkillGauge { get { return _skillGauge; } }
     public int SelectedIndex { get { return _selectedIndex; } }
+    public string SkillKeyLabel { get { return _skillAction.GetKeyLabel(); } }
 
-    // 기본 공격 다음 번호가 특수 스킬 키다. 기본 공격이 둘이면 3번이 된다.
-    public int SkillKeyNumber { get { return BasicStyleCount + 1; } }
-
-    private int BasicStyleCount
+    // 기본 공격과 입력 중 적은 쪽까지만 쓴다. 키가 없는 공격은 고를 수 없다.
+    public int BasicStyleCount
     {
         get
         {
-            if (null == _loadout || null == _loadout.BasicStyles)
+            if (null == _loadout || null == _loadout.BasicStyles || null == _basicAttackActions)
             {
                 return 0;
             }
 
-            return Mathf.Min(_loadout.BasicStyles.Length, NUMBER_KEYS.Length - 1);
+            return Mathf.Min(_loadout.BasicStyles.Length, _basicAttackActions.Length);
         }
     }
 
@@ -57,6 +51,19 @@ public class PlayerAttackInput : MonoBehaviour
         _skillGauge.Init(_loadout.SkillGaugeMax);
     }
 
+    private void OnEnable()
+    {
+        if (null != _basicAttackActions)
+        {
+            for (int i = 0; i < _basicAttackActions.Length; i++)
+            {
+                EnableAction(_basicAttackActions[i]);
+            }
+        }
+
+        EnableAction(_skillAction);
+    }
+
     private void Start()
     {
         if (0 < BasicStyleCount)
@@ -67,9 +74,7 @@ public class PlayerAttackInput : MonoBehaviour
 
     private void Update()
     {
-        Keyboard keyboard = Keyboard.current;
-
-        if (null == keyboard || null == _loadout)
+        if (null == _loadout)
         {
             return;
         }
@@ -78,17 +83,27 @@ public class PlayerAttackInput : MonoBehaviour
 
         for (int i = 0; i < basicCount; i++)
         {
-            if (keyboard[NUMBER_KEYS[i]].wasPressedThisFrame)
+            if (_basicAttackActions[i].WasPressedThisFrame())
             {
                 SelectBasic(i);
                 return;
             }
         }
 
-        if (keyboard[NUMBER_KEYS[basicCount]].wasPressedThisFrame)
+        if (_skillAction.WasPressedThisFrame())
         {
             TryUseSkill();
         }
+    }
+
+    public string GetBasicKeyLabel(int index)
+    {
+        if (null == _basicAttackActions || index >= _basicAttackActions.Length)
+        {
+            return string.Empty;
+        }
+
+        return _basicAttackActions[index].GetKeyLabel();
     }
 
     private void SelectBasic(int index)
@@ -122,5 +137,13 @@ public class PlayerAttackInput : MonoBehaviour
         _skillGauge.TryConsumeAll();
 
         OnSkillFired?.Invoke();
+    }
+
+    private void EnableAction(InputActionReference actionReference)
+    {
+        if (null != actionReference)
+        {
+            actionReference.action.Enable();
+        }
     }
 }

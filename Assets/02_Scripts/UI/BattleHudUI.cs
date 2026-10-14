@@ -80,20 +80,21 @@ public class BattleHudUI : MonoBehaviour
         _attackInput = attackInput;
 
         AttackStyle[] basicStyles = attackInput.Loadout.BasicStyles;
+        int basicCount = attackInput.BasicStyleCount;
 
         for (int i = 0; i < _basicSlots.Length; i++)
         {
-            bool hasStyle = null != basicStyles && i < basicStyles.Length;
+            bool hasStyle = i < basicCount;
 
             _basicSlots[i].gameObject.SetActive(hasStyle);
 
             if (hasStyle)
             {
-                _basicSlots[i].Setup(i + 1, basicStyles[i]);
+                _basicSlots[i].Setup(attackInput.GetBasicKeyLabel(i), basicStyles[i]);
             }
         }
 
-        _skillSlot.Setup(attackInput.SkillKeyNumber, attackInput.Loadout.SkillStyle);
+        _skillSlot.Setup(attackInput.SkillKeyLabel, attackInput.Loadout.SkillStyle);
 
         _attackInput.OnBasicStyleChanged += HandleBasicStyleChanged;
         _attackInput.OnSkillFired += HandleSkillFired;

@@ -471,6 +471,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttackInput
   _loadout: {fileID: 11400000, guid: 4588523c7a01cf6479fc7d27f0a0450c, type: 2}
+  _basicAttackActions:
+  - {fileID: 7556292513268214159, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  - {fileID: 4842117460415523917, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  _skillAction: {fileID: 6070815292295317116, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
 --- !u!114 &3533665038697895136
 MonoBehaviour:
   m_ObjectHideFlags: 0

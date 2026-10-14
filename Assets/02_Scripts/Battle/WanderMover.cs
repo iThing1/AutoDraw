@@ -27,9 +27,9 @@ public class WanderMover : MonoBehaviour
         {
             while (false == _unit.Health.IsDead)
             {
-                if (_isPaused)
+                while (_isPaused)
                 {
-                    await UniTask.WaitWhile(() => _isPaused, cancellationToken: token);
+                    await UniTask.Yield(PlayerLoopTiming.Update, token);
                 }
 
                 WanderSettings settings = _unit.Data.Wander;
@@ -41,7 +41,7 @@ public class WanderMover : MonoBehaviour
 
                 Vector3 destination = PickDestination(center, settings);
                 float distance = Vector3.Distance(transform.position, destination);
-                float duration = distance / Mathf.Max(MIN_SPEED, settings.Speed.Pick());
+                float duration = distance / Mathf.Max(MIN_SPEED, settings.Speed.PickRandom());
 
                 _moveTween = transform.DOMove(destination, duration).SetEase(settings.MoveEase);
 
@@ -50,7 +50,7 @@ public class WanderMover : MonoBehaviour
 
                 token.ThrowIfCancellationRequested();
 
-                await UniTask.Delay(TimeSpan.FromSeconds(settings.Pause.Pick()), cancellationToken: token);
+                await UniTask.Delay(TimeSpan.FromSeconds(settings.Pause.PickRandom()), cancellationToken: token);
             }
         }
         catch (OperationCanceledException)

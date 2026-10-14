@@ -91,7 +91,7 @@ public class AttackStyleSet : AttackStyle
             return null;
         }
 
-        float pick = UnityEngine.Random.value * totalWeight;
+        float remainingWeight = UnityEngine.Random.value * totalWeight;
 
         for (int i = 0; i < _entries.Length; i++)
         {
@@ -100,9 +100,9 @@ public class AttackStyleSet : AttackStyle
                 continue;
             }
 
-            pick -= _entries[i].Weight;
+            remainingWeight -= _entries[i].Weight;
 
-            if (0f >= pick)
+            if (0f >= remainingWeight)
             {
                 return _entries[i];
             }

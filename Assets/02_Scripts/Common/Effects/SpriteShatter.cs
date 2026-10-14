@@ -87,9 +87,9 @@ public static class SpriteShatter
             direction = Random.insideUnitCircle;
         }
 
-        Vector3 destination = pieceTransform.position + direction.normalized * settings.SpreadDistance.Pick();
+        Vector3 destination = pieceTransform.position + direction.normalized * settings.SpreadDistance.PickRandom();
         float rotation = Random.Range(-settings.MaxRotation, settings.MaxRotation);
-        float fadeDelay = settings.FadeDelay.Pick();
+        float fadeDelay = settings.FadeDelay.PickRandom();
 
         Sequence sequence = DOTween.Sequence()
             .Join(pieceTransform.DOMove(destination, settings.FlyDuration).SetEase(settings.FlyEase))

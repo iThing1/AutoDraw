@@ -7,7 +7,7 @@ public class AutoAttacker : MonoBehaviour
 {
     private BattleUnit _owner;
     private SkillGauge _skillGauge;
-    private int _paletteIndex;
+    private int _nextColorIndex;
 
     private AttackTarget _target;
     private PaintCanvas _paintCanvas;
@@ -125,8 +125,8 @@ public class AutoAttacker : MonoBehaviour
             return Color.white;
         }
 
-        Color color = palette.Pick(_paletteIndex);
-        _paletteIndex++;
+        Color color = palette.Pick(_nextColorIndex);
+        _nextColorIndex++;
 
         return color;
     }
@@ -162,31 +162,31 @@ public class AutoAttacker : MonoBehaviour
     private async UniTaskVoid FireShotAsync(ShotSettings shot, Vector3 start, Vector3 landingOffset, float gaugeGain, CancellationToken token)
     {
         // 피해량과 물감 색은 쏘는 순간 정해, 날아가는 투사체의 색과 맞은 자리의 물감 색이 같게 한다.
-        DamageInfo info = RollDamage(shot);
+        DamageInfo damage = RollDamage(shot);
 
         bool hasArrived = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, _target.GetAimPoint(landingOffset),
-            _target.FollowTransform, info.PaintColor, token);
+            _target.FollowTransform, damage.PaintColor, token);
 
         if (false == hasArrived)
         {
             return;
         }
 
-        ApplyHit(shot, info, _target.GetAimPoint(landingOffset), gaugeGain);
+        ApplyHit(shot, damage, _target.GetAimPoint(landingOffset), gaugeGain);
     }
 
-    private void ApplyHit(ShotSettings hit, DamageInfo info, Vector3 hitPoint, float gaugeGain)
+    private void ApplyHit(ShotSettings hit, DamageInfo damage, Vector3 hitPoint, float gaugeGain)
     {
         if (_target.IsDefeated || false == _target.IsHit(hitPoint))
         {
             return;
         }
 
-        info.HitPoint = hitPoint;
+        damage.HitPoint = hitPoint;
 
-        _target.Unit.Health.TakeDamage(info);
+        _target.Unit.Health.TakeDamage(damage);
 
-        HitFeedbackPlayer.Play(hit.GetHitFeedback(info.IsCritical), _target.Unit, info, _paintCanvas);
+        HitFeedbackPlayer.Play(hit.GetHitFeedback(damage.IsCritical), _target.Unit, damage, _paintCanvas);
 
         if (null != _skillGauge && 0f < gaugeGain)
         {
@@ -196,7 +196,7 @@ public class AutoAttacker : MonoBehaviour
 
     private DamageInfo RollDamage(ShotSettings shot)
     {
-        int amount = shot.Damage.Pick();
+        int amount = shot.Damage.PickRandom();
         bool isCritical = UnityEngine.Random.value < shot.CriticalChance;
 
         if (isCritical)

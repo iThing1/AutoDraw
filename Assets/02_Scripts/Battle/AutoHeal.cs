@@ -28,7 +28,7 @@ public class AutoHeal : MonoBehaviour
         _health.OnDamaged -= HandleDamaged;
     }
 
-    private void HandleDamaged(DamageInfo info)
+    private void HandleDamaged(DamageInfo damage)
     {
         BattleUnitData data = _owner.Data;
 

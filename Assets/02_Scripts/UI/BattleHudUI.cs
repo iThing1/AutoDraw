@@ -142,17 +142,17 @@ public class BattleHudUI : MonoBehaviour
         _skillSlot.PlayUsed();
     }
 
-    private void SpawnDamageText(DamageInfo info)
+    private void SpawnDamageText(DamageInfo damage)
     {
         if (null == _damageTextPrefab)
         {
             return;
         }
 
-        Vector2 screenPosition = GameManager.CameraRig.OutputCamera.WorldToScreenPoint(info.HitPoint);
+        Vector2 screenPosition = GameManager.CameraRig.OutputCamera.WorldToScreenPoint(damage.HitPoint);
 
         GameObject instance = GameManager.Pool.Spawn(_damageTextPrefab, _damageTextRoot);
 
-        instance.GetComponent<DamageText>().Play(info.Amount, info.IsCritical, screenPosition, _damageText);
+        instance.GetComponent<DamageText>().Play(damage.Amount, damage.IsCritical, screenPosition, _damageText);
     }
 }

@@ -56,19 +56,9 @@ public class DashSlashAttackStyle : AttackStyle
 
         await UniTask.Delay(TimeSpan.FromSeconds(_delayBeforeSlash), cancellationToken: token);
 
-        GameManager.HitStop.BaseTimeScale = _slowTimeScale;
-
-        try
+        using (GameManager.TimeScale.BeginSlowMotion(_slowTimeScale))
         {
             await SwingAsync(attacker, gaugeGain, token);
-        }
-        finally
-        {
-            // 베는 도중 보스가 쓰러지면 엔딩이 자기 슬로 모션을 먼저 걸 수 있어, 내가 건 배율일 때만 되돌린다.
-            if (Mathf.Approximately(GameManager.HitStop.BaseTimeScale, _slowTimeScale))
-            {
-                GameManager.HitStop.BaseTimeScale = 1f;
-            }
         }
 
         await owner.DOMove(origin, _returnDuration)

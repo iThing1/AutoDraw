@@ -11,7 +11,7 @@ public static class HitFeedbackPlayer
             return;
         }
 
-        GameManager.HitStop.Play(preset.HitStopDuration, preset.HitStopTimeScale);
+        GameManager.TimeScale.PlayHitStop(preset.HitStopDuration, preset.HitStopTimeScale);
 
         UnitView view = target.View;
 

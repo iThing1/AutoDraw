@@ -21,32 +21,24 @@ public class EndingCutscene : MonoBehaviour
     // 프리셋 값은 캐싱하지 않고 매번 읽어, 플레이 중에 바꾼 값이 다음 재생에 바로 반영되게 한다.
     public async UniTask PlayAsync(BattleUnit boss, PaintCanvas paintCanvas, CancellationToken token)
     {
-        try
-        {
-            await PlayFinishAsync(boss.transform, token);
-            await PlayShatterAsync(boss, token);
+        await PlayFinishAsync(boss.transform, token);
+        await PlayShatterAsync(boss, token);
 
-            // 카메라가 돌아오는 동안 잉크가 함께 걷히고, 문구는 카메라가 돌아온 뒤에 나온다.
-            await UniTask.WhenAll(
-                PlayExitAndStageClearAsync(token),
-                paintCanvas.FadeOutInkAsync(_preset.InkFadeDuration, _preset.InkFadeDelay, _preset.InkFadeEase, token));
-        }
-        finally
-        {
-            GameManager.HitStop.BaseTimeScale = 1f;
-        }
+        // 카메라가 돌아오는 동안 잉크가 함께 걷히고, 문구는 카메라가 돌아온 뒤에 나온다.
+        await UniTask.WhenAll(
+            PlayExitAndStageClearAsync(token),
+            paintCanvas.FadeOutInkAsync(_preset.InkFadeDuration, _preset.InkFadeDelay, _preset.InkFadeEase, token));
     }
 
     // 마지막 일격의 여운이 남도록 게임 시간을 늦춘 채로 카메라를 보스에게 옮긴다.
     private async UniTask PlayFinishAsync(Transform focusTarget, CancellationToken token)
     {
-        GameManager.HitStop.BaseTimeScale = _preset.SlowTimeScale;
-
-        await UniTask.WhenAll(
-            CinematicPlayer.EnterAsync(focusTarget, _preset.Cinematic, token),
-            RealtimeDelay.WaitAsync(_preset.SlowDuration, token));
-
-        GameManager.HitStop.BaseTimeScale = 1f;
+        using (GameManager.TimeScale.BeginSlowMotion(_preset.SlowTimeScale))
+        {
+            await UniTask.WhenAll(
+                CinematicPlayer.EnterAsync(focusTarget, _preset.Cinematic, token),
+                RealtimeDelay.WaitAsync(_preset.SlowDuration, token));
+        }
     }
 
     private async UniTask PlayShatterAsync(BattleUnit boss, CancellationToken token)

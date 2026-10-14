@@ -9,41 +9,40 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c41fc0067d2ab79e27a5fe568b7630f8, type: 3}
+  m_Script: {fileID: 11500000, guid: 6e67267e720a1a93e8facde41ebf66d0, type: 3}
   m_Name: Boss_Default
-  m_EditorClassIdentifier: Assembly-CSharp::SingleAttackStyle
+  m_EditorClassIdentifier: Assembly-CSharp::BurstAttackStyle
   _displayName: Boss
   _iconColor: {r: 0.08, g: 0.08, b: 0.1, a: 1}
   _attackInterval: 1.4
   _gaugeGainPerHit: 0
+  _waitUntilFinished: 0
+  _stopsMovement: 0
   _shot:
-    _projectileScale: 1
-    _homing: 0.75
-    _trailTime: 0.2
-    _trailWidth: 0.2
+    _projectileScale: 0.6
+    _homing: 0.3
+    _missTravelTime: 0.3
+    _trailTime: 0.15
+    _trailWidth: 0.12
     _useTrailColor: 1
     _trailColor: {r: 0, g: 0, b: 0, a: 1}
     _trajectories:
     - _type: 1
-      _weight: 2
+      _weight: 1
       _height:
         _min: 0
         _max: 0
       _duration:
-        _min: 0.4
-        _max: 0.5
-    - _type: 0
-      _weight: 1
-      _height:
-        _min: 2
-        _max: 4
-      _duration:
-        _min: 0.5
-        _max: 0.7
+        _min: 0.3
+        _max: 0.35
     _damage:
-      _min: 6
-      _max: 12
+      _min: 4
+      _max: 7
     _criticalChance: 0.1
     _criticalMultiplier: 2
-    _normalHit: {fileID: 11400000, guid: 789e71a3222486742b3aba402f7e49b9, type: 2}
-    _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+    _normalHit: {fileID: 11400000, guid: 3e2afe8de358077d09a19ac1f877e59e, type: 2}
+    _criticalHit: {fileID: 11400000, guid: 789e71a3222486742b3aba402f7e49b9, type: 2}
+  _shotCount:
+    _min: 2
+    _max: 4
+  _burstInterval: 0.08

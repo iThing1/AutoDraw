@@ -1,7 +1,13 @@
+using DG.Tweening;
 using UnityEngine;
 
 public class GameManager : SingletonBehaviour<GameManager>
 {
+    // 환경 탄막은 탄 수십 발이 각자 트윈으로 날고, 빗나가면 이어 날아가는 트윈(시퀀스)이 더 붙는다.
+    // 기본 용량(트윈 200, 시퀀스 50)을 넘기면 실행 중에 늘리며 끊길 수 있어 처음부터 넉넉히 잡는다.
+    private const int TWEENERS_CAPACITY = 800;
+    private const int SEQUENCES_CAPACITY = 200;
+
     public static BattleManager Battle { get { return Instance._battle; } }
     public static BattleCameraRig CameraRig { get { return Instance._cameraRig; } }
     public static UIManager UI { get { return Instance._uiManager; } }
@@ -32,6 +38,8 @@ public class GameManager : SingletonBehaviour<GameManager>
         {
             return;
         }
+
+        DOTween.SetTweensCapacity(TWEENERS_CAPACITY, SEQUENCES_CAPACITY);
 
         _soundManager.Init(gameObject);
         _poolManager.Init();

@@ -39,14 +39,15 @@ public static class ProjectileFlight
         }
 
         float height = trajectory.Height.PickRandom();
-        float duration = trajectory.Duration.PickRandom();
+        float duration = trajectory.PickDuration(Vector3.Distance(start, end));
 
         Transform projectileTransform = projectile.transform;
 
-        Tween flight = projectileTransform.DOPath(BuildPath(trajectory.Type, start, end, height), duration, PathType.CatmullRom)
-            .SetEase(Ease.Linear);
+        Tween flight = CreateFlightTween(projectileTransform, trajectory.Type, start, end, height, duration).SetEase(Ease.Linear);
 
-        bool isBlocked = false;
+        // 날아오는 도중 방패나 몸에 닿으면 Blocked·Arrived가 되고, 닿지 않은 동안은 Missed로 둔다.
+        FlightOutcome contactOutcome = FlightOutcome.Missed;
+        Vector3 contactPoint = end;
         float flightSpeed = 0f < duration ? Vector3.Distance(start, end) / duration : 0f;
         Vector3 lastPosition = start;
         Vector3 velocity = 0f < flightSpeed ? (end - start).normalized * flightSpeed : Vector3.zero;
@@ -55,6 +56,7 @@ public static class ProjectileFlight
         {
             Transform followTarget = target.FollowTransform;
             Vector3 targetStartPosition = followTarget.position;
+            Vector3 lastTargetPosition = targetStartPosition;
             float homing = shot.Homing;
             float maxHomingSpeed = flightSpeed * homing;
             Vector3 homingOffset = Vector3.zero;
@@ -75,11 +77,12 @@ public static class ProjectileFlight
                     velocity = (currentPosition - lastPosition) / Time.deltaTime;
                 }
 
+                contactOutcome = CheckContact(target, lastPosition, currentPosition, lastTargetPosition, projectileRadius, out contactPoint);
                 lastPosition = currentPosition;
+                lastTargetPosition = followTarget.position;
 
-                if (target.IsBlockedAt(currentPosition, projectileRadius))
+                if (FlightOutcome.Missed != contactOutcome)
                 {
-                    isBlocked = true;
                     flight.Kill();
                 }
             });
@@ -88,12 +91,19 @@ public static class ProjectileFlight
         // 전투가 끝나 토큰이 취소되면 트윈을 멈추고, 예외를 던지는 대신 isCanceled를 true로 돌려받는다.
         bool isCanceled = await flight.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token).SuppressCancellationThrow();
 
-        Vector3 landingPoint = projectileTransform.position;
-        FlightOutcome outcome = GetOutcome(isBlocked, isCanceled, target, landingPoint);
+        Vector3 landingPoint = FlightOutcome.Missed != contactOutcome ? contactPoint : projectileTransform.position;
+        FlightOutcome outcome = GetOutcome(contactOutcome, isCanceled, target, landingPoint);
 
+        // 도착 지점에서 비켜난 목표가 탄이 지나갈 길 위에 있을 수 있어, 지나가는 동안에도 닿았는지 본다.
         if (FlightOutcome.Missed == outcome)
         {
-            await FlyPastAsync(projectileTransform, velocity, shot.MissTravelTime, token);
+            FlightResult pastResult = await FlyPastAsync(projectileTransform, velocity, shot.MissTravelTime, target, projectileRadius, token);
+            outcome = pastResult.Outcome;
+
+            if (FlightOutcome.Missed != outcome)
+            {
+                landingPoint = pastResult.LandingPoint;
+            }
         }
 
         GameManager.Pool.Despawn(projectile);
@@ -101,12 +111,33 @@ public static class ProjectileFlight
         return new FlightResult(outcome, landingPoint);
     }
 
-    // 방패에 막혀 직접 멈춘 경우는 트윈이 취소로 끝나더라도 막힌 것으로 본다.
-    private static FlightOutcome GetOutcome(bool isBlocked, bool isCanceled, AttackTarget target, Vector3 landingPoint)
+    // 탄과 목표가 같은 프레임에 함께 움직이면 서로 엇갈려 지나갈 수 있다.
+    // 목표 기준으로 본 탄의 이동 선분에서 몸에 가장 가까운 점으로 판정하고, 닿지 않았으면 Missed를 돌려준다.
+    private static FlightOutcome CheckContact(AttackTarget target, Vector3 from, Vector3 to, Vector3 targetFrom, float projectileRadius,
+        out Vector3 contactPoint)
     {
-        if (isBlocked)
+        Vector3 targetTo = target.FollowTransform.position;
+        contactPoint = targetTo + GetClosestPointOnSegment(from - targetFrom, to - targetTo, Vector3.zero);
+
+        if (target.IsBlockedAt(contactPoint, projectileRadius))
         {
             return FlightOutcome.Blocked;
+        }
+
+        if (target.IsTouching(contactPoint, projectileRadius))
+        {
+            return FlightOutcome.Arrived;
+        }
+
+        return FlightOutcome.Missed;
+    }
+
+    // 방패나 몸에 닿아 직접 멈춘 경우는 트윈이 취소로 끝나더라도 닿은 것으로 본다.
+    private static FlightOutcome GetOutcome(FlightOutcome contactOutcome, bool isCanceled, AttackTarget target, Vector3 landingPoint)
+    {
+        if (FlightOutcome.Missed != contactOutcome)
+        {
+            return contactOutcome;
         }
 
         if (isCanceled)
@@ -122,21 +153,66 @@ public static class ProjectileFlight
         return FlightOutcome.Arrived;
     }
 
+    private static Vector3 GetClosestPointOnSegment(Vector3 from, Vector3 to, Vector3 point)
+    {
+        Vector3 segment = to - from;
+        float sqrLength = segment.sqrMagnitude;
+
+        if (0f >= sqrLength)
+        {
+            return from;
+        }
+
+        float t = Mathf.Clamp01(Vector3.Dot(point - from, segment) / sqrLength);
+
+        return from + segment * t;
+    }
+
     // 외곽선 같은 자식까지 함께 사라지도록 색 대신 크기를 줄인다.
-    private static async UniTask FlyPastAsync(Transform projectile, Vector3 velocity, float travelTime, CancellationToken token)
+    private static async UniTask<FlightResult> FlyPastAsync(Transform projectile, Vector3 velocity, float travelTime, AttackTarget target,
+        float projectileRadius, CancellationToken token)
     {
         if (0f >= travelTime)
         {
-            return;
+            return new FlightResult(FlightOutcome.Missed, projectile.position);
         }
 
         Vector3 destination = projectile.position + velocity * travelTime;
+        FlightOutcome contactOutcome = FlightOutcome.Missed;
+        Vector3 contactPoint = destination;
 
         Sequence pass = DOTween.Sequence()
             .Join(projectile.DOMove(destination, travelTime).SetEase(Ease.Linear))
             .Join(projectile.DOScale(0f, travelTime).SetEase(Ease.InQuad));
 
-        await pass.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token).SuppressCancellationThrow();
+        if (null != target)
+        {
+            Vector3 lastPosition = projectile.position;
+            Vector3 lastTargetPosition = target.FollowTransform.position;
+
+            pass = pass.OnUpdate(() =>
+            {
+                Vector3 currentPosition = projectile.position;
+
+                contactOutcome = CheckContact(target, lastPosition, currentPosition, lastTargetPosition, projectileRadius, out contactPoint);
+                lastPosition = currentPosition;
+                lastTargetPosition = target.FollowTransform.position;
+
+                if (FlightOutcome.Missed != contactOutcome)
+                {
+                    pass.Kill();
+                }
+            });
+        }
+
+        bool isCanceled = await pass.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token).SuppressCancellationThrow();
+
+        if (FlightOutcome.Missed != contactOutcome)
+        {
+            return new FlightResult(contactOutcome, contactPoint);
+        }
+
+        return new FlightResult(isCanceled ? FlightOutcome.Canceled : FlightOutcome.Missed, projectile.position);
     }
 
     private static void SetupTrail(TrailRenderer trail, ShotSettings shot, Color color)
@@ -151,6 +227,17 @@ public static class ProjectileFlight
         Color trailColor = shot.UseTrailColor ? shot.TrailColor : color;
         trail.startColor = trailColor;
         trail.endColor = new Color(trailColor.r, trailColor.g, trailColor.b, 0f);
+    }
+
+    // 경로 트윈은 탄마다 경로를 새로 만들어 탄막에서 할당이 몰리므로, 경유점이 없는 직선은 위치 트윈으로 날린다.
+    private static Tween CreateFlightTween(Transform projectile, TrajectoryType type, Vector3 start, Vector3 end, float height, float duration)
+    {
+        if (TrajectoryType.Straight == type)
+        {
+            return projectile.DOMove(end, duration);
+        }
+
+        return projectile.DOPath(BuildPath(type, start, end, height), duration, PathType.CatmullRom);
     }
 
     // 경로의 시작점은 투사체의 현재 위치라서 경유점과 도착점만 넣는다.

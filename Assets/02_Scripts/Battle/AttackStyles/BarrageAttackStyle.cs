@@ -17,6 +17,7 @@ public class BarrageAttackStyle : AttackStyle
     [SerializeField, Min(0f)] private float _turretDisappearDuration = 0.2f;
     [SerializeField] private Ease _turretDisappearEase = Ease.InBack;
     [SerializeField, Min(0f)] private float _turretRecoil = 0.25f;
+    [SerializeField] private AudioClip _turretAppearSound;
 
     [Header("일제사격")]
     [SerializeField, Min(1)] private int _volleyCount = 4;
@@ -45,6 +46,8 @@ public class BarrageAttackStyle : AttackStyle
             Debug.LogError($"일제사격 : {name}에 포대 프리팹이 지정되지 않았습니다.");
             return;
         }
+
+        GameManager.Sound.PlaySfx(_turretAppearSound);
 
         List<Transform> turrets = SpawnTurrets(attacker.Owner.transform);
 

@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26877b954ae115a45a27dc98c256d69b, type: 3}
+  m_Name: Boss_HomingMissile
+  m_EditorClassIdentifier: Assembly-CSharp::HomingMissileAttackStyle
+  _displayName: HomingMissile
+  _iconColor: {r: 0.08, g: 0.08, b: 0.1, a: 1}
+  _attackInterval: 1.4
+  _gaugeGainPerHit: 0
+  _waitUntilFinished: 1
+  _stopsMovement: 0
+  _missilePrefab: {fileID: 7624588648995019004, guid: 4f5be32277d24ca7acc01ea2fb47e095, type: 3}
+  _missileCount: 3
+  _launchInterval: 0.4
+  _launchSpreadAngle: 60
+  _launchSound: {fileID: 0}
+  _speed: 6
+  _turnSpeed: 120
+  _lifetime: 5
+  _collisionRadius: 0.3
+  _blastRadius: 2.5
+  _blastImpact:
+    _shakeForce: 0.8
+    _sounds:
+    - {fileID: 8300000, guid: 719f60a1210744d4991b5897a355751c, type: 3}
+    - {fileID: 8300000, guid: 62a4fc432d1e58e4aac35a1475bbb55e, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0, g: 0, b: 0, a: 1}
+    _effectScale: 2
+    _effectLifetime: 2
+  _hit:
+    _projectileScale: 1
+    _homing: 1
+    _missTravelTime: 0
+    _trailTime: 0
+    _trailWidth: 0.2
+    _useTrailColor: 0
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
+    _trajectories:
+    - _type: 1
+      _weight: 1
+      _height:
+        _min: 0
+        _max: 0
+      _duration:
+        _min: 0.5
+        _max: 0.5
+    _damage:
+      _min: 10
+      _max: 14
+    _criticalChance: 0
+    _criticalMultiplier: 1
+    _normalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+    _criticalHit: {fileID: 0}

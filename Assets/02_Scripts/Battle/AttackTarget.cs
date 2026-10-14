@@ -8,10 +8,14 @@ public class AttackTarget
     private const float MIN_DIRECTION_SQR_LENGTH = 0.0001f;
 
     private readonly BattleUnit _unit;
+    private readonly float _bodyRadius;
 
     public AttackTarget(BattleUnit unit)
     {
         _unit = unit;
+
+        SpriteRenderer bodyRenderer = unit.Body.GetComponent<SpriteRenderer>();
+        _bodyRadius = null != bodyRenderer ? bodyRenderer.bounds.extents.x : 0f;
     }
 
     public BattleUnit Unit { get { return _unit; } }
@@ -28,6 +32,18 @@ public class AttackTarget
     public bool IsHit(Vector3 hitPoint)
     {
         return Vector2.Distance(hitPoint, _unit.Body.position) <= _unit.Data.HitRadius;
+    }
+
+    // 날아가는 탄이 몸 그림과 겹쳤는지. 넉넉한 도착 판정(명중 반경)과 달리 실제 크기로 봐서,
+    // 빠른 탄이 몸을 뚫고 지나가지 않으면서도 허공에서 미리 맞지 않게 한다.
+    public bool IsTouching(Vector3 position, float attackRadius)
+    {
+        return Vector2.Distance(position, _unit.Body.position) <= _bodyRadius + attackRadius;
+    }
+
+    public bool IsInBlast(Vector3 center, float radius)
+    {
+        return Vector2.Distance(center, _unit.Body.position) <= radius;
     }
 
     // 방패가 떠 있는 동안 방패에 닿은 공격은 막힌다. 투사체는 날아오는 도중에도 이걸로 확인한다.

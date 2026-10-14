@@ -25,7 +25,8 @@ MonoBehaviour:
   _turretAppearDuration: 0.25
   _turretDisappearDuration: 0.2
   _turretRecoil: 0.25
-  _volleyCount: 4
+  _turretAppearSound: {fileID: 8300000, guid: 5358f49ed93744188f2e65f788cb1e34, type: 3}
+  _volleyCount: 7
   _volleyInterval: 0.15
   _turretShot:
     _projectileScale: 0.7

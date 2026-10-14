@@ -17,11 +17,18 @@ public static class CinematicPlayer
 
     public static UniTask ExitAsync(CinematicSettings settings, CancellationToken token)
     {
-        GameManager.Sound.PlaySfx(settings.ExitSound);
         GameManager.CameraRig.ReturnToGameplay(settings.ExitBlendDuration);
+
+        return HideAsync(settings, settings.ExitBlendDuration, token);
+    }
+
+    // 엔딩처럼 카메라를 전투 화면이 아닌 곳으로 이미 옮긴 경우에 쓴다.
+    public static UniTask HideAsync(CinematicSettings settings, float cameraBlendDuration, CancellationToken token)
+    {
+        GameManager.Sound.PlaySfx(settings.ExitSound);
 
         return UniTask.WhenAll(
             GameManager.UI.Cinematic.Letterbox.HideAsync(settings.LetterboxOutDuration, settings.LetterboxEase, token),
-            RealtimeDelay.WaitAsync(settings.ExitBlendDuration, token));
+            RealtimeDelay.WaitAsync(cameraBlendDuration, token));
     }
 }

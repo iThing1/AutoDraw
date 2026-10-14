@@ -13,9 +13,12 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private BattleUnit _playerPrefab;
     [SerializeField] private BattleUnit _bossPrefab;
 
-    [Header("플레이어 이동")]
-    // 스테이지 기준 범위. 바닥 종이 가장자리가 보이는 경계가 되도록, 종이에서 몸 크기만큼 안쪽으로 잡는다.
-    [SerializeField] private Rect _playerMoveArea = new Rect(-39f, -29f, 78f, 58f);
+    [Header("스테이지 영역")]
+    // 바닥 종이와 같은 크기의 콜라이더. 카메라는 이 밖을 비추지 않고, 유닛은 이 안에서만 움직인다. 비워 두면 둘 다 제한하지 않는다.
+    // 이동 범위를 숫자로 따로 적지 않아, 종이 크기를 바꿀 때 콜라이더만 고치면 된다.
+    [SerializeField] private Collider2D _stageBounds;
+    // 유닛이 종이 가장자리에서 몸 크기 외에 더 떨어져 있을 거리.
+    [SerializeField, Min(0f)] private float _edgePadding;
 
     [Header("접근")]
     [SerializeField] private BossIntroTrigger _introTrigger;
@@ -26,6 +29,10 @@ public class BattleManager : MonoBehaviour
     [Header("전투")]
     [SerializeField] private PaintCanvas _paintCanvas;
     [SerializeField] private BattleHudUI _hudPrefab;
+
+    [Header("환경 패턴")]
+    // 비워 두면 환경 탄막 없이 보스 공격만 나온다.
+    [SerializeField] private EnvironmentHazard _environmentHazard;
 
     [Header("엔딩")]
     [SerializeField] private EndingCutscene _endingCutscene;
@@ -48,11 +55,25 @@ public class BattleManager : MonoBehaviour
         SpawnUnits();
         PrewarmPools();
 
+        if (null != _stageBounds)
+        {
+            GameManager.CameraRig.SetCameraBounds(_stageBounds);
+        }
+
         GameManager.CameraRig.FollowPlayer(_player.transform);
 
         WarnIfAutoHealCannotSave();
 
         RunAsync(destroyCancellationToken).Forget();
+    }
+
+    // 카메라 리그는 스테이지보다 오래 남아 경계를 풀어 둔다. 게임을 끌 때는 게임 매니저가 먼저 사라질 수 있다.
+    private void OnDestroy()
+    {
+        if (null != _stageBounds && null != GameManager.Instance && null != GameManager.CameraRig)
+        {
+            GameManager.CameraRig.ClearCameraBounds();
+        }
     }
 
     private bool HasRequiredReferences()
@@ -106,10 +127,20 @@ public class BattleManager : MonoBehaviour
     {
         _player = Instantiate(_playerPrefab, _playerSpawnPoint.position, Quaternion.identity, transform);
         _player.name = _playerPrefab.name;
-        _player.Mover.SetMoveArea(GetWorldPlayerMoveArea());
 
         _boss = Instantiate(_bossPrefab, _bossSpawnPoint.position, Quaternion.identity, transform);
         _boss.name = _bossPrefab.name;
+
+        // 카메라가 종이 안만 비추므로, 보스도 종이 밖으로 나가면 화면에서 잘린다.
+        if (null != _stageBounds)
+        {
+            _player.Mover.SetMoveArea(GetMoveArea(_player));
+
+            if (null != _boss.Mover)
+            {
+                _boss.Mover.SetMoveArea(GetMoveArea(_boss));
+            }
+        }
 
         _boss.gameObject.SetActive(false);
     }
@@ -118,6 +149,11 @@ public class BattleManager : MonoBehaviour
     {
         PrewarmUnit(_player);
         PrewarmUnit(_boss);
+
+        if (null != _environmentHazard && null != _boss.Data)
+        {
+            _environmentHazard.Prewarm(_boss.Data.ProjectilePrefab);
+        }
     }
 
     private void PrewarmUnit(BattleUnit unit)
@@ -215,6 +251,12 @@ public class BattleManager : MonoBehaviour
                 _boss.Mover.RunAsync(battleSource.Token).Forget();
             }
 
+            // 환경 탄막은 보스 자리에서 나오지만 보스 공격 순서와 따로 돈다.
+            if (null != _environmentHazard)
+            {
+                _environmentHazard.RunAsync(_boss.Attacker, battleSource.Token).Forget();
+            }
+
             // WhenAny는 먼저 끝난 작업의 순서 번호를 돌려준다. 0은 보스, 1은 플레이어가 먼저 쓰러진 것이다.
             int defeatedIndex = await UniTask.WhenAny(
                 _boss.Health.WaitForDeathAsync(token),
@@ -242,9 +284,53 @@ public class BattleManager : MonoBehaviour
         unit.Attacker.RunAsync(target, _paintCanvas, token).Forget();
     }
 
-    private Rect GetWorldPlayerMoveArea()
+    // 스테이지 영역에서 몸 크기의 절반과 여백만큼 안쪽. 큰 유닛일수록 가장자리에서 더 떨어져 몸이 종이 밖으로 나가지 않는다.
+    private Rect GetMoveArea(BattleUnit unit)
     {
-        return new Rect(_playerMoveArea.position + (Vector2)transform.position, _playerMoveArea.size);
+        Bounds stage = _stageBounds.bounds;
+        Vector2 inset = GetBodyExtents(unit) + Vector2.one * _edgePadding;
+        Vector2 min = (Vector2)stage.min + inset;
+        Vector2 max = (Vector2)stage.max - inset;
+
+        // 영역이 몸보다 좁으면 범위가 뒤집히므로 가운데 한 줄로 모은다.
+        if (min.x > max.x)
+        {
+            min.x = max.x = stage.center.x;
+        }
+
+        if (min.y > max.y)
+        {
+            min.y = max.y = stage.center.y;
+        }
+
+        return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
+    }
+
+    // 렌더러의 bounds는 꺼진 오브젝트나 프리팹에서 0이 되므로, 스프라이트 크기에 스케일을 곱해 읽는다.
+    // 등장 전이라 꺼져 있는 보스와 씬 뷰 기즈모(프리팹)에서도 같은 값이 나온다.
+    private Vector2 GetBodyExtents(BattleUnit unit)
+    {
+        SpriteRenderer bodyRenderer = unit.Body.GetComponent<SpriteRenderer>();
+
+        if (null == bodyRenderer || null == bodyRenderer.sprite)
+        {
+            return Vector2.zero;
+        }
+
+        return Vector2.Scale(bodyRenderer.sprite.bounds.extents, unit.Body.lossyScale);
+    }
+
+    private void DrawMoveAreaGizmo(BattleUnit unitPrefab, Color color)
+    {
+        if (null == unitPrefab)
+        {
+            return;
+        }
+
+        Rect area = GetMoveArea(unitPrefab);
+
+        Gizmos.color = color;
+        Gizmos.DrawWireCube(area.center, new Vector3(area.width, area.height, 0f));
     }
 
     private async UniTask PlayEndingAsync(CancellationToken token)
@@ -262,13 +348,14 @@ public class BattleManager : MonoBehaviour
         _hud = null;
     }
 
-    // 이동 범위를 바꿀 때 화면 안에 들어오는지 씬 뷰에서 바로 확인하기 위해 그린다.
+    // 여백을 바꿀 때 유닛별 이동 범위를 씬 뷰에서 바로 확인하기 위해 그린다. 하늘색은 플레이어, 빨간색은 보스다.
     private void OnDrawGizmosSelected()
     {
-        Rect playerArea = GetWorldPlayerMoveArea();
-
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireCube(playerArea.center, new Vector3(playerArea.width, playerArea.height, 0f));
+        if (null != _stageBounds)
+        {
+            DrawMoveAreaGizmo(_playerPrefab, Color.cyan);
+            DrawMoveAreaGizmo(_bossPrefab, Color.red);
+        }
 
         if (null == _bossSpawnPoint || null == _bossPrefab || null == _bossPrefab.Data)
         {

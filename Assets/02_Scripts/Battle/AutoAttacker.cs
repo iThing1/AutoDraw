@@ -97,7 +97,27 @@ public class AutoAttacker : MonoBehaviour
             return;
         }
 
-        FireShotAsync(shot, start, landingOffset, gaugeGain, token).Forget();
+        FireShotAsync(_owner.Data.ProjectilePrefab, shot, start, _target.GetAimPoint(landingOffset), gaugeGain, token).Forget();
+    }
+
+    // 목표를 겨누지 않고 정해진 방향으로 사거리만큼 날린다. 날아가는 길에 목표가 닿으면 맞는다.
+    // 추적 강도가 0인 탄과 함께 써서, 플레이어가 피할 자리를 찾아 움직이게 하는 탄막에 쓴다.
+    public void FireShotToward(GameObject projectilePrefab, ShotSettings shot, Vector3 start, Vector2 direction, float range, float gaugeGain,
+        CancellationToken token)
+    {
+        if (null == projectilePrefab)
+        {
+            if (false == HasProjectilePrefab())
+            {
+                return;
+            }
+
+            projectilePrefab = _owner.Data.ProjectilePrefab;
+        }
+
+        Vector3 end = start + (Vector3)(direction.normalized * range);
+
+        FireShotAsync(projectilePrefab, shot, start, end, gaugeGain, token).Forget();
     }
 
     // 목표가 아닌 고정된 지점으로 날린다. 파편이 갈라지는 공중 지점처럼 맞히지 않는 비행에 쓴다.
@@ -117,6 +137,17 @@ public class AutoAttacker : MonoBehaviour
     public void Strike(ShotSettings hit, Vector3 hitPoint, float gaugeGain)
     {
         ApplyHit(hit, RollDamage(hit), hitPoint, gaugeGain);
+    }
+
+    // 범위 공격. 폭발 반경 안에 목표가 있으면 목표 자리에 맞고, 방패를 들고 있으면 막힌다.
+    public void Blast(ShotSettings hit, Vector3 center, float radius, float gaugeGain)
+    {
+        if (false == _target.IsInBlast(center, radius))
+        {
+            return;
+        }
+
+        ApplyHit(hit, RollDamage(hit), _target.GetAimPoint(Vector3.zero), gaugeGain);
     }
 
     public Color PickColor()
@@ -182,13 +213,13 @@ public class AutoAttacker : MonoBehaviour
         return true;
     }
 
-    private async UniTaskVoid FireShotAsync(ShotSettings shot, Vector3 start, Vector3 landingOffset, float gaugeGain, CancellationToken token)
+    private async UniTaskVoid FireShotAsync(GameObject projectilePrefab, ShotSettings shot, Vector3 start, Vector3 end, float gaugeGain,
+        CancellationToken token)
     {
         // 피해량과 물감 색은 쏘는 순간 정해, 날아가는 투사체의 색과 맞은 자리의 물감 색이 같게 한다.
         DamageInfo damage = RollDamage(shot);
 
-        FlightResult flight = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, _target.GetAimPoint(landingOffset),
-            _target, damage.PaintColor, token);
+        FlightResult flight = await ProjectileFlight.FlyAsync(projectilePrefab, shot, start, end, _target, damage.PaintColor, token);
 
         if (FlightOutcome.Blocked == flight.Outcome)
         {
@@ -196,15 +227,26 @@ public class AutoAttacker : MonoBehaviour
         }
         else if (FlightOutcome.Arrived == flight.Outcome)
         {
-            ApplyHit(shot, damage, flight.LandingPoint, gaugeGain);
+            // 큰 탄은 명중 반경 밖에서 몸 가장자리에 닿으므로, 비행이 이미 닿았다고 본 탄은 명중 반경으로 다시 거르지 않는다.
+            DealHit(shot, damage, flight.LandingPoint, gaugeGain);
         }
     }
 
-    // 막혔으면 피해·물감 자국·게이지 없이 끝난다. 막기 연출은 막은 쪽이 맡는다.
-    // 방패가 명중 반경보다 넓어서, 빗나갔는지보다 막혔는지를 먼저 본다.
+    // 방패가 명중 반경보다 넓어서, 명중 반경 밖이어도 방패 안이면 막기 판정으로 넘긴다.
     private void ApplyHit(ShotSettings hit, DamageInfo damage, Vector3 hitPoint, float gaugeGain)
     {
-        if (_target.IsDefeated || _target.TryBlockHit(hitPoint) || false == _target.IsHit(hitPoint))
+        if (false == _target.IsHit(hitPoint) && false == _target.IsBlockedAt(hitPoint, 0f))
+        {
+            return;
+        }
+
+        DealHit(hit, damage, hitPoint, gaugeGain);
+    }
+
+    // 막혔으면 피해·물감 자국·게이지 없이 끝난다. 막기 연출은 막은 쪽이 맡는다.
+    private void DealHit(ShotSettings hit, DamageInfo damage, Vector3 hitPoint, float gaugeGain)
+    {
+        if (_target.IsDefeated || _target.TryBlockHit(hitPoint))
         {
             return;
         }

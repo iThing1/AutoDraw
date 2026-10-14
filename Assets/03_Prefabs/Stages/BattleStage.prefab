@@ -271,10 +271,10 @@ MonoBehaviour:
   _bossPrefab: {fileID: 5673451803158972909, guid: 2e8d6d477003ae54baf0cd0c464cf3ce, type: 3}
   _playerMoveArea:
     serializedVersion: 2
-    x: -18
-    y: -6
-    width: 40
-    height: 12
+    x: -39
+    y: -29
+    width: 78
+    height: 58
   _introTrigger: {fileID: 7753745094576344584}
   _introCutscene: {fileID: 8588949236467943965}
   _paintCanvas: {fileID: 6145387518109863596}

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fb33b84bd505cb4d9e92f11e51f1d76, type: 3}
   m_Name: PlayerData
   m_EditorClassIdentifier: Assembly-CSharp::BattleUnitData
-  _moveSpeed: 5
+  _moveSpeed: 7
   _wander:
     _useWander: 0
     _areaHalfSize: {x: 4, y: 2}

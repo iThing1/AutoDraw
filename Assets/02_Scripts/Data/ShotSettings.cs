@@ -7,6 +7,8 @@ public class ShotSettings
 {
     [SerializeField, Min(0.1f)] private float _projectileScale = 1f;
     [SerializeField] private TrajectorySettings[] _trajectories = { new() };
+    // 움직이는 목표를 따라가는 정도. 1이면 반드시 맞고, 낮출수록 피하기 쉽다.
+    [SerializeField, Range(0f, 1f)] private float _homing = 1f;
 
     // 꼬리 길이(초)가 0이면 궤적을 그리지 않는다.
     [SerializeField, Min(0f)] private float _trailTime = 0.2f;
@@ -24,6 +26,7 @@ public class ShotSettings
 
     public float ProjectileScale { get { return _projectileScale; } }
     public TrajectorySettings[] Trajectories { get { return _trajectories; } }
+    public float Homing { get { return _homing; } }
 
     public float TrailTime { get { return _trailTime; } }
     public float TrailWidth { get { return _trailWidth; } }
@@ -34,7 +37,19 @@ public class ShotSettings
     public float CriticalChance { get { return _criticalChance; } }
     public float CriticalMultiplier { get { return _criticalMultiplier; } }
 
-    public int MaxHitDamage { get { return Mathf.RoundToInt(Damage.Max * _criticalMultiplier); } }
+    // 치명타가 나올 수 없는 공격까지 배율을 곱하면 자동 회복 경고가 실제보다 크게 잡히므로 뺀다.
+    public int MaxHitDamage
+    {
+        get
+        {
+            if (0f >= _criticalChance)
+            {
+                return Damage.Max;
+            }
+
+            return Mathf.RoundToInt(Damage.Max * _criticalMultiplier);
+        }
+    }
 
     // 치명타 프리셋이 비어 있으면 일반 프리셋으로 대신한다.
     public HitFeedbackPreset GetHitFeedback(bool isCritical)

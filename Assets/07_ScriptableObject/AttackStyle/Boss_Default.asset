@@ -18,6 +18,7 @@ MonoBehaviour:
   _gaugeGainPerHit: 0
   _shot:
     _projectileScale: 1
+    _homing: 0.5
     _trailTime: 0.2
     _trailWidth: 0.2
     _useTrailColor: 1

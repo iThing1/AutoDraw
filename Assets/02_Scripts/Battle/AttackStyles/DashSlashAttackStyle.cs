@@ -48,27 +48,15 @@ public class DashSlashAttackStyle : AttackStyle
     {
         Transform owner = attacker.Owner.transform;
         Vector3 origin = owner.position;
-        Vector3 approachPoint = attacker.Target.GetApproachPoint(origin, _stopDistance);
 
-        await owner.DOMove(approachPoint, _dashDuration)
-            .SetEase(_dashEase)
+        await StartDash(owner, origin, attacker.Target)
             .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
 
         await UniTask.Delay(TimeSpan.FromSeconds(_delayBeforeSlash), cancellationToken: token);
 
-        GameManager.HitStop.BaseTimeScale = _slowTimeScale;
-
-        try
+        using (GameManager.TimeScale.BeginSlowMotion(_slowTimeScale))
         {
             await SwingAsync(attacker, gaugeGain, token);
-        }
-        finally
-        {
-            // 베는 도중 보스가 쓰러지면 엔딩이 자기 슬로 모션을 먼저 걸 수 있어, 내가 건 배율일 때만 되돌린다.
-            if (Mathf.Approximately(GameManager.HitStop.BaseTimeScale, _slowTimeScale))
-            {
-                GameManager.HitStop.BaseTimeScale = 1f;
-            }
         }
 
         await owner.DOMove(origin, _returnDuration)
@@ -105,7 +93,10 @@ public class DashSlashAttackStyle : AttackStyle
 
             await RealtimeDelay.WaitAsync(_swingDuration * _hitTiming, token);
 
-            attacker.Strike(_hit, attacker.Target.GetAimPoint(Vector3.zero), gaugeGain);
+            // 칼이 닿는 거리 밖으로 벗어났으면 빗나간다.
+            Vector3 hitPoint = Vector3.MoveTowards(attacker.Owner.Body.position, attacker.Target.GetAimPoint(Vector3.zero), _swingRadius);
+
+            attacker.Strike(_hit, hitPoint, gaugeGain);
 
             await swing.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
             await RealtimeDelay.WaitAsync(_trailLingerTime, token);
@@ -114,6 +105,13 @@ public class DashSlashAttackStyle : AttackStyle
         {
             GameManager.Pool.Despawn(blade);
         }
+    }
+
+    // 목표가 움직여도 붙도록 도착 지점을 매 프레임 다시 구한다. 반동 이징이 1을 넘길 수 있어 LerpUnclamped를 쓴다.
+    private Tween StartDash(Transform owner, Vector3 origin, AttackTarget target)
+    {
+        return DOVirtual.Float(0f, 1f, _dashDuration, progress => owner.position = Vector3.LerpUnclamped(origin, target.GetApproachPoint(origin, _stopDistance), progress))
+            .SetEase(_dashEase);
     }
 
     private Tween StartSwing(Transform blade, Vector3 center, float startAngle, float endAngle)

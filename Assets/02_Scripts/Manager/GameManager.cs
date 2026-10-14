@@ -7,7 +7,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     public static UIManager UI { get { return Instance._uiManager; } }
     public static SoundManager Sound { get { return Instance._soundManager; } }
     public static PoolManager Pool { get { return Instance._poolManager; } }
-    public static HitStopManager HitStop { get { return Instance._hitStopManager; } }
+    public static TimeScaleManager TimeScale { get { return Instance._timeScaleManager; } }
 
     [Header("씬")]
     [SerializeField] private BattleCameraRig _cameraRig;
@@ -19,7 +19,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     private SoundManager _soundManager = new();
     private UIManager _uiManager = new();
     private PoolManager _poolManager = new();
-    private HitStopManager _hitStopManager = new();
+    private TimeScaleManager _timeScaleManager = new();
 
     private BattleManager _battle;
 
@@ -35,7 +35,7 @@ public class GameManager : SingletonBehaviour<GameManager>
 
         _soundManager.Init(gameObject);
         _poolManager.Init();
-        _hitStopManager.Init(destroyCancellationToken);
+        _timeScaleManager.Init(destroyCancellationToken);
 
         // 스테이지가 생성되자마자 등장 컷신이 시네마틱 UI를 쓰므로 UI를 먼저 만든다.
         _uiManager.Init(_cinematicUIPrefab);

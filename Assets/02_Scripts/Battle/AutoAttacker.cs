@@ -13,6 +13,7 @@ public class AutoAttacker : MonoBehaviour
     private PaintCanvas _paintCanvas;
     private CancellationToken _battleToken;
     private bool _isRunning;
+    private bool _hasLoggedMissingProjectile;
 
     public BattleUnit Owner { get { return _owner; } }
     public AttackTarget Target { get { return _target; } }
@@ -100,14 +101,16 @@ public class AutoAttacker : MonoBehaviour
     }
 
     // 목표가 아닌 고정된 지점으로 날린다. 파편이 갈라지는 공중 지점처럼 맞히지 않는 비행에 쓴다.
-    public UniTask<bool> FlyToPointAsync(ShotSettings shot, Vector3 start, Vector3 end, Color color, CancellationToken token)
+    public async UniTask<bool> FlyToPointAsync(ShotSettings shot, Vector3 start, Vector3 end, Color color, CancellationToken token)
     {
         if (false == HasProjectilePrefab())
         {
-            return UniTask.FromResult(false);
+            return false;
         }
 
-        return ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, end, color, token);
+        FlightResult flight = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, end, color, token);
+
+        return flight.HasArrived;
     }
 
     // 날아가는 과정 없이 바로 맞힌다. 근접 공격처럼 투사체가 없는 공격에 쓴다.
@@ -134,16 +137,20 @@ public class AutoAttacker : MonoBehaviour
     private async UniTask FireAsync(AttackStyle style, bool gainsGauge, CancellationToken token)
     {
         float gaugeGain = gainsGauge ? style.GaugeGainPerHit : 0f;
-        // WanderMover는 Unity 오브젝트라 ?. 대신 == null로 확인한다. ?.는 파괴된 오브젝트를 null로 보지 않는다.
-        WanderMover mover = style.StopsMovement ? _owner.Mover : null;
-
-        if (null != mover)
-        {
-            mover.Pause();
-        }
+        bool hasBegunAction = false;
 
         try
         {
+            if (style.StopsMovement)
+            {
+                hasBegunAction = await WaitAndBeginActionAsync(token);
+
+                if (false == hasBegunAction)
+                {
+                    return;
+                }
+            }
+
             await style.FireAsync(this, gaugeGain, token);
         }
         catch (OperationCanceledException)
@@ -152,11 +159,27 @@ public class AutoAttacker : MonoBehaviour
         }
         finally
         {
-            if (null != mover)
+            // 기다리다 취소됐으면 다른 패턴의 Action을 끝내지 않는다.
+            if (hasBegunAction)
             {
-                mover.Resume();
+                _owner.EndAction();
             }
         }
+    }
+
+    private async UniTask<bool> WaitAndBeginActionAsync(CancellationToken token)
+    {
+        while (false == _owner.TryBeginAction())
+        {
+            if (UnitState.Dead == _owner.State)
+            {
+                return false;
+            }
+
+            await UniTask.Yield(PlayerLoopTiming.Update, token);
+        }
+
+        return true;
     }
 
     private async UniTaskVoid FireShotAsync(ShotSettings shot, Vector3 start, Vector3 landingOffset, float gaugeGain, CancellationToken token)
@@ -164,15 +187,15 @@ public class AutoAttacker : MonoBehaviour
         // 피해량과 물감 색은 쏘는 순간 정해, 날아가는 투사체의 색과 맞은 자리의 물감 색이 같게 한다.
         DamageInfo damage = RollDamage(shot);
 
-        bool hasArrived = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, _target.GetAimPoint(landingOffset),
+        FlightResult flight = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, _target.GetAimPoint(landingOffset),
             _target.FollowTransform, damage.PaintColor, token);
 
-        if (false == hasArrived)
+        if (false == flight.HasArrived)
         {
             return;
         }
 
-        ApplyHit(shot, damage, _target.GetAimPoint(landingOffset), gaugeGain);
+        ApplyHit(shot, damage, flight.LandingPoint, gaugeGain);
     }
 
     private void ApplyHit(ShotSettings hit, DamageInfo damage, Vector3 hitPoint, float gaugeGain)
@@ -223,7 +246,13 @@ public class AutoAttacker : MonoBehaviour
             return true;
         }
 
-        Debug.LogError($"자동 공격 : {_owner.name}의 투사체 프리팹이 지정되지 않았습니다.");
+        // 쏠 때마다 남기면 같은 로그가 쌓여 다른 에러가 묻히므로 한 번만 알린다.
+        if (false == _hasLoggedMissingProjectile)
+        {
+            _hasLoggedMissingProjectile = true;
+            Debug.LogError($"자동 공격 : {_owner.name}의 투사체 프리팹이 지정되지 않았습니다.");
+        }
+
         return false;
     }
 }

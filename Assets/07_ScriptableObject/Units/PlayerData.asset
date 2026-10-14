@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BattleUnitData
   _moveSpeed: 3
   _maxHp: 100
+  _hitRadius: 0.8
   _useAutoHeal: 1
   _autoHealThresholdRatio: 0.3
   _autoHealTargetRatio: 0.8

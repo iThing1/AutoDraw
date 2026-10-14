@@ -30,6 +30,12 @@ public class AttackTarget
         return Vector2.Distance(hitPoint, _unit.Body.position) <= _unit.Data.HitRadius;
     }
 
+    // 닿기는 했지만 방패에 막힌 경우. 막은 쪽에 알리고 true를 돌려준다.
+    public bool TryGuard(Vector3 hitPoint)
+    {
+        return _unit.TryGuard(hitPoint);
+    }
+
     // 근접 공격이 설 자리. 목표에서 공격자 쪽으로 distance만큼 떨어진 곳이다.
     public Vector3 GetApproachPoint(Vector3 from, float distance)
     {

@@ -4,10 +4,33 @@ using UnityEngine;
 [RequireComponent(typeof(Health), typeof(AutoAttacker), typeof(UnitView))]
 public class BattleUnit : MonoBehaviour
 {
+    // 막는 동안을 using 블록으로 묶는다. 블록을 벗어나면 정상 종료·예외·취소 모두 막기가 풀린다.
+    public readonly struct GuardScope : IDisposable
+    {
+        private readonly BattleUnit _unit;
+
+        internal GuardScope(BattleUnit unit)
+        {
+            _unit = unit;
+        }
+
+        public void Dispose()
+        {
+            if (null == _unit)
+            {
+                return;
+            }
+
+            _unit.EndGuard();
+        }
+    }
+
     [SerializeField] private BattleUnitData _data;
     [SerializeField] private Transform _body;
 
     public event Action<UnitState> OnStateChanged;
+    // 막은 자리를 넘겨, 막은 쪽이 방패 연출과 막기 문구를 띄우게 한다.
+    public event Action<Vector3> OnGuarded;
 
     private Health _health;
     private AutoAttacker _attacker;
@@ -18,6 +41,8 @@ public class BattleUnit : MonoBehaviour
     // 전투 밖에서 쓴 스킬이면 Idle로 돌아간다.
     private UnitState _stateBeforeAction;
 
+    private int _guardCount;
+
     // 키로 고른 공격이 데이터 에셋을 고치지 않도록, 실행 중에만 쓰는 덮어쓰기 값을 따로 둔다.
     private AttackStyle _attackStyleOverride;
 
@@ -26,6 +51,7 @@ public class BattleUnit : MonoBehaviour
     public AutoAttacker Attacker { get { return _attacker; } }
     public UnitView View { get { return _view; } }
     public UnitState State { get { return _state; } }
+    public bool IsGuarding { get { return 0 < _guardCount; } }
 
     // 전투 중 움직이지 않는 유닛은 null이다.
     public UnitMover Mover { get { return _mover; } }
@@ -96,9 +122,32 @@ public class BattleUnit : MonoBehaviour
         ChangeState(_stateBeforeAction);
     }
 
+    public GuardScope BeginGuard()
+    {
+        _guardCount++;
+
+        return new GuardScope(this);
+    }
+
+    public bool TryGuard(Vector3 hitPoint)
+    {
+        if (false == IsGuarding)
+        {
+            return false;
+        }
+
+        OnGuarded?.Invoke(hitPoint);
+        return true;
+    }
+
     public void OverrideAttackStyle(AttackStyle attackStyle)
     {
         _attackStyleOverride = attackStyle;
+    }
+
+    private void EndGuard()
+    {
+        _guardCount = Mathf.Max(0, _guardCount - 1);
     }
 
     private void HandleDied()

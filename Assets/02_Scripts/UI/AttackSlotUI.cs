@@ -32,9 +32,17 @@ public class AttackSlotUI : MonoBehaviour
 
     public void Setup(int keyNumber, AttackStyle style)
     {
-        _keyText.text = keyNumber.ToString();
-        _nameText.text = null != style ? style.DisplayName : string.Empty;
-        _icon.color = null != style ? style.IconColor : Color.white;
+        string displayName = null != style ? style.DisplayName : string.Empty;
+        Color iconColor = null != style ? style.IconColor : Color.white;
+
+        Setup(keyNumber.ToString(), displayName, iconColor);
+    }
+
+    public void Setup(string keyLabel, string displayName, Color iconColor)
+    {
+        _keyText.text = keyLabel;
+        _nameText.text = displayName;
+        _icon.color = iconColor;
 
         SetSelected(false);
     }

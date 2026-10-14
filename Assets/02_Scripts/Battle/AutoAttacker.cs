@@ -205,6 +205,12 @@ public class AutoAttacker : MonoBehaviour
             return;
         }
 
+        // 막혔으면 피해·물감 자국·게이지 없이 끝난다. 막기 연출은 막은 쪽이 맡는다.
+        if (_target.TryGuard(hitPoint))
+        {
+            return;
+        }
+
         damage.HitPoint = hitPoint;
 
         _target.Unit.Health.TakeDamage(damage);

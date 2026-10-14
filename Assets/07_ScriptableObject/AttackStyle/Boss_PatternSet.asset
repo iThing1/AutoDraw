@@ -20,8 +20,10 @@ MonoBehaviour:
   _stopsMovement: 0
   _entries:
   - _style: {fileID: 11400000, guid: ae6ac45b8aefad94eb71e68e76a19071, type: 2}
-    _weight: 60
+    _weight: 50
   - _style: {fileID: 11400000, guid: 56abb8a0ccc3540419438d6fc7786aee, type: 2}
-    _weight: 25
+    _weight: 20
+  - _style: {fileID: 11400000, guid: 01f91439332442628cfa4c613e17e523, type: 2}
+    _weight: 15
   - _style: {fileID: 11400000, guid: 8445d9876c5d73c4b8e6fb8e22e6477d, type: 2}
     _weight: 15

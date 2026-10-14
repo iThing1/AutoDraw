@@ -119,6 +119,17 @@ public class AutoAttacker : MonoBehaviour
         ApplyHit(hit, RollDamage(hit), hitPoint, gaugeGain);
     }
 
+    // 범위 공격. 폭발 반경 안에 목표가 있으면 목표 자리에 맞고, 방패를 들고 있으면 막힌다.
+    public void Blast(ShotSettings hit, Vector3 center, float radius, float gaugeGain)
+    {
+        if (false == _target.IsInBlast(center, radius))
+        {
+            return;
+        }
+
+        ApplyHit(hit, RollDamage(hit), _target.GetAimPoint(Vector3.zero), gaugeGain);
+    }
+
     public Color PickColor()
     {
         PaintPalette palette = _owner.Data.Palette;

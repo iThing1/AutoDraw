@@ -30,6 +30,11 @@ public class AttackTarget
         return Vector2.Distance(hitPoint, _unit.Body.position) <= _unit.Data.HitRadius;
     }
 
+    public bool IsInBlast(Vector3 center, float radius)
+    {
+        return Vector2.Distance(center, _unit.Body.position) <= radius;
+    }
+
     // 방패가 떠 있는 동안 방패에 닿은 공격은 막힌다. 투사체는 날아오는 도중에도 이걸로 확인한다.
     // attackRadius는 공격 자체의 크기로, 큰 탄은 중심보다 가장자리가 먼저 방패에 닿는다.
     public bool IsBlockedAt(Vector3 position, float attackRadius)

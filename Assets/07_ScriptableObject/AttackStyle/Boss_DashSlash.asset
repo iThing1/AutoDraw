@@ -25,7 +25,7 @@ MonoBehaviour:
   _slowTimeScale: 0.35
   _bladePrefab: {fileID: 3734301711108920927, guid: 6c8db83991a622147a4f55b81d9138ff, type: 3}
   _swingAngle: 220
-  _swingRadius: 2.2
+  _swingRadius: 3.2
   _swingDuration: 0.3
   _swingEase: 9
   _hitTiming: 0.5

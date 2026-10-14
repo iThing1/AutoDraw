@@ -8,8 +8,27 @@ public class SkillGauge : MonoBehaviour
     private float _current;
     private float _max = 1f;
 
+    public float Current { get { return _current; } }
     public float Ratio { get { return _current / _max; } }
     public bool IsFull { get { return _current >= _max; } }
+
+    public bool CanConsume(float amount)
+    {
+        return _current >= amount;
+    }
+
+    public bool TryConsume(float amount)
+    {
+        if (false == CanConsume(amount))
+        {
+            return false;
+        }
+
+        _current -= amount;
+
+        OnChanged?.Invoke();
+        return true;
+    }
 
     public void Init(float max)
     {

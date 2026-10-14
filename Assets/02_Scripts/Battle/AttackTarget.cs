@@ -30,6 +30,29 @@ public class AttackTarget
         return Vector2.Distance(hitPoint, _unit.Body.position) <= _unit.Data.HitRadius;
     }
 
+    // 방패가 떠 있는 동안 방패 반경 안에 들어온 공격은 막힌다. 투사체는 날아오는 도중에도 이걸로 확인한다.
+    public bool IsBlockedAt(Vector3 position)
+    {
+        return _unit.IsGuarding && Vector2.Distance(position, _unit.Body.position) <= _unit.GuardRadius;
+    }
+
+    public bool TryBlockHit(Vector3 hitPoint)
+    {
+        if (false == IsBlockedAt(hitPoint))
+        {
+            return false;
+        }
+
+        _unit.NotifyBlocked(hitPoint);
+        return true;
+    }
+
+    // 날아오는 도중 이미 막힌 투사체용. 도착한 순간에는 방패가 내려가 있을 수 있어 다시 확인하지 않는다.
+    public void NotifyBlocked(Vector3 hitPoint)
+    {
+        _unit.NotifyBlocked(hitPoint);
+    }
+
     // 근접 공격이 설 자리. 목표에서 공격자 쪽으로 distance만큼 떨어진 곳이다.
     public Vector3 GetApproachPoint(Vector3 from, float distance)
     {

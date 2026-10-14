@@ -9,6 +9,8 @@ public class ShotSettings
     [SerializeField] private TrajectorySettings[] _trajectories = { new() };
     // 움직이는 목표를 따라가는 정도. 1이면 반드시 맞고, 낮출수록 피하기 쉽다.
     [SerializeField, Range(0f, 1f)] private float _homing = 1f;
+    // 빗나간 뒤 날아오던 방향으로 더 날아가는 시간. 0이면 도착 지점에서 바로 사라진다.
+    [SerializeField, Min(0f)] private float _missTravelTime = 0.3f;
 
     // 꼬리 길이(초)가 0이면 궤적을 그리지 않는다.
     [SerializeField, Min(0f)] private float _trailTime = 0.2f;
@@ -27,6 +29,7 @@ public class ShotSettings
     public float ProjectileScale { get { return _projectileScale; } }
     public TrajectorySettings[] Trajectories { get { return _trajectories; } }
     public float Homing { get { return _homing; } }
+    public float MissTravelTime { get { return _missTravelTime; } }
 
     public float TrailTime { get { return _trailTime; } }
     public float TrailWidth { get { return _trailWidth; } }

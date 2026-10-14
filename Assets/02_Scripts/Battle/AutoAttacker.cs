@@ -110,7 +110,7 @@ public class AutoAttacker : MonoBehaviour
 
         FlightResult flight = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, end, color, token);
 
-        return flight.HasArrived;
+        return FlightOutcome.Arrived == flight.Outcome;
     }
 
     // 날아가는 과정 없이 바로 맞힌다. 근접 공격처럼 투사체가 없는 공격에 쓴다.
@@ -188,19 +188,23 @@ public class AutoAttacker : MonoBehaviour
         DamageInfo damage = RollDamage(shot);
 
         FlightResult flight = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, _target.GetAimPoint(landingOffset),
-            _target.FollowTransform, damage.PaintColor, token);
+            _target, damage.PaintColor, token);
 
-        if (false == flight.HasArrived)
+        if (FlightOutcome.Blocked == flight.Outcome)
         {
-            return;
+            _target.NotifyBlocked(flight.LandingPoint);
         }
-
-        ApplyHit(shot, damage, flight.LandingPoint, gaugeGain);
+        else if (FlightOutcome.Arrived == flight.Outcome)
+        {
+            ApplyHit(shot, damage, flight.LandingPoint, gaugeGain);
+        }
     }
 
+    // 막혔으면 피해·물감 자국·게이지 없이 끝난다. 막기 연출은 막은 쪽이 맡는다.
+    // 방패가 명중 반경보다 넓어서, 빗나갔는지보다 막혔는지를 먼저 본다.
     private void ApplyHit(ShotSettings hit, DamageInfo damage, Vector3 hitPoint, float gaugeGain)
     {
-        if (_target.IsDefeated || false == _target.IsHit(hitPoint))
+        if (_target.IsDefeated || _target.TryBlockHit(hitPoint) || false == _target.IsHit(hitPoint))
         {
             return;
         }

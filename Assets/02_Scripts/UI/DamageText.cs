@@ -28,12 +28,26 @@ public class DamageText : MonoBehaviour
     {
         // int를 문자열로 바꾸지 않고 TMP가 직접 숫자를 채워, 타격마다 문자열이 새로 생기지 않게 한다.
         _text.SetText("{0}", amount);
-        _text.color = isCritical ? settings.CriticalColor : settings.NormalColor;
+
+        Color color = isCritical ? settings.CriticalColor : settings.NormalColor;
+        float scale = isCritical ? settings.CriticalScale : settings.NormalScale;
+
+        Pop(color, scale, screenPosition, settings);
+    }
+
+    public void PlayText(string text, Color color, Vector2 screenPosition, DamageTextSettings settings)
+    {
+        _text.SetText(text);
+
+        Pop(color, settings.NormalScale, screenPosition, settings);
+    }
+
+    private void Pop(Color color, float scale, Vector2 screenPosition, DamageTextSettings settings)
+    {
+        _text.color = color;
         _canvasGroup.alpha = 1f;
 
         _rect.position = screenPosition;
-
-        float scale = isCritical ? settings.CriticalScale : settings.NormalScale;
         _rect.localScale = Vector3.one * scale * settings.PopScale;
 
         // 크게 튀어나왔다가 제 크기로 줄고(Append), 동시에 위로 떠오르며(Join), 끝나기 직전부터 흐려진다(Insert).

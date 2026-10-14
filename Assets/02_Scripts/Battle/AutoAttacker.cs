@@ -13,6 +13,7 @@ public class AutoAttacker : MonoBehaviour
     private PaintCanvas _paintCanvas;
     private CancellationToken _battleToken;
     private bool _isRunning;
+    private bool _hasLoggedMissingProjectile;
 
     public BattleUnit Owner { get { return _owner; } }
     public AttackTarget Target { get { return _target; } }
@@ -223,7 +224,13 @@ public class AutoAttacker : MonoBehaviour
             return true;
         }
 
-        Debug.LogError($"자동 공격 : {_owner.name}의 투사체 프리팹이 지정되지 않았습니다.");
+        // 쏠 때마다 남기면 같은 로그가 쌓여 다른 에러가 묻히므로 한 번만 알린다.
+        if (false == _hasLoggedMissingProjectile)
+        {
+            _hasLoggedMissingProjectile = true;
+            Debug.LogError($"자동 공격 : {_owner.name}의 투사체 프리팹이 지정되지 않았습니다.");
+        }
+
         return false;
     }
 }

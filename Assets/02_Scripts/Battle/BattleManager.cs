@@ -55,74 +55,48 @@ public class BattleManager : MonoBehaviour
 
     private bool HasRequiredReferences()
     {
-        if (null == _playerSpawnPoint || null == _bossSpawnPoint)
+        // 앞에서부터 확인해 처음 비어 있는 참조에서 멈춘다.
+        // nameof는 컴파일할 때 필드 이름을 문자열로 바꿔 줘서, 필드 이름을 바꿔도 로그가 함께 바뀐다.
+        bool hasAllReferences = IsAssigned(_playerSpawnPoint, nameof(_playerSpawnPoint))
+            && IsAssigned(_bossSpawnPoint, nameof(_bossSpawnPoint))
+            && IsAssigned(_playerPrefab, nameof(_playerPrefab))
+            && IsAssigned(_bossPrefab, nameof(_bossPrefab))
+            && IsAssigned(_introTrigger, nameof(_introTrigger))
+            && IsAssigned(_introCutscene, nameof(_introCutscene))
+            && IsAssigned(_paintCanvas, nameof(_paintCanvas))
+            && IsAssigned(_hudPrefab, nameof(_hudPrefab))
+            && IsAssigned(_endingCutscene, nameof(_endingCutscene))
+            && IsAssigned(GameManager.CameraRig, nameof(GameManager.CameraRig))
+            && IsAssigned(GameManager.UI.Cinematic, nameof(GameManager.UI.Cinematic));
+
+        if (false == hasAllReferences)
         {
-            Debug.LogError("전투 매니저 : 스폰 포인트가 지정되지 않았습니다.");
             return false;
         }
 
-        if (null == _playerPrefab || null == _playerPrefab.GetComponent<PlayerAutoMover>())
+        if (null == _playerPrefab.GetComponent<PlayerAutoMover>())
         {
-            Debug.LogError("전투 매니저 : 플레이어 프리팹이 없거나 PlayerAutoMover가 붙어 있지 않습니다.");
-            return false;
-        }
-
-        if (null == _bossPrefab)
-        {
-            Debug.LogError("전투 매니저 : 보스 프리팹이 지정되지 않았습니다.");
-            return false;
-        }
-
-        if (null == _introTrigger)
-        {
-            Debug.LogError("전투 매니저 : BossIntroTrigger가 지정되지 않았습니다.");
-            return false;
-        }
-
-        if (null == _introCutscene)
-        {
-            Debug.LogError("전투 매니저 : BossIntroCutscene이 지정되지 않았습니다.");
-            return false;
-        }
-
-        if (null == GameManager.CameraRig)
-        {
-            Debug.LogError("전투 매니저 : GameManager에 카메라 리그가 지정되지 않았습니다.");
-            return false;
-        }
-
-        if (null == _paintCanvas)
-        {
-            Debug.LogError("전투 매니저 : PaintCanvas가 지정되지 않았습니다.");
-            return false;
-        }
-
-        if (null == _hudPrefab)
-        {
-            Debug.LogError("전투 매니저 : 전투 HUD 프리팹이 지정되지 않았습니다.");
-            return false;
-        }
-
-        if (null == _endingCutscene)
-        {
-            Debug.LogError("전투 매니저 : EndingCutscene이 지정되지 않았습니다.");
+            Debug.LogError("전투 매니저 : 플레이어 프리팹에 PlayerAutoMover가 붙어 있지 않습니다.");
             return false;
         }
 
         // 하위 컴포넌트는 빠진 항목을 직접 로그로 남기므로 결과만 확인한다.
-        if (false == _introCutscene.HasRequiredReferences() || false == GameManager.CameraRig.HasRequiredReferences()
-            || false == _paintCanvas.HasRequiredReferences() || false == _endingCutscene.HasRequiredReferences())
+        return _introCutscene.HasRequiredReferences()
+            && GameManager.CameraRig.HasRequiredReferences()
+            && _paintCanvas.HasRequiredReferences()
+            && _endingCutscene.HasRequiredReferences();
+    }
+
+    // System.Object와 이름이 겹쳐 UnityEngine.Object로 적는다. Unity 오브젝트 타입으로 받아야 파괴된 오브젝트도 null로 본다.
+    private bool IsAssigned(UnityEngine.Object target, string label)
+    {
+        if (null != target)
         {
-            return false;
+            return true;
         }
 
-        if (null == GameManager.UI.Cinematic)
-        {
-            Debug.LogError("전투 매니저 : 시네마틱 UI가 생성되지 않았습니다.");
-            return false;
-        }
-
-        return true;
+        Debug.LogError($"전투 매니저 : {label} 참조가 비어 있습니다.");
+        return false;
     }
 
     private void SpawnUnits()
@@ -205,8 +179,6 @@ public class BattleManager : MonoBehaviour
 
     private async UniTask PlayApproachAsync(CancellationToken token)
     {
-        SetPhase(BattlePhase.Approach);
-
         _playerMover.StartMoving();
 
         await _introTrigger.WaitForEnterAsync(token);
@@ -216,8 +188,6 @@ public class BattleManager : MonoBehaviour
 
     private async UniTask PlayIntroAsync(CancellationToken token)
     {
-        SetPhase(BattlePhase.Intro);
-
         GameManager.CameraRig.PrepareBattleFraming(_player, _boss);
 
         await _introCutscene.PlayAsync(_boss, _bossSpawnPoint, token);
@@ -225,8 +195,6 @@ public class BattleManager : MonoBehaviour
 
     private async UniTask<bool> PlayBattleAsync(CancellationToken token)
     {
-        SetPhase(BattlePhase.Battle);
-
         // 전투 HUD는 전투에서만 쓰므로 전투 매니저가 직접 열고, 엔딩이 시작되면 닫는다.
         _hud = GameManager.UI.Open(_hudPrefab, UILayer.HUD);
         _hud.Bind(_player, _boss);
@@ -262,8 +230,6 @@ public class BattleManager : MonoBehaviour
 
     private async UniTask PlayEndingAsync(CancellationToken token)
     {
-        SetPhase(BattlePhase.Ending);
-
         await UniTask.WhenAll(
             CloseHudAsync(token),
             _endingCutscene.PlayAsync(_boss, _paintCanvas, token));
@@ -275,11 +241,6 @@ public class BattleManager : MonoBehaviour
 
         GameManager.UI.Close(_hud);
         _hud = null;
-    }
-
-    private void SetPhase(BattlePhase phase)
-    {
-        Debug.Log($"전투 단계 : {phase}");
     }
 
     // 배회 범위를 데이터로 바꿀 때 화면 안에 들어오는지 씬 뷰에서 바로 확인하기 위해 그린다.

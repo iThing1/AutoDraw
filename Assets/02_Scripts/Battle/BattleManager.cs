@@ -14,8 +14,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private BattleUnit _bossPrefab;
 
     [Header("플레이어 이동")]
-    // 스테이지 기준 범위. 보스 배회 범위까지는 다가갈 수 있고, 화면 밖으로는 나가지 않게 막는다.
-    [SerializeField] private Rect _playerMoveArea = new Rect(-18f, -6f, 40f, 12f);
+    // 스테이지 기준 범위. 바닥 종이 가장자리가 보이는 경계가 되도록, 종이에서 몸 크기만큼 안쪽으로 잡는다.
+    [SerializeField] private Rect _playerMoveArea = new Rect(-39f, -29f, 78f, 58f);
 
     [Header("접근")]
     [SerializeField] private BossIntroTrigger _introTrigger;

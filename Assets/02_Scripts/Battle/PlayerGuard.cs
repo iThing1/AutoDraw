@@ -23,8 +23,7 @@ public class PlayerGuard : MonoBehaviour
     public GuardPreset Preset { get { return _preset; } }
     public SkillGauge SkillGauge { get { return _skillGauge; } }
 
-    // HUD 칸에 표시할 키 이름. 입력 에셋에서 키를 바꾸면 따라 바뀐다.
-    public string KeyLabel { get { return null != _guardAction ? _guardAction.action.GetBindingDisplayString(0) : string.Empty; } }
+    public string KeyLabel { get { return _guardAction.GetKeyLabel(); } }
 
     private void Awake()
     {
@@ -77,7 +76,7 @@ public class PlayerGuard : MonoBehaviour
             return;
         }
 
-        if (_guardAction.action.WasPressedThisFrame())
+        if (_guardAction.WasPressedThisFrame())
         {
             TryStartGuard();
         }

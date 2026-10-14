@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fb33b84bd505cb4d9e92f11e51f1d76, type: 3}
   m_Name: PlayerData
   m_EditorClassIdentifier: Assembly-CSharp::BattleUnitData
-  _moveSpeed: 10
+  _moveSpeed: 5
   _wander:
     _useWander: 0
     _areaHalfSize: {x: 4, y: 2}
@@ -25,7 +25,7 @@ MonoBehaviour:
     _minMoveDistance: 1.5
     _moveEase: 4
   _maxHp: 100
-  _hitRadius: 0.8
+  _hitRadius: 1
   _useAutoHeal: 1
   _autoHealThresholdRatio: 0.3
   _autoHealTargetRatio: 0.8

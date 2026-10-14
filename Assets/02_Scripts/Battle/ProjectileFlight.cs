@@ -24,9 +24,13 @@ public static class ProjectileFlight
         GameObject projectile = GameManager.Pool.Spawn(prefab, start, Quaternion.identity);
         projectile.transform.localScale = prefab.transform.localScale * shot.ProjectileScale;
 
+        // 큰 탄은 가장자리가 먼저 방패에 닿으므로, 막기 판정에 탄의 반지름을 더한다.
+        float projectileRadius = 0f;
+
         if (projectile.TryGetComponent(out SpriteRenderer projectileRenderer))
         {
             projectileRenderer.color = color;
+            projectileRadius = projectileRenderer.bounds.extents.x;
         }
 
         if (projectile.TryGetComponent(out TrailRenderer trail))
@@ -73,7 +77,7 @@ public static class ProjectileFlight
 
                 lastPosition = currentPosition;
 
-                if (target.IsBlockedAt(currentPosition))
+                if (target.IsBlockedAt(currentPosition, projectileRadius))
                 {
                     isBlocked = true;
                     flight.Kill();

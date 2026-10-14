@@ -209,7 +209,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.8, y: 1.8, z: 1}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5946075003864393431}
@@ -261,7 +261,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -733027019
   m_SortingLayer: 1
-  m_SortingOrder: 210
+  m_SortingOrder: 300
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 0.55, g: 0.75, b: 1, a: 0.45}
@@ -471,6 +471,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttackInput
   _loadout: {fileID: 11400000, guid: 4588523c7a01cf6479fc7d27f0a0450c, type: 2}
+  _basicAttackActions:
+  - {fileID: 7556292513268214159, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  - {fileID: 4842117460415523917, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  _skillAction: {fileID: 6070815292295317116, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
 --- !u!114 &3533665038697895136
 MonoBehaviour:
   m_ObjectHideFlags: 0

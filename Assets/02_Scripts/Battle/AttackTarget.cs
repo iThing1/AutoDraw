@@ -30,15 +30,17 @@ public class AttackTarget
         return Vector2.Distance(hitPoint, _unit.Body.position) <= _unit.Data.HitRadius;
     }
 
-    // 방패가 떠 있는 동안 방패 반경 안에 들어온 공격은 막힌다. 투사체는 날아오는 도중에도 이걸로 확인한다.
-    public bool IsBlockedAt(Vector3 position)
+    // 방패가 떠 있는 동안 방패에 닿은 공격은 막힌다. 투사체는 날아오는 도중에도 이걸로 확인한다.
+    // attackRadius는 공격 자체의 크기로, 큰 탄은 중심보다 가장자리가 먼저 방패에 닿는다.
+    public bool IsBlockedAt(Vector3 position, float attackRadius)
     {
-        return _unit.IsGuarding && Vector2.Distance(position, _unit.Body.position) <= _unit.GuardRadius;
+        return _unit.IsGuarding && Vector2.Distance(position, _unit.Body.position) <= _unit.GuardRadius + attackRadius;
     }
 
+    // 방패를 든 동안에는 맞을 자리에 온 공격도 막는다. 방패가 명중 반경보다 작아도 막기를 뚫고 맞지 않게 한다.
     public bool TryBlockHit(Vector3 hitPoint)
     {
-        if (false == IsBlockedAt(hitPoint))
+        if (false == IsBlockedAt(hitPoint, 0f) && false == (_unit.IsGuarding && IsHit(hitPoint)))
         {
             return false;
         }

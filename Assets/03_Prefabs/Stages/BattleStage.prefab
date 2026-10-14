@@ -273,6 +273,7 @@ GameObject:
   - component: {fileID: 2969957242831443143}
   - component: {fileID: 8588949236467943965}
   - component: {fileID: 5973427622324177786}
+  - component: {fileID: 1946385720461831234}
   m_Layer: 0
   m_Name: BattleStage
   m_TagString: Untagged
@@ -327,8 +328,28 @@ MonoBehaviour:
   _introCutscene: {fileID: 8588949236467943965}
   _paintCanvas: {fileID: 6145387518109863596}
   _hudPrefab: {fileID: 7728036517409257316, guid: 6130fac36af31ba4aa2ce4787a21c635, type: 3}
+  _environmentHazard: {fileID: 1946385720461831234}
   _endingCutscene: {fileID: 5973427622324177786}
   _projectilePrewarmCount: 20
+--- !u!114 &1946385720461831234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5561326264097074974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddbf13161b104e83a5684f966415b6b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnvironmentHazard
+  _patterns:
+  - {fileID: 11400000, guid: b7cd6d91d4694522898b9acaf3d583d5, type: 2}
+  - {fileID: 11400000, guid: 966cbf131bf648158f46a036af553fd1, type: 2}
+  _firstDelay: 8
+  _interval:
+    _min: 12
+    _max: 18
 --- !u!114 &8588949236467943965
 MonoBehaviour:
   m_ObjectHideFlags: 0

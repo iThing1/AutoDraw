@@ -95,7 +95,18 @@ public class PaintCanvas : MonoBehaviour
         _inkSplats.Clear();
     }
 
-    private void SpawnSplat(Vector3 position, SplatStyle style, Color color, bool isInk, float scale)
+    // 연출이 새로 찍은 잉크 자국 자리를 써야 할 때(주변에 잉크가 없어 새로 찍는 경우 등) 찍은 자국을 돌려준다.
+    public PaintSplat LeaveInkSplat(Vector3 position, SplatStyle style, Color color, float scale)
+    {
+        if (null == style || false == style.HasSprites)
+        {
+            return null;
+        }
+
+        return SpawnSplat(position, style, color, true, scale);
+    }
+
+    private PaintSplat SpawnSplat(Vector3 position, SplatStyle style, Color color, bool isInk, float scale)
     {
         if (_splats.Count >= _maxSplatCount)
         {
@@ -119,6 +130,8 @@ public class PaintCanvas : MonoBehaviour
         {
             _inkSplats.Add(splat);
         }
+
+        return splat;
     }
 
     // 나중에 찍힌 자국이 위에 오도록 정렬 순서를 올린다. 정렬 순서는 short 범위라, 상한에 닿으면

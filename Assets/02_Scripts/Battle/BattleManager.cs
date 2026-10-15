@@ -170,6 +170,8 @@ public class BattleManager : MonoBehaviour
         {
             _environmentHazard.Prewarm(_boss.Data.ProjectilePrefab);
         }
+
+        _defeatCutscene.Prewarm();
     }
 
     private void PrewarmUnit(BattleUnit unit)
@@ -346,7 +348,7 @@ public class BattleManager : MonoBehaviour
     {
         await UniTask.WhenAll(
             CloseHudAsync(token),
-            _defeatCutscene.PlayAsync(_player, token));
+            _defeatCutscene.PlayAsync(_player, _paintCanvas, token));
     }
 
     private async UniTask CloseHudAsync(CancellationToken token)

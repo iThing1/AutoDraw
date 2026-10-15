@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 202e76242496486d9d18568fd56e72c2, type: 3}
+  m_Name: DefeatPreset
+  m_EditorClassIdentifier: Assembly-CSharp::DefeatPreset
+  _slowTimeScale: 0.3
+  _slowDuration: 1.2
+  _cinematic:
+    _letterboxHeightRatio: 0.12
+    _letterboxInDuration: 0.35
+    _letterboxOutDuration: 0.35
+    _letterboxEase: 9
+    _enterBlendDuration: 0.8
+    _exitBlendDuration: 0.6
+    _enterSound: {fileID: 8300000, guid: 50fd2ff187c1bb349a27ed90afbb8560, type: 3}
+    _exitSound: {fileID: 0}
+  _title:
+    _text: INK OVER
+    _letterPalette: {fileID: 11400000, guid: ffbed08809908924792318e46513ead8, type: 2}
+    _spaceWidth: 70
+    _delayBefore: 0.3
+    _letterInterval: 0.1
+    _letterPopDuration: 0.3
+    _letterEase: 27
+    _letterSound: {fileID: 8300000, guid: f6abb264e6544cc3ab5c32813549058d, type: 3}
+    _finishSound: {fileID: 8300000, guid: dc8a45bbe587f89478717840437313c6, type: 3}
+    _finishPunch: 0.15

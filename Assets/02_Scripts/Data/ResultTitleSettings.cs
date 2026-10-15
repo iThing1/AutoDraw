@@ -3,7 +3,7 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public class StageClearSettings
+public class ResultTitleSettings
 {
     [SerializeField] private string _text = "STAGE CLEAR";
     [SerializeField] private PaintPalette _letterPalette;

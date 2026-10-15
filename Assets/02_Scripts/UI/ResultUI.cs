@@ -6,14 +6,55 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class StageClearUI : MonoBehaviour
+public enum ResultChoice
+{
+    Retry,
+    Gallery,
+}
+
+// 승리(STAGE CLEAR)와 패배(INK OVER)가 함께 쓰는 결과 화면. 문구가 다 튀어나온 뒤 버튼을 보여 주고 고를 때까지 기다린다.
+public class ResultUI : MonoBehaviour
 {
     [SerializeField] private RectTransform _letterRoot;
     [SerializeField] private TMP_Text _letterPrefab;
 
+    [Header("버튼")]
+    [SerializeField] private CanvasGroup _buttonGroup;
+    [SerializeField] private Button _retryButton;
+    // 갤러리가 생기기 전까지는 프리팹에서 꺼 둔다.
+    [SerializeField] private Button _galleryButton;
+    [SerializeField, Min(0f)] private float _buttonFadeDuration = 0.3f;
+
     private readonly List<TMP_Text> _letters = new();
 
-    public async UniTask PlayAsync(StageClearSettings settings, CancellationToken token)
+    // 문구가 나오는 동안 버튼이 눌리지 않게 숨겨 둔다.
+    private void Awake()
+    {
+        _buttonGroup.alpha = 0f;
+        _buttonGroup.interactable = false;
+        _buttonGroup.blocksRaycasts = false;
+    }
+
+    public async UniTask<ResultChoice> PlayAsync(ResultTitleSettings settings, CancellationToken token)
+    {
+        await PlayTitleAsync(settings, token);
+
+        await _buttonGroup.DOFade(1f, _buttonFadeDuration)
+            .SetUpdate(true)
+            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+
+        _buttonGroup.interactable = true;
+        _buttonGroup.blocksRaycasts = true;
+
+        // WhenAny는 먼저 눌린 버튼의 순서 번호를 돌려준다. 0은 다시 하기, 1은 갤러리다.
+        int choiceIndex = await UniTask.WhenAny(_retryButton.OnClickAsync(token), _galleryButton.OnClickAsync(token));
+
+        _buttonGroup.interactable = false;
+
+        return 0 == choiceIndex ? ResultChoice.Retry : ResultChoice.Gallery;
+    }
+
+    private async UniTask PlayTitleAsync(ResultTitleSettings settings, CancellationToken token)
     {
         CreateLetters(settings);
 
@@ -43,7 +84,7 @@ public class StageClearUI : MonoBehaviour
     }
 
     // async 메서드 안에서 트윈을 기다리지 않고 버리면 CS4014 경고가 나므로, 기다리지 않는 트윈은 일반 메서드로 뺀다.
-    private void PopLetter(TMP_Text letter, StageClearSettings settings)
+    private void PopLetter(TMP_Text letter, ResultTitleSettings settings)
     {
         GameManager.Sound.PlaySfx(settings.LetterSound);
 
@@ -53,7 +94,7 @@ public class StageClearUI : MonoBehaviour
     }
 
     // 글자를 하나씩 추가하면 가운데 정렬이 매번 다시 계산돼 글자가 밀려나므로, 모두 크기 0으로 먼저 배치해 둔다.
-    private void CreateLetters(StageClearSettings settings)
+    private void CreateLetters(ResultTitleSettings settings)
     {
         string text = settings.Text;
         PaintPalette palette = settings.LetterPalette;

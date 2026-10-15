@@ -273,6 +273,7 @@ GameObject:
   - component: {fileID: 2969957242831443143}
   - component: {fileID: 8588949236467943965}
   - component: {fileID: 5973427622324177786}
+  - component: {fileID: 6620314580213354001}
   - component: {fileID: 1946385720461831234}
   m_Layer: 0
   m_Name: BattleStage
@@ -325,6 +326,8 @@ MonoBehaviour:
   _hudPrefab: {fileID: 7728036517409257316, guid: 6130fac36af31ba4aa2ce4787a21c635, type: 3}
   _environmentHazard: {fileID: 1946385720461831234}
   _endingCutscene: {fileID: 5973427622324177786}
+  _defeatCutscene: {fileID: 6620314580213354001}
+  _resultPrefab: {fileID: 1836262863735427526, guid: eb85a1febf1f4e8458132fe0bc7fab17, type: 3}
   _projectilePrewarmCount: 20
 --- !u!114 &1946385720461831234
 MonoBehaviour:
@@ -371,7 +374,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EndingCutscene
   _preset: {fileID: 11400000, guid: c811d056a521ef14e8abb4152b931a7a, type: 2}
-  _stageClearPrefab: {fileID: 1836262863735427526, guid: eb85a1febf1f4e8458132fe0bc7fab17, type: 3}
+--- !u!114 &6620314580213354001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5561326264097074974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e51b2ba20364538add50409f3d9b6ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefeatCutscene
+  _preset: {fileID: 11400000, guid: 2ba0ced906764f5888618745948c8aae, type: 2}
 --- !u!1 &7604822164757181108
 GameObject:
   m_ObjectHideFlags: 0

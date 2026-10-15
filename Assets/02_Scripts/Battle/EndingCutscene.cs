@@ -5,13 +5,14 @@ using UnityEngine;
 public class EndingCutscene : MonoBehaviour
 {
     [SerializeField] private EndingPreset _preset;
-    [SerializeField] private StageClearUI _stageClearPrefab;
+
+    public ResultTitleSettings ResultTitle { get { return _preset.StageClear; } }
 
     public bool HasRequiredReferences()
     {
-        if (null == _preset || null == _stageClearPrefab)
+        if (null == _preset)
         {
-            Debug.LogError("엔딩 컷신 : EndingPreset 또는 StageClearUI 프리팹이 지정되지 않았습니다.");
+            Debug.LogError("엔딩 컷신 : EndingPreset이 지정되지 않았습니다.");
             return false;
         }
 
@@ -24,10 +25,10 @@ public class EndingCutscene : MonoBehaviour
         await PlayFinishAsync(boss.transform, token);
         await PlayShatterAsync(boss, token);
 
-        // 카메라가 뒤로 빠지는 동안 잉크가 함께 걷히고, 문구는 카메라가 멈춘 뒤에 나온다.
-        await UniTask.WhenAll(
-            PlayExitAndStageClearAsync(token),
-            paintCanvas.FadeOutInkAsync(_preset.InkFadeDuration, _preset.InkFadeDelay, _preset.InkFadeEase, token));
+        // 잉크는 카메라가 뒤로 빠지는 동안 걷히고, 결과 화면은 잉크를 기다리지 않고 카메라가 멈추면 나온다.
+        paintCanvas.FadeOutInkAsync(_preset.InkFadeDuration, _preset.InkFadeDelay, _preset.InkFadeEase, token).Forget();
+
+        await PlayExitAsync(token);
     }
 
     // 마지막 일격의 여운이 남도록 게임 시간을 늦춘 채로 카메라를 보스에게 옮긴다.
@@ -53,16 +54,6 @@ public class EndingCutscene : MonoBehaviour
         {
             await SpriteShatter.PlayAsync(bossRenderer, _preset.Shatter, token);
         }
-    }
-
-    // 엔딩 문구는 엔딩에서만 쓰므로 엔딩 컷신이 직접 연다. 열어 둔 채로 끝나 그림 위에 남는다.
-    private async UniTask PlayExitAndStageClearAsync(CancellationToken token)
-    {
-        await PlayExitAsync(token);
-
-        StageClearUI stageClear = GameManager.UI.Open(_stageClearPrefab, UILayer.Overlay);
-
-        await stageClear.PlayAsync(_preset.StageClear, token);
     }
 
     // 경계가 없는 스테이지는 전체를 담을 영역을 알 수 없어 전투 화면으로 돌아간다.

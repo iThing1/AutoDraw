@@ -20,15 +20,20 @@ public class EndingCutscene : MonoBehaviour
     }
 
     // 프리셋 값은 캐싱하지 않고 매번 읽어, 플레이 중에 바꾼 값이 다음 재생에 바로 반영되게 한다.
-    public async UniTask PlayAsync(BattleUnit boss, PaintCanvas paintCanvas, CancellationToken token)
+    // 끝나면 잉크가 다 걷힌 종이 전체를 찍어 돌려준다.
+    public async UniTask<Texture2D> PlayAsync(BattleUnit boss, PaintCanvas paintCanvas, CancellationToken token)
     {
         await PlayFinishAsync(boss.transform, token);
         await PlayShatterAsync(boss, token);
 
-        // 잉크는 카메라가 뒤로 빠지는 동안 걷히고, 결과 화면은 잉크를 기다리지 않고 카메라가 멈추면 나온다.
-        paintCanvas.FadeOutInkAsync(_preset.InkFadeDuration, _preset.InkFadeDelay, _preset.InkFadeEase, token).Forget();
+        // 카메라가 뒤로 빠지는 동안 잉크가 걷히고, 둘 다 끝나야 물감만 남은 그림을 찍을 수 있다.
+        await UniTask.WhenAll(
+            PlayExitAsync(token),
+            paintCanvas.FadeOutInkAsync(_preset.InkFadeDuration, _preset.InkFadeDelay, _preset.InkFadeEase, token));
 
-        await PlayExitAsync(token);
+        Vector2Int size = _preset.PaintingSize;
+
+        return GameManager.CameraRig.CaptureStage(size.x, size.y);
     }
 
     // 마지막 일격의 여운이 남도록 게임 시간을 늦춘 채로 카메라를 보스에게 옮긴다.

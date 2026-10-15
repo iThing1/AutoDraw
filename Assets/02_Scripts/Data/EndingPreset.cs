@@ -25,11 +25,16 @@ public class EndingPreset : ScriptableObject
     [SerializeField, Min(0f)] private float _overviewBlendDuration = 1.5f;
     [SerializeField, Min(0f)] private float _overviewPadding = 0f;
 
+    [Header("그림 촬영")]
+    // 액자에 거는 그림 크기. 맵·액자와 같은 16:9로 찍는다.
+    [SerializeField] private Vector2Int _paintingSize = new Vector2Int(1280, 720);
+
     [Header("스테이지 클리어 문구")]
     [SerializeField] private ResultTitleSettings _stageClear = new();
 
     public float OverviewBlendDuration { get { return _overviewBlendDuration; } }
     public float OverviewPadding { get { return _overviewPadding; } }
+    public Vector2Int PaintingSize { get { return _paintingSize; } }
 
     public float SlowTimeScale { get { return _slowTimeScale; } }
     public float SlowDuration { get { return _slowDuration; } }

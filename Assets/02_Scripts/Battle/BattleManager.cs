@@ -50,6 +50,8 @@ public class BattleManager : MonoBehaviour
 
     // 결과 화면에서 고른 것. 다시 하기·갤러리 이동은 스테이지를 만든 쪽이 처리한다.
     public event Action<ResultChoice> OnResultChosen;
+    // 결과 화면보다 먼저 알려, 버튼을 누르기 전에 게임을 꺼도 그림이 남게 한다. 텍스처는 받는 쪽이 지운다.
+    public event Action<Texture2D> OnStageCleared;
 
     private void Start()
     {
@@ -205,7 +207,8 @@ public class BattleManager : MonoBehaviour
 
             if (isBossDefeated)
             {
-                await PlayEndingAsync(token);
+                Texture2D painting = await PlayEndingAsync(token);
+                OnStageCleared?.Invoke(painting);
                 resultTitle = _endingCutscene.ResultTitle;
             }
             else
@@ -337,11 +340,14 @@ public class BattleManager : MonoBehaviour
         Gizmos.DrawWireCube(area.center, new Vector3(area.width, area.height, 0f));
     }
 
-    private async UniTask PlayEndingAsync(CancellationToken token)
+    private async UniTask<Texture2D> PlayEndingAsync(CancellationToken token)
     {
-        await UniTask.WhenAll(
-            CloseHudAsync(token),
-            _endingCutscene.PlayAsync(_boss, _paintCanvas, token));
+        UniTask closeHud = CloseHudAsync(token);
+        Texture2D painting = await _endingCutscene.PlayAsync(_boss, _paintCanvas, token);
+
+        await closeHud;
+
+        return painting;
     }
 
     private async UniTask PlayDefeatAsync(CancellationToken token)

@@ -70,3 +70,4 @@ MonoBehaviour:
     _letterSound: {fileID: 8300000, guid: f6abb264e6544cc3ab5c32813549058d, type: 3}
     _finishSound: {fileID: 8300000, guid: dc8a45bbe587f89478717840437313c6, type: 3}
     _finishPunch: 0.15
+    _backdropColor: {r: 0.96, g: 0.94, b: 0.9, a: 0.85}

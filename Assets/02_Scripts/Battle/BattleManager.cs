@@ -68,8 +68,6 @@ public class BattleManager : MonoBehaviour
 
         GameManager.CameraRig.FollowPlayer(_player.transform);
 
-        WarnIfAutoHealCannotSave();
-
         RunAsync(destroyCancellationToken).Forget();
     }
 
@@ -191,26 +189,6 @@ public class BattleManager : MonoBehaviour
         if (null != data.AttackStyle)
         {
             data.AttackStyle.Prewarm();
-        }
-    }
-
-    // 자동 회복은 맞은 직후 기준선 아래인지로 시작하므로, 기준선 체력이 보스의 최대 한 방보다 낮으면 회복 전에 쓰러질 수 있다.
-    private void WarnIfAutoHealCannotSave()
-    {
-        BattleUnitData playerData = _player.Data;
-        BattleUnitData bossData = _boss.Data;
-
-        if (null == playerData || null == bossData || null == bossData.AttackStyle || false == playerData.UseAutoHeal)
-        {
-            return;
-        }
-
-        int thresholdHp = Mathf.RoundToInt(playerData.MaxHp * playerData.AutoHealThresholdRatio);
-        int bossMaxHit = bossData.AttackStyle.MaxHitDamage;
-
-        if (thresholdHp <= bossMaxHit)
-        {
-            Debug.LogWarning($"전투 매니저 : 자동 회복 기준 체력({thresholdHp})이 보스의 최대 한 방({bossMaxHit}) 이하라 회복 전에 쓰러질 수 있습니다.");
         }
     }
 

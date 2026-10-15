@@ -24,8 +24,6 @@ public class AttackStyleSet : AttackStyle
     [Header("패턴")]
     [SerializeField] private Entry[] _entries;
 
-    public override int MaxHitDamage { get { return GetMaxHitDamage(0); } }
-
     // 안쪽 묶음을 따라 내려가며 실제 공격 하나를 고른다. 재귀 대신 반복문이라 순환이 있어도 깊이 제한에서 멈춘다.
     public override AttackStyle PickStyle()
     {
@@ -80,31 +78,6 @@ public class AttackStyleSet : AttackStyle
         {
             Debug.LogError($"공격 스타일 묶음 : {name}이 다른 묶음을 거쳐 자기 자신을 다시 포함합니다. 패턴 목록을 확인해 주세요.", this);
         }
-    }
-
-    private int GetMaxHitDamage(int depth)
-    {
-        int maxHitDamage = 0;
-
-        if (null == _entries || depth >= MAX_NESTING_DEPTH)
-        {
-            return maxHitDamage;
-        }
-
-        for (int i = 0; i < _entries.Length; i++)
-        {
-            if (false == IsValid(_entries[i]))
-            {
-                continue;
-            }
-
-            AttackStyleSet nestedSet = _entries[i].Style as AttackStyleSet;
-            int hitDamage = null != nestedSet ? nestedSet.GetMaxHitDamage(depth + 1) : _entries[i].Style.MaxHitDamage;
-
-            maxHitDamage = Mathf.Max(maxHitDamage, hitDamage);
-        }
-
-        return maxHitDamage;
     }
 
     private void PrewarmEntries(int depth)

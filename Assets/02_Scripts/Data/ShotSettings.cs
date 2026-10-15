@@ -40,20 +40,6 @@ public class ShotSettings
     public float CriticalChance { get { return _criticalChance; } }
     public float CriticalMultiplier { get { return _criticalMultiplier; } }
 
-    // 치명타가 나올 수 없는 공격까지 배율을 곱하면 자동 회복 경고가 실제보다 크게 잡히므로 뺀다.
-    public int MaxHitDamage
-    {
-        get
-        {
-            if (0f >= _criticalChance)
-            {
-                return Damage.Max;
-            }
-
-            return Mathf.RoundToInt(Damage.Max * _criticalMultiplier);
-        }
-    }
-
     // 치명타 프리셋이 비어 있으면 일반 프리셋으로 대신한다.
     public HitFeedbackPreset GetHitFeedback(bool isCritical)
     {

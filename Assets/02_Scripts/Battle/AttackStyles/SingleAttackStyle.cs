@@ -8,8 +8,6 @@ public class SingleAttackStyle : AttackStyle
     [Header("발사체")]
     [SerializeField] private ShotSettings _shot = new();
 
-    public override int MaxHitDamage { get { return _shot.MaxHitDamage; } }
-
     public override UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
     {
         attacker.FireShot(_shot, attacker.Owner.Body.position, Vector3.zero, gaugeGain, token);

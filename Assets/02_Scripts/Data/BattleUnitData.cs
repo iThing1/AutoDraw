@@ -14,12 +14,6 @@ public class BattleUnitData : ScriptableObject
     // 떨어진 자리가 몸 중심에서 이 거리 안이면 맞는다. 몸보다 넉넉하게 준다.
     [SerializeField, Min(0f)] private float _hitRadius = 1f;
 
-    [Header("자동 회복")]
-    [SerializeField] private bool _useAutoHeal;
-    [SerializeField, Range(0f, 1f)] private float _autoHealThresholdRatio = 0.3f;
-    [SerializeField, Range(0f, 1f)] private float _autoHealTargetRatio = 0.7f;
-    [SerializeField, Min(0f)] private float _autoHealDuration = 1f;
-
     [Header("공격")]
     [SerializeField] private AttackStyle _attackStyle;
 
@@ -41,11 +35,6 @@ public class BattleUnitData : ScriptableObject
 
     public int MaxHp { get { return _maxHp; } }
     public float HitRadius { get { return _hitRadius; } }
-
-    public bool UseAutoHeal { get { return _useAutoHeal; } }
-    public float AutoHealThresholdRatio { get { return _autoHealThresholdRatio; } }
-    public float AutoHealTargetRatio { get { return _autoHealTargetRatio; } }
-    public float AutoHealDuration { get { return _autoHealDuration; } }
 
     public AttackStyle AttackStyle { get { return _attackStyle; } }
 

@@ -34,8 +34,6 @@ public class DashSlashAttackStyle : AttackStyle
     [SerializeField, Min(0f)] private float _returnDuration = 0.4f;
     [SerializeField] private Ease _returnEase = Ease.InOutSine;
 
-    public override int MaxHitDamage { get { return _hit.MaxHitDamage; } }
-
     public override void Prewarm()
     {
         if (null != _bladePrefab)

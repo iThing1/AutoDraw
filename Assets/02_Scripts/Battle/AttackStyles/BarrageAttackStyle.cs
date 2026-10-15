@@ -28,8 +28,6 @@ public class BarrageAttackStyle : AttackStyle
     [SerializeField, Min(0f)] private float _finaleDelay = 0.35f;
     [SerializeField] private ShotSettings _finaleShot = new();
 
-    public override int MaxHitDamage { get { return Mathf.Max(_turretShot.MaxHitDamage, _finaleShot.MaxHitDamage); } }
-
     // 일제사격은 끝나야 다음 공격을 하므로 포대는 위치 수만큼만 있으면 된다.
     public override void Prewarm()
     {

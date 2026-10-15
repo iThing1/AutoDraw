@@ -28,8 +28,6 @@ public class HomingMissileAttackStyle : AttackStyle
     // 투사체 관련 값은 쓰지 않고 피해·치명타·타격 프리셋만 쓴다.
     [SerializeField] private ShotSettings _hit = new();
 
-    public override int MaxHitDamage { get { return _hit.MaxHitDamage; } }
-
     // 미사일은 수명 동안 남아 있어 다음 공격과 겹칠 수 있으므로, 두 번 쏠 만큼 만들어 둔다.
     public override void Prewarm()
     {

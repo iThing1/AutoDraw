@@ -92,6 +92,17 @@ public class TimeScaleManager
         return new SlowMotionScope(this, _activeSlowMotionTicket);
     }
 
+    // 이전 슬로 모션의 using 블록이 나중에 끝나도 번호표가 0이라 다시 건드리지 않는다.
+    public void ResetToNormal()
+    {
+        _hitStopEndTime = 0f;
+        _isHitStopping = false;
+        _activeSlowMotionTicket = 0;
+        _slowTimeScale = 1f;
+
+        ApplyTimeScale();
+    }
+
     // 번호표가 지금 것과 다르면 이미 다른 연출이 덮어쓴 것이라, 그 연출의 슬로 모션이 풀리지 않게 무시한다.
     private void ClearSlowMotion(int ticket)
     {

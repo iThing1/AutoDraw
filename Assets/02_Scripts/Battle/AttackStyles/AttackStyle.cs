@@ -25,9 +25,6 @@ public abstract class AttackStyle : ScriptableObject
     public bool WaitUntilFinished { get { return _waitUntilFinished; } }
     public bool StopsMovement { get { return _stopsMovement; } }
 
-    // 한 번 맞을 때 들어올 수 있는 가장 큰 피해. 플레이어 자동 회복 기준이 충분한지 확인할 때 쓴다.
-    public abstract int MaxHitDamage { get; }
-
     // 이번 공격에 쓸 스타일. 여러 패턴을 묶은 스타일은 이 중 하나를 골라 돌려준다.
     public virtual AttackStyle PickStyle()
     {

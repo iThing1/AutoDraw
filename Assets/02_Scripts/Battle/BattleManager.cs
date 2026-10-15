@@ -34,8 +34,10 @@ public class BattleManager : MonoBehaviour
     // 비워 두면 환경 탄막 없이 보스 공격만 나온다.
     [SerializeField] private EnvironmentHazard _environmentHazard;
 
-    [Header("엔딩")]
+    [Header("결과")]
     [SerializeField] private EndingCutscene _endingCutscene;
+    [SerializeField] private DefeatCutscene _defeatCutscene;
+    [SerializeField] private ResultUI _resultPrefab;
 
     [Header("풀")]
     // 첫 공격 때 투사체가 한꺼번에 생성되며 끊기지 않도록 유닛마다 미리 만들어 둘 개수.
@@ -44,6 +46,10 @@ public class BattleManager : MonoBehaviour
     private BattleUnit _player;
     private BattleUnit _boss;
     private BattleHudUI _hud;
+    private ResultUI _result;
+
+    // 결과 화면에서 고른 것. 다시 하기·갤러리 이동은 스테이지를 만든 쪽이 처리한다.
+    public event Action<ResultChoice> OnResultChosen;
 
     private void Start()
     {
@@ -62,18 +68,25 @@ public class BattleManager : MonoBehaviour
 
         GameManager.CameraRig.FollowPlayer(_player.transform);
 
-        WarnIfAutoHealCannotSave();
-
         RunAsync(destroyCancellationToken).Forget();
     }
 
-    // 카메라 리그는 스테이지보다 오래 남아 경계를 풀어 둔다. 게임을 끌 때는 게임 매니저가 먼저 사라질 수 있다.
+    // 카메라 리그와 UI는 스테이지보다 오래 남아, 이 스테이지가 쓰던 경계와 화면을 정리한다.
+    // 게임을 끌 때는 게임 매니저가 먼저 사라질 수 있다.
     private void OnDestroy()
     {
-        if (null != _stageBounds && null != GameManager.Instance && null != GameManager.CameraRig)
+        if (null == GameManager.Instance)
+        {
+            return;
+        }
+
+        if (null != _stageBounds && null != GameManager.CameraRig)
         {
             GameManager.CameraRig.ClearCameraBounds();
         }
+
+        GameManager.UI.Close(_hud);
+        GameManager.UI.Close(_result);
     }
 
     private bool HasRequiredReferences()
@@ -89,6 +102,8 @@ public class BattleManager : MonoBehaviour
             && IsAssigned(_paintCanvas, nameof(_paintCanvas))
             && IsAssigned(_hudPrefab, nameof(_hudPrefab))
             && IsAssigned(_endingCutscene, nameof(_endingCutscene))
+            && IsAssigned(_defeatCutscene, nameof(_defeatCutscene))
+            && IsAssigned(_resultPrefab, nameof(_resultPrefab))
             && IsAssigned(GameManager.CameraRig, nameof(GameManager.CameraRig))
             && IsAssigned(GameManager.UI.Cinematic, nameof(GameManager.UI.Cinematic));
 
@@ -108,7 +123,8 @@ public class BattleManager : MonoBehaviour
         return _introCutscene.HasRequiredReferences()
             && GameManager.CameraRig.HasRequiredReferences()
             && _paintCanvas.HasRequiredReferences()
-            && _endingCutscene.HasRequiredReferences();
+            && _endingCutscene.HasRequiredReferences()
+            && _defeatCutscene.HasRequiredReferences();
     }
 
     // System.Object와 이름이 겹쳐 UnityEngine.Object로 적는다. Unity 오브젝트 타입으로 받아야 파괴된 오브젝트도 null로 본다.
@@ -154,6 +170,8 @@ public class BattleManager : MonoBehaviour
         {
             _environmentHazard.Prewarm(_boss.Data.ProjectilePrefab);
         }
+
+        _defeatCutscene.Prewarm();
     }
 
     private void PrewarmUnit(BattleUnit unit)
@@ -176,26 +194,6 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    // 자동 회복은 맞은 직후 기준선 아래인지로 시작하므로, 기준선 체력이 보스의 최대 한 방보다 낮으면 회복 전에 쓰러질 수 있다.
-    private void WarnIfAutoHealCannotSave()
-    {
-        BattleUnitData playerData = _player.Data;
-        BattleUnitData bossData = _boss.Data;
-
-        if (null == playerData || null == bossData || null == bossData.AttackStyle || false == playerData.UseAutoHeal)
-        {
-            return;
-        }
-
-        int thresholdHp = Mathf.RoundToInt(playerData.MaxHp * playerData.AutoHealThresholdRatio);
-        int bossMaxHit = bossData.AttackStyle.MaxHitDamage;
-
-        if (thresholdHp <= bossMaxHit)
-        {
-            Debug.LogWarning($"전투 매니저 : 자동 회복 기준 체력({thresholdHp})이 보스의 최대 한 방({bossMaxHit}) 이하라 회복 전에 쓰러질 수 있습니다.");
-        }
-    }
-
     private async UniTaskVoid RunAsync(CancellationToken token)
     {
         try
@@ -203,11 +201,23 @@ public class BattleManager : MonoBehaviour
             await PlayApproachAsync(token);
             await PlayIntroAsync(token);
             bool isBossDefeated = await PlayBattleAsync(token);
+            ResultTitleSettings resultTitle;
 
             if (isBossDefeated)
             {
                 await PlayEndingAsync(token);
+                resultTitle = _endingCutscene.ResultTitle;
             }
+            else
+            {
+                await PlayDefeatAsync(token);
+                resultTitle = _defeatCutscene.ResultTitle;
+            }
+
+            _result = GameManager.UI.Open(_resultPrefab, UILayer.Overlay);
+            ResultChoice choice = await _result.PlayAsync(resultTitle, token);
+
+            OnResultChosen?.Invoke(choice);
         }
         catch (OperationCanceledException)
         {
@@ -268,13 +278,7 @@ public class BattleManager : MonoBehaviour
             _player.ChangeState(UnitState.Idle);
             _boss.ChangeState(UnitState.Idle);
 
-            if (1 == defeatedIndex)
-            {
-                Debug.LogWarning("전투 매니저 : 플레이어가 먼저 쓰러졌습니다. PlayerData의 자동 회복 설정을 확인해 주세요.");
-                return false;
-            }
-
-            return true;
+            return 0 == defeatedIndex;
         }
     }
 
@@ -340,12 +344,42 @@ public class BattleManager : MonoBehaviour
             _endingCutscene.PlayAsync(_boss, _paintCanvas, token));
     }
 
+    private async UniTask PlayDefeatAsync(CancellationToken token)
+    {
+        await UniTask.WhenAll(
+            CloseHudAsync(token),
+            _defeatCutscene.PlayAsync(_player, _paintCanvas, token));
+    }
+
     private async UniTask CloseHudAsync(CancellationToken token)
     {
         await _hud.HideAsync(token);
 
         GameManager.UI.Close(_hud);
         _hud = null;
+    }
+
+    // 플레이어는 자동 회복 때문에 거의 쓰러지지 않아, 플레이 중 컴포넌트 우클릭 메뉴로 결과 흐름을 바로 확인한다.
+    [ContextMenu("테스트/플레이어 처치")]
+    private void KillPlayerForTest()
+    {
+        KillForTest(_player);
+    }
+
+    [ContextMenu("테스트/보스 처치")]
+    private void KillBossForTest()
+    {
+        KillForTest(_boss);
+    }
+
+    private void KillForTest(BattleUnit unit)
+    {
+        if (null == unit || unit.Health.IsDead)
+        {
+            return;
+        }
+
+        unit.Health.TakeDamage(new DamageInfo { Amount = unit.Health.CurrentHp, HitPoint = unit.Body.position });
     }
 
     // 여백을 바꿀 때 유닛별 이동 범위를 씬 뷰에서 바로 확인하기 위해 그린다. 하늘색은 플레이어, 빨간색은 보스다.

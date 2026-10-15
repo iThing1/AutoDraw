@@ -286,7 +286,6 @@ GameObject:
   - component: {fileID: -7785593189395216596}
   - component: {fileID: 5747795057357951753}
   - component: {fileID: 8650631995990055002}
-  - component: {fileID: 3753704952995598723}
   - component: {fileID: 5628677625872867307}
   - component: {fileID: 6769664501310300376}
   - component: {fileID: 4450831803582169860}
@@ -405,18 +404,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6be39f33851314543b051ef486f854d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AutoAttacker
---- !u!114 &3753704952995598723
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9124088967955213027}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15d39c1991ac4ab4d893348de97986c6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AutoHeal
 --- !u!114 &5628677625872867307
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -148,6 +148,9 @@ public class BattleCameraRig : MonoBehaviour
         // 생성 위치에서 플레이어 위치까지 감쇠로 미끄러져 오지 않도록 첫 프레임은 바로 맞춘다.
         _playerCamera.PreviousStateIsValid = false;
 
+        // 엔딩·패배 연출이 켜 둔 채로 다시 시작할 수 있다.
+        _brain.IgnoreTimeScale = false;
+
         _gameplayCamera = _playerCamera;
         SetActiveCamera(_playerCamera, 0f);
     }

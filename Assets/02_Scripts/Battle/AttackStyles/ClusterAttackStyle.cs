@@ -12,8 +12,6 @@ public class ClusterAttackStyle : AttackStyle
     [Header("파편")]
     [SerializeField] private ClusterSettings _cluster = new();
 
-    public override int MaxHitDamage { get { return _cluster.Fragment.MaxHitDamage; } }
-
     // 덩어리가 공중의 분열 지점까지 날아가 터지고, 조각들이 시간차를 두고 목표 주변으로 쏟아진다.
     public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
     {

@@ -13,6 +13,40 @@ public class PoolManager
         _root = new GameObject("PoolRoot").transform;
     }
 
+    // 스테이지 아래에 붙여 쓰던 오브젝트(물감 자국·포대)는 스테이지와 함께 파괴되어 기록에서 지운다.
+    public void RemoveDestroyed()
+    {
+        foreach (Queue<GameObject> pool in _pools.Values)
+        {
+            int count = pool.Count;
+
+            for (int i = 0; i < count; i++)
+            {
+                GameObject instance = pool.Dequeue();
+
+                if (null != instance)
+                {
+                    pool.Enqueue(instance);
+                }
+            }
+        }
+
+        List<GameObject> destroyedInstances = new List<GameObject>();
+
+        foreach (GameObject instance in _prefabByInstance.Keys)
+        {
+            if (null == instance)
+            {
+                destroyedInstances.Add(instance);
+            }
+        }
+
+        for (int i = 0; i < destroyedInstances.Count; i++)
+        {
+            _prefabByInstance.Remove(destroyedInstances[i]);
+        }
+    }
+
     public void Prewarm(GameObject prefab, int count)
     {
         Queue<GameObject> pool = GetPool(prefab);

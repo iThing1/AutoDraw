@@ -10,6 +10,12 @@ public class Letterbox : MonoBehaviour
 
     private void Awake()
     {
+        HideImmediately();
+    }
+
+    // 패배 연출은 레터박스를 내리지 않고 결과 화면으로 넘어간다.
+    public void HideImmediately()
+    {
         _top.anchorMin = GetTopAnchorMin(0f);
         _bottom.anchorMax = GetBottomAnchorMax(0f);
     }

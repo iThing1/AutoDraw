@@ -14,8 +14,6 @@ public class BurstAttackStyle : AttackStyle
     [SerializeField] private IntRange _shotCount = new(3, 3);
     [SerializeField, Min(0f)] private float _burstInterval = 0.08f;
 
-    public override int MaxHitDamage { get { return _shot.MaxHitDamage; } }
-
     public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
     {
         int shotCount = Mathf.Max(1, _shotCount.PickRandom());

@@ -46,6 +46,7 @@ public class BattleManager : MonoBehaviour
     private BattleUnit _player;
     private BattleUnit _boss;
     private BattleHudUI _hud;
+    private ResultUI _result;
 
     // 결과 화면에서 고른 것. 다시 하기·갤러리 이동은 스테이지를 만든 쪽이 처리한다.
     public event Action<ResultChoice> OnResultChosen;
@@ -72,13 +73,22 @@ public class BattleManager : MonoBehaviour
         RunAsync(destroyCancellationToken).Forget();
     }
 
-    // 카메라 리그는 스테이지보다 오래 남아 경계를 풀어 둔다. 게임을 끌 때는 게임 매니저가 먼저 사라질 수 있다.
+    // 카메라 리그와 UI는 스테이지보다 오래 남아, 이 스테이지가 쓰던 경계와 화면을 정리한다.
+    // 게임을 끌 때는 게임 매니저가 먼저 사라질 수 있다.
     private void OnDestroy()
     {
-        if (null != _stageBounds && null != GameManager.Instance && null != GameManager.CameraRig)
+        if (null == GameManager.Instance)
+        {
+            return;
+        }
+
+        if (null != _stageBounds && null != GameManager.CameraRig)
         {
             GameManager.CameraRig.ClearCameraBounds();
         }
+
+        GameManager.UI.Close(_hud);
+        GameManager.UI.Close(_result);
     }
 
     private bool HasRequiredReferences()
@@ -224,8 +234,8 @@ public class BattleManager : MonoBehaviour
                 resultTitle = _defeatCutscene.ResultTitle;
             }
 
-            ResultUI result = GameManager.UI.Open(_resultPrefab, UILayer.Overlay);
-            ResultChoice choice = await result.PlayAsync(resultTitle, token);
+            _result = GameManager.UI.Open(_resultPrefab, UILayer.Overlay);
+            ResultChoice choice = await _result.PlayAsync(resultTitle, token);
 
             OnResultChosen?.Invoke(choice);
         }

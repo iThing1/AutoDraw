@@ -328,6 +328,8 @@ MonoBehaviour:
   _endingCutscene: {fileID: 5973427622324177786}
   _defeatCutscene: {fileID: 6620314580213354001}
   _resultPrefab: {fileID: 1836262863735427526, guid: eb85a1febf1f4e8458132fe0bc7fab17, type: 3}
+  _bgm: {fileID: 8300000, guid: 03952403bb4fcc345bd0685d21aa33c3, type: 3}
+  _bgmFadeDuration: 1
   _projectilePrewarmCount: 20
 --- !u!114 &1946385720461831234
 MonoBehaviour:

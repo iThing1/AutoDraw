@@ -22,6 +22,10 @@ public class GameManager : SingletonBehaviour<GameManager>
     [Header("프리팹")]
     [SerializeField] private CinematicUI _cinematicUIPrefab;
 
+    [Header("사운드")]
+    // 효과음(1)보다 낮게 깔아 타격음·경고음이 묻히지 않게 한다.
+    [SerializeField, Range(0f, 1f)] private float _bgmVolume = 0.5f;
+
     private SoundManager _soundManager = new();
     private UIManager _uiManager = new();
     private PoolManager _poolManager = new();
@@ -39,7 +43,7 @@ public class GameManager : SingletonBehaviour<GameManager>
 
         DOTween.SetTweensCapacity(TWEENERS_CAPACITY, SEQUENCES_CAPACITY);
 
-        _soundManager.Init(gameObject);
+        _soundManager.Init(gameObject, _bgmVolume);
         _poolManager.Init();
         _timeScaleManager.Init(destroyCancellationToken);
 

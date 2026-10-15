@@ -39,6 +39,11 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private DefeatCutscene _defeatCutscene;
     [SerializeField] private ResultUI _resultPrefab;
 
+    [Header("사운드")]
+    // 보스가 나올 때 틀고, 승패가 나면 줄여 끈다.
+    [SerializeField] private AudioClip _bgm;
+    [SerializeField, Min(0f)] private float _bgmFadeDuration = 1f;
+
     [Header("풀")]
     // 첫 공격 때 투사체가 한꺼번에 생성되며 끊기지 않도록 유닛마다 미리 만들어 둘 개수.
     [SerializeField, Min(0)] private int _projectilePrewarmCount = 20;
@@ -203,6 +208,7 @@ public class BattleManager : MonoBehaviour
             await PlayApproachAsync(token);
             await PlayIntroAsync(token);
             bool isBossDefeated = await PlayBattleAsync(token);
+            GameManager.Sound.StopBgm(_bgmFadeDuration);
             ResultTitleSettings resultTitle;
 
             if (isBossDefeated)
@@ -241,6 +247,7 @@ public class BattleManager : MonoBehaviour
 
     private async UniTask PlayIntroAsync(CancellationToken token)
     {
+        GameManager.Sound.PlayBgm(_bgm, _bgmFadeDuration);
         GameManager.CameraRig.PrepareBattleFraming(_player, _boss);
 
         await _introCutscene.PlayAsync(_boss, _bossSpawnPoint, token);

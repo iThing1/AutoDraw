@@ -38,6 +38,12 @@ public class BattleCameraRig : MonoBehaviour
 
     public Camera OutputCamera { get { return _brain.OutputCamera; } }
 
+    // 브레인의 OutputCamera는 게임 시작 직후 비어 있을 수 있어 같은 오브젝트의 카메라를 직접 찾는다.
+    public void SetOutputEnabled(bool isEnabled)
+    {
+        _brain.GetComponent<Camera>().enabled = isEnabled;
+    }
+
     // Confiner2D는 효율 때문에 줌 변화를 스스로 반영하지 않는다. 전투 카메라는 두 유닛을 담으려고 줌이 계속 바뀌므로 직접 알린다.
     private void LateUpdate()
     {

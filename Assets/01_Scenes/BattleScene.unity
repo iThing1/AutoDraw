@@ -1018,7 +1018,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 625212ddec6d4d2ea8e736e409ecb85f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapSpawner
-  _battleStagePrefab: {fileID: 2969957242831443143, guid: f69c14c14a264e3429d4d59d17eddbb3, type: 3}
+  _galleryPrefab: {fileID: 5810000000000000000, guid: 289285181b0049d18d617d1529740a2a, type: 3}
+  _startInStage: 0
+  _testStage: {fileID: 11400000, guid: 471b5d067c364a6f809fde2e0ed82b1b, type: 2}
 --- !u!4 &2132573752
 Transform:
   m_ObjectHideFlags: 0

@@ -983,6 +983,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2132573752}
   - component: {fileID: 2132573751}
+  - component: {fileID: 2132573753}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1004,7 +1005,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   _cameraRig: {fileID: 1938150102}
   _cinematicUIPrefab: {fileID: 6658607233805704159, guid: 2b193404ac6794343b9d5fa875708906, type: 3}
-  _battleStagePrefab: {fileID: 2969957242831443143, guid: f69c14c14a264e3429d4d59d17eddbb3, type: 3}
+  _mapSpawner: {fileID: 2132573753}
+--- !u!114 &2132573753
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2132573750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 625212ddec6d4d2ea8e736e409ecb85f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MapSpawner
+  _galleryPrefab: {fileID: 5810000000000000000, guid: 289285181b0049d18d617d1529740a2a, type: 3}
+  _startInStage: 0
+  _testStage: {fileID: 11400000, guid: 471b5d067c364a6f809fde2e0ed82b1b, type: 2}
 --- !u!4 &2132573752
 Transform:
   m_ObjectHideFlags: 0

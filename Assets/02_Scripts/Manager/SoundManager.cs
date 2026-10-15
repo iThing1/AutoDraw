@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 
 public class SoundManager
@@ -8,7 +9,12 @@ public class SoundManager
     private AudioSource[] _sfxSources;
     private int _nextSourceIndex;
 
-    public void Init(GameObject owner)
+    private AudioSource _bgmSource;
+    private float _bgmVolume;
+    // 지금 곡을 줄인 뒤 바꿔 틀 곡.
+    private AudioClip _nextBgm;
+
+    public void Init(GameObject owner, float bgmVolume)
     {
         _sfxSources = new AudioSource[SFX_SOURCE_COUNT];
 
@@ -19,6 +25,12 @@ public class SoundManager
 
             _sfxSources[i] = source;
         }
+
+        _bgmVolume = bgmVolume;
+        _bgmSource = owner.AddComponent<AudioSource>();
+        _bgmSource.playOnAwake = false;
+        _bgmSource.loop = true;
+        _bgmSource.volume = 0f;
     }
 
     public void PlaySfx(AudioClip clip)
@@ -39,6 +51,52 @@ public class SoundManager
         source.clip = clip;
         source.pitch = pitch;
         source.Play();
+    }
+
+    // 히트 스톱·슬로 모션 중에도 정해진 시간에 바뀌도록 시간 배율을 무시한다.
+    // 같은 곡이 이미 나오고 있으면 처음부터 다시 틀지 않고 볼륨만 되돌린다.
+    public void PlayBgm(AudioClip clip, float fadeDuration)
+    {
+        if (null == clip || null == _bgmSource)
+        {
+            return;
+        }
+
+        _bgmSource.DOKill();
+
+        if (clip == _bgmSource.clip && _bgmSource.isPlaying)
+        {
+            _bgmSource.DOFade(_bgmVolume, fadeDuration).SetUpdate(true);
+            return;
+        }
+
+        _nextBgm = clip;
+
+        DOTween.Sequence()
+            .Append(_bgmSource.DOFade(0f, fadeDuration))
+            .AppendCallback(SwapBgm)
+            .Append(_bgmSource.DOFade(_bgmVolume, fadeDuration))
+            .SetTarget(_bgmSource)
+            .SetUpdate(true);
+    }
+
+    public void StopBgm(float fadeDuration)
+    {
+        if (null == _bgmSource)
+        {
+            return;
+        }
+
+        _bgmSource.DOKill();
+        _bgmSource.DOFade(0f, fadeDuration)
+            .SetUpdate(true)
+            .OnComplete(_bgmSource.Stop);
+    }
+
+    private void SwapBgm()
+    {
+        _bgmSource.clip = _nextBgm;
+        _bgmSource.Play();
     }
 
     // 쉬고 있는 소스를 먼저 쓰고, 모두 재생 중이면 다음 차례 소스의 소리를 끊고 쓴다.

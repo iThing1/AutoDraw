@@ -29,7 +29,6 @@ public class ResultUI : MonoBehaviour
     [Header("버튼")]
     [SerializeField] private CanvasGroup _buttonGroup;
     [SerializeField] private Button _retryButton;
-    // 갤러리가 생기기 전까지는 프리팹에서 꺼 둔다.
     [SerializeField] private Button _galleryButton;
     [SerializeField, Min(0f)] private float _buttonFadeDuration = 0.3f;
 

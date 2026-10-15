@@ -1,5 +1,7 @@
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class BattleCameraRig : MonoBehaviour
 {
@@ -35,6 +37,12 @@ public class BattleCameraRig : MonoBehaviour
     private CinemachineCamera _overviewCamera;
 
     public Camera OutputCamera { get { return _brain.OutputCamera; } }
+
+    // 브레인의 OutputCamera는 게임 시작 직후 비어 있을 수 있어 같은 오브젝트의 카메라를 직접 찾는다.
+    public void SetOutputEnabled(bool isEnabled)
+    {
+        _brain.GetComponent<Camera>().enabled = isEnabled;
+    }
 
     // Confiner2D는 효율 때문에 줌 변화를 스스로 반영하지 않는다. 전투 카메라는 두 유닛을 담으려고 줌이 계속 바뀌므로 직접 알린다.
     private void LateUpdate()
@@ -108,6 +116,46 @@ public class BattleCameraRig : MonoBehaviour
         _confinedCameras = null;
         _confiners = null;
         _lastOrthoSizes = null;
+    }
+
+    // 오버레이 UI는 카메라 그림에 들어가지 않아 그림만 찍힌다. 경계가 없으면 null이다.
+    // 화면 비율과 상관없이 종이가 그림에 꼭 맞도록, 찍는 동안만 카메라 자리와 크기를 바꾼다.
+    public Texture2D CaptureStage(int width, int height)
+    {
+        if (null == _cameraBounds)
+        {
+            return null;
+        }
+
+        Camera camera = _brain.GetComponent<Camera>();
+        Transform cameraTransform = camera.transform;
+        Vector3 position = cameraTransform.position;
+        float orthographicSize = camera.orthographicSize;
+        Bounds bounds = _cameraBounds.bounds;
+        float aspect = (float)width / height;
+
+        cameraTransform.position = new Vector3(bounds.center.x, bounds.center.y, position.z);
+        camera.orthographicSize = Mathf.Max(bounds.extents.y, bounds.extents.x / aspect);
+        camera.aspect = aspect;
+
+        RenderTexture target = RenderTexture.GetTemporary(width, height, 24);
+        RenderPipeline.SubmitRenderRequest(camera, new UniversalRenderPipeline.SingleCameraRequest { destination = target });
+
+        cameraTransform.position = position;
+        camera.orthographicSize = orthographicSize;
+        camera.ResetAspect();
+
+        RenderTexture previousActive = RenderTexture.active;
+        RenderTexture.active = target;
+
+        // 찍은 그림은 파일로 저장하고 바로 지우므로, GPU로 다시 올리는 Apply는 하지 않는다.
+        Texture2D painting = new Texture2D(width, height, TextureFormat.RGB24, false);
+        painting.ReadPixels(new Rect(0f, 0f, width, height), 0, 0);
+
+        RenderTexture.active = previousActive;
+        RenderTexture.ReleaseTemporary(target);
+
+        return painting;
     }
 
     // 엔딩 슬로 모션 중에도 정해진 시간에 끝나도록 시간 배율을 무시한다.

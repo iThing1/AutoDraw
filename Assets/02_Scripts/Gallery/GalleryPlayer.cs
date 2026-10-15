@@ -41,6 +41,7 @@ public class GalleryPlayer : MonoBehaviour
 
     // HUD에 보여 줄 상호작용 키 이름. 입력 에셋에서 키를 바꾸면 따라 바뀐다.
     public string InteractKeyLabel { get { return _interactAction.GetKeyLabel(); } }
+    public bool IsControlEnabled { get { return _isControlEnabled; } }
 
     private void Awake()
     {
@@ -124,6 +125,25 @@ public class GalleryPlayer : MonoBehaviour
         Sequence move = DOTween.Sequence()
             .Join(_camera.DOMove(viewPoint.position, duration))
             .Join(_camera.DORotateQuaternion(viewPoint.rotation, duration))
+            .SetEase(ease);
+
+        return move.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+    }
+
+    // 돌아올 때 그림 앞에서 시작해 서 있던 자리로 물러나도록, 카메라만 액자 앞에 먼저 둔다.
+    public void PlaceCameraAt(Transform viewPoint)
+    {
+        _camera.DOKill();
+        _camera.SetPositionAndRotation(viewPoint.position, viewPoint.rotation);
+    }
+
+    public UniTask MoveCameraHomeAsync(float duration, Ease ease, CancellationToken token)
+    {
+        _camera.DOKill();
+
+        Sequence move = DOTween.Sequence()
+            .Join(_camera.DOLocalMove(_cameraHomePosition, duration))
+            .Join(_camera.DOLocalRotateQuaternion(Quaternion.Euler(_pitch, 0f, 0f), duration))
             .SetEase(ease);
 
         return move.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);

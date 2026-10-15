@@ -1,4 +1,5 @@
 using DG.Tweening;
+using TMPro;
 using UnityEngine;
 
 // 갤러리 벽의 액자. 스테이지가 비어 있으면 천으로 덮인 잠긴 액자이고, 깬 스테이지는 완성된 그림으로 바뀐다.
@@ -18,6 +19,10 @@ public class GalleryFrame : MonoBehaviour
     [SerializeField] private Color _highlightColor = new Color(0.85f, 0.65f, 0.3f, 1f);
     // 들어갈 때 카메라가 다가가 멈추는 자리. 그림이 화면을 거의 채우는 거리에 둔다.
     [SerializeField] private Transform _viewPoint;
+
+    [Header("이름표")]
+    [SerializeField] private TMP_Text _nameplate;
+    [SerializeField] private string _clearedNameplateFormat = "{0}\n<size=60%>CLEARED</size>";
 
     [Header("잠김")]
     [SerializeField, Min(0f)] private float _lockedShakeDuration = 0.3f;
@@ -44,7 +49,7 @@ public class GalleryFrame : MonoBehaviour
         ReleaseSavedPainting();
     }
 
-    // 깨기 전에는 빈 도화지를, 깬 뒤에는 그 판에서 칠해 찍어 둔 그림을 건다.
+    // 깨기 전에는 빈 도화지를, 깬 뒤에는 마지막으로 깬 판에서 칠해 찍어 둔 그림을 건다. 이름표에도 깼는지 적는다.
     public void Refresh()
     {
         _cloth.SetActive(IsLocked);
@@ -52,6 +57,7 @@ public class GalleryFrame : MonoBehaviour
 
         if (IsLocked)
         {
+            _nameplate.text = LOCKED_LABEL;
             return;
         }
 
@@ -59,11 +65,15 @@ public class GalleryFrame : MonoBehaviour
         _savedPainting = PaintingStorage.Load(_stage);
 
         Texture painting = _stage.BlankCanvas;
+        string nameplate = _stage.DisplayName;
 
         if (null != _savedPainting)
         {
             painting = _savedPainting;
+            nameplate = string.Format(_clearedNameplateFormat, _stage.DisplayName);
         }
+
+        _nameplate.text = nameplate;
 
         // 액자마다 그림만 다르므로 재질은 하나를 함께 쓰고 그림만 따로 넣는다.
         _painting.GetPropertyBlock(_propertyBlock);

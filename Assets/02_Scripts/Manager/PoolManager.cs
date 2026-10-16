@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class PoolManager
 {
-    private Dictionary<GameObject, Queue<GameObject>> _pools = new();
-    private Dictionary<GameObject, GameObject> _prefabByInstance = new();
+    private readonly Dictionary<GameObject, Queue<GameObject>> _pools = new();
+    private readonly Dictionary<GameObject, GameObject> _prefabByInstance = new();
 
     private Transform _root;
 

@@ -30,7 +30,7 @@ public class EndingPreset : ScriptableObject
     [SerializeField] private Vector2Int _paintingSize = new Vector2Int(1280, 720);
 
     [Header("스테이지 클리어 문구")]
-    [SerializeField] private ResultTitleSettings _stageClear = new();
+    [SerializeField] private ResultTitleSettings _resultTitle = new();
 
     public float OverviewBlendDuration { get { return _overviewBlendDuration; } }
     public float OverviewPadding { get { return _overviewPadding; } }
@@ -48,5 +48,5 @@ public class EndingPreset : ScriptableObject
     public FloatRange InkFadeDelay { get { return _inkFadeDelay; } }
     public Ease InkFadeEase { get { return _inkFadeEase; } }
 
-    public ResultTitleSettings StageClear { get { return _stageClear; } }
+    public ResultTitleSettings ResultTitle { get { return _resultTitle; } }
 }

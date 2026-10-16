@@ -13,6 +13,15 @@ public static class InputActionExtensions
         return actionReference.action.GetBindingDisplayString(0);
     }
 
+    // 입력이 연결되지 않았으면 아무 일도 하지 않는다. 연결 누락은 쓰는 쪽이 따로 알린다.
+    public static void Enable(this InputActionReference actionReference)
+    {
+        if (null != actionReference)
+        {
+            actionReference.action.Enable();
+        }
+    }
+
     public static bool WasPressedThisFrame(this InputActionReference actionReference)
     {
         return null != actionReference && actionReference.action.WasPressedThisFrame();

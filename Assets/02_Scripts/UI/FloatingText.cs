@@ -2,7 +2,8 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 
-public class DamageText : MonoBehaviour
+// HUD에 잠깐 떠올랐다 사라지는 글자 하나. 피해 숫자와 짧은 문구(GUARD·NO INK·BREAK)를 같은 연출로 띄우고 풀로 돌아간다.
+public class FloatingText : MonoBehaviour
 {
     [SerializeField] private TMP_Text _text;
     [SerializeField] private CanvasGroup _canvasGroup;
@@ -24,7 +25,7 @@ public class DamageText : MonoBehaviour
         _sequence?.Kill();
     }
 
-    public void Play(int amount, bool isCritical, Vector2 screenPosition, DamageTextSettings settings)
+    public void Play(int amount, bool isCritical, Vector2 screenPosition, FloatingTextSettings settings)
     {
         // int를 문자열로 바꾸지 않고 TMP가 직접 숫자를 채워, 타격마다 문자열이 새로 생기지 않게 한다.
         _text.SetText("{0}", amount);
@@ -35,14 +36,14 @@ public class DamageText : MonoBehaviour
         Pop(color, scale, screenPosition, settings);
     }
 
-    public void PlayText(string text, Color color, Vector2 screenPosition, DamageTextSettings settings)
+    public void PlayText(string text, Color color, Vector2 screenPosition, FloatingTextSettings settings)
     {
         _text.SetText(text);
 
         Pop(color, settings.NormalScale, screenPosition, settings);
     }
 
-    private void Pop(Color color, float scale, Vector2 screenPosition, DamageTextSettings settings)
+    private void Pop(Color color, float scale, Vector2 screenPosition, FloatingTextSettings settings)
     {
         _text.color = color;
         _canvasGroup.alpha = 1f;

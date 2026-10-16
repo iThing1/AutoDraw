@@ -22,10 +22,11 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
     [SerializeField] private AttackSlotView _skillSlot;
     [SerializeField] private AttackSlotView _guardSlot;
 
-    [Header("데미지 숫자")]
-    [SerializeField] private RectTransform _damageTextRoot;
-    [SerializeField] private GameObject _damageTextPrefab;
-    [SerializeField] private DamageTextSettings _damageText = new();
+    [Header("떠오르는 문구")]
+    // 피해 숫자와 GUARD·NO INK·BREAK 같은 짧은 문구를 같은 프리팹으로 띄운다.
+    [SerializeField] private RectTransform _floatingTextRoot;
+    [SerializeField] private GameObject _floatingTextPrefab;
+    [SerializeField] private FloatingTextSettings _floatingText = new();
 
     [Header("표시")]
     [SerializeField, Min(0f)] private float _fadeDuration = 0.3f;
@@ -151,24 +152,24 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
 
     private void SpawnDamageText(DamageInfo damage)
     {
-        DamageText damageText = SpawnText();
+        FloatingText floatingText = SpawnText();
 
-        if (null != damageText)
+        if (null != floatingText)
         {
-            damageText.Play(damage.Amount, damage.IsCritical, ToScreen(damage.HitPoint), _damageText);
+            floatingText.Play(damage.Amount, damage.IsCritical, ToScreen(damage.HitPoint), _floatingText);
         }
     }
 
     private void SpawnFloatingText(FloatingTextKind kind, Vector3 worldPosition)
     {
-        DamageText damageText = SpawnText();
+        FloatingText floatingText = SpawnText();
 
-        if (null == damageText)
+        if (null == floatingText)
         {
             return;
         }
 
-        damageText.PlayText(GetFloatingText(kind), GetFloatingColor(kind), ToScreen(worldPosition), _damageText);
+        floatingText.PlayText(GetFloatingText(kind), GetFloatingColor(kind), ToScreen(worldPosition), _floatingText);
     }
 
     private string GetFloatingText(FloatingTextKind kind)
@@ -176,16 +177,16 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
         switch (kind)
         {
             case FloatingTextKind.Guard:
-                return _damageText.GuardText;
+                return _floatingText.GuardText;
 
             case FloatingTextKind.NoGauge:
-                return _damageText.NoGaugeText;
+                return _floatingText.NoGaugeText;
 
             case FloatingTextKind.GimmickClear:
-                return _damageText.GimmickClearText;
+                return _floatingText.GimmickClearText;
 
             default:
-                return _damageText.GimmickFailText;
+                return _floatingText.GimmickFailText;
         }
     }
 
@@ -194,27 +195,27 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
         switch (kind)
         {
             case FloatingTextKind.Guard:
-                return _damageText.GuardColor;
+                return _floatingText.GuardColor;
 
             case FloatingTextKind.NoGauge:
-                return _damageText.NoGaugeColor;
+                return _floatingText.NoGaugeColor;
 
             case FloatingTextKind.GimmickClear:
-                return _damageText.GimmickClearColor;
+                return _floatingText.GimmickClearColor;
 
             default:
-                return _damageText.GimmickFailColor;
+                return _floatingText.GimmickFailColor;
         }
     }
 
-    private DamageText SpawnText()
+    private FloatingText SpawnText()
     {
-        if (null == _damageTextPrefab)
+        if (null == _floatingTextPrefab)
         {
             return null;
         }
 
-        return GameManager.Pool.Spawn(_damageTextPrefab, _damageTextRoot).GetComponent<DamageText>();
+        return GameManager.Pool.Spawn(_floatingTextPrefab, _floatingTextRoot).GetComponent<FloatingText>();
     }
 
     private Vector2 ToScreen(Vector3 worldPosition)

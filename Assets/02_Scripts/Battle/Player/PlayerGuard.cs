@@ -51,10 +51,7 @@ public class PlayerGuard : MonoBehaviour
     {
         _unit.OnBlocked += HandleBlocked;
 
-        if (null != _guardAction)
-        {
-            _guardAction.action.Enable();
-        }
+        _guardAction.Enable();
     }
 
     private void OnDisable()

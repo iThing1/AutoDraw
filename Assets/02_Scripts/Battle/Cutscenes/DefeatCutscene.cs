@@ -6,7 +6,7 @@ public class DefeatCutscene : MonoBehaviour
 {
     [SerializeField] private DefeatPreset _preset;
 
-    public ResultTitleSettings ResultTitle { get { return _preset.Title; } }
+    public ResultTitleSettings ResultTitle { get { return _preset.ResultTitle; } }
 
     public bool HasRequiredReferences()
     {

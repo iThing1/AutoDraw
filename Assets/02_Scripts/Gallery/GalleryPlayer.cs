@@ -63,9 +63,9 @@ public class GalleryPlayer : MonoBehaviour
             return;
         }
 
-        _moveAction.action.Enable();
-        _lookAction.action.Enable();
-        _interactAction.action.Enable();
+        _moveAction.Enable();
+        _lookAction.Enable();
+        _interactAction.Enable();
     }
 
     private void Update()

@@ -149,7 +149,7 @@ GameObject:
   - component: {fileID: 6532674498309245764}
   - component: {fileID: 4122802287786723635}
   m_Layer: 0
-  m_Name: DamageText
+  m_Name: FloatingText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -198,6 +198,6 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 406978fd05fe2c84b827ac6678490697, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DamageText
+  m_EditorClassIdentifier: Assembly-CSharp::FloatingText
   _text: {fileID: 2430614955977947622}
   _canvasGroup: {fileID: 6532674498309245764}

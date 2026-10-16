@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfe8f9cbb80f4d0fb428f2681541854d, type: 3}
+  m_Name: Boss2_Phase2
+  m_EditorClassIdentifier: Assembly-CSharp::BossPhaseData
+  _hpRatio: 0.8
+  _attackStyle: {fileID: 11400000, guid: f77d3fa9a124b07641f6bc2d52435961, type: 2}
+  _colorSegments:
+  - _from: {r: 0.06, g: 0.06, b: 0.06, a: 1}
+    _to: {r: 0.04, g: 0.04, b: 0.04, a: 1}
+  - _from: {r: 0.03, g: 0.03, b: 0.03, a: 1}
+    _to: {r: 0.02, g: 0.02, b: 0.02, a: 1}
+  - _from: {r: 0.015, g: 0.015, b: 0.015, a: 1}
+    _to: {r: 0, g: 0, b: 0, a: 1}
+  _gimmickLines:
+  - _hpRatio: 0.66
+    _gimmick: {fileID: 11400000, guid: 3c8ffb34a8a240c0b129766bfc0629cf, type: 2}
+  - _hpRatio: 0.33
+    _gimmick: {fileID: 11400000, guid: 526864677e1257bfd23e0981cf51625e, type: 2}
+  _bannerTitle: INK AWAKENED
+  _bannerSubtitle: The canvas turns black

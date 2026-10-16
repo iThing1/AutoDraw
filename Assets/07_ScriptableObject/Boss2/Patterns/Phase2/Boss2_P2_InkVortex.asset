@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56b430db36fe43c3a02e7ebf2fdfcc9c, type: 3}
+  m_Name: Boss2_P2_InkVortex
+  m_EditorClassIdentifier: Assembly-CSharp::InkVortexAttackStyle
+  _displayName: InkVortex
+  _iconColor: {r: 0.08, g: 0.08, b: 0.1, a: 1}
+  _attackInterval: 0.6
+  _gaugeGainPerHit: 0
+  _waitUntilFinished: 1
+  _stopsMovement: 1
+  _tell: 9
+  _tellDuration: 0.7
+  _duration: 3.5
+  _armCount: 4
+  _waveInterval: 0.12
+  _angleStep: 9
+  _range: 25
+  _shot:
+    _projectileScale: 0.55
+    _trajectories:
+    - _type: 1
+      _weight: 1
+      _height:
+        _min: 0
+        _max: 0
+      _duration:
+        _min: 1
+        _max: 1
+      _useSpeed: 1
+      _speed:
+        _min: 13
+        _max: 13
+    _homing: 0
+    _missTravelTime: 0
+    _trailTime: 0.1
+    _trailWidth: 0.1
+    _useTrailColor: 1
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
+    _damage:
+      _min: 5
+      _max: 7
+    _criticalChance: 0.1
+    _criticalMultiplier: 2
+    _normalHit: {fileID: 11400000, guid: 789e71a3222486742b3aba402f7e49b9, type: 2}
+    _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+  _pullSpeed: 2.5
+  _handOrbitSpeed: 540

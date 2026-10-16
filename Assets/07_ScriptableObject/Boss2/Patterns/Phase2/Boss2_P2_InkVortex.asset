@@ -53,5 +53,5 @@ MonoBehaviour:
     _criticalMultiplier: 2
     _normalHit: {fileID: 11400000, guid: 789e71a3222486742b3aba402f7e49b9, type: 2}
     _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
-  _pullSpeed: 2.5
+  _pullSpeed: 4
   _handOrbitSpeed: 540

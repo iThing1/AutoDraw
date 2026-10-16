@@ -18,14 +18,14 @@ public class InkVortexAttackStyle : AttackStyle
 
     [Header("끌어당김")]
     // 플레이어를 보스 쪽으로 끄는 빠르기(초당 거리). 플레이어 이동 속도보다 낮게 둬야 버틸 수 있다.
-    [SerializeField, Min(0f)] private float _pullSpeed = 2.5f;
+    [SerializeField, Min(0f)] private float _pullSpeed = 4f;
 
     [Header("손")]
     [SerializeField, Min(0f)] private float _handOrbitSpeed = 540f;
 
     public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
     {
-        UnitMover targetMover = attacker.Target.Unit.Mover;
+        AttackTarget target = attacker.Target;
         BossHands hands = attacker.Hands;
         Vector3 center = attacker.Owner.Body.position;
         float angle = UnityEngine.Random.Range(0f, 360f);
@@ -45,10 +45,7 @@ public class InkVortexAttackStyle : AttackStyle
                     nextWave += _waveInterval;
                 }
 
-                if (null != targetMover)
-                {
-                    targetMover.SetExternalVelocity(GetPullVelocity(center, attacker.Target.FollowTransform.position));
-                }
+                target.SetPull(GetPullVelocity(center, target.FollowTransform.position));
 
                 if (null != hands)
                 {
@@ -62,10 +59,7 @@ public class InkVortexAttackStyle : AttackStyle
         }
         finally
         {
-            if (null != targetMover)
-            {
-                targetMover.SetExternalVelocity(Vector2.zero);
-            }
+            target.SetPull(Vector2.zero);
         }
     }
 

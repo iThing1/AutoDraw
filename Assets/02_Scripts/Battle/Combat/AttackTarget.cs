@@ -80,6 +80,16 @@ public class AttackTarget
         _unit.NotifyBlocked(hitPoint);
     }
 
+    // 소용돌이처럼 목표를 끌거나 미는 힘(초당 거리). 직접 조작하는 이동에 더해지고, 움직이지 않는 목표에는 아무 일도 없다.
+    // 다 쓰면 Vector2.zero를 넘겨 풀어 준다.
+    public void SetPull(Vector2 velocity)
+    {
+        if (null != _unit.Mover)
+        {
+            _unit.Mover.SetExternalVelocity(velocity);
+        }
+    }
+
     // 근접 공격이 설 자리. 목표에서 공격자 쪽으로 distance만큼 떨어진 곳이다.
     public Vector3 GetApproachPoint(Vector3 from, float distance)
     {

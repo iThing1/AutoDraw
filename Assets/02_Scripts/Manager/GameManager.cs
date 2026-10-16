@@ -9,7 +9,6 @@ public class GameManager : SingletonBehaviour<GameManager>
     private const int SEQUENCES_CAPACITY = 200;
 
     public static BattleCameraRig CameraRig { get { return Instance._cameraRig; } }
-    public static MapSpawner Map { get { return Instance._mapSpawner; } }
     public static UIManager UI { get { return Instance._uiManager; } }
     public static SoundManager Sound { get { return Instance._soundManager; } }
     public static PoolManager Pool { get { return Instance._poolManager; } }

@@ -164,8 +164,8 @@ public class BossHands : MonoBehaviour
                 break;
 
             case HandGesture.Orbit:
-                pose.Join(_leftHand.DOLocalPath(BuildCircle(Vector3.zero, _leftRest.magnitude, GetAngle(_leftRest)), poseDuration, PathType.CatmullRom).SetEase(Ease.Linear));
-                pose.Join(_rightHand.DOLocalPath(BuildCircle(Vector3.zero, _rightRest.magnitude, GetAngle(_rightRest)), poseDuration, PathType.CatmullRom).SetEase(Ease.Linear));
+                pose.Join(_leftHand.DOLocalPath(BuildCircle(Vector3.zero, _leftRest.magnitude, AngleUtility.ToAngle(_leftRest)), poseDuration, PathType.CatmullRom).SetEase(Ease.Linear));
+                pose.Join(_rightHand.DOLocalPath(BuildCircle(Vector3.zero, _rightRest.magnitude, AngleUtility.ToAngle(_rightRest)), poseDuration, PathType.CatmullRom).SetEase(Ease.Linear));
                 break;
         }
 
@@ -257,16 +257,10 @@ public class BossHands : MonoBehaviour
 
         for (int i = 0; i <= CIRCLE_POINT_COUNT; i++)
         {
-            float radian = (i / (float)CIRCLE_POINT_COUNT) * 2f * Mathf.PI + startAngle * Mathf.Deg2Rad;
-            points[i] = center + new Vector3(Mathf.Cos(radian), Mathf.Sin(radian), 0f) * radius;
+            points[i] = center + AngleUtility.ToDirection(i / (float)CIRCLE_POINT_COUNT * 360f + startAngle) * radius;
         }
 
         return points;
-    }
-
-    private float GetAngle(Vector3 localPosition)
-    {
-        return Mathf.Atan2(localPosition.y, localPosition.x) * Mathf.Rad2Deg;
     }
 
     private void KillTweens()

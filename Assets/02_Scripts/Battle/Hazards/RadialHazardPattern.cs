@@ -69,8 +69,7 @@ public class RadialHazardPattern : HazardPattern
                 continue;
             }
 
-            float radian = angle * Mathf.Deg2Rad;
-            Vector2 direction = new Vector2(Mathf.Cos(radian), Mathf.Sin(radian));
+            Vector2 direction = AngleUtility.ToDirection(angle);
 
             // 환경 탄막은 보스의 공격이 아니라서 게이지를 쌓지 않는다.
             shooter.FireShotToward(ProjectilePrefab, _shot, origin, direction, _range, 0f, token);
@@ -92,8 +91,6 @@ public class RadialHazardPattern : HazardPattern
 
     private float GetAngleToTarget(AutoAttacker shooter)
     {
-        Vector3 toTarget = shooter.Target.FollowTransform.position - shooter.Owner.Body.position;
-
-        return Mathf.Atan2(toTarget.y, toTarget.x) * Mathf.Rad2Deg;
+        return AngleUtility.ToAngle(shooter.Target.FollowTransform.position - shooter.Owner.Body.position);
     }
 }

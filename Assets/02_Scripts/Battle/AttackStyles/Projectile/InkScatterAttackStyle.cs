@@ -49,8 +49,7 @@ public class InkScatterAttackStyle : AttackStyle
 
         for (int i = 0; i < _shotCount; i++)
         {
-            float radian = (startAngle + step * i) * Mathf.Deg2Rad;
-            Vector2 direction = new Vector2(Mathf.Cos(radian), Mathf.Sin(radian));
+            Vector2 direction = AngleUtility.ToDirection(startAngle + step * i);
 
             attacker.FireShotToward(null, _shot, origin, direction, _range, gaugeGain, token);
         }
@@ -58,8 +57,6 @@ public class InkScatterAttackStyle : AttackStyle
 
     private float GetAngleToTarget(AutoAttacker attacker)
     {
-        Vector3 toTarget = attacker.Target.FollowTransform.position - attacker.Owner.Body.position;
-
-        return Mathf.Atan2(toTarget.y, toTarget.x) * Mathf.Rad2Deg;
+        return AngleUtility.ToAngle(attacker.Target.FollowTransform.position - attacker.Owner.Body.position);
     }
 }

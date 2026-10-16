@@ -150,8 +150,7 @@ public class DarknessGimmick : BossGimmick
 
     private Vector3 PickRepositionPoint(BattleUnit boss, Vector3 center)
     {
-        float radian = UnityEngine.Random.Range(0f, 2f * Mathf.PI);
-        Vector3 position = center + new Vector3(Mathf.Cos(radian), Mathf.Sin(radian), 0f) * _repositionDistance.PickRandom();
+        Vector3 position = center + AngleUtility.ToDirection(UnityEngine.Random.Range(0f, 360f)) * _repositionDistance.PickRandom();
         position.z = boss.transform.position.z;
 
         if (null != boss.Mover)
@@ -217,9 +216,7 @@ public class DarknessGimmick : BossGimmick
 
         for (int i = 0; i < _shotsPerBurst; i++)
         {
-            float radian = (startAngle + step * i) * Mathf.Deg2Rad;
-
-            attacker.FireShotToward(null, _shot, origin, new Vector2(Mathf.Cos(radian), Mathf.Sin(radian)), _range, 0f, token);
+            attacker.FireShotToward(null, _shot, origin, AngleUtility.ToDirection(startAngle + step * i), _range, 0f, token);
         }
 
         if (0 == _aimedShotCount)
@@ -228,15 +225,13 @@ public class DarknessGimmick : BossGimmick
         }
 
         Vector3 toTarget = attacker.Target.GetAimPoint(Vector3.zero) - origin;
-        float centerAngle = Mathf.Atan2(toTarget.y, toTarget.x) * Mathf.Rad2Deg;
+        float centerAngle = AngleUtility.ToAngle(toTarget);
         float aimedStep = 1 < _aimedShotCount ? _aimedSpread / (_aimedShotCount - 1) : 0f;
         float aimedStart = 1 < _aimedShotCount ? centerAngle - _aimedSpread * 0.5f : centerAngle;
 
         for (int i = 0; i < _aimedShotCount; i++)
         {
-            float radian = (aimedStart + aimedStep * i) * Mathf.Deg2Rad;
-
-            attacker.FireShotToward(null, _aimedShot, origin, new Vector2(Mathf.Cos(radian), Mathf.Sin(radian)), _range, 0f, token);
+            attacker.FireShotToward(null, _aimedShot, origin, AngleUtility.ToDirection(aimedStart + aimedStep * i), _range, 0f, token);
         }
     }
 }

@@ -143,7 +143,9 @@ public class BossPhaseController : MonoBehaviour
             UpdateGimmickRatios();
             OnPhaseChanged?.Invoke();
 
-            await ShiftColorAsync(GetSegmentStartColor(_nextLineIndex), token);
+            // 기믹이 끝나면 잉크가 번지듯 한 단계 크게 물든다.
+            ImpactPlayer.Play(_toneShiftImpact, _unit.Body.position);
+            await TweenColorAsync(_currentColor, GetSegmentStartColor(_nextLineIndex), _toneShiftDuration, false, token);
 
             UpdateFloor();
 
@@ -172,9 +174,7 @@ public class BossPhaseController : MonoBehaviour
             return false;
         }
 
-        Health.InvulnerableScope invulnerable = gimmick.KeepsBossInvulnerable ? _unit.Health.BeginInvulnerable() : default;
-
-        using (invulnerable)
+        using (_unit.Health.BeginInvulnerable())
         {
             return await gimmick.PlayAsync(_unit, token);
         }
@@ -228,7 +228,7 @@ public class BossPhaseController : MonoBehaviour
                 // 새 페이즈 색이 한 프레임 먼저 칠해지지 않게, 물들기 전까지는 이전 색으로 둔다.
                 ApplyColor(before);
 
-                await TweenColorAsync(before, GetCurrentColor(), _revival.BeamHoldDuration, token);
+                await TweenColorAsync(before, GetCurrentColor(), _revival.BeamHoldDuration, true, token);
 
                 SetHandsGroggy(false);
 
@@ -442,25 +442,6 @@ public class BossPhaseController : MonoBehaviour
         return null != segment ? segment.From : _currentColor;
     }
 
-    // 기믹이 끝나면 잉크가 번지듯 한 단계 크게 물든다.
-    private async UniTask ShiftColorAsync(Color target, CancellationToken token)
-    {
-        ImpactPlayer.Play(_toneShiftImpact, _unit.Body.position);
-
-        _isColorShifting = true;
-
-        try
-        {
-            await DOVirtual.Color(_currentColor, target, _toneShiftDuration, ApplyColor)
-                .SetTarget(this)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
-        }
-        finally
-        {
-            _isColorShifting = false;
-        }
-    }
-
     private void ApplyColor(Color color)
     {
         _currentColor = color;
@@ -502,14 +483,15 @@ public class BossPhaseController : MonoBehaviour
             .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
     }
 
-    private async UniTask TweenColorAsync(Color from, Color to, float duration, CancellationToken token)
+    // 물드는 동안에는 맞아도 체력에 맞춘 색으로 덮어쓰지 않는다. 기믹 뒤에는 게임 시간, 부활 연출은 실제 시간으로 돈다.
+    private async UniTask TweenColorAsync(Color from, Color to, float duration, bool isRealtime, CancellationToken token)
     {
         _isColorShifting = true;
 
         try
         {
             await DOVirtual.Color(from, to, duration, ApplyColor)
-                .SetUpdate(true)
+                .SetUpdate(isRealtime)
                 .SetTarget(this)
                 .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
         }

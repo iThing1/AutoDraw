@@ -73,7 +73,7 @@ public class DashSlashAttackStyle : AttackStyle
 
         Vector3 center = attacker.Owner.Body.position;
         Vector3 toTarget = attacker.Target.GetAimPoint(Vector3.zero) - center;
-        float facingAngle = Mathf.Atan2(toTarget.y, toTarget.x) * Mathf.Rad2Deg;
+        float facingAngle = AngleUtility.ToAngle(toTarget);
         float startAngle = facingAngle + _swingAngle * 0.5f;
         float endAngle = facingAngle - _swingAngle * 0.5f;
 
@@ -121,8 +121,6 @@ public class DashSlashAttackStyle : AttackStyle
 
     private Vector3 GetPointOnArc(Vector3 center, float angle)
     {
-        float radian = angle * Mathf.Deg2Rad;
-
-        return center + new Vector3(Mathf.Cos(radian), Mathf.Sin(radian), 0f) * _swingRadius;
+        return center + AngleUtility.ToDirection(angle) * _swingRadius;
     }
 }

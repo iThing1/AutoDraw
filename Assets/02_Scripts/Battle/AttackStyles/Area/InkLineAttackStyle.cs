@@ -68,8 +68,7 @@ public class InkLineAttackStyle : AttackStyle
     private async UniTask DrawLineAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
     {
         float angle = UnityEngine.Random.Range(0f, 180f);
-        float radian = angle * Mathf.Deg2Rad;
-        Vector3 along = new Vector3(Mathf.Cos(radian), Mathf.Sin(radian), 0f);
+        Vector3 along = AngleUtility.ToDirection(angle);
         Vector3 side = new Vector3(-along.y, along.x, 0f);
         Vector3 center = attacker.Target.GetAimPoint(Vector3.zero) + side * UnityEngine.Random.Range(-_offsetRange, _offsetRange);
 

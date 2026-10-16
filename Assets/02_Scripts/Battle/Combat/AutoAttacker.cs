@@ -65,9 +65,13 @@ public class AutoAttacker : MonoBehaviour
                         return;
                     }
                 }
-                catch (OperationCanceledException) when (false == token.IsCancellationRequested)
+                catch (OperationCanceledException)
                 {
-                    // 기믹이 끊은 공격이라 다음 공격으로 넘어간다.
+                    // 전투가 끝나 취소됐으면 루프를 나가고, 기믹이 끊은 공격이면 다음 공격으로 넘어간다.
+                    if (token.IsCancellationRequested)
+                    {
+                        throw;
+                    }
                 }
             }
         }

@@ -13,9 +13,7 @@ public class AttackTarget
     public AttackTarget(BattleUnit unit)
     {
         _unit = unit;
-
-        SpriteRenderer bodyRenderer = unit.Body.GetComponent<SpriteRenderer>();
-        _bodyRadius = null != bodyRenderer ? bodyRenderer.bounds.extents.x : 0f;
+        _bodyRadius = unit.GetBodyRadius();
     }
 
     public BattleUnit Unit { get { return _unit; } }

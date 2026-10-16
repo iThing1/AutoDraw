@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 9197854841830104096}
   - component: {fileID: 5979226863342604246}
   - component: {fileID: 3418620957714306127}
+  - component: {fileID: 7413029586621043711}
   m_Layer: 10
   m_Name: Ground
   m_TagString: Untagged
@@ -318,8 +319,7 @@ MonoBehaviour:
   _bossSpawnPoint: {fileID: 2935112580148223958}
   _playerPrefab: {fileID: 5628677625872867307, guid: 2c1ee4e491c0cc44890185f99d222d9b, type: 3}
   _bossPrefab: {fileID: 9200000000000000003, guid: 58e0e61094ec6680e93e6534c3d66657, type: 3}
-  _stageBounds: {fileID: 3418620957714306127}
-  _edgePadding: 0
+  _stageArea: {fileID: 7413029586621043711}
   _introTrigger: {fileID: 7753745094576344584}
   _introCutscene: {fileID: 8588949236467943965}
   _paintCanvas: {fileID: 6145387518109863596}
@@ -469,3 +469,16 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8873060262263899674}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7413029586621043711
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1862418460576012687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fc20530c86e46e7ac055e68888ec4b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StageArea
+  _edgePadding: 0

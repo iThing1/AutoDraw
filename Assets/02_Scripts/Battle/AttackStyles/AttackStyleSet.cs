@@ -47,11 +47,6 @@ public class AttackStyleSet : AttackStyle
     [Header("패턴")]
     [SerializeField] private Entry[] _entries;
 
-    public override AttackStyle PickStyle()
-    {
-        return PickStyle(null);
-    }
-
     // 안쪽 묶음을 따라 내려가며 실제 공격 하나를 고른다. 재귀 대신 반복문이라 순환이 있어도 깊이 제한에서 멈춘다.
     // 거리·쿨타임 조건에 맞는 항목이 하나도 없으면 조건 없이 골라, 보스가 공격을 멈추지 않게 한다.
     public override AttackStyle PickStyle(AutoAttacker picker)
@@ -90,7 +85,7 @@ public class AttackStyleSet : AttackStyle
     // 자동 공격은 PickStyle로 고른 스타일을 직접 쏘므로, 이 묶음이 그대로 넘어온 경우에만 여기서 하나를 골라 쏜다.
     public override UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
     {
-        AttackStyle style = PickStyle();
+        AttackStyle style = PickStyle(attacker);
 
         if (this == style)
         {

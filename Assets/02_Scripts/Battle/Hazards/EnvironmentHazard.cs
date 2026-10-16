@@ -16,7 +16,7 @@ public class EnvironmentHazard : MonoBehaviour
     private int _lastPatternIndex = -1;
 
     // Prewarm은 최소 개수를 맞추므로, 같은 프리팹을 여러 패턴이 써도 중복으로 만들지 않는다.
-    public void Prewarm(GameObject defaultPrefab)
+    public void Prewarm(GameObject defaultProjectile)
     {
         if (null == _patterns)
         {
@@ -25,18 +25,9 @@ public class EnvironmentHazard : MonoBehaviour
 
         for (int i = 0; i < _patterns.Length; i++)
         {
-            HazardPattern pattern = _patterns[i];
-
-            if (null == pattern)
+            if (null != _patterns[i])
             {
-                continue;
-            }
-
-            GameObject prefab = null != pattern.ProjectilePrefab ? pattern.ProjectilePrefab : defaultPrefab;
-
-            if (null != prefab)
-            {
-                GameManager.Pool.Prewarm(prefab, pattern.MaxProjectileCount);
+                _patterns[i].Prewarm(defaultProjectile);
             }
         }
     }

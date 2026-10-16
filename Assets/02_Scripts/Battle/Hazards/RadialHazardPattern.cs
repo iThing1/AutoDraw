@@ -10,6 +10,10 @@ public class RadialHazardPattern : HazardPattern
 {
     private const float FULL_CIRCLE = 360f;
 
+    [Header("투사체")]
+    // 비워 두면 쏘는 쪽(보스)의 투사체를 쓴다.
+    [SerializeField] private GameObject _projectilePrefab;
+
     [Header("예고")]
     [SerializeField] private AudioClip _warningSound;
     // 소리가 난 뒤 첫 발사까지의 시간. 다른 공격을 피하던 중에도 대비할 틈을 준다.
@@ -32,7 +36,16 @@ public class RadialHazardPattern : HazardPattern
     // 너무 크면 반대편까지 달려갈 수 없어 피할 수 없는 탄막이 되므로, 탄 간격 동안 걸어갈 수 있을 만큼만 옮긴다.
     [SerializeField] private FloatRange _gapShift = new FloatRange(30f, 60f);
 
-    public override int MaxProjectileCount { get { return _waveCount * _shotsPerWave; } }
+    // 한 번 발동할 때 동시에 날아갈 수 있는 탄 수만큼 만든다.
+    public override void Prewarm(GameObject defaultProjectile)
+    {
+        GameObject prefab = GetProjectilePrefab(defaultProjectile);
+
+        if (null != prefab)
+        {
+            GameManager.Pool.Prewarm(prefab, _waveCount * _shotsPerWave);
+        }
+    }
 
     public override async UniTask PlayAsync(AutoAttacker shooter, CancellationToken token)
     {
@@ -72,7 +85,7 @@ public class RadialHazardPattern : HazardPattern
             Vector2 direction = AngleUtility.ToDirection(angle);
 
             // 환경 탄막은 보스의 공격이 아니라서 게이지를 쌓지 않는다.
-            shooter.FireShotToward(ProjectilePrefab, _shot, origin, direction, _range, 0f, token);
+            shooter.FireShotToward(_projectilePrefab, _shot, origin, direction, _range, 0f, token);
         }
     }
 
@@ -87,6 +100,11 @@ public class RadialHazardPattern : HazardPattern
         float shift = _gapShift.PickRandom();
 
         return 0.5f > UnityEngine.Random.value ? -shift : shift;
+    }
+
+    private GameObject GetProjectilePrefab(GameObject defaultProjectile)
+    {
+        return null != _projectilePrefab ? _projectilePrefab : defaultProjectile;
     }
 
     private float GetAngleToTarget(AutoAttacker shooter)

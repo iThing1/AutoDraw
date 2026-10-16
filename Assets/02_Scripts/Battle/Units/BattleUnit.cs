@@ -63,6 +63,26 @@ public class BattleUnit : MonoBehaviour
 
     public AttackStyle AttackStyle { get { return null != _attackStyleOverride ? _attackStyleOverride : GetDataAttackStyle(); } }
 
+    // 몸 그림의 가로·세로 절반 크기(월드). 렌더러의 bounds는 꺼진 오브젝트나 프리팹에서 0이 되므로, 스프라이트 크기에 스케일을 곱해 읽는다.
+    // 등장 전이라 꺼져 있는 보스와 씬 뷰 기즈모(프리팹)에서도 같은 값이 나온다. 몸 그림이 없으면 0이다.
+    public Vector2 GetBodyExtents()
+    {
+        SpriteRenderer bodyRenderer = Body.GetComponent<SpriteRenderer>();
+
+        if (null == bodyRenderer || null == bodyRenderer.sprite)
+        {
+            return Vector2.zero;
+        }
+
+        return Vector2.Scale(bodyRenderer.sprite.bounds.extents, Body.lossyScale);
+    }
+
+    // 판정에 쓰는 몸 반지름. 몸 그림을 원으로 보고 가로 절반을 쓴다.
+    public float GetBodyRadius()
+    {
+        return GetBodyExtents().x;
+    }
+
     private void Awake()
     {
         _health = GetComponent<Health>();

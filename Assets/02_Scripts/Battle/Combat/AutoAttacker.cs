@@ -166,7 +166,7 @@ public class AutoAttacker : MonoBehaviour
             return false;
         }
 
-        FireAsync(skill.PickStyle(), false, _battleToken).Forget();
+        FireAsync(skill.PickStyle(this), false, _battleToken).Forget();
         return true;
     }
 

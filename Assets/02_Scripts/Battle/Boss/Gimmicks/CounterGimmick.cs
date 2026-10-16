@@ -93,7 +93,7 @@ public class CounterGimmick : BossGimmick
 
         await PlayWarnAsync(boss, token);
 
-        float bodyRadius = GetBodyRadius(boss);
+        float bodyRadius = boss.GetBodyRadius();
         Transform bossTransform = boss.transform;
         Vector3 start = bossTransform.position;
         bool isCountered = false;
@@ -148,7 +148,7 @@ public class CounterGimmick : BossGimmick
             return;
         }
 
-        float endDiameter = GetBodyRadius(boss) * 2f;
+        float endDiameter = boss.GetBodyRadius() * 2f;
         SpriteRenderer warn = PooledSprite.Spawn(_warnPrefab, boss.Body.position, 0f, new Vector2(_warnStartDiameter, _warnStartDiameter), _warnColor);
 
         try
@@ -177,12 +177,5 @@ public class CounterGimmick : BossGimmick
         away.z = 0f;
 
         return boss.transform.position + (0f < away.sqrMagnitude ? away.normalized : Vector3.right) * _knockbackDistance;
-    }
-
-    private float GetBodyRadius(BattleUnit boss)
-    {
-        SpriteRenderer body = boss.Body.GetComponent<SpriteRenderer>();
-
-        return null != body ? body.bounds.extents.x : 1f;
     }
 }

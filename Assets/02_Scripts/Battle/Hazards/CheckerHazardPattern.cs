@@ -31,7 +31,14 @@ public class CheckerHazardPattern : HazardPattern
     [SerializeField] private ShotSettings _hit = new();
     [SerializeField] private ImpactSettings _impact = new();
 
-    public override int MaxProjectileCount { get { return 0; } }
+    // 탄은 쏘지 않는다. 한 칸에 예고(바탕·채움)가 뜬 채로 앞 물결의 번쩍임이 남아 있을 수 있어 칸마다 세 장씩 만든다.
+    public override void Prewarm(GameObject defaultProjectile)
+    {
+        if (null != _cellPrefab)
+        {
+            GameManager.Pool.Prewarm(_cellPrefab, (_columns * _rows + 1) / 2 * 3);
+        }
+    }
 
     public override async UniTask PlayAsync(AutoAttacker shooter, CancellationToken token)
     {

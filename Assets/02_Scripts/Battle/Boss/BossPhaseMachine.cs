@@ -9,7 +9,7 @@ using UnityEngine;
 // 마지막이 아닌 페이즈의 바닥에 닿으면 쓰러졌다가 다음 페이즈의 체력으로 다시 일어난다.
 // 진짜로 쓰러지는 것은 마지막 페이즈뿐이라, 전투 매니저는 지금처럼 보스가 죽을 때까지만 기다리면 된다.
 [RequireComponent(typeof(BattleUnit))]
-public class BossPhaseController : MonoBehaviour
+public class BossPhaseMachine : MonoBehaviour
 {
     // 마지막이 아닌 페이즈는 바닥 대신 이 체력에서 멈춰 쓰러지지 않게 한다.
     private const int REVIVAL_FLOOR_HP = 1;

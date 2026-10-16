@@ -523,7 +523,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 54c86d0473ef43899991123e6d6e2eb0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossPhaseController
+  m_EditorClassIdentifier: Assembly-CSharp::BossPhaseMachine
   _phases:
   - {fileID: 11400000, guid: 086895091d572ce69bbcf1638dd7be15, type: 2}
   - {fileID: 11400000, guid: 176711cdd48b0ec4594c4198661d87de, type: 2}

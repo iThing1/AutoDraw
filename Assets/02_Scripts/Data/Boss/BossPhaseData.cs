@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 // 보스 페이즈 하나. 체력, 쓰는 패턴, 맞을수록 물드는 색, 체력 줄마다 나오는 기믹을 담는다.
-// 페이즈 순서와 전환은 BossPhaseController가 정하고, 여기는 값만 들고 있다.
+// 페이즈 순서와 전환은 BossPhaseMachine가 정하고, 여기는 값만 들고 있다.
 [CreateAssetMenu(fileName = "BossPhaseData", menuName = "Scriptable Objects/Boss/PhaseData")]
 public class BossPhaseData : ScriptableObject
 {

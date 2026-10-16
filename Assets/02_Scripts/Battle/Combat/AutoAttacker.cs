@@ -9,10 +9,10 @@ public class AutoAttacker : MonoBehaviour
     private BattleUnit _owner;
     private SkillGauge _skillGauge;
     private BossHands _hands;
-    private int _nextColorIndex;
 
     private AttackTarget _target;
     private PaintCanvas _paintCanvas;
+    private DamageDealer _damageDealer;
     private CancellationToken _battleToken;
     private bool _isRunning;
     private bool _hasLoggedMissingProjectile;
@@ -45,6 +45,7 @@ public class AutoAttacker : MonoBehaviour
     {
         _target = new AttackTarget(target);
         _paintCanvas = paintCanvas;
+        _damageDealer = new DamageDealer(_owner, _skillGauge, _target, paintCanvas);
         _battleToken = token;
         _isRunning = true;
 
@@ -214,52 +215,25 @@ public class AutoAttacker : MonoBehaviour
         return FlightOutcome.Arrived == flight.Outcome;
     }
 
-    // 날아가는 과정 없이 바로 맞힌다. 근접 공격처럼 투사체가 없는 공격에 쓴다.
+    // 맞히는 규칙은 DamageDealer가 맡고, 공격 스타일은 여기를 거쳐 부른다.
     public void Strike(ShotSettings hit, Vector3 hitPoint, float gaugeGain)
     {
-        ApplyHit(hit, RollDamage(hit), hitPoint, gaugeGain);
+        _damageDealer.Strike(hit, hitPoint, gaugeGain);
     }
 
-    // 기믹 실패처럼 막을 수 없는 공격. 명중 반경·방패를 보지 않고 바로 맞힌다.
     public void StrikeUnblockable(ShotSettings hit, Vector3 hitPoint)
     {
-        if (_target.IsDefeated)
-        {
-            return;
-        }
-
-        DamageInfo damage = RollDamage(hit);
-        damage.HitPoint = hitPoint;
-
-        _target.Unit.Health.TakeDamage(damage);
-
-        HitFeedbackPlayer.Play(hit.GetHitFeedback(damage.IsCritical), _target.Unit, damage, _paintCanvas);
+        _damageDealer.StrikeUnblockable(hit, hitPoint);
     }
 
-    // 범위 공격. 폭발 반경 안에 목표가 있으면 목표 자리에 맞고, 방패를 들고 있으면 막힌다.
     public void Blast(ShotSettings hit, Vector3 center, float radius, float gaugeGain)
     {
-        if (false == _target.IsInBlast(center, radius))
-        {
-            return;
-        }
-
-        ApplyHit(hit, RollDamage(hit), _target.GetAimPoint(Vector3.zero), gaugeGain);
+        _damageDealer.Blast(hit, center, radius, gaugeGain);
     }
 
     public Color PickColor()
     {
-        PaintPalette palette = _owner.Data.Palette;
-
-        if (null == palette)
-        {
-            return Color.white;
-        }
-
-        Color color = palette.Pick(_nextColorIndex);
-        _nextColorIndex++;
-
-        return color;
+        return _damageDealer.PickColor();
     }
 
     private async UniTask FireAsync(AttackStyle style, bool gainsGauge, CancellationToken token)
@@ -328,8 +302,7 @@ public class AutoAttacker : MonoBehaviour
     private async UniTaskVoid FireShotAsync(GameObject projectilePrefab, ShotSettings shot, Vector3 start, Vector3 end, float gaugeGain,
         CancellationToken token)
     {
-        // 피해량과 물감 색은 쏘는 순간 정해, 날아가는 투사체의 색과 맞은 자리의 물감 색이 같게 한다.
-        DamageInfo damage = RollDamage(shot);
+        DamageInfo damage = _damageDealer.RollDamage(shot);
 
         FlightResult flight = await ProjectileFlight.FlyAsync(projectilePrefab, shot, start, end, _target, damage.PaintColor, token);
 
@@ -339,62 +312,8 @@ public class AutoAttacker : MonoBehaviour
         }
         else if (FlightOutcome.Arrived == flight.Outcome)
         {
-            // 큰 탄은 명중 반경 밖에서 몸 가장자리에 닿으므로, 비행이 이미 닿았다고 본 탄은 명중 반경으로 다시 거르지 않는다.
-            DealHit(shot, damage, flight.LandingPoint, gaugeGain);
+            _damageDealer.DealHit(shot, damage, flight.LandingPoint, gaugeGain);
         }
-    }
-
-    // 방패가 명중 반경보다 넓어서, 명중 반경 밖이어도 방패 안이면 막기 판정으로 넘긴다.
-    private void ApplyHit(ShotSettings hit, DamageInfo damage, Vector3 hitPoint, float gaugeGain)
-    {
-        if (false == _target.IsHit(hitPoint) && false == _target.IsBlockedAt(hitPoint, 0f))
-        {
-            return;
-        }
-
-        DealHit(hit, damage, hitPoint, gaugeGain);
-    }
-
-    // 막혔으면 피해·물감 자국·게이지 없이 끝난다. 막기 연출은 막은 쪽이 맡는다.
-    private void DealHit(ShotSettings hit, DamageInfo damage, Vector3 hitPoint, float gaugeGain)
-    {
-        if (_target.IsDefeated || _target.TryBlockHit(hitPoint))
-        {
-            return;
-        }
-
-        damage.HitPoint = hitPoint;
-
-        _target.Unit.Health.TakeDamage(damage);
-
-        HitFeedbackPlayer.Play(hit.GetHitFeedback(damage.IsCritical), _target.Unit, damage, _paintCanvas);
-
-        if (null != _skillGauge && 0f < gaugeGain)
-        {
-            _skillGauge.Add(gaugeGain);
-        }
-    }
-
-    private DamageInfo RollDamage(ShotSettings shot)
-    {
-        int amount = shot.Damage.PickRandom();
-        bool isCritical = UnityEngine.Random.value < shot.CriticalChance;
-
-        if (isCritical)
-        {
-            amount = Mathf.RoundToInt(amount * shot.CriticalMultiplier);
-        }
-
-        PaintPalette palette = _owner.Data.Palette;
-
-        return new DamageInfo
-        {
-            Amount = amount,
-            IsCritical = isCritical,
-            PaintColor = PickColor(),
-            IsInk = null != palette && palette.IsInk,
-            Attacker = _owner,
-        };
     }
 
     private bool HasProjectilePrefab()

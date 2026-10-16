@@ -34,7 +34,7 @@ public class BattleHudUI : MonoBehaviour
     private PlayerAttackInput _attackInput;
     private BattleUnit _player;
     private PlayerGuard _guard;
-    private BossPhaseController _bossPhases;
+    private BossPhaseMachine _bossPhases;
     private BattleUnit _boss;
 
     private void Awake()

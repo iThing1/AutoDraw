@@ -52,7 +52,7 @@ public class ShadowDashAttackStyle : AttackStyle
         for (int i = 0; i < _dashCount; i++)
         {
             float angle = UnityEngine.Random.Range(0f, 180f);
-            Vector3 along = AngleUtility.ToDirection(angle);
+            Vector3 along = Geometry2D.ToDirection(angle);
             Vector3 side = new Vector3(-along.y, along.x, 0f);
             Vector3 center = targetPoint + side * UnityEngine.Random.Range(-_offsetRange, _offsetRange);
 
@@ -111,11 +111,6 @@ public class ShadowDashAttackStyle : AttackStyle
 
     private bool IsTouchingPath(AttackTarget target, Vector3 from, Vector3 to, float radius)
     {
-        Vector3 targetPoint = target.FollowTransform.position;
-        Vector3 segment = to - from;
-        float sqrLength = segment.sqrMagnitude;
-        float t = 0f < sqrLength ? Mathf.Clamp01(Vector3.Dot(targetPoint - from, segment) / sqrLength) : 0f;
-
-        return target.IsTouching(from + segment * t, radius);
+        return target.IsTouching(Geometry2D.GetClosestPointOnSegment(from, to, target.FollowTransform.position), radius);
     }
 }

@@ -157,7 +157,7 @@ public class DarknessGimmick : BossGimmick
 
     private Vector3 PickRepositionPoint(BattleUnit boss, Vector3 center)
     {
-        Vector3 position = center + AngleUtility.ToDirection(UnityEngine.Random.Range(0f, 360f)) * _repositionDistance.PickRandom();
+        Vector3 position = center + Geometry2D.ToDirection(UnityEngine.Random.Range(0f, 360f)) * _repositionDistance.PickRandom();
         position.z = boss.transform.position.z;
 
         if (null != boss.Mover)
@@ -183,7 +183,7 @@ public class DarknessGimmick : BossGimmick
 
         for (int i = 0; i < _shotsPerBurst; i++)
         {
-            attacker.FireShotToward(null, _shot, origin, AngleUtility.ToDirection(startAngle + step * i), _range, 0f, token);
+            attacker.FireShotToward(null, _shot, origin, Geometry2D.ToDirection(startAngle + step * i), _range, 0f, token);
         }
 
         if (0 == _aimedShotCount)
@@ -192,13 +192,13 @@ public class DarknessGimmick : BossGimmick
         }
 
         Vector3 toTarget = attacker.Target.GetAimPoint(Vector3.zero) - origin;
-        float centerAngle = AngleUtility.ToAngle(toTarget);
+        float centerAngle = Geometry2D.ToAngle(toTarget);
         float aimedStep = 1 < _aimedShotCount ? _aimedSpread / (_aimedShotCount - 1) : 0f;
         float aimedStart = 1 < _aimedShotCount ? centerAngle - _aimedSpread * 0.5f : centerAngle;
 
         for (int i = 0; i < _aimedShotCount; i++)
         {
-            attacker.FireShotToward(null, _aimedShot, origin, AngleUtility.ToDirection(aimedStart + aimedStep * i), _range, 0f, token);
+            attacker.FireShotToward(null, _aimedShot, origin, Geometry2D.ToDirection(aimedStart + aimedStep * i), _range, 0f, token);
         }
     }
 }

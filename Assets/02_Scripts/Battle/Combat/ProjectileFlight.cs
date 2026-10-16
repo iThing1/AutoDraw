@@ -123,7 +123,7 @@ public static class ProjectileFlight
         out Vector3 contactPoint)
     {
         Vector3 targetTo = target.FollowTransform.position;
-        contactPoint = targetTo + GetClosestPointOnSegment(from - targetFrom, to - targetTo, Vector3.zero);
+        contactPoint = targetTo + Geometry2D.GetClosestPointOnSegment(from - targetFrom, to - targetTo, Vector3.zero);
 
         if (target.IsBlockedAt(contactPoint, projectileRadius))
         {
@@ -157,21 +157,6 @@ public static class ProjectileFlight
         }
 
         return FlightOutcome.Arrived;
-    }
-
-    private static Vector3 GetClosestPointOnSegment(Vector3 from, Vector3 to, Vector3 point)
-    {
-        Vector3 segment = to - from;
-        float sqrLength = segment.sqrMagnitude;
-
-        if (0f >= sqrLength)
-        {
-            return from;
-        }
-
-        float t = Mathf.Clamp01(Vector3.Dot(point - from, segment) / sqrLength);
-
-        return from + segment * t;
     }
 
     // 외곽선 같은 자식까지 함께 사라지도록 색 대신 크기를 줄인다.

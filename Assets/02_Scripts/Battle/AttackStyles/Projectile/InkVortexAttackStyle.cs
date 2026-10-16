@@ -89,7 +89,7 @@ public class InkVortexAttackStyle : AttackStyle
 
         for (int i = 0; i < _armCount; i++)
         {
-            Vector2 direction = AngleUtility.ToDirection(angle + angleBetweenArms * i);
+            Vector2 direction = Geometry2D.ToDirection(angle + angleBetweenArms * i);
 
             attacker.FireShotToward(null, _shot, center, direction, _range, gaugeGain, token);
         }
@@ -99,7 +99,7 @@ public class InkVortexAttackStyle : AttackStyle
     private void OrbitHands(BossHands hands, Vector3 center, float angle)
     {
         float radius = Vector2.Distance(hands.LeftHand.position, center);
-        Vector3 offset = AngleUtility.ToDirection(angle) * radius;
+        Vector3 offset = Geometry2D.ToDirection(angle) * radius;
 
         hands.LeftHand.position = center + offset;
         hands.RightHand.position = center - offset;

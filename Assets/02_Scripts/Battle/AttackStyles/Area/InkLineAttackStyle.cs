@@ -68,7 +68,7 @@ public class InkLineAttackStyle : AttackStyle
     private async UniTask DrawLineAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
     {
         float angle = UnityEngine.Random.Range(0f, 180f);
-        Vector3 along = AngleUtility.ToDirection(angle);
+        Vector3 along = Geometry2D.ToDirection(angle);
         Vector3 side = new Vector3(-along.y, along.x, 0f);
         Vector3 center = attacker.Target.GetAimPoint(Vector3.zero) + side * UnityEngine.Random.Range(-_offsetRange, _offsetRange);
 
@@ -109,8 +109,8 @@ public class InkLineAttackStyle : AttackStyle
 
     private Vector3 GetClosestPoint(Vector3 center, Vector3 along, Vector3 point)
     {
-        float distance = Mathf.Clamp(Vector3.Dot(point - center, along), -_length * 0.5f, _length * 0.5f);
+        Vector3 half = along * (_length * 0.5f);
 
-        return center + along * distance;
+        return Geometry2D.GetClosestPointOnSegment(center - half, center + half, point);
     }
 }

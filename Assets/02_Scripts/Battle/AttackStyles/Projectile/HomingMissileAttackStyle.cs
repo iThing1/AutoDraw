@@ -91,7 +91,7 @@ public class HomingMissileAttackStyle : AttackStyle
                 direction = Vector3.RotateTowards(direction, toTarget.normalized, _turnSpeed * Mathf.Deg2Rad * deltaTime, 0f);
 
                 missileTransform.position += direction * (_speed * deltaTime);
-                missileTransform.rotation = Quaternion.Euler(0f, 0f, AngleUtility.ToAngle(direction));
+                missileTransform.rotation = Quaternion.Euler(0f, 0f, Geometry2D.ToAngle(direction));
 
                 if (target.IsBlockedAt(missileTransform.position, _collisionRadius) || target.IsTouching(missileTransform.position, _collisionRadius))
                 {

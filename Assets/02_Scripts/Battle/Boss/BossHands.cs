@@ -157,8 +157,8 @@ public class BossHands : MonoBehaviour
                 break;
 
             case HandGesture.Orbit:
-                pose.Join(_leftHand.DOLocalPath(BuildCircle(Vector3.zero, _leftRest.magnitude, AngleUtility.ToAngle(_leftRest)), poseDuration, PathType.CatmullRom).SetEase(Ease.Linear));
-                pose.Join(_rightHand.DOLocalPath(BuildCircle(Vector3.zero, _rightRest.magnitude, AngleUtility.ToAngle(_rightRest)), poseDuration, PathType.CatmullRom).SetEase(Ease.Linear));
+                pose.Join(_leftHand.DOLocalPath(BuildCircle(Vector3.zero, _leftRest.magnitude, Geometry2D.ToAngle(_leftRest)), poseDuration, PathType.CatmullRom).SetEase(Ease.Linear));
+                pose.Join(_rightHand.DOLocalPath(BuildCircle(Vector3.zero, _rightRest.magnitude, Geometry2D.ToAngle(_rightRest)), poseDuration, PathType.CatmullRom).SetEase(Ease.Linear));
                 break;
         }
 
@@ -250,7 +250,7 @@ public class BossHands : MonoBehaviour
 
         for (int i = 0; i <= CIRCLE_POINT_COUNT; i++)
         {
-            points[i] = center + AngleUtility.ToDirection(i / (float)CIRCLE_POINT_COUNT * 360f + startAngle) * radius;
+            points[i] = center + Geometry2D.ToDirection(i / (float)CIRCLE_POINT_COUNT * 360f + startAngle) * radius;
         }
 
         return points;

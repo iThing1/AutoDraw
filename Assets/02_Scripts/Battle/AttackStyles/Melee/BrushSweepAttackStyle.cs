@@ -64,7 +64,7 @@ public class BrushSweepAttackStyle : AttackStyle
         await Telegraph.PlayCircleAsync(_telegraphPrefab, center, _radius, _telegraphColor, _warnDuration, token);
 
         Vector3 toTarget = attacker.Target.GetAimPoint(Vector3.zero) - center;
-        float startAngle = AngleUtility.ToAngle(toTarget) + 180f;
+        float startAngle = Geometry2D.ToAngle(toTarget) + 180f;
 
         GameObject trail = null != _trailPrefab ? GameManager.Pool.Spawn(_trailPrefab, GetPointOnCircle(center, startAngle), Quaternion.identity) : null;
         Transform hand = null != attacker.Hands ? attacker.Hands.RightHand : null;
@@ -202,6 +202,6 @@ public class BrushSweepAttackStyle : AttackStyle
 
     private Vector3 GetPointOnCircle(Vector3 center, float angle)
     {
-        return center + AngleUtility.ToDirection(angle) * _radius;
+        return center + Geometry2D.ToDirection(angle) * _radius;
     }
 }

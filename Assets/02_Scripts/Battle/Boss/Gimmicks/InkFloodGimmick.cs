@@ -147,7 +147,7 @@ public class InkFloodGimmick : PunishingBossGimmick
 
         for (int i = 0; i < _islandCount; i++)
         {
-            Vector3 direction = AngleUtility.ToDirection(startAngle + 360f / _islandCount * i);
+            Vector3 direction = Geometry2D.ToDirection(startAngle + 360f / _islandCount * i);
             Color color = null != palette ? palette.Pick(i) : Color.white;
 
             canvas.LeaveSplat(center + direction * _islandDistance.PickRandom(), _islandStyle, color, false, _islandScale);

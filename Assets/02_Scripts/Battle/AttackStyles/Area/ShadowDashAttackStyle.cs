@@ -78,7 +78,7 @@ public class ShadowDashAttackStyle : AttackStyle
         Vector3 velocity = along * (_dashSpeed * direction);
         float radius = _shadowDiameter * 0.5f;
 
-        SpriteRenderer shadow = Telegraph.Spawn(_shadowPrefab, start, 0f, new Vector2(_shadowDiameter, _shadowDiameter), _shadowColor);
+        SpriteRenderer shadow = PooledSprite.Spawn(_shadowPrefab, start, 0f, new Vector2(_shadowDiameter, _shadowDiameter), _shadowColor);
         AttackTarget target = attacker.Target;
         float travelled = 0f;
         bool hasStruck = false;
@@ -105,7 +105,7 @@ public class ShadowDashAttackStyle : AttackStyle
         }
         finally
         {
-            Telegraph.Despawn(shadow);
+            PooledSprite.Despawn(shadow);
         }
     }
 

@@ -12,42 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42dd0c5970e142ffb05915f3609c1e16, type: 3}
   m_Name: Gimmick_Darkness
   m_EditorClassIdentifier: Assembly-CSharp::DarknessGimmick
-  _failHit:
-    _projectileScale: 1
-    _trajectories:
-    - _type: 1
-      _weight: 1
-      _height:
-        _min: 0
-        _max: 0
-      _duration:
-        _min: 0.3
-        _max: 0.35
-      _useSpeed: 0
-      _speed:
-        _min: 10
-        _max: 10
-    _homing: 0
-    _missTravelTime: 0
-    _trailTime: 0
-    _trailWidth: 0.1
-    _useTrailColor: 1
-    _trailColor: {r: 0, g: 0, b: 0, a: 1}
-    _damage:
-      _min: 30
-      _max: 36
-    _criticalChance: 0
-    _criticalMultiplier: 2
-    _normalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
-    _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+  _darknessPrefab: {fileID: 8300000000000000001, guid: d771fbb282954f808a67d2b0cf9d964f, type: 3}
   _duration: 9
   _fadeDuration: 0.8
   _darkColor: {r: 0.02, g: 0.02, b: 0.03, a: 0.96}
-  _holeRadius: 4.5
-  _edgeSoftness: 1.5
   _endScale: 0.6
   _coverSize: 240
-  _textureSize: 512
   _repositionDistance:
     _min: 7
     _max: 11

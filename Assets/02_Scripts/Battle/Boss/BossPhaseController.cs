@@ -260,7 +260,7 @@ public class BossPhaseController : MonoBehaviour
         finally
         {
             boss.localScale = startScale;
-            Telegraph.Despawn(beam);
+            PooledSprite.Despawn(beam);
             FinishBusy();
         }
     }
@@ -456,7 +456,7 @@ public class BossPhaseController : MonoBehaviour
             return null;
         }
 
-        return Telegraph.Spawn(_revival.BeamPrefab, _unit.Body.position, 0f, new Vector2(_revival.BeamWidth, 0f), _revival.BeamColor);
+        return PooledSprite.Spawn(_revival.BeamPrefab, _unit.Body.position, 0f, new Vector2(_revival.BeamWidth, 0f), _revival.BeamColor);
     }
 
     // 윗끝은 화면 위에 고정한 채 아랫끝이 보스까지 내려온다. 연출이라 실제 시간으로 돈다.

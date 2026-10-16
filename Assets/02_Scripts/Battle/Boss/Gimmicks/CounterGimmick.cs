@@ -149,7 +149,7 @@ public class CounterGimmick : BossGimmick
         }
 
         float endDiameter = GetBodyRadius(boss) * 2f;
-        SpriteRenderer warn = Telegraph.Spawn(_warnPrefab, boss.Body.position, 0f, new Vector2(_warnStartDiameter, _warnStartDiameter), _warnColor);
+        SpriteRenderer warn = PooledSprite.Spawn(_warnPrefab, boss.Body.position, 0f, new Vector2(_warnStartDiameter, _warnStartDiameter), _warnColor);
 
         try
         {
@@ -159,7 +159,7 @@ public class CounterGimmick : BossGimmick
         }
         finally
         {
-            Telegraph.Despawn(warn);
+            PooledSprite.Despawn(warn);
         }
     }
 

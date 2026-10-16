@@ -61,7 +61,7 @@ public class InkFloodGimmick : PunishingBossGimmick
         AutoAttacker attacker = boss.Attacker;
         AttackTarget target = attacker.Target;
         Color clear = new Color(_floodColor.r, _floodColor.g, _floodColor.b, 0f);
-        SpriteRenderer flood = Telegraph.Spawn(_floodPrefab, boss.transform.position, 0f, new Vector2(_floodSize, _floodSize), clear);
+        SpriteRenderer flood = PooledSprite.Spawn(_floodPrefab, boss.transform.position, 0f, new Vector2(_floodSize, _floodSize), clear);
         SpriteRenderer dim = SpawnDim(boss.transform.position);
 
         try
@@ -101,8 +101,8 @@ public class InkFloodGimmick : PunishingBossGimmick
         }
         finally
         {
-            Telegraph.Despawn(flood);
-            Telegraph.Despawn(dim);
+            PooledSprite.Despawn(flood);
+            PooledSprite.Despawn(dim);
 
             if (null != attacker.Hands)
             {
@@ -118,7 +118,7 @@ public class InkFloodGimmick : PunishingBossGimmick
             return null;
         }
 
-        return Telegraph.Spawn(_dimPrefab, center, 0f, new Vector2(_floodSize, _floodSize), Color.clear);
+        return PooledSprite.Spawn(_dimPrefab, center, 0f, new Vector2(_floodSize, _floodSize), Color.clear);
     }
 
     private void FadeDim(SpriteRenderer dim, float alpha)

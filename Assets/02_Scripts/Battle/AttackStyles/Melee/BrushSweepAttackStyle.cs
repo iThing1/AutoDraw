@@ -29,14 +29,14 @@ public class BrushSweepAttackStyle : AttackStyle
     [SerializeField] private ShotSettings _hit = new();
 
     [Header("퍼지는 고리")]
-    // 속이 빈 고리 선. 굵기·색·점 위치는 여기 값으로 채운다.
+    // 속이 빈 고리 선. 프리팹에 반지름 1짜리 원 점이 로컬 좌표로 들어 있어, 크기를 반지름만큼 키워 퍼뜨린다.
+    // 선 굵기는 크기의 영향을 받지 않아 퍼져도 같은 굵기다.
     [SerializeField] private LineRenderer _ringPrefab;
     [SerializeField] private Color _ringColor = new Color(0.08f, 0.08f, 0.1f, 0.9f);
     [SerializeField, Min(0.05f)] private float _ringWidth = 0.6f;
     [SerializeField, Min(0f)] private float _ringSpeed = 12f;
     // 종이 끝까지 닿도록 넉넉히 잡는다.
     [SerializeField, Min(0f)] private float _ringMaxRadius = 60f;
-    [SerializeField, Range(8, 256)] private int _ringSegments = 96;
     // 끝으로 갈수록 옅어져, 이 비율부터 사라지기 시작한다.
     [SerializeField, Range(0f, 1f)] private float _ringFadeStart = 0.7f;
     // 고리를 여러 겹 연달아 퍼뜨릴 때의 겹 수와 간격. 막기를 다시 쓸 수 있을 만큼 띄운다.
@@ -142,13 +142,9 @@ public class BrushSweepAttackStyle : AttackStyle
         }
 
         LineRenderer ring = GameManager.Pool.Spawn(_ringPrefab.gameObject, center, Quaternion.identity).GetComponent<LineRenderer>();
-        ring.useWorldSpace = true;
-        ring.loop = true;
-        ring.positionCount = _ringSegments;
         ring.widthMultiplier = _ringWidth;
 
         AttackTarget target = attacker.Target;
-        Vector3[] points = new Vector3[_ringSegments];
         float radius = _radius;
         bool hasStruck = false;
 
@@ -159,7 +155,7 @@ public class BrushSweepAttackStyle : AttackStyle
                 float previousRadius = radius;
                 radius += _ringSpeed * Time.deltaTime;
 
-                DrawRing(ring, points, center, radius);
+                DrawRing(ring, radius);
 
                 if (false == hasStruck && IsRingPassing(target, center, previousRadius, radius))
                 {
@@ -176,14 +172,9 @@ public class BrushSweepAttackStyle : AttackStyle
         }
     }
 
-    private void DrawRing(LineRenderer ring, Vector3[] points, Vector3 center, float radius)
+    private void DrawRing(LineRenderer ring, float radius)
     {
-        for (int i = 0; i < points.Length; i++)
-        {
-            points[i] = center + AngleUtility.ToDirection(i / (float)points.Length * 360f) * radius;
-        }
-
-        ring.SetPositions(points);
+        ring.transform.localScale = new Vector3(radius, radius, 1f);
 
         float fade = Mathf.InverseLerp(_ringMaxRadius, _ringMaxRadius * _ringFadeStart, radius);
         Color color = new Color(_ringColor.r, _ringColor.g, _ringColor.b, _ringColor.a * fade);

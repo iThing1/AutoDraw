@@ -63,7 +63,6 @@ MonoBehaviour:
   _ringWidth: 0.6
   _ringSpeed: 12
   _ringMaxRadius: 60
-  _ringSegments: 96
   _ringFadeStart: 0.7
   _ringHit:
     _projectileScale: 1

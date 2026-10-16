@@ -87,11 +87,11 @@ public class CheckerHazardPattern : HazardPattern
     // 떨어진 칸이 진하게 번쩍였다가 사라진다. 판정은 이미 끝나 기다리지 않는다.
     private void FlashCell(Vector3 center, float size)
     {
-        SpriteRenderer cell = Telegraph.Spawn(_cellPrefab, center, 0f, new Vector2(size, size), _impactColor);
+        SpriteRenderer cell = PooledSprite.Spawn(_cellPrefab, center, 0f, new Vector2(size, size), _impactColor);
 
         cell.DOFade(0f, _impactFadeDuration)
             .SetEase(Ease.InQuad)
-            .OnComplete(() => Telegraph.Despawn(cell));
+            .OnComplete(() => PooledSprite.Despawn(cell));
     }
 
     // 플레이어가 가운데 칸에 오도록 격자 왼쪽 아래 모서리를 잡는다.

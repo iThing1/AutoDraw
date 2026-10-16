@@ -275,6 +275,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9200000000000000022}
   - component: {fileID: 9200000000000000023}
+  - component: {fileID: 9200000000000000027}
   m_Layer: 15
   m_Name: LeftGlow
   m_TagString: Untagged
@@ -349,6 +350,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9200000000000000025}
   - component: {fileID: 9200000000000000026}
+  - component: {fileID: 9200000000000000028}
   m_Layer: 15
   m_Name: RightGlow
   m_TagString: Untagged
@@ -593,3 +595,41 @@ MonoBehaviour:
       _inEase: 27
       _outEase: 5
       _sound: {fileID: 8300000, guid: ae1c3efd82e6ff242a23a830d0e42356, type: 3}
+--- !u!1818360608 &9200000000000000027
+PositionConstraint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9200000000000000021}
+  m_Enabled: 1
+  m_Weight: 1
+  m_TranslationAtRest: {x: 0, y: 0, z: 0}
+  m_TranslationOffset: {x: 0, y: 0, z: 0}
+  m_AffectTranslationX: 1
+  m_AffectTranslationY: 1
+  m_AffectTranslationZ: 1
+  m_IsContraintActive: 1
+  m_IsLocked: 1
+  m_Sources:
+  - sourceTransform: {fileID: 9200000000000000015}
+    weight: 1
+--- !u!1818360608 &9200000000000000028
+PositionConstraint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9200000000000000024}
+  m_Enabled: 1
+  m_Weight: 1
+  m_TranslationAtRest: {x: 0, y: 0, z: 0}
+  m_TranslationOffset: {x: 0, y: 0, z: 0}
+  m_AffectTranslationX: 1
+  m_AffectTranslationY: 1
+  m_AffectTranslationZ: 1
+  m_IsContraintActive: 1
+  m_IsLocked: 1
+  m_Sources:
+  - sourceTransform: {fileID: 9200000000000000018}
+    weight: 1

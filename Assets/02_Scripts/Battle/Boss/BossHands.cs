@@ -39,7 +39,7 @@ public class BossHands : MonoBehaviour
 
     [Header("예고 빛")]
     // 예고하는 손 뒤에 깔리는 빛. 흰 종이 위에서도 보이게 손마다 색을 정한다(왼손 설치형, 오른손 공격형).
-    // 손 그림의 자식이면 엔딩에서 손이 조각날 때 함께 복제되므로, 보스 바로 아래에 두고 손을 따라가게 한다.
+    // 손 그림의 자식이면 엔딩에서 손이 조각날 때 함께 복제되므로, 보스 바로 아래에 두고 Position Constraint(소스 = 손)로 따라가게 한다.
     [SerializeField] private SpriteRenderer _leftGlow;
     [SerializeField] private SpriteRenderer _rightGlow;
     [SerializeField] private Color _leftTellColor = new Color(0.2f, 0.45f, 0.95f, 0.85f);
@@ -79,13 +79,6 @@ public class BossHands : MonoBehaviour
 
         _leftHand.localPosition = _leftRest + Vector3.up * (Mathf.Sin(phase) * _bobHeight);
         _rightHand.localPosition = _rightRest + Vector3.up * (Mathf.Sin(phase + Mathf.PI) * _bobHeight);
-    }
-
-    // 손이 움직인 뒤에 따라가야 빛이 손에서 어긋나지 않는다.
-    private void LateUpdate()
-    {
-        FollowHand(_leftGlow, _leftHand);
-        FollowHand(_rightGlow, _rightHand);
     }
 
     public async UniTask PoseAsync(HandGesture gesture, Vector3 aimPoint, float duration, CancellationToken token)
@@ -296,14 +289,6 @@ public class BossHands : MonoBehaviour
 
         glow.DOKill();
         glow.enabled = false;
-    }
-
-    private void FollowHand(SpriteRenderer glow, Transform hand)
-    {
-        if (null != glow && glow.enabled)
-        {
-            glow.transform.position = hand.position;
-        }
     }
 
     private void StopHolding()

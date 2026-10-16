@@ -74,7 +74,7 @@ public class InkLineAttackStyle : AttackStyle
 
         await Telegraph.PlayLineAsync(_telegraphPrefab, center, angle, _length, _width, _telegraphColor, _warnDuration, token);
 
-        SpriteRenderer stroke = Telegraph.Spawn(_telegraphPrefab, center, angle, new Vector2(_length, 0f), _strokeColor);
+        SpriteRenderer stroke = PooledSprite.Spawn(_telegraphPrefab, center, angle, new Vector2(_length, 0f), _strokeColor);
 
         try
         {
@@ -92,7 +92,7 @@ public class InkLineAttackStyle : AttackStyle
         }
         finally
         {
-            Telegraph.Despawn(stroke);
+            PooledSprite.Despawn(stroke);
         }
     }
 

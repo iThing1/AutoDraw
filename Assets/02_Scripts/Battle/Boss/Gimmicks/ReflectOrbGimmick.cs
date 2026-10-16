@@ -155,13 +155,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
 
         if (orb.TryGetComponent(out TrailRenderer trail))
         {
-            // 같은 프리팹을 쓰는 보스 탄이 꼬리 설정을 바꿔 두므로 매번 다시 맞춘다.
-            trail.Clear();
-            trail.emitting = 0f < _trailTime;
-            trail.time = _trailTime;
-            trail.widthMultiplier = radius;
-            trail.startColor = _orbColor;
-            trail.endColor = new Color(_orbColor.r, _orbColor.g, _orbColor.b, 0f);
+            ProjectileFlight.SetupTrail(trail, _trailTime, radius, _orbColor);
         }
 
         float speed = _orbSpeed.PickRandom();
@@ -205,7 +199,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
     // 손에 붙은 채로 구체가 커져, 던질 때까지 손을 따라다닌다.
     private async UniTask ChargeAsync(Transform hand, CancellationToken token)
     {
-        SpriteRenderer charge = Telegraph.Spawn(_chargePrefab, hand.position, 0f, Vector2.zero, _orbColor);
+        SpriteRenderer charge = PooledSprite.Spawn(_chargePrefab, hand.position, 0f, Vector2.zero, _orbColor);
         float elapsed = 0f;
 
         try
@@ -223,7 +217,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
         }
         finally
         {
-            Telegraph.Despawn(charge);
+            PooledSprite.Despawn(charge);
         }
     }
 }

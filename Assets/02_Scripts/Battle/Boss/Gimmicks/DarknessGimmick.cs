@@ -10,22 +10,18 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "DarknessGimmick", menuName = "Scriptable Objects/Boss/Gimmick/Darkness")]
 public class DarknessGimmick : BossGimmick
 {
-    // 어둠은 유닛(보스 포함)을 덮고 탄 아래에 그린다. 정렬 층 이름은 프로젝트 설정(Tags and Layers)과 같아야 한다.
-    private const string DARKNESS_SORTING_LAYER = "Unit";
-    private const int DARKNESS_SORTING_ORDER = 1000;
     private const int REPOSITION_TRY_COUNT = 8;
 
     [Header("어둠")]
+    // 가운데가 뚫린 흰 덮개(04_Texture/DarknessHole). 유닛(보스 포함)을 덮고 탄 아래에 그리도록 프리팹에서 Unit 층 1000번에 둔다.
+    [SerializeField] private GameObject _darknessPrefab;
     [SerializeField, Min(0f)] private float _duration = 9f;
     [SerializeField, Min(0f)] private float _fadeDuration = 0.8f;
     [SerializeField] private Color _darkColor = new Color(0.02f, 0.02f, 0.03f, 0.96f);
-    // 시작할 때 플레이어 둘레에 보이는 구멍 반지름과, 가장자리가 흐려지는 폭(월드 거리).
-    [SerializeField, Min(0f)] private float _holeRadius = 4.5f;
-    [SerializeField, Min(0f)] private float _edgeSoftness = 1.5f;
-    // 끝날 즈음 어둠이 이 배율로 줄어들어 구멍도 함께 좁아진다. 줄어든 뒤에도 종이 전체를 덮도록 넉넉히 잡는다.
-    [SerializeField, Range(0.1f, 1f)] private float _endScale = 0.6f;
+    // 덮개 한 변의 월드 크기. 그림 속 구멍은 한 변에 맞춰 그려져 있어(240일 때 반지름 4.5, 흐림 폭 1.5) 이 값을 키우면 구멍도 같이 커진다.
     [SerializeField, Min(1f)] private float _coverSize = 240f;
-    [SerializeField, Range(64, 1024)] private int _textureSize = 512;
+    // 끝날 즈음 덮개가 이 배율로 줄어들어 구멍도 함께 좁아진다. 줄어든 뒤에도 종이 전체를 덮도록 넉넉히 잡는다.
+    [SerializeField, Range(0.1f, 1f)] private float _endScale = 0.6f;
 
     [Header("숨어서 쏘기")]
     // 쏠 때마다 보스가 플레이어 둘레 이 거리 안 아무 데로나 옮긴다.
@@ -47,14 +43,27 @@ public class DarknessGimmick : BossGimmick
     [SerializeField, Range(0f, 180f)] private float _aimedSpread = 30f;
     [SerializeField] private ShotSettings _aimedShot = new();
 
+    public override void Prewarm()
+    {
+        if (null != _darknessPrefab)
+        {
+            GameManager.Pool.Prewarm(_darknessPrefab, 1);
+        }
+    }
+
     public override async UniTask<bool> PlayAsync(BattleUnit boss, CancellationToken token)
     {
+        if (null == _darknessPrefab)
+        {
+            Debug.LogError($"암흑 : {name}에 어둠 프리팹이 지정되지 않았습니다.");
+            return true;
+        }
+
         AutoAttacker attacker = boss.Attacker;
         Transform bossTransform = boss.transform;
         Vector3 origin = bossTransform.position;
-        Texture2D texture = CreateHoleTexture();
-        Sprite sprite = Sprite.Create(texture, new Rect(0f, 0f, _textureSize, _textureSize), new Vector2(0.5f, 0.5f), _textureSize / _coverSize);
-        SpriteRenderer darkness = CreateDarkness(sprite);
+        Color clear = new Color(_darkColor.r, _darkColor.g, _darkColor.b, 0f);
+        SpriteRenderer darkness = PooledSprite.Spawn(_darknessPrefab, attacker.Target.FollowTransform.position, 0f, new Vector2(_coverSize, _coverSize), clear);
 
         try
         {
@@ -63,7 +72,7 @@ public class DarknessGimmick : BossGimmick
                 attacker.Hands.PoseAsync(HandGesture.BothRaise, attacker.Target.GetAimPoint(Vector3.zero), _fadeDuration, token).Forget();
             }
 
-            FadeDarkness(darkness, 1f);
+            FadeDarkness(darkness, _darkColor.a);
 
             await UniTask.Delay(TimeSpan.FromSeconds(_fadeDuration), cancellationToken: token);
 
@@ -75,9 +84,10 @@ public class DarknessGimmick : BossGimmick
             while (elapsed < _duration && false == attacker.Target.IsDefeated)
             {
                 float progress = elapsed / _duration;
+                float size = _coverSize * Mathf.Lerp(1f, _endScale, progress);
 
                 darkness.transform.position = attacker.Target.FollowTransform.position;
-                darkness.transform.localScale = Vector3.one * Mathf.Lerp(1f, _endScale, progress);
+                darkness.transform.localScale = new Vector3(size, size, 1f);
 
                 if (false == isCueing && elapsed >= nextBurst)
                 {
@@ -108,10 +118,7 @@ public class DarknessGimmick : BossGimmick
             // 어둠이 걷히기 전에 원래 자리로 돌아가, 걷힌 뒤에는 보스가 처음 자리에 있다.
             bossTransform.position = origin;
 
-            darkness.DOKill();
-            Destroy(darkness.gameObject);
-            Destroy(sprite);
-            Destroy(texture);
+            PooledSprite.Despawn(darkness);
 
             if (null != attacker.Hands)
             {
@@ -159,46 +166,6 @@ public class DarknessGimmick : BossGimmick
         }
 
         return position;
-    }
-
-    // 가운데가 뚫린 어둠 한 장. 구멍 가장자리를 부드럽게 흐려, 보이는 곳과 안 보이는 곳 경계가 딱 잘리지 않게 한다.
-    private Texture2D CreateHoleTexture()
-    {
-        Texture2D texture = new Texture2D(_textureSize, _textureSize, TextureFormat.RGBA32, false);
-        Color32[] pixels = new Color32[_textureSize * _textureSize];
-        float unitsPerPixel = _coverSize / _textureSize;
-        float half = _textureSize * 0.5f;
-        Color32 dark = _darkColor;
-
-        for (int y = 0; y < _textureSize; y++)
-        {
-            for (int x = 0; x < _textureSize; x++)
-            {
-                float distance = Mathf.Sqrt((x - half) * (x - half) + (y - half) * (y - half)) * unitsPerPixel;
-                float alpha = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(_holeRadius, _holeRadius + _edgeSoftness, distance));
-
-                pixels[y * _textureSize + x] = new Color32(dark.r, dark.g, dark.b, (byte)(dark.a * alpha));
-            }
-        }
-
-        texture.SetPixels32(pixels);
-        texture.Apply();
-
-        return texture;
-    }
-
-    // 한 번 쓰고 지우는 그림이라 풀 대신 그때그때 만든다.
-    private SpriteRenderer CreateDarkness(Sprite sprite)
-    {
-        GameObject darknessObject = new GameObject("Darkness");
-        SpriteRenderer darkness = darknessObject.AddComponent<SpriteRenderer>();
-
-        darkness.sprite = sprite;
-        darkness.sortingLayerName = DARKNESS_SORTING_LAYER;
-        darkness.sortingOrder = DARKNESS_SORTING_ORDER;
-        darkness.color = new Color(1f, 1f, 1f, 0f);
-
-        return darkness;
     }
 
     private void FadeDarkness(SpriteRenderer darkness, float alpha)

@@ -23,8 +23,8 @@ public static class Telegraph
         }
 
         Color areaColor = new Color(color.r, color.g, color.b, color.a * AREA_ALPHA_RATIO);
-        SpriteRenderer area = Spawn(prefab, position, angle, size, areaColor);
-        SpriteRenderer fill = Spawn(prefab, position, angle, startFillSize, color);
+        SpriteRenderer area = PooledSprite.Spawn(prefab, position, angle, size, areaColor);
+        SpriteRenderer fill = PooledSprite.Spawn(prefab, position, angle, startFillSize, color);
 
         try
         {
@@ -36,8 +36,8 @@ public static class Telegraph
         }
         finally
         {
-            Despawn(area);
-            Despawn(fill);
+            PooledSprite.Despawn(area);
+            PooledSprite.Despawn(fill);
         }
     }
 
@@ -60,28 +60,5 @@ public static class Telegraph
         CancellationToken token)
     {
         return PlayAsync(prefab, center, angle, new Vector2(length, width), new Vector2(length, 0f), color, duration, token);
-    }
-
-    public static SpriteRenderer Spawn(GameObject prefab, Vector3 position, float angle, Vector2 size, Color color)
-    {
-        GameObject instance = GameManager.Pool.Spawn(prefab, position, Quaternion.Euler(0f, 0f, angle));
-        instance.transform.localScale = new Vector3(size.x, size.y, 1f);
-
-        SpriteRenderer mark = instance.GetComponent<SpriteRenderer>();
-        mark.color = color;
-
-        return mark;
-    }
-
-    public static void Despawn(SpriteRenderer mark)
-    {
-        if (null == mark)
-        {
-            return;
-        }
-
-        mark.transform.DOKill();
-        mark.DOKill();
-        GameManager.Pool.Despawn(mark.gameObject);
     }
 }

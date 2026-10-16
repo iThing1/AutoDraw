@@ -238,16 +238,20 @@ public static class ProjectileFlight
 
     private static void SetupTrail(TrailRenderer trail, ShotSettings shot, Color color)
     {
+        SetupTrail(trail, shot.TrailTime, shot.TrailWidth, shot.UseTrailColor ? shot.TrailColor : color);
+    }
+
+    // 같은 투사체 프리팹을 여러 공격이 함께 쓰므로, 꺼낼 때마다 꼬리를 그 공격의 값으로 다시 맞춘다. 끝으로 갈수록 투명해진다.
+    public static void SetupTrail(TrailRenderer trail, float time, float width, Color color)
+    {
         // 풀에서 다시 꺼낸 투사체에는 이전 비행의 꼬리가 남아 있어, 그대로 두면 이전 위치에서 새 출발점까지 선이 그어진다.
         trail.Clear();
 
-        trail.emitting = 0f < shot.TrailTime;
-        trail.time = shot.TrailTime;
-        trail.widthMultiplier = shot.TrailWidth;
-
-        Color trailColor = shot.UseTrailColor ? shot.TrailColor : color;
-        trail.startColor = trailColor;
-        trail.endColor = new Color(trailColor.r, trailColor.g, trailColor.b, 0f);
+        trail.emitting = 0f < time;
+        trail.time = time;
+        trail.widthMultiplier = width;
+        trail.startColor = color;
+        trail.endColor = new Color(color.r, color.g, color.b, 0f);
     }
 
     // 경로 트윈은 탄마다 경로를 새로 만들어 탄막에서 할당이 몰리므로, 경유점이 없는 직선은 위치 트윈으로 날린다.

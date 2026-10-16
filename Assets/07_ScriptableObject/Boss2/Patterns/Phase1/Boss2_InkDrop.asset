@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 092abb4e10d44712b27b46ada5565122, type: 3}
+  m_Name: Boss2_InkDrop
+  m_EditorClassIdentifier: Assembly-CSharp::InkDropAttackStyle
+  _displayName: InkDrop
+  _iconColor: {r: 0.08, g: 0.08, b: 0.1, a: 1}
+  _attackInterval: 0.7
+  _gaugeGainPerHit: 0
+  _waitUntilFinished: 1
+  _stopsMovement: 0
+  _tell: 1
+  _tellDuration: 0.55
+  _dropCount: 8
+  _leadRatio: 1
+  _firstWarnDuration: 1
+  _lastWarnDuration: 0.35
+  _firstInterval: 0.45
+  _lastInterval: 0.12
+  _speedUpEase: 5
+  _telegraphPrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
+  _telegraphColor: {r: 0.1, g: 0.1, b: 0.12, a: 0.35}
+  _dropRadius: 1.5
+  _hit:
+    _projectileScale: 1
+    _trajectories:
+    - _type: 1
+      _weight: 1
+      _height:
+        _min: 0
+        _max: 0
+      _duration:
+        _min: 0.3
+        _max: 0.35
+      _useSpeed: 0
+      _speed:
+        _min: 10
+        _max: 10
+    _homing: 0
+    _missTravelTime: 0
+    _trailTime: 0
+    _trailWidth: 0.1
+    _useTrailColor: 1
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
+    _damage:
+      _min: 9
+      _max: 12
+    _criticalChance: 0.1
+    _criticalMultiplier: 2
+    _normalHit: {fileID: 11400000, guid: 789e71a3222486742b3aba402f7e49b9, type: 2}
+    _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+  _impact:
+    _shakeForce: 0.6
+    _sounds:
+    - {fileID: 8300000, guid: bc241be328531014fa49af9c462337f0, type: 3}
+    - {fileID: 8300000, guid: 1daae339c06742e4c8074055986fb3f8, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0, g: 0, b: 0, a: 1}
+    _effectScale: 1.5
+    _effectLifetime: 2
+  _groundSplat: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+  _puddlePrefab: {fileID: 8300000000000000004, guid: c0890a896a71b27ef94b94c45c57e8fb, type: 3}
+  _puddle:
+    _radius: 1.3
+    _moveScale: 0.55
+    _projectileScale: 1
+    _growDuration: 0.2
+    _duration: 3
+    _endDuration: 0.3
+    _color: {r: 0.08, g: 0.08, b: 0.1, a: 0.35}
+    _endPunch: 0

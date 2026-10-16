@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74b857d1ba3b43448e119a9fbb2229c5, type: 3}
+  m_Name: Stage2
+  m_EditorClassIdentifier: Assembly-CSharp::StageData
+  _displayName: Stage 2 - Ink Hands
+  _stagePrefab: {fileID: 2969957242831443143, guid: f4437aaad3ea1d9c8e583f9cbf6d8add, type: 3}
+  _blankCanvas: {fileID: 2800000, guid: 3f7b792a8ea0e4245ba9a0ff5c380267, type: 3}
+  _saveKey: Stage2

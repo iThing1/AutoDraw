@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6afb1180ec02425593680eee7d9e3140, type: 3}
+  m_Name: Gimmick_InkFlood
+  m_EditorClassIdentifier: Assembly-CSharp::InkFloodGimmick
+  _failHit:
+    _projectileScale: 1
+    _trajectories:
+    - _type: 1
+      _weight: 1
+      _height:
+        _min: 0
+        _max: 0
+      _duration:
+        _min: 0.3
+        _max: 0.35
+      _useSpeed: 0
+      _speed:
+        _min: 10
+        _max: 10
+    _homing: 0
+    _missTravelTime: 0
+    _trailTime: 0
+    _trailWidth: 0.1
+    _useTrailColor: 1
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
+    _damage:
+      _min: 30
+      _max: 36
+    _criticalChance: 0
+    _criticalMultiplier: 2
+    _normalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+    _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+  _warnDuration: 3.2
+  _floodPrefab: {fileID: 8300000000000000001, guid: 0abfa1a6def6fb6ea6a4a91035a05393, type: 3}
+  _floodColor: {r: 0.06, g: 0.06, b: 0.08, a: 0.55}
+  _floodSize: 200
+  _islandCount: 2
+  _islandDistance:
+    _min: 6
+    _max: 10
+  _islandStyle: {fileID: 11400000, guid: 84a8458c865a9814a62ba647e2fc707a, type: 2}
+  _islandScale: 2
+  _footRadius: 0.2
+  _surgeAlpha: 0.85
+  _surgeDuration: 0.15
+  _holdDuration: 0.5
+  _recedeDuration: 0.6
+  _surgeImpact:
+    _shakeForce: 1.5
+    _sounds:
+    - {fileID: 8300000, guid: 50fd2ff187c1bb349a27ed90afbb8560, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 0}
+    _effectColor: {r: 0, g: 0, b: 0, a: 1}
+    _effectScale: 1.5
+    _effectLifetime: 2
+  _dimPrefab: {fileID: 8300000000000000001, guid: 3a7f9c2deae4269957c9237d9e6e92e3, type: 3}
+  _dimAlpha: 0.25
+  _dimFadeDuration: 0.6

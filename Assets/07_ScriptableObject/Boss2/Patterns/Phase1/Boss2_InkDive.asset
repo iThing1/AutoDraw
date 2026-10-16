@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e6d15d49f0c46e78ca8604da3098a7c, type: 3}
+  m_Name: Boss2_InkDive
+  m_EditorClassIdentifier: Assembly-CSharp::InkDiveAttackStyle
+  _displayName: InkDive
+  _iconColor: {r: 0.08, g: 0.08, b: 0.1, a: 1}
+  _attackInterval: 0.8
+  _gaugeGainPerHit: 0
+  _waitUntilFinished: 1
+  _stopsMovement: 1
+  _tell: 6
+  _tellDuration: 0.5
+  _sinkDuration: 0.25
+  _sinkEase: 26
+  _hiddenDuration: 0.3
+  _inkSplat: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+  _telegraphPrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
+  _telegraphColor: {r: 0.1, g: 0.1, b: 0.12, a: 0.4}
+  _warnDuration: 0.5
+  _riseDuration: 0.2
+  _riseEase: 27
+  _blastRadius: 2.6
+  _hit:
+    _projectileScale: 1
+    _trajectories:
+    - _type: 1
+      _weight: 1
+      _height:
+        _min: 0
+        _max: 0
+      _duration:
+        _min: 0.3
+        _max: 0.35
+      _useSpeed: 0
+      _speed:
+        _min: 10
+        _max: 10
+    _homing: 0
+    _missTravelTime: 0
+    _trailTime: 0
+    _trailWidth: 0.1
+    _useTrailColor: 1
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
+    _damage:
+      _min: 12
+      _max: 16
+    _criticalChance: 0.2
+    _criticalMultiplier: 2
+    _normalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}
+    _criticalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}
+  _riseImpact:
+    _shakeForce: 1.2
+    _sounds:
+    - {fileID: 8300000, guid: c0d8972d38d3fe84fab073047861b628, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0, g: 0, b: 0, a: 1}
+    _effectScale: 2.5
+    _effectLifetime: 2

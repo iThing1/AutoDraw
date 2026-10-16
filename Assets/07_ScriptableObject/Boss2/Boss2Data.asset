@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fb33b84bd505cb4d9e92f11e51f1d76, type: 3}
+  m_Name: Boss2Data
+  m_EditorClassIdentifier: Assembly-CSharp::BattleUnitData
+  _moveSpeed: 3
+  _wander:
+    _useWander: 1
+    _areaHalfSize: {x: 6, y: 3}
+    _speed:
+      _min: 3.5
+      _max: 4.5
+    _pause:
+      _min: 0.4
+      _max: 1
+    _minMoveDistance: 3
+    _moveEase: 4
+    _chaseDistance: 12
+    _chaseStopDistance: 6
+  _maxHp: 2400
+  _hitRadius: 1.6
+  _attackStyle: {fileID: 11400000, guid: 1c883e95039a14ba65912a3d9c55c72d, type: 2}
+  _projectilePrefab: {fileID: 7624588648995017096, guid: de381a618a5797b47a750c0113577fac, type: 3}
+  _palette: {fileID: 11400000, guid: ffbed08809908924792318e46513ead8, type: 2}
+  _framingRadius: 3
+  _bannerTitle: Stage 2 - Ink Hands
+  _bannerSubtitle: Conductor of the Blank

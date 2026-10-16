@@ -434,7 +434,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PaintCanvas
   _splatPrefab: {fileID: 2687638166152425016, guid: fc2e34d7d7d952645a48fbcb16f7d1a5, type: 3}
-  _maxSplatCount: 300
+  _maxSplatCount: 600
   _appearDuration: 0.12
   _appearEase: 27
 --- !u!1 &8120992787737956099

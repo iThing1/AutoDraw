@@ -53,6 +53,12 @@ public class EnvironmentHazard : MonoBehaviour
 
         while (false == shooter.Owner.Health.IsDead && false == shooter.Target.IsDefeated)
         {
+            // 보스가 기믹·부활로 멈춘 동안에는 새 탄막을 꺼내지 않아, 기믹과 탄막이 겹치지 않게 한다.
+            while (shooter.IsInterrupted)
+            {
+                await UniTask.Yield(PlayerLoopTiming.Update, token);
+            }
+
             HazardPattern pattern = PickPattern();
 
             if (null != pattern)

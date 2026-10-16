@@ -49,14 +49,18 @@ public class PlayerInputMover : UnitMover
             }
 
             Vector2 input = Vector2.ClampMagnitude(_moveAction.action.ReadValue<Vector2>(), 1f);
-            Vector2 step = input * Unit.Data.MoveSpeed * Time.fixedDeltaTime;
+            Vector2 velocity = (input * Unit.Data.MoveSpeed + ExternalVelocity) * GameManager.SlowZones.GetMoveScale(_rigidbody.position);
+            Vector2 step = velocity * Time.fixedDeltaTime;
+
+            SetVelocity(velocity);
 
             _rigidbody.MovePosition(ClampToMoveArea(_rigidbody.position + step));
         }
     }
 
-    // 매 물리 프레임마다 상태를 확인해 멈추므로 따로 끊을 이동이 없다.
+    // 매 물리 프레임마다 상태를 확인해 멈추므로 따로 끊을 이동은 없고, 예측 사격이 멈춘 자리를 노리게 속도만 지운다.
     protected override void StopMoving()
     {
+        SetVelocity(Vector2.zero);
     }
 }

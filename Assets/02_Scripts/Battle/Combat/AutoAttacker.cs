@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
@@ -7,6 +8,7 @@ public class AutoAttacker : MonoBehaviour
 {
     private BattleUnit _owner;
     private SkillGauge _skillGauge;
+    private BossHands _hands;
     private int _nextColorIndex;
 
     private AttackTarget _target;
@@ -15,13 +17,26 @@ public class AutoAttacker : MonoBehaviour
     private bool _isRunning;
     private bool _hasLoggedMissingProjectile;
 
+    // 기믹·부활이 진행 중인 공격을 끊을 때 쓴다. 끊으면 버리고 다음 공격 때 새로 만든다.
+    // 끊긴 토큰을 아직 쥔 작업(날아가던 탄 등)이 있을 수 있어 Dispose하지 않는다. 링크된 소스는 전투 토큰과 함께 정리된다.
+    private CancellationTokenSource _interruptSource;
+    private bool _isInterrupted;
+    // 쿨타임 조건을 보려고 패턴마다 마지막으로 쏜 시간을 기억한다. 에셋(SO)에 두면 다른 유닛과 섞여 여기 둔다.
+    private readonly Dictionary<AttackStyle, float> _lastFireTimes = new();
+
     public BattleUnit Owner { get { return _owner; } }
     public AttackTarget Target { get { return _target; } }
+    public BossHands Hands { get { return _hands; } }
+    public PaintCanvas PaintCanvas { get { return _paintCanvas; } }
+    // 전투가 끝나면(누군가 쓰러지면) 끊기는 토큰. 공격 루프 밖에서 도는 보스 연출도 전투와 함께 끝내는 데 쓴다.
+    public CancellationToken BattleToken { get { return _battleToken; } }
+    public bool IsInterrupted { get { return _isInterrupted; } }
 
     private void Awake()
     {
         _owner = GetComponent<BattleUnit>();
         _skillGauge = GetComponent<SkillGauge>();
+        TryGetComponent(out _hands);
     }
 
     // 공격 간격은 게임 시간으로 재서, 히트 스톱 동안에는 다음 공격도 함께 멈춘다.
@@ -37,50 +52,112 @@ public class AutoAttacker : MonoBehaviour
         {
             while (false == _owner.Health.IsDead && false == _target.IsDefeated)
             {
-                AttackStyle selectedStyle = _owner.AttackStyle;
-
-                if (null == selectedStyle)
+                // 기믹·부활로 끊긴 동안에는 다시 이어질 때까지 새 공격을 고르지 않는다.
+                while (_isInterrupted)
                 {
-                    Debug.LogError($"자동 공격 : {_owner.name}에 공격 스타일이 지정되지 않았습니다.");
-                    return;
+                    await UniTask.Yield(PlayerLoopTiming.Update, token);
                 }
 
-                // 여러 패턴을 묶은 스타일이면 이번에 쓸 패턴을 먼저 골라, 간격·대기·멈춤을 그 패턴의 값으로 정한다.
-                AttackStyle style = selectedStyle.PickStyle();
-
-                await UniTask.Delay(TimeSpan.FromSeconds(style.AttackInterval), cancellationToken: token);
-
-                if (_owner.Health.IsDead || _target.IsDefeated)
+                try
                 {
-                    return;
+                    if (false == await AttackOnceAsync(GetAttackToken(token)))
+                    {
+                        return;
+                    }
                 }
-
-                // 기다리는 동안 키로 공격을 바꿨으면 다음 공격부터가 아니라 바로 새 공격을 쏜다.
-                if (selectedStyle != _owner.AttackStyle)
+                catch (OperationCanceledException) when (false == token.IsCancellationRequested)
                 {
-                    style = _owner.AttackStyle.PickStyle();
-                }
-
-                if (style.WaitUntilFinished)
-                {
-                    await FireAsync(style, true, token);
-                }
-                else
-                {
-                    FireAsync(style, true, token).Forget();
+                    // 기믹이 끊은 공격이라 다음 공격으로 넘어간다.
                 }
             }
         }
         finally
         {
             _isRunning = false;
+            _interruptSource = null;
         }
+    }
+
+    // 진행 중인 공격(예고·발사·날아가던 탄)을 끊고, Resume 전까지 새 공격을 시작하지 않는다.
+    public void Interrupt()
+    {
+        _isInterrupted = true;
+
+        if (null != _interruptSource)
+        {
+            _interruptSource.Cancel();
+            _interruptSource = null;
+        }
+    }
+
+    public void Resume()
+    {
+        _isInterrupted = false;
+    }
+
+    public bool IsOnCooldown(AttackStyle style, float cooldown)
+    {
+        if (0f >= cooldown || null == style || false == _lastFireTimes.TryGetValue(style, out float lastFireTime))
+        {
+            return false;
+        }
+
+        return Time.time - lastFireTime < cooldown;
+    }
+
+    // 공격 스타일이 없으면 false를 돌려 공격을 끝낸다.
+    private async UniTask<bool> AttackOnceAsync(CancellationToken token)
+    {
+        AttackStyle selectedStyle = _owner.AttackStyle;
+
+        if (null == selectedStyle)
+        {
+            Debug.LogError($"자동 공격 : {_owner.name}에 공격 스타일이 지정되지 않았습니다.");
+            return false;
+        }
+
+        // 여러 패턴을 묶은 스타일이면 이번에 쓸 패턴을 먼저 골라, 간격·대기·멈춤을 그 패턴의 값으로 정한다.
+        AttackStyle style = selectedStyle.PickStyle(this);
+
+        await UniTask.Delay(TimeSpan.FromSeconds(style.AttackInterval), cancellationToken: token);
+
+        if (_owner.Health.IsDead || _target.IsDefeated)
+        {
+            return true;
+        }
+
+        // 기다리는 동안 키로 공격을 바꿨거나 페이즈가 바뀌었으면 다음 공격부터가 아니라 바로 새 공격을 쏜다.
+        if (selectedStyle != _owner.AttackStyle)
+        {
+            style = _owner.AttackStyle.PickStyle(this);
+        }
+
+        if (style.WaitUntilFinished)
+        {
+            await FireAsync(style, true, token);
+        }
+        else
+        {
+            FireAsync(style, true, token).Forget();
+        }
+
+        return true;
+    }
+
+    private CancellationToken GetAttackToken(CancellationToken battleToken)
+    {
+        if (null == _interruptSource)
+        {
+            _interruptSource = CancellationTokenSource.CreateLinkedTokenSource(battleToken);
+        }
+
+        return _interruptSource.Token;
     }
 
     // 특수 스킬은 공격 주기와 상관없이 즉시 발동하고, 게이지를 쌓지 않는다.
     public bool TryFireSkill(AttackStyle skill)
     {
-        if (false == _isRunning || null == skill || null == _target || _target.IsDefeated)
+        if (false == _isRunning || _isInterrupted || null == skill || null == _target || _target.IsDefeated)
         {
             return false;
         }
@@ -139,6 +216,22 @@ public class AutoAttacker : MonoBehaviour
         ApplyHit(hit, RollDamage(hit), hitPoint, gaugeGain);
     }
 
+    // 기믹 실패처럼 막을 수 없는 공격. 명중 반경·방패를 보지 않고 바로 맞힌다.
+    public void StrikeUnblockable(ShotSettings hit, Vector3 hitPoint)
+    {
+        if (_target.IsDefeated)
+        {
+            return;
+        }
+
+        DamageInfo damage = RollDamage(hit);
+        damage.HitPoint = hitPoint;
+
+        _target.Unit.Health.TakeDamage(damage);
+
+        HitFeedbackPlayer.Play(hit.GetHitFeedback(damage.IsCritical), _target.Unit, damage, _paintCanvas);
+    }
+
     // 범위 공격. 폭발 반경 안에 목표가 있으면 목표 자리에 맞고, 방패를 들고 있으면 막힌다.
     public void Blast(ShotSettings hit, Vector3 center, float radius, float gaugeGain)
     {
@@ -169,6 +262,9 @@ public class AutoAttacker : MonoBehaviour
     {
         float gaugeGain = gainsGauge ? style.GaugeGainPerHit : 0f;
         bool hasBegunAction = false;
+        bool hasPosed = false;
+
+        _lastFireTimes[style] = Time.time;
 
         try
         {
@@ -182,6 +278,13 @@ public class AutoAttacker : MonoBehaviour
                 }
             }
 
+            // 손 달린 보스는 패턴마다 정해진 손동작을 먼저 보여 줘, 무엇이 올지 읽고 대비할 틈을 준다.
+            if (null != _hands && HandGesture.None != style.Tell)
+            {
+                hasPosed = true;
+                await _hands.PoseAsync(style.Tell, _target.GetAimPoint(Vector3.zero), style.TellDuration, token);
+            }
+
             await style.FireAsync(this, gaugeGain, token);
         }
         catch (OperationCanceledException)
@@ -190,6 +293,11 @@ public class AutoAttacker : MonoBehaviour
         }
         finally
         {
+            if (hasPosed)
+            {
+                _hands.ReturnToRest();
+            }
+
             // 기다리다 취소됐으면 다른 패턴의 Action을 끝내지 않는다.
             if (hasBegunAction)
             {

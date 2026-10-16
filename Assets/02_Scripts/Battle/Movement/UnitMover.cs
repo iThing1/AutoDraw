@@ -11,8 +11,39 @@ public abstract class UnitMover : MonoBehaviour
 
     private bool _hasMoveArea;
     private Rect _moveArea;
+    // 예측 사격용 지금 속도. 직접 조작하는 이동만 채우고, 나머지는 0이다.
+    private Vector2 _velocity;
+    // 소용돌이처럼 바깥에서 끌거나 미는 힘(초당 거리). 직접 조작하는 이동에 더해진다.
+    private Vector2 _externalVelocity;
 
     protected BattleUnit Unit { get { return _unit; } }
+    protected Vector2 ExternalVelocity { get { return _externalVelocity; } }
+
+    // 지금 속도 그대로 seconds초 뒤에 있을 자리. 이동 범위 밖은 범위 끝으로 자른다.
+    public Vector3 PredictPosition(float seconds)
+    {
+        Vector2 predicted = ClampToMoveArea((Vector2)transform.position + _velocity * seconds);
+
+        return new Vector3(predicted.x, predicted.y, transform.position.z);
+    }
+
+    public void SetExternalVelocity(Vector2 velocity)
+    {
+        _externalVelocity = velocity;
+    }
+
+    // 순간이동처럼 직접 옮길 자리를 이동 범위 안으로 자른다.
+    public Vector3 ClampPosition(Vector3 position)
+    {
+        Vector2 clamped = ClampToMoveArea(position);
+
+        return new Vector3(clamped.x, clamped.y, position.z);
+    }
+
+    protected void SetVelocity(Vector2 velocity)
+    {
+        _velocity = velocity;
+    }
 
     protected virtual void Awake()
     {

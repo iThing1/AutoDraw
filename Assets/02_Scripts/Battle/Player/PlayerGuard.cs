@@ -14,10 +14,13 @@ public class PlayerGuard : MonoBehaviour
     [SerializeField] private SpriteRenderer _shield;
 
     public event Action OnGuardStarted;
+    // 눌렀지만 막기가 안 나갔을 때. 게이지가 모자랐으면 true를 넘긴다.
+    public event Action<bool> OnGuardRejected;
 
     private BattleUnit _unit;
     private SkillGauge _skillGauge;
     private Vector3 _shieldScale;
+    private Color _shieldColor;
     private float _readyTime;
 
     public GuardPreset Preset { get { return _preset; } }
@@ -42,6 +45,7 @@ public class PlayerGuard : MonoBehaviour
             float spriteDiameter = _shield.sprite.bounds.size.x;
             _shieldScale = Vector3.one * (_preset.GuardRadius * 2f / spriteDiameter);
             _shield.transform.localScale = _shieldScale;
+            _shieldColor = _shield.color;
             _shield.enabled = false;
         }
     }
@@ -66,6 +70,7 @@ public class PlayerGuard : MonoBehaviour
         if (null != _shield)
         {
             _shield.transform.DOKill();
+            _shield.DOKill();
         }
     }
 
@@ -82,11 +87,19 @@ public class PlayerGuard : MonoBehaviour
         }
     }
 
-    // 직접 움직일 수 있을 때만 쓴다. 컷신(Idle)이나 다른 동작(Action) 중에는 나가지 않는다.
+    // 직접 움직일 수 있을 때만 쓴다. 컷신(Idle)이나 다른 동작(Action, 막는 중 포함) 중에는 조용히 넘긴다.
     private void TryStartGuard()
     {
-        if (UnitState.Move != _unit.State || Time.time < _readyTime || false == _skillGauge.CanConsume(_preset.GaugeCost))
+        if (UnitState.Move != _unit.State)
         {
+            return;
+        }
+
+        bool isOutOfGauge = false == _skillGauge.CanConsume(_preset.GaugeCost);
+
+        if (Time.time < _readyTime || isOutOfGauge)
+        {
+            RejectGuard(isOutOfGauge);
             return;
         }
 
@@ -125,9 +138,30 @@ public class PlayerGuard : MonoBehaviour
         }
     }
 
+    // 눌렀는데 막기가 안 나가면 방패를 회색으로 잠깐 비춰, 막을 수 있었는데 안 막힌 것처럼 보이지 않게 한다.
+    private void RejectGuard(bool isOutOfGauge)
+    {
+        OnGuardRejected?.Invoke(isOutOfGauge);
+
+        if (null == _shield)
+        {
+            return;
+        }
+
+        _shield.transform.DOKill();
+        _shield.DOKill();
+        _shield.transform.localScale = _shieldScale;
+        _shield.color = _preset.RejectColor;
+        _shield.enabled = true;
+        _shield.DOFade(0f, _preset.RejectFlashDuration).OnComplete(HideShield);
+    }
+
     // 짧은 히트 스톱으로 막는 순간의 손맛을 준다.
+    // 막아 냈으면 쿨타임을 지워, 지금 방패가 내려가는 즉시 다음 막기를 쓸 수 있게 한다. 연달아 오는 공격을 막기로 받아치는 보상이다.
     private void HandleBlocked(Vector3 hitPoint)
     {
+        _readyTime = 0f;
+
         GameManager.TimeScale.PlayHitStop(_preset.BlockHitStopDuration, _preset.BlockHitStopTimeScale);
         ImpactPlayer.Play(_preset.BlockImpact, hitPoint);
 
@@ -149,6 +183,8 @@ public class PlayerGuard : MonoBehaviour
 
         Transform shieldTransform = _shield.transform;
 
+        _shield.DOKill();
+        _shield.color = _shieldColor;
         _shield.enabled = true;
         shieldTransform.DOKill();
         shieldTransform.localScale = Vector3.zero;
@@ -163,7 +199,9 @@ public class PlayerGuard : MonoBehaviour
         }
 
         _shield.transform.DOKill();
+        _shield.DOKill();
         _shield.transform.localScale = _shieldScale;
+        _shield.color = _shieldColor;
         _shield.enabled = false;
     }
 }

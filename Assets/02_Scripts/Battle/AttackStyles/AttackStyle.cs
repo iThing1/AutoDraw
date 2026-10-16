@@ -17,6 +17,11 @@ public abstract class AttackStyle : ScriptableObject
     [SerializeField] private bool _waitUntilFinished;
     [SerializeField] private bool _stopsMovement;
 
+    [Header("예고")]
+    // 손 달린 보스만 쓴다. 손이 없는 유닛은 예고 없이 바로 쏜다.
+    [SerializeField] private HandGesture _tell;
+    [SerializeField, Min(0f)] private float _tellDuration = 0.5f;
+
     public string DisplayName { get { return _displayName; } }
     public Color IconColor { get { return _iconColor; } }
 
@@ -25,10 +30,19 @@ public abstract class AttackStyle : ScriptableObject
     public bool WaitUntilFinished { get { return _waitUntilFinished; } }
     public bool StopsMovement { get { return _stopsMovement; } }
 
+    public HandGesture Tell { get { return _tell; } }
+    public float TellDuration { get { return _tellDuration; } }
+
     // 이번 공격에 쓸 스타일. 여러 패턴을 묶은 스타일은 이 중 하나를 골라 돌려준다.
     public virtual AttackStyle PickStyle()
     {
         return this;
+    }
+
+    // 거리·쿨타임처럼 쏘는 쪽 상황을 보고 고르는 묶음은 이것을 덮어쓴다.
+    public virtual AttackStyle PickStyle(AutoAttacker picker)
+    {
+        return PickStyle();
     }
 
     // 첫 공격 때 한꺼번에 생성되며 끊기지 않도록, 이 공격만 쓰는 프리팹(포대, 칼끝 등)을 풀에 미리 만들어 둔다.

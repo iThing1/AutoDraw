@@ -10,11 +10,14 @@ public class PaintCanvas : MonoBehaviour
     [SerializeField] private GameObject _splatPrefab;
 
     [Header("자국")]
-    [SerializeField, Min(1)] private int _maxSplatCount = 300;
+    [SerializeField, Min(1)] private int _maxSplatCount = 600;
     [SerializeField, Min(0f)] private float _appearDuration = 0.12f;
     [SerializeField] private Ease _appearEase = Ease.OutBack;
+    // 상한을 넘어 지우는 자국이 갑자기 사라지지 않고 이 시간 동안 흐려지며 사라진다.
+    [SerializeField, Min(0f)] private float _removeFadeDuration = 0.4f;
 
-    private readonly Queue<PaintSplat> _splats = new();
+    // 오래된 순서대로 둔다. 상한을 넘을 때 가운데(가장 오래된 잉크)를 빼야 해서 큐 대신 리스트를 쓴다.
+    private readonly List<PaintSplat> _splats = new();
     private readonly List<PaintSplat> _inkSplats = new();
 
     private int _sortingOrder;
@@ -73,22 +76,15 @@ public class PaintCanvas : MonoBehaviour
         RemoveAllInk();
     }
 
-    // 큐 중간의 항목은 바로 뺄 수 없어서, 한 바퀴 돌며 잉크만 버리고 나머지는 순서대로 다시 넣는다.
+    // 뒤에서부터 지워야 지운 자리 뒤의 순서가 밀려도 건너뛰는 자국이 없다.
     private void RemoveAllInk()
     {
-        int count = _splats.Count;
-
-        for (int i = 0; i < count; i++)
+        for (int i = _splats.Count - 1; i >= 0; i--)
         {
-            PaintSplat splat = _splats.Dequeue();
-
-            if (splat.IsInk)
+            if (_splats[i].IsInk)
             {
-                DespawnSplat(splat);
-            }
-            else
-            {
-                _splats.Enqueue(splat);
+                DespawnSplat(_splats[i]);
+                _splats.RemoveAt(i);
             }
         }
 
@@ -98,19 +94,49 @@ public class PaintCanvas : MonoBehaviour
     // 연출이 새로 찍은 잉크 자국 자리를 써야 할 때(주변에 잉크가 없어 새로 찍는 경우 등) 찍은 자국을 돌려준다.
     public PaintSplat LeaveInkSplat(Vector3 position, SplatStyle style, Color color, float scale)
     {
+        return LeaveSplat(position, style, color, true, scale);
+    }
+
+    // 맞은 자리가 아닌 곳에 자국을 하나 찍는다. 기믹이 플레이어 쪽 물감(안전한 자리)을 미리 깔아 둘 때도 쓴다.
+    public PaintSplat LeaveSplat(Vector3 position, SplatStyle style, Color color, bool isInk, float scale)
+    {
         if (null == style || false == style.HasSprites)
         {
             return null;
         }
 
-        return SpawnSplat(position, style, color, true, scale);
+        return SpawnSplat(position, style, color, isInk, scale);
+    }
+
+    // 플레이어 쪽 물감(잉크가 아닌 자국)이 이 자리에 칠해져 있는지. 자국 그림 크기의 원으로 넉넉히 본다.
+    // 기믹 때 한 번씩만 불려, 자국 수(최대 수백 개)만큼 도는 비용은 문제가 되지 않는다.
+    public bool IsPaintedAt(Vector3 position, float radius)
+    {
+        for (int i = 0; i < _splats.Count; i++)
+        {
+            PaintSplat splat = _splats[i];
+
+            if (splat.IsInk)
+            {
+                continue;
+            }
+
+            float splatRadius = splat.SpriteRenderer.bounds.extents.x;
+
+            if (Vector2.Distance(position, splat.transform.position) <= splatRadius + radius)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private PaintSplat SpawnSplat(Vector3 position, SplatStyle style, Color color, bool isInk, float scale)
     {
         if (_splats.Count >= _maxSplatCount)
         {
-            RemoveSplat(_splats.Dequeue());
+            RemoveOldest();
         }
 
         GameObject instance = GameManager.Pool.Spawn(_splatPrefab, transform);
@@ -124,7 +150,7 @@ public class PaintCanvas : MonoBehaviour
         splatTransform.localScale = Vector3.zero;
         splatTransform.DOScale(scale, _appearDuration).SetEase(_appearEase).SetUpdate(true);
 
-        _splats.Enqueue(splat);
+        _splats.Add(splat);
 
         if (isInk)
         {
@@ -145,22 +171,45 @@ public class PaintCanvas : MonoBehaviour
 
         _sortingOrder = 0;
 
-        foreach (PaintSplat splat in _splats)
+        for (int i = 0; i < _splats.Count; i++)
         {
-            splat.SpriteRenderer.sortingOrder = ++_sortingOrder;
+            _splats[i].SpriteRenderer.sortingOrder = ++_sortingOrder;
         }
 
         return ++_sortingOrder;
     }
 
-    private void RemoveSplat(PaintSplat splat)
+    // 상한을 넘으면 보스 잉크 중 가장 오래된 것부터 지운다. 플레이어 물감은 클리어 그림에 남아야 해서 잉크가 하나도 없을 때만 지운다.
+    private void RemoveOldest()
     {
-        if (splat.IsInk)
+        PaintSplat oldest = 0 < _inkSplats.Count ? _inkSplats[0] : _splats[0];
+
+        _splats.Remove(oldest);
+
+        if (oldest.IsInk)
         {
-            _inkSplats.Remove(splat);
+            _inkSplats.RemoveAt(0);
         }
 
-        DespawnSplat(splat);
+        FadeOutAndDespawn(oldest);
+    }
+
+    // 목록에서는 바로 빼 상한을 비우고, 그림만 흐려지며 사라진다. 스테이지와 함께 파괴되면 트윈도 함께 정리된다.
+    private void FadeOutAndDespawn(PaintSplat splat)
+    {
+        splat.transform.DOKill();
+        splat.SpriteRenderer.DOKill();
+
+        if (0f >= _removeFadeDuration)
+        {
+            GameManager.Pool.Despawn(splat.gameObject);
+            return;
+        }
+
+        splat.SpriteRenderer.DOFade(0f, _removeFadeDuration)
+            .SetUpdate(true)
+            .SetLink(splat.gameObject)
+            .OnComplete(() => GameManager.Pool.Despawn(splat.gameObject));
     }
 
     private void DespawnSplat(PaintSplat splat)

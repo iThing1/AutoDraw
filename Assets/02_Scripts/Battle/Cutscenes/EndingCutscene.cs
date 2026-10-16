@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
@@ -51,14 +52,18 @@ public class EndingCutscene : MonoBehaviour
     {
         await RealtimeDelay.WaitAsync(_preset.DelayBeforeShatter, token);
 
-        SpriteRenderer bossRenderer = boss.Body.GetComponent<SpriteRenderer>();
-
+        // 손 달린 보스처럼 그림이 여러 장이면 함께 조각내, 남은 손이 완성된 그림에 찍히지 않게 한다.
         // 보스 오브젝트는 끄지 않고 그림만 숨긴다. 전투 카메라가 보스 자리를 기준으로 화면을 잡고 있어서,
         // 꺼 버리면 카메라가 돌아올 때 그림이 그려진 자리에서 벗어날 수 있다.
-        if (null != bossRenderer)
+        IReadOnlyList<SpriteRenderer> renderers = boss.View.Renderers;
+        List<UniTask> shatters = new List<UniTask>(renderers.Count);
+
+        for (int i = 0; i < renderers.Count; i++)
         {
-            await SpriteShatter.PlayAsync(bossRenderer, _preset.Shatter, token);
+            shatters.Add(SpriteShatter.PlayAsync(renderers[i], _preset.Shatter, token));
         }
+
+        await UniTask.WhenAll(shatters);
     }
 
     // 경계가 없는 스테이지는 전체를 담을 영역을 알 수 없어 전투 화면으로 돌아간다.

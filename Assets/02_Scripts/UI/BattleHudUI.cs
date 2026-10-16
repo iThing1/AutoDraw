@@ -119,6 +119,7 @@ public class BattleHudUI : MonoBehaviour
         _guardSlot.Setup(_guard.KeyLabel, _guard.Preset.DisplayName, _guard.Preset.IconColor);
 
         _guard.OnGuardStarted += HandleGuardStarted;
+        _guard.OnGuardRejected += HandleGuardRejected;
         _guard.SkillGauge.OnChanged += HandleGuardGaugeChanged;
 
         HandleGuardGaugeChanged();
@@ -135,6 +136,7 @@ public class BattleHudUI : MonoBehaviour
         if (null != _guard)
         {
             _guard.OnGuardStarted -= HandleGuardStarted;
+            _guard.OnGuardRejected -= HandleGuardRejected;
             _guard.SkillGauge.OnChanged -= HandleGuardGaugeChanged;
             _guard = null;
         }
@@ -192,6 +194,22 @@ public class BattleHudUI : MonoBehaviour
     private void HandleGuardStarted()
     {
         _guardSlot.PlayUsed();
+    }
+
+    // 게이지가 모자라 막기가 안 나갔으면 플레이어 머리 위에 알린다. 쿨타임은 방패가 회색으로 비치는 것으로 충분하다.
+    private void HandleGuardRejected(bool isOutOfGauge)
+    {
+        if (false == isOutOfGauge)
+        {
+            return;
+        }
+
+        DamageText damageText = SpawnText();
+
+        if (null != damageText)
+        {
+            damageText.PlayText(_damageText.NoGaugeText, _damageText.NoGaugeColor, ToScreen(_player.Body.position), _damageText);
+        }
     }
 
     private void SpawnDamageText(DamageInfo damage)

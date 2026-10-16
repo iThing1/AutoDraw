@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System.Collections.Generic;
 using UnityEngine;
 
 // 유닛의 겉모습 연출(피격 플래시, 넉백)을 맡는다. M5에서 플래시는 셰이더로 바뀐다.
@@ -9,6 +10,8 @@ public class UnitView : MonoBehaviour
 
     private Color[] _originalColors;
 
+    public IReadOnlyList<SpriteRenderer> Renderers { get { return _renderers; } }
+
     private void Awake()
     {
         _originalColors = new Color[_renderers.Length];
@@ -16,6 +19,21 @@ public class UnitView : MonoBehaviour
         for (int i = 0; i < _renderers.Length; i++)
         {
             _originalColors[i] = _renderers[i].color;
+        }
+    }
+
+    // 맞을수록 물드는 보스처럼 바탕색이 바뀌는 유닛용. 피격 플래시는 맞은 뒤에 시작해 바뀐 색으로 돌아온다.
+    // 플래시가 도는 중이면 그 플래시가 끝날 때 맞추도록 색은 바로 칠하지 않는다.
+    public void SetBaseColor(Color color)
+    {
+        for (int i = 0; i < _renderers.Length; i++)
+        {
+            _originalColors[i] = color;
+
+            if (false == DOTween.IsTweening(_renderers[i]))
+            {
+                _renderers[i].color = color;
+            }
         }
     }
 

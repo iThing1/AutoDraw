@@ -28,6 +28,17 @@ public class AttackTarget
         return _unit.Body.position + offset;
     }
 
+    // 지금 움직이는 방향으로 seconds초 뒤에 있을 자리. 떨어지기까지 시간이 걸리는 공격이 앞질러 노릴 때 쓴다.
+    public Vector3 GetPredictedPoint(float seconds)
+    {
+        if (null == _unit.Mover)
+        {
+            return _unit.Body.position;
+        }
+
+        return _unit.Mover.PredictPosition(seconds) + (_unit.Body.position - _unit.transform.position);
+    }
+
     // 명중 반경 밖으로 움직였으면 피한 것이다.
     public bool IsHit(Vector3 hitPoint)
     {

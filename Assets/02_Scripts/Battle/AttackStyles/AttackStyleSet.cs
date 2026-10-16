@@ -16,22 +16,56 @@ public class AttackStyleSet : AttackStyle
     {
         [SerializeField] private AttackStyle _style;
         [SerializeField, Min(0f)] private float _weight = 1f;
+        // 목표와의 거리가 이 범위 안일 때만 고른다. 최대 0은 제한 없음이다.
+        [SerializeField, Min(0f)] private float _minDistance;
+        [SerializeField, Min(0f)] private float _maxDistance;
+        // 한 번 쓰면 이 시간(초) 동안은 다시 고르지 않는다.
+        [SerializeField, Min(0f)] private float _cooldown;
 
         public AttackStyle Style { get { return _style; } }
         public float Weight { get { return _weight; } }
+
+        // 쏘는 쪽을 모르면(null) 조건 없이 고를 수 있다고 본다.
+        public bool IsAvailable(AutoAttacker picker)
+        {
+            if (null == picker || null == picker.Target)
+            {
+                return true;
+            }
+
+            float distance = Vector2.Distance(picker.Owner.transform.position, picker.Target.Unit.transform.position);
+
+            if (distance < _minDistance || (0f < _maxDistance && distance > _maxDistance))
+            {
+                return false;
+            }
+
+            return false == picker.IsOnCooldown(_style, _cooldown);
+        }
     }
 
     [Header("패턴")]
     [SerializeField] private Entry[] _entries;
 
-    // 안쪽 묶음을 따라 내려가며 실제 공격 하나를 고른다. 재귀 대신 반복문이라 순환이 있어도 깊이 제한에서 멈춘다.
     public override AttackStyle PickStyle()
+    {
+        return PickStyle(null);
+    }
+
+    // 안쪽 묶음을 따라 내려가며 실제 공격 하나를 고른다. 재귀 대신 반복문이라 순환이 있어도 깊이 제한에서 멈춘다.
+    // 거리·쿨타임 조건에 맞는 항목이 하나도 없으면 조건 없이 골라, 보스가 공격을 멈추지 않게 한다.
+    public override AttackStyle PickStyle(AutoAttacker picker)
     {
         AttackStyleSet currentSet = this;
 
         for (int depth = 0; depth < MAX_NESTING_DEPTH; depth++)
         {
-            Entry entry = currentSet.PickEntry();
+            Entry entry = currentSet.PickEntry(picker);
+
+            if (null == entry)
+            {
+                entry = currentSet.PickEntry(null);
+            }
 
             if (null == entry)
             {
@@ -138,7 +172,7 @@ public class AttackStyleSet : AttackStyle
         return false;
     }
 
-    private Entry PickEntry()
+    private Entry PickEntry(AutoAttacker picker)
     {
         if (null == _entries)
         {
@@ -149,7 +183,7 @@ public class AttackStyleSet : AttackStyle
 
         for (int i = 0; i < _entries.Length; i++)
         {
-            if (IsValid(_entries[i]))
+            if (IsPickable(_entries[i], picker))
             {
                 totalWeight += _entries[i].Weight;
             }
@@ -164,7 +198,7 @@ public class AttackStyleSet : AttackStyle
 
         for (int i = 0; i < _entries.Length; i++)
         {
-            if (false == IsValid(_entries[i]))
+            if (false == IsPickable(_entries[i], picker))
             {
                 continue;
             }
@@ -178,6 +212,11 @@ public class AttackStyleSet : AttackStyle
         }
 
         return null;
+    }
+
+    private bool IsPickable(Entry entry, AutoAttacker picker)
+    {
+        return IsValid(entry) && entry.IsAvailable(picker);
     }
 
     // 자기 자신을 바로 넣은 항목은 고를 때마다 자기를 다시 골라 끝나지 않으므로 뺀다.

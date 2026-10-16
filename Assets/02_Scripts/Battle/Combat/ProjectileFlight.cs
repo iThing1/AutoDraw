@@ -65,16 +65,18 @@ public static class ProjectileFlight
             // 도착 지점만 보면 방패를 가로질러 지나가도 막히지 않아, 날아오는 동안 매 프레임 방패에 닿았는지 본다.
             flight = flight.OnUpdate(() =>
             {
+                float slowScale = ApplySlowZone(flight, projectileTransform);
                 Vector3 desiredOffset = (followTarget.position - targetStartPosition) * (flight.ElapsedPercentage() * homing);
-                homingOffset = Vector3.MoveTowards(homingOffset, desiredOffset, maxHomingSpeed * Time.deltaTime);
+                homingOffset = Vector3.MoveTowards(homingOffset, desiredOffset, maxHomingSpeed * Time.deltaTime * slowScale);
                 projectileTransform.position += homingOffset;
 
                 Vector3 currentPosition = projectileTransform.position;
 
                 // 빗나간 뒤 같은 속도로 이어 가도록 실제 속도를 기억한다. 마지막 프레임은 덜 움직여 넘긴다.
-                if (0f < Time.deltaTime && 1f > flight.ElapsedPercentage())
+                // 느려지는 구역 안에서 잰 속도는 배율로 되돌려, 구역을 벗어난 뒤에는 원래 속도로 날아가게 한다.
+                if (0f < Time.deltaTime && 0f < slowScale && 1f > flight.ElapsedPercentage())
                 {
-                    velocity = (currentPosition - lastPosition) / Time.deltaTime;
+                    velocity = (currentPosition - lastPosition) / (Time.deltaTime * slowScale);
                 }
 
                 contactOutcome = CheckContact(target, lastPosition, currentPosition, lastTargetPosition, projectileRadius, out contactPoint);
@@ -86,6 +88,10 @@ public static class ProjectileFlight
                     flight.Kill();
                 }
             });
+        }
+        else
+        {
+            flight = flight.OnUpdate(() => ApplySlowZone(flight, projectileTransform));
         }
 
         // 전투가 끝나 토큰이 취소되면 트윈을 멈추고, 예외를 던지는 대신 isCanceled를 true로 돌려받는다.
@@ -192,6 +198,8 @@ public static class ProjectileFlight
 
             pass = pass.OnUpdate(() =>
             {
+                ApplySlowZone(pass, projectile);
+
                 Vector3 currentPosition = projectile.position;
 
                 contactOutcome = CheckContact(target, lastPosition, currentPosition, lastTargetPosition, projectileRadius, out contactPoint);
@@ -204,6 +212,10 @@ public static class ProjectileFlight
                 }
             });
         }
+        else
+        {
+            pass = pass.OnUpdate(() => ApplySlowZone(pass, projectile));
+        }
 
         bool isCanceled = await pass.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token).SuppressCancellationThrow();
 
@@ -213,6 +225,15 @@ public static class ProjectileFlight
         }
 
         return new FlightResult(isCanceled ? FlightOutcome.Canceled : FlightOutcome.Missed, projectile.position);
+    }
+
+    // 느려지는 구역 안에 있는 동안만 이 탄의 트윈을 늦춘다. 게임 전체 시간은 건드리지 않는다.
+    private static float ApplySlowZone(Tween tween, Transform projectile)
+    {
+        float scale = GameManager.SlowZones.GetProjectileScale(projectile.position);
+        tween.timeScale = scale;
+
+        return scale;
     }
 
     private static void SetupTrail(TrailRenderer trail, ShotSettings shot, Color color)

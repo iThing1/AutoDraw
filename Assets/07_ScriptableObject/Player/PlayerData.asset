@@ -24,8 +24,10 @@ MonoBehaviour:
       _max: 1.2
     _minMoveDistance: 1.5
     _moveEase: 4
-  _maxHp: 150
-  _hitRadius: 1
+    _chaseDistance: 12
+    _chaseStopDistance: 7
+  _maxHp: 200
+  _hitRadius: 0.9
   _attackStyle: {fileID: 11400000, guid: 3c74d8da002e5b642a82aa46f39fe1af, type: 2}
   _projectilePrefab: {fileID: 7624588648995017096, guid: dd8bc6d1b75476545ad3bfa488ffd6ee, type: 3}
   _palette: {fileID: 11400000, guid: 073348c3e2bf9df4fa51d06e2836c5e1, type: 2}

@@ -15,7 +15,11 @@ MonoBehaviour:
   _displayName: Light
   _iconColor: {r: 0.68, g: 0.85, b: 1, a: 1}
   _attackInterval: 0.6
-  _gaugeGainPerHit: 4
+  _gaugeGainPerHit: 5
+  _waitUntilFinished: 0
+  _stopsMovement: 0
+  _tell: 0
+  _tellDuration: 0.5
   _shot:
     _projectileScale: 0.6
     _trajectories:
@@ -27,8 +31,16 @@ MonoBehaviour:
       _duration:
         _min: 0.25
         _max: 0.35
+      _useSpeed: 0
+      _speed:
+        _min: 8
+        _max: 10
+    _homing: 1
+    _missTravelTime: 0.3
     _trailTime: 0.15
     _trailWidth: 0.1
+    _useTrailColor: 0
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
     _damage:
       _min: 3
       _max: 5

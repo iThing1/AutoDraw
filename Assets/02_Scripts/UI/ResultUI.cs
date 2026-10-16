@@ -6,12 +6,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum ResultChoice
-{
-    Retry,
-    Gallery,
-}
-
 // 승리(STAGE CLEAR)와 패배(INK OVER)가 함께 쓰는 결과 화면. 문구가 다 튀어나온 뒤 버튼을 보여 주고 고를 때까지 기다린다.
 public class ResultUI : MonoBehaviour
 {

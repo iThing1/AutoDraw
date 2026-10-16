@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class SingletonBehaviour<T> : MonoBehaviour where T : SingletonBehaviour<T>
 {
@@ -21,11 +21,5 @@ public class SingletonBehaviour<T> : MonoBehaviour where T : SingletonBehaviour<
         }
     }
 
-    public static T Instance
-    {
-        get
-        {
-            return _instance;
-        }
-    }
+    public static T Instance { get { return _instance; } }
 }

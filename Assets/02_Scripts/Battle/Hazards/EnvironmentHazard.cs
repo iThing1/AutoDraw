@@ -16,7 +16,7 @@ public class EnvironmentHazard : MonoBehaviour
     private int _lastPatternIndex = -1;
 
     // Prewarm은 최소 개수를 맞추므로, 같은 프리팹을 여러 패턴이 써도 중복으로 만들지 않는다.
-    public void Prewarm(GameObject defaultPrefab)
+    public void Prewarm(GameObject defaultProjectile)
     {
         if (null == _patterns)
         {
@@ -25,18 +25,9 @@ public class EnvironmentHazard : MonoBehaviour
 
         for (int i = 0; i < _patterns.Length; i++)
         {
-            HazardPattern pattern = _patterns[i];
-
-            if (null == pattern)
+            if (null != _patterns[i])
             {
-                continue;
-            }
-
-            GameObject prefab = null != pattern.ProjectilePrefab ? pattern.ProjectilePrefab : defaultPrefab;
-
-            if (null != prefab)
-            {
-                GameManager.Pool.Prewarm(prefab, pattern.MaxProjectileCount);
+                _patterns[i].Prewarm(defaultProjectile);
             }
         }
     }
@@ -53,6 +44,12 @@ public class EnvironmentHazard : MonoBehaviour
 
         while (false == shooter.Owner.Health.IsDead && false == shooter.Target.IsDefeated)
         {
+            // 보스가 기믹·부활로 멈춘 동안에는 새 탄막을 꺼내지 않아, 기믹과 탄막이 겹치지 않게 한다.
+            while (shooter.IsInterrupted)
+            {
+                await UniTask.Yield(PlayerLoopTiming.Update, token);
+            }
+
             HazardPattern pattern = PickPattern();
 
             if (null != pattern)

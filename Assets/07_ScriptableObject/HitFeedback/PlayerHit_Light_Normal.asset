@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf6903cf7ebe27f459ba17a3805172b8, type: 3}
+  m_Name: PlayerHit_Light_Normal
+  m_EditorClassIdentifier: Assembly-CSharp::HitFeedbackPreset
+  _hitStopDuration: 0.02
+  _hitStopTimeScale: 0.3
+  _flashDuration: 0.05
+  _flashColor: {r: 1, g: 1, b: 1, a: 1}
+  _knockbackDistance: 0.1
+  _knockbackDuration: 0.15
+  _impact:
+    _shakeForce: 0
+    _sounds:
+    - {fileID: 8300000, guid: 134435e6e9ed3fa4a9600a47ea1d8d62, type: 3}
+    - {fileID: 8300000, guid: ec22a2860844c96469f519631d78a1fc, type: 3}
+    - {fileID: 8300000, guid: b2259f06be2be5d42ba885f790593006, type: 3}
+    - {fileID: 8300000, guid: 7fc37ff548d63184f8d810eb2eaca553, type: 3}
+    - {fileID: 8300000, guid: e878ff0a3c16c4f48ad1ebf56305af43, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0, g: 0, b: 0, a: 1}
+    _effectScale: 0.6
+    _effectLifetime: 2
+  _splatStyle: {fileID: 11400000, guid: 97aa6ae1f38f8e668280d781e7262ad6, type: 2}
+  _splatCount:
+    _min: 0
+    _max: 1
+  _splatScale:
+    _min: 0.2
+    _max: 0.35
+  _splatSpread: 1.5

@@ -9,11 +9,11 @@ public class GameManager : SingletonBehaviour<GameManager>
     private const int SEQUENCES_CAPACITY = 200;
 
     public static BattleCameraRig CameraRig { get { return Instance._cameraRig; } }
-    public static MapSpawner Map { get { return Instance._mapSpawner; } }
     public static UIManager UI { get { return Instance._uiManager; } }
     public static SoundManager Sound { get { return Instance._soundManager; } }
     public static PoolManager Pool { get { return Instance._poolManager; } }
     public static TimeScaleManager TimeScale { get { return Instance._timeScaleManager; } }
+    public static SlowZoneManager SlowZones { get { return Instance._slowZoneManager; } }
 
     [Header("씬")]
     [SerializeField] private BattleCameraRig _cameraRig;
@@ -30,6 +30,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     private UIManager _uiManager = new();
     private PoolManager _poolManager = new();
     private TimeScaleManager _timeScaleManager = new();
+    private SlowZoneManager _slowZoneManager = new();
 
     protected override void Init()
     {

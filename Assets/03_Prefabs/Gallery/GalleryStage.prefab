@@ -2190,7 +2190,7 @@ GameObject:
   - component: {fileID: 5810000000000000104}
   - component: {fileID: 5810000000000000105}
   m_Layer: 0
-  m_Name: Frame_Locked_East
+  m_Name: Frame_Stage2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2228,7 +2228,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cd52e4144f048ceaa65347693509622, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GalleryFrame
-  _stage: {fileID: 0}
+  _stage: {fileID: 11400000, guid: b0b96a3f0ac81e7ac00a7a4913c8df66, type: 2}
   _painting: {fileID: 5810000000000000113}
   _cloth: {fileID: 5810000000000000116}
   _border: {fileID: 5810000000000000109}

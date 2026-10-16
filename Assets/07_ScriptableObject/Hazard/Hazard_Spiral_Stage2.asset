@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99e15634357a44c6a7f361b168210644, type: 3}
+  m_Name: Hazard_Spiral_Stage2
+  m_EditorClassIdentifier: Assembly-CSharp::RadialHazardPattern
+  _warningSound: {fileID: 8300000, guid: 2e36cb6ff8296854fb41fc95a3a5db05, type: 3}
+  _warningDuration: 0.6
+  _waveCount: 30
+  _waveInterval: 0.1
+  _shotsPerWave: 4
+  _angleStepPerWave: 5.4
+  _range: 30
+  _shot:
+    _projectileScale: 0.7
+    _trajectories:
+    - _type: 1
+      _weight: 1
+      _height:
+        _min: 0
+        _max: 0
+      _duration:
+        _min: 3.5
+        _max: 3.5
+      _useSpeed: 1
+      _speed:
+        _min: 12.5
+        _max: 12.5
+    _homing: 0
+    _missTravelTime: 0.3
+    _trailTime: 0.1
+    _trailWidth: 0.08
+    _useTrailColor: 1
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
+    _damage:
+      _min: 5
+      _max: 7
+    _criticalChance: 0
+    _criticalMultiplier: 2
+    _normalHit: {fileID: 11400000, guid: 3e2afe8de358077d09a19ac1f877e59e, type: 2}
+    _criticalHit: {fileID: 11400000, guid: 3e2afe8de358077d09a19ac1f877e59e, type: 2}
+  _gapAngle: 0
+  _gapShift:
+    _min: 0
+    _max: 0

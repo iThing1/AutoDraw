@@ -97,6 +97,12 @@ public class InkArm : MonoBehaviour
         _slitherPhase = Random.Range(0f, 2f * Mathf.PI);
     }
 
+    // 기어 오는 도중 붙잡을 자리를 옮겨, 움직이는 대상을 쫓아가게 한다. 닿는 시간은 처음 정한 그대로다.
+    public void SetGrabPoint(Vector3 grabPoint)
+    {
+        _grabPoint = grabPoint;
+    }
+
     public void Tick(SwallowFrame frame)
     {
         float headProgress = SwallowFrame.GetProgress(frame.Elapsed, _startTime, _crawlDuration);

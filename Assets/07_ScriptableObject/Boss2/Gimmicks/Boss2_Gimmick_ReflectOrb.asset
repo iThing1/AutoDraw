@@ -1,0 +1,126 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b51743a82e0489794b075c66244a3a7, type: 3}
+  m_Name: Boss2_Gimmick_ReflectOrb
+  m_EditorClassIdentifier: Assembly-CSharp::ReflectOrbGimmick
+  _failHit:
+    _projectileScale: 1
+    _trajectories:
+    - _type: 1
+      _weight: 1
+      _height:
+        _min: 0
+        _max: 0
+      _duration:
+        _min: 0.3
+        _max: 0.35
+      _useSpeed: 0
+      _speed:
+        _min: 10
+        _max: 10
+    _homing: 0
+    _missTravelTime: 0
+    _trailTime: 0
+    _trailWidth: 0.1
+    _useTrailColor: 1
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
+    _damage:
+      _min: 30
+      _max: 36
+    _criticalChance: 0
+    _criticalMultiplier: 2
+    _normalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+    _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+  _castCount: 5
+  _requiredReflects: 3
+  _castInterval: 0.8
+  _chargePrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
+  _chargeDuration: 0.8
+  _chargeDiameter: 1.6
+  _orbPrefab: {fileID: 7624588648995017096, guid: de381a618a5797b47a750c0113577fac, type: 3}
+  _orbColor: {r: 0.35, g: 0.08, b: 0.45, a: 1}
+  _orbScale: 2.6
+  _orbSpeed:
+    _min: 7
+    _max: 15
+  _turnSpeed: 90
+  _lifetime: 6
+  _trailTime: 0.2
+  _orbHit:
+    _projectileScale: 1
+    _trajectories:
+    - _type: 1
+      _weight: 1
+      _height:
+        _min: 0
+        _max: 0
+      _duration:
+        _min: 0.3
+        _max: 0.35
+      _useSpeed: 0
+      _speed:
+        _min: 10
+        _max: 10
+    _homing: 0
+    _missTravelTime: 0
+    _trailTime: 0
+    _trailWidth: 0.1
+    _useTrailColor: 1
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
+    _damage:
+      _min: 12
+      _max: 16
+    _criticalChance: 0
+    _criticalMultiplier: 2
+    _normalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+    _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+  _reflectColor: {r: 0.2, g: 0.75, b: 1, a: 1}
+  _reflectShot:
+    _projectileScale: 2.6
+    _trajectories:
+    - _type: 1
+      _weight: 1
+      _height:
+        _min: 0
+        _max: 0
+      _duration:
+        _min: 1
+        _max: 1
+      _useSpeed: 1
+      _speed:
+        _min: 22
+        _max: 22
+    _homing: 0
+    _missTravelTime: 0
+    _trailTime: 0.2
+    _trailWidth: 0.4
+    _useTrailColor: 1
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
+    _damage:
+      _min: 0
+      _max: 0
+    _criticalChance: 0
+    _criticalMultiplier: 2
+    _normalHit: {fileID: 11400000, guid: 789e71a3222486742b3aba402f7e49b9, type: 2}
+    _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+  _reflectImpact:
+    _shakeForce: 1.5
+    _sounds:
+    - {fileID: 8300000, guid: 719f60a1210744d4991b5897a355751c, type: 3}
+    - {fileID: 8300000, guid: 62a4fc432d1e58e4aac35a1475bbb55e, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0, g: 0, b: 0, a: 1}
+    _effectScale: 3
+    _effectLifetime: 2

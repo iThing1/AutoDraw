@@ -25,7 +25,7 @@ public class BattleManager : MonoBehaviour
 
     [Header("전투")]
     [SerializeField] private PaintCanvas _paintCanvas;
-    [SerializeField] private BattleHudUI _hudPrefab;
+    [SerializeField] private BattleHudView _hudPrefab;
 
     [Header("환경 패턴")]
     // 비워 두면 환경 탄막 없이 보스 공격만 나온다.
@@ -47,7 +47,8 @@ public class BattleManager : MonoBehaviour
 
     private BattleUnit _player;
     private BattleUnit _boss;
-    private BattleHudUI _hud;
+    private BattleHudView _hud;
+    private BattleHudViewModel _hudViewModel;
     private ResultUI _result;
 
     // 결과 화면에서 고른 것. 다시 하기·갤러리 이동은 스테이지를 만든 쪽이 처리한다.
@@ -89,7 +90,7 @@ public class BattleManager : MonoBehaviour
             GameManager.CameraRig.ClearCameraBounds();
         }
 
-        GameManager.UI.Close(_hud);
+        ReleaseHud();
         GameManager.UI.Close(_result);
     }
 
@@ -254,7 +255,8 @@ public class BattleManager : MonoBehaviour
     {
         // 전투 HUD는 전투에서만 쓰므로 전투 매니저가 직접 열고, 엔딩이 시작되면 닫는다.
         _hud = GameManager.UI.Open(_hudPrefab, UILayer.HUD);
-        _hud.Bind(_player, _boss);
+        _hudViewModel = new BattleHudViewModel(_player, _boss);
+        _hud.Bind(_hudViewModel);
         _hud.Show();
 
         // 보스가 쓰러지면 전투 토큰을 취소해, 남은 공격 루프와 날아가던 투사체를 함께 정리한다.
@@ -329,8 +331,24 @@ public class BattleManager : MonoBehaviour
     {
         await _hud.HideAsync(token);
 
-        GameManager.UI.Close(_hud);
-        _hud = null;
+        ReleaseHud();
+    }
+
+    // View가 먼저 ViewModel 구독을 풀고, 그다음 ViewModel이 게임 컴포넌트에 건 구독을 푼다. ViewModel은 만든 쪽인 여기서 푼다.
+    private void ReleaseHud()
+    {
+        if (null != _hud)
+        {
+            _hud.UnBind();
+            GameManager.UI.Close(_hud);
+            _hud = null;
+        }
+
+        if (null != _hudViewModel)
+        {
+            _hudViewModel.UnBind();
+            _hudViewModel = null;
+        }
     }
 
     // 플레이어는 자동 회복 때문에 거의 쓰러지지 않아, 플레이 중 컴포넌트 우클릭 메뉴로 결과 흐름을 바로 확인한다.

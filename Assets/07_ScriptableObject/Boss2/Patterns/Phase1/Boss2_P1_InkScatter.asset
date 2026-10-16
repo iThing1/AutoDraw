@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4fad4687ef94a5098fd42d66318edde, type: 3}
+  m_Name: Boss2_P1_InkScatter
+  m_EditorClassIdentifier: Assembly-CSharp::InkScatterAttackStyle
+  _displayName: InkScatter
+  _iconColor: {r: 0.08, g: 0.08, b: 0.1, a: 1}
+  _attackInterval: 0.7
+  _gaugeGainPerHit: 0
+  _waitUntilFinished: 1
+  _stopsMovement: 0
+  _tell: 4
+  _tellDuration: 0.5
+  _shotCount: 13
+  _spreadAngle: 80
+  _range: 20
+  _waveCount: 2
+  _waveInterval: 0.22
+  _angleStepPerWave: 6
+  _shot:
+    _projectileScale: 0.6
+    _trajectories:
+    - _type: 1
+      _weight: 1
+      _height:
+        _min: 0
+        _max: 0
+      _duration:
+        _min: 1
+        _max: 1
+      _useSpeed: 1
+      _speed:
+        _min: 16
+        _max: 16
+    _homing: 0
+    _missTravelTime: 0
+    _trailTime: 0.1
+    _trailWidth: 0.1
+    _useTrailColor: 1
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
+    _damage:
+      _min: 5
+      _max: 7
+    _criticalChance: 0.1
+    _criticalMultiplier: 2
+    _normalHit: {fileID: 11400000, guid: 789e71a3222486742b3aba402f7e49b9, type: 2}
+    _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}

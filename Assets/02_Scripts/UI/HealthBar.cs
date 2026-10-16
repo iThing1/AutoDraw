@@ -1,5 +1,7 @@
 using DG.Tweening;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class HealthBar : MonoBehaviour
 {
@@ -11,8 +13,33 @@ public class HealthBar : MonoBehaviour
     [SerializeField, Min(0f)] private float _trailDelay = 0.25f;
     [SerializeField, Min(0f)] private float _trailDuration = 0.4f;
     [SerializeField] private Ease _trailEase = Ease.OutQuad;
+    // 보스가 다시 일어나 체력이 처음부터 차오르는 시간.
+    [SerializeField, Min(0f)] private float _refillDuration = 1f;
+
+    [Header("기믹 눈금")]
+    // 꺼 둔 눈금 하나. 줄 수만큼 복제해 체력 비율 자리에 세운다. 비워 두면 눈금을 그리지 않는다.
+    [SerializeField] private RectTransform _markerTemplate;
+
+    [Header("기믹 중")]
+    // 보스가 기믹을 쓰는 동안 막대를 이 색으로 바꿔, 지금은 체력이 줄지 않는 시간임을 알린다.
+    [SerializeField] private Color _alertColor = new Color(0.55f, 0.3f, 0.85f, 1f);
+
+    private readonly List<RectTransform> _markers = new();
+
+    private Graphic _fillGraphic;
+    private Color _fillColor;
 
     private Health _health;
+
+    private void Awake()
+    {
+        _fillGraphic = _fill.GetComponent<Graphic>();
+
+        if (null != _fillGraphic)
+        {
+            _fillColor = _fillGraphic.color;
+        }
+    }
 
     // HUD가 닫혀 파괴될 때 잔상 트윈이 지연 중이면, 파괴된 막대에 값을 쓰려다 경고가 나므로 함께 끈다.
     private void OnDestroy()
@@ -30,6 +57,7 @@ public class HealthBar : MonoBehaviour
         _health = health;
         _health.OnDamaged += HandleDamaged;
         _health.OnHealed += HandleHealed;
+        _health.OnRefilled += HandleRefilled;
 
         SetRatioImmediately(_health.Ratio);
     }
@@ -43,6 +71,7 @@ public class HealthBar : MonoBehaviour
 
         _health.OnDamaged -= HandleDamaged;
         _health.OnHealed -= HandleHealed;
+        _health.OnRefilled -= HandleRefilled;
         _health = null;
     }
 
@@ -68,6 +97,53 @@ public class HealthBar : MonoBehaviour
 
         _trail.DOKill();
         _trail.anchorMax = new Vector2(ratio, 1f);
+    }
+
+    // 체력 줄마다 눈금을 세워 기믹이 어디서 나올지 보이게 한다. 쓰지 않는 눈금은 꺼 두고 다음에 다시 쓴다.
+    public void SetMarkers(IReadOnlyList<float> ratios)
+    {
+        if (null == _markerTemplate)
+        {
+            return;
+        }
+
+        for (int i = 0; i < ratios.Count; i++)
+        {
+            if (i >= _markers.Count)
+            {
+                _markers.Add(Instantiate(_markerTemplate, _markerTemplate.parent));
+            }
+
+            RectTransform marker = _markers[i];
+            marker.gameObject.SetActive(true);
+            marker.anchorMin = new Vector2(ratios[i], 0f);
+            marker.anchorMax = new Vector2(ratios[i], 1f);
+            marker.anchoredPosition = Vector2.zero;
+        }
+
+        for (int i = ratios.Count; i < _markers.Count; i++)
+        {
+            _markers[i].gameObject.SetActive(false);
+        }
+    }
+
+    public void SetAlert(bool isAlert)
+    {
+        if (null == _fillGraphic)
+        {
+            return;
+        }
+
+        _fillGraphic.color = isAlert ? _alertColor : _fillColor;
+    }
+
+    // 빈 막대에서 가득 찰 때까지 천천히 차올라, 보스가 다시 일어났음을 보여 준다.
+    private void HandleRefilled()
+    {
+        SetRatioImmediately(0f);
+
+        _fill.DOAnchorMax(Vector2.one, _refillDuration).SetEase(Ease.OutQuad).SetUpdate(true);
+        _trail.DOAnchorMax(Vector2.one, _refillDuration).SetEase(Ease.OutQuad).SetUpdate(true);
     }
 
     private void TweenFill(float ratio)

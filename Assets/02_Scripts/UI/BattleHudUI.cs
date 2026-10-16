@@ -1,6 +1,8 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using System;
 using System.Threading;
+using TMPro;
 using UnityEngine;
 
 public class BattleHudUI : MonoBehaviour
@@ -8,6 +10,11 @@ public class BattleHudUI : MonoBehaviour
     [SerializeField] private CanvasGroup _canvasGroup;
     [SerializeField] private HealthBar _playerHealthBar;
     [SerializeField] private HealthBar _bossHealthBar;
+
+    [Header("보스 페이즈")]
+    // 남은 페이즈 수. 페이즈가 하나뿐인 보스나 마지막 페이즈에서는 숨긴다.
+    [SerializeField] private TMP_Text _bossPhaseText;
+    [SerializeField] private string _bossPhaseFormat = "x{0}";
 
     [Header("공격 슬롯")]
     [SerializeField] private AttackSlotUI[] _basicSlots;
@@ -27,6 +34,8 @@ public class BattleHudUI : MonoBehaviour
     private PlayerAttackInput _attackInput;
     private BattleUnit _player;
     private PlayerGuard _guard;
+    private BossPhaseController _bossPhases;
+    private BattleUnit _boss;
 
     private void Awake()
     {
@@ -53,6 +62,7 @@ public class BattleHudUI : MonoBehaviour
 
         BindAttackSlots(player.GetComponent<PlayerAttackInput>());
         BindGuard(player);
+        BindBossPhases(boss);
     }
 
     public void Show()
@@ -125,8 +135,36 @@ public class BattleHudUI : MonoBehaviour
         HandleGuardGaugeChanged();
     }
 
+    private void BindBossPhases(BattleUnit boss)
+    {
+        _boss = boss;
+
+        if (false == boss.TryGetComponent(out _bossPhases))
+        {
+            _bossHealthBar.SetMarkers(Array.Empty<float>());
+            SetBossPhaseTextVisible(false);
+            return;
+        }
+
+        _bossPhases.OnPhaseChanged += HandleBossPhaseChanged;
+        _bossPhases.OnGimmickActiveChanged += _bossHealthBar.SetAlert;
+        _bossPhases.OnGimmickFinished += HandleGimmickFinished;
+
+        HandleBossPhaseChanged();
+    }
+
     private void Unbind()
     {
+        if (null != _bossPhases)
+        {
+            _bossPhases.OnPhaseChanged -= HandleBossPhaseChanged;
+            _bossPhases.OnGimmickActiveChanged -= _bossHealthBar.SetAlert;
+            _bossPhases.OnGimmickFinished -= HandleGimmickFinished;
+            _bossPhases = null;
+        }
+
+        _boss = null;
+
         if (null != _player)
         {
             _player.OnBlocked -= SpawnGuardText;
@@ -159,6 +197,43 @@ public class BattleHudUI : MonoBehaviour
             _attackInput.OnSkillFired -= HandleSkillFired;
             _attackInput.SkillGauge.OnChanged -= HandleSkillGaugeChanged;
             _attackInput = null;
+        }
+    }
+
+    private void HandleBossPhaseChanged()
+    {
+        _bossHealthBar.SetMarkers(_bossPhases.GimmickRatios);
+
+        int remaining = _bossPhases.RemainingPhaseCount;
+
+        SetBossPhaseTextVisible(1 < remaining);
+
+        if (null != _bossPhaseText)
+        {
+            _bossPhaseText.text = string.Format(_bossPhaseFormat, remaining);
+        }
+    }
+
+    private void HandleGimmickFinished(bool isSucceeded)
+    {
+        DamageText damageText = SpawnText();
+
+        if (null == damageText)
+        {
+            return;
+        }
+
+        string text = isSucceeded ? _damageText.GimmickClearText : _damageText.GimmickFailText;
+        Color color = isSucceeded ? _damageText.GimmickClearColor : _damageText.GimmickFailColor;
+
+        damageText.PlayText(text, color, ToScreen(_boss.Body.position), _damageText);
+    }
+
+    private void SetBossPhaseTextVisible(bool isVisible)
+    {
+        if (null != _bossPhaseText)
+        {
+            _bossPhaseText.gameObject.SetActive(isVisible);
         }
     }
 

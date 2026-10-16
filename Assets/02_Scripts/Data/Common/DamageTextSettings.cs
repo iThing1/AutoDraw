@@ -12,6 +12,11 @@ public class DamageTextSettings
     // 게이지가 모자라 막기가 안 나갔을 때 띄운다.
     [SerializeField] private string _noGaugeText = "NO INK";
     [SerializeField] private Color _noGaugeColor = new Color(0.45f, 0.45f, 0.45f);
+    // 보스 기믹을 해냈는지 보스 머리 위에 띄운다.
+    [SerializeField] private string _gimmickClearText = "BREAK";
+    [SerializeField] private Color _gimmickClearColor = new Color(0.2f, 0.6f, 0.95f);
+    [SerializeField] private string _gimmickFailText = "FAILED";
+    [SerializeField] private Color _gimmickFailColor = new Color(0.85f, 0.2f, 0.3f);
     [SerializeField, Min(0f)] private float _normalScale = 1f;
     [SerializeField, Min(0f)] private float _criticalScale = 1.6f;
     [SerializeField, Min(1f)] private float _popScale = 1.4f;
@@ -28,6 +33,10 @@ public class DamageTextSettings
     public Color GuardColor { get { return _guardColor; } }
     public string NoGaugeText { get { return _noGaugeText; } }
     public Color NoGaugeColor { get { return _noGaugeColor; } }
+    public string GimmickClearText { get { return _gimmickClearText; } }
+    public Color GimmickClearColor { get { return _gimmickClearColor; } }
+    public string GimmickFailText { get { return _gimmickFailText; } }
+    public Color GimmickFailColor { get { return _gimmickFailColor; } }
     public float NormalScale { get { return _normalScale; } }
     public float CriticalScale { get { return _criticalScale; } }
     public float PopScale { get { return _popScale; } }

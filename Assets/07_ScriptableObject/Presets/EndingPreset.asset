@@ -57,7 +57,7 @@ MonoBehaviour:
     _min: 0
     _max: 0.8
   _inkFadeEase: 5
-  _stageClear:
+  _resultTitle:
     _text: STAGE CLEAR
     _letterPalette: {fileID: 11400000, guid: 073348c3e2bf9df4fa51d06e2836c5e1, type: 2}
     _delayBefore: 0.3

@@ -7,7 +7,7 @@ public class EndingCutscene : MonoBehaviour
 {
     [SerializeField] private EndingPreset _preset;
 
-    public ResultTitleSettings ResultTitle { get { return _preset.StageClear; } }
+    public ResultTitleSettings ResultTitle { get { return _preset.ResultTitle; } }
 
     public bool HasRequiredReferences()
     {

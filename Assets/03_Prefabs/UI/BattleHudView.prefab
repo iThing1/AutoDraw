@@ -763,7 +763,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 495e332cb42aecf49b1704b057ef8e92, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttackSlotUI
+  m_EditorClassIdentifier: Assembly-CSharp::AttackSlotView
   _icon: {fileID: 837108944415702429}
   _keyText: {fileID: 4955234699023265643}
   _nameText: {fileID: 317581433215668839}
@@ -962,7 +962,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26fddb9273f901c42840db3d9a594503, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HealthBar
+  m_EditorClassIdentifier: Assembly-CSharp::HealthBarView
   _fill: {fileID: 5058002563697113495}
   _trail: {fileID: 3801087475288675879}
   _fillDuration: 0.1
@@ -1022,7 +1022,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26fddb9273f901c42840db3d9a594503, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HealthBar
+  m_EditorClassIdentifier: Assembly-CSharp::HealthBarView
   _fill: {fileID: 8328225159689808510}
   _trail: {fileID: 2130116178272915450}
   _fillDuration: 0.15
@@ -1118,7 +1118,7 @@ GameObject:
   - component: {fileID: 6124640455684773250}
   - component: {fileID: 3743520939089651706}
   m_Layer: 0
-  m_Name: BattleHudUI
+  m_Name: BattleHudView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1158,7 +1158,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 82b60395fc70b6149a2ed2c42ee97dbd, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BattleHudUI
+  m_EditorClassIdentifier: Assembly-CSharp::BattleHudView
   _canvasGroup: {fileID: 3743520939089651706}
   _playerHealthBar: {fileID: 4983967655864957721}
   _bossHealthBar: {fileID: 8278502422303877329}
@@ -1169,9 +1169,9 @@ MonoBehaviour:
   - {fileID: 1924539115944971099}
   _skillSlot: {fileID: 291768563873768782}
   _guardSlot: {fileID: 7300000019075025873}
-  _damageTextRoot: {fileID: 7132977060385009204}
-  _damageTextPrefab: {fileID: 5834097133458508562, guid: e04d28214f3b998419414c08f4429418, type: 3}
-  _damageText:
+  _floatingTextRoot: {fileID: 7132977060385009204}
+  _floatingTextPrefab: {fileID: 5834097133458508562, guid: e04d28214f3b998419414c08f4429418, type: 3}
+  _floatingText:
     _normalColor: {r: 0, g: 0, b: 0, a: 1}
     _criticalColor: {r: 0.85, g: 0.2, b: 0.3, a: 1}
     _normalScale: 1
@@ -2205,7 +2205,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 495e332cb42aecf49b1704b057ef8e92, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttackSlotUI
+  m_EditorClassIdentifier: Assembly-CSharp::AttackSlotView
   _icon: {fileID: 1590480300098666753}
   _keyText: {fileID: 6868940707439420866}
   _nameText: {fileID: 3270972245773280457}
@@ -2341,7 +2341,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 495e332cb42aecf49b1704b057ef8e92, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttackSlotUI
+  m_EditorClassIdentifier: Assembly-CSharp::AttackSlotView
   _icon: {fileID: 1035428091751075752}
   _keyText: {fileID: 2572894318130284190}
   _nameText: {fileID: 4309648906910507206}
@@ -3388,7 +3388,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 495e332cb42aecf49b1704b057ef8e92, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttackSlotUI
+  m_EditorClassIdentifier: Assembly-CSharp::AttackSlotView
   _icon: {fileID: 7300000003317395804}
   _keyText: {fileID: 7300000006634791608}
   _nameText: {fileID: 7300000009952187412}

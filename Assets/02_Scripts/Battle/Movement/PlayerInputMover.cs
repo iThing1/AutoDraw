@@ -26,7 +26,7 @@ public class PlayerInputMover : UnitMover
             return;
         }
 
-        _moveAction.action.Enable();
+        _moveAction.Enable();
     }
 
     // 보스 등장 트리거 같은 충돌이 감지되도록 물리 프레임마다 Rigidbody로 옮긴다.

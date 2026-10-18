@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // 막기 키를 누르는 순간 짧게 방패를 세운다. 그동안 닿은 공격은 피해 없이 막히고, 스킬 게이지를 조금 쓴다.
+// 쓸 수 있는지(쿨타임·게이지)는 GuardState가 정하고, 여기는 입력을 받고 방패를 보여 주는 일만 한다.
 [RequireComponent(typeof(BattleUnit), typeof(SkillGauge))]
 public class PlayerGuard : MonoBehaviour
 {
@@ -13,31 +14,27 @@ public class PlayerGuard : MonoBehaviour
     [SerializeField] private GuardPreset _preset;
     [SerializeField] private SpriteRenderer _shield;
 
-    public event Action OnGuardStarted;
-    // 눌렀지만 막기가 안 나갔을 때. 게이지가 모자랐으면 true를 넘긴다.
-    public event Action<bool> OnGuardRejected;
-
     private BattleUnit _unit;
-    private SkillGauge _skillGauge;
+    private GuardState _state;
     private Vector3 _shieldScale;
     private Color _shieldColor;
-    private float _readyTime;
 
-    public GuardPreset Preset { get { return _preset; } }
-    public SkillGauge SkillGauge { get { return _skillGauge; } }
+    // 프리셋이나 입력이 비어 있으면 null이다.
+    public GuardState State { get { return _state; } }
 
     public string KeyLabel { get { return _guardAction.GetKeyLabel(); } }
 
     private void Awake()
     {
         _unit = GetComponent<BattleUnit>();
-        _skillGauge = GetComponent<SkillGauge>();
 
         if (null == _guardAction || null == _preset)
         {
             Debug.LogError($"플레이어 막기 : {name}에 막기 입력 또는 GuardPreset이 지정되지 않았습니다.");
             return;
         }
+
+        _state = new GuardState(_preset, GetComponent<SkillGauge>());
 
         if (null != _shield && null != _shield.sprite)
         {
@@ -54,10 +51,7 @@ public class PlayerGuard : MonoBehaviour
     {
         _unit.OnBlocked += HandleBlocked;
 
-        if (null != _guardAction)
-        {
-            _guardAction.action.Enable();
-        }
+        _guardAction.Enable();
     }
 
     private void OnDisable()
@@ -67,6 +61,11 @@ public class PlayerGuard : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (null != _state)
+        {
+            _state.Dispose();
+        }
+
         if (null != _shield)
         {
             _shield.transform.DOKill();
@@ -76,7 +75,7 @@ public class PlayerGuard : MonoBehaviour
 
     private void Update()
     {
-        if (null == _guardAction || null == _preset)
+        if (null == _state)
         {
             return;
         }
@@ -95,11 +94,12 @@ public class PlayerGuard : MonoBehaviour
             return;
         }
 
-        bool isOutOfGauge = false == _skillGauge.CanConsume(_preset.GaugeCost);
+        GuardStartResult result = _state.CheckStart(Time.time);
 
-        if (Time.time < _readyTime || isOutOfGauge)
+        if (GuardStartResult.Ready != result)
         {
-            RejectGuard(isOutOfGauge);
+            _state.Reject(result);
+            FlashRejected();
             return;
         }
 
@@ -108,8 +108,7 @@ public class PlayerGuard : MonoBehaviour
             return;
         }
 
-        _skillGauge.TryConsume(_preset.GaugeCost);
-        _readyTime = Time.time + _preset.GuardDuration + _preset.Cooldown;
+        _state.Begin(Time.time);
 
         GuardAsync(destroyCancellationToken).Forget();
     }
@@ -118,7 +117,6 @@ public class PlayerGuard : MonoBehaviour
     private async UniTaskVoid GuardAsync(CancellationToken token)
     {
         ShowShield();
-        OnGuardStarted?.Invoke();
 
         try
         {
@@ -139,10 +137,8 @@ public class PlayerGuard : MonoBehaviour
     }
 
     // 눌렀는데 막기가 안 나가면 방패를 회색으로 잠깐 비춰, 막을 수 있었는데 안 막힌 것처럼 보이지 않게 한다.
-    private void RejectGuard(bool isOutOfGauge)
+    private void FlashRejected()
     {
-        OnGuardRejected?.Invoke(isOutOfGauge);
-
         if (null == _shield)
         {
             return;
@@ -157,10 +153,9 @@ public class PlayerGuard : MonoBehaviour
     }
 
     // 짧은 히트 스톱으로 막는 순간의 손맛을 준다.
-    // 막아 냈으면 쿨타임을 지워, 지금 방패가 내려가는 즉시 다음 막기를 쓸 수 있게 한다. 연달아 오는 공격을 막기로 받아치는 보상이다.
     private void HandleBlocked(Vector3 hitPoint)
     {
-        _readyTime = 0f;
+        _state.ResetCooldown();
 
         GameManager.TimeScale.PlayHitStop(_preset.BlockHitStopDuration, _preset.BlockHitStopTimeScale);
         ImpactPlayer.Play(_preset.BlockImpact, hitPoint);

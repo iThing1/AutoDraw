@@ -57,11 +57,11 @@ public class PlayerAttackInput : MonoBehaviour
         {
             for (int i = 0; i < _basicAttackActions.Length; i++)
             {
-                EnableAction(_basicAttackActions[i]);
+                _basicAttackActions[i].Enable();
             }
         }
 
-        EnableAction(_skillAction);
+        _skillAction.Enable();
     }
 
     private void Start()
@@ -137,13 +137,5 @@ public class PlayerAttackInput : MonoBehaviour
         _skillGauge.TryConsumeAll();
 
         OnSkillFired?.Invoke();
-    }
-
-    private void EnableAction(InputActionReference actionReference)
-    {
-        if (null != actionReference)
-        {
-            actionReference.action.Enable();
-        }
     }
 }

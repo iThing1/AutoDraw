@@ -2,8 +2,9 @@ using DG.Tweening;
 using System;
 using UnityEngine;
 
+// 떠오르는 글자의 색·크기·문구와 연출 시간. 문구 종류는 FloatingTextKind로 고른다.
 [Serializable]
-public class DamageTextSettings
+public class FloatingTextSettings
 {
     [SerializeField] private Color _normalColor = Color.black;
     [SerializeField] private Color _criticalColor = new Color(0.85f, 0.2f, 0.3f);

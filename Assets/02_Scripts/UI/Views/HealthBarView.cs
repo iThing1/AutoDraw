@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HealthBar : MonoBehaviour
+// 체력바. 깎이면 흰 잔상이 남았다가 따라 줄고, 보스가 다시 일어나면 처음부터 차오른다. 기믹 줄 눈금과 기믹 중 색도 보인다.
+public class HealthBarView : ViewBase<HealthBarViewModel>
 {
     [SerializeField] private RectTransform _fill;
     [SerializeField] private RectTransform _trail;
@@ -29,8 +30,6 @@ public class HealthBar : MonoBehaviour
     private Graphic _fillGraphic;
     private Color _fillColor;
 
-    private Health _health;
-
     private void Awake()
     {
         _fillGraphic = _fill.GetComponent<Graphic>();
@@ -42,70 +41,83 @@ public class HealthBar : MonoBehaviour
     }
 
     // HUD가 닫혀 파괴될 때 잔상 트윈이 지연 중이면, 파괴된 막대에 값을 쓰려다 경고가 나므로 함께 끈다.
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         _fill.DOKill();
         _trail.DOKill();
 
-        Unbind();
+        base.OnDestroy();
     }
 
-    public void Bind(Health health)
+    protected override void OnPropertyChanged(string propertyName)
     {
-        Unbind();
-
-        _health = health;
-        _health.OnDamaged += HandleDamaged;
-        _health.OnHealed += HandleHealed;
-        _health.OnRefilled += HandleRefilled;
-
-        SetRatioImmediately(_health.Ratio);
-    }
-
-    private void Unbind()
-    {
-        if (null == _health)
+        switch (propertyName)
         {
-            return;
+            case nameof(HealthBarViewModel.Ratio):
+                DrawRatio(ViewModel.LastChange);
+                break;
+
+            case nameof(HealthBarViewModel.Markers):
+                DrawMarkers();
+                break;
+
+            case nameof(HealthBarViewModel.IsAlert):
+                DrawAlert();
+                break;
+
+            default:
+                RefreshAll();
+                break;
         }
-
-        _health.OnDamaged -= HandleDamaged;
-        _health.OnHealed -= HandleHealed;
-        _health.OnRefilled -= HandleRefilled;
-        _health = null;
     }
 
-    // 깎인 만큼 흰 잔상이 잠깐 남았다가 따라 줄어들어, 얼마나 맞았는지 눈에 보이게 한다.
-    private void HandleDamaged(DamageInfo damage)
+    protected override void RefreshAll()
     {
-        float ratio = _health.Ratio;
-
-        TweenFill(ratio);
-
-        _trail.DOKill();
-        _trail.DOAnchorMax(new Vector2(ratio, 1f), _trailDuration)
-            .SetDelay(_trailDelay)
-            .SetEase(_trailEase)
-            .SetUpdate(true);
+        SetRatioImmediately(ViewModel.Ratio);
+        DrawMarkers();
+        DrawAlert();
     }
 
-    private void HandleHealed(int amount)
+    private void DrawRatio(HealthBarChange change)
     {
-        float ratio = _health.Ratio;
+        float ratio = ViewModel.Ratio;
 
-        TweenFill(ratio);
+        switch (change)
+        {
+            // 깎인 만큼 흰 잔상이 잠깐 남았다가 따라 줄어들어, 얼마나 맞았는지 눈에 보이게 한다.
+            case HealthBarChange.Damaged:
+                TweenFill(ratio);
+                _trail.DOKill();
+                _trail.DOAnchorMax(new Vector2(ratio, 1f), _trailDuration)
+                    .SetDelay(_trailDelay)
+                    .SetEase(_trailEase)
+                    .SetUpdate(true);
+                break;
 
-        _trail.DOKill();
-        _trail.anchorMax = new Vector2(ratio, 1f);
+            case HealthBarChange.Healed:
+                TweenFill(ratio);
+                _trail.DOKill();
+                _trail.anchorMax = new Vector2(ratio, 1f);
+                break;
+
+            // 빈 막대에서 가득 찰 때까지 천천히 차올라, 보스가 다시 일어났음을 보여 준다.
+            case HealthBarChange.Refilled:
+                SetRatioImmediately(0f);
+                _fill.DOAnchorMax(Vector2.one, _refillDuration).SetEase(Ease.OutQuad).SetUpdate(true);
+                _trail.DOAnchorMax(Vector2.one, _refillDuration).SetEase(Ease.OutQuad).SetUpdate(true);
+                break;
+        }
     }
 
     // 체력 줄마다 눈금을 세워 기믹이 어디서 나올지 보이게 한다. 쓰지 않는 눈금은 꺼 두고 다음에 다시 쓴다.
-    public void SetMarkers(IReadOnlyList<float> ratios)
+    private void DrawMarkers()
     {
         if (null == _markerTemplate)
         {
             return;
         }
+
+        IReadOnlyList<float> ratios = ViewModel.Markers;
 
         for (int i = 0; i < ratios.Count; i++)
         {
@@ -127,23 +139,14 @@ public class HealthBar : MonoBehaviour
         }
     }
 
-    public void SetAlert(bool isAlert)
+    private void DrawAlert()
     {
         if (null == _fillGraphic)
         {
             return;
         }
 
-        _fillGraphic.color = isAlert ? _alertColor : _fillColor;
-    }
-
-    // 빈 막대에서 가득 찰 때까지 천천히 차올라, 보스가 다시 일어났음을 보여 준다.
-    private void HandleRefilled()
-    {
-        SetRatioImmediately(0f);
-
-        _fill.DOAnchorMax(Vector2.one, _refillDuration).SetEase(Ease.OutQuad).SetUpdate(true);
-        _trail.DOAnchorMax(Vector2.one, _refillDuration).SetEase(Ease.OutQuad).SetUpdate(true);
+        _fillGraphic.color = ViewModel.IsAlert ? _alertColor : _fillColor;
     }
 
     private void TweenFill(float ratio)

@@ -16,7 +16,7 @@ public class DefeatPreset : ScriptableObject
     [SerializeField, Min(0f)] private float _holdBeforeResult = 0.4f;
 
     [Header("결과 문구")]
-    [SerializeField] private ResultTitleSettings _title = new();
+    [SerializeField] private ResultTitleSettings _resultTitle = new();
 
     public float SlowTimeScale { get { return _slowTimeScale; } }
 
@@ -25,5 +25,5 @@ public class DefeatPreset : ScriptableObject
     public InkSwallowSettings Swallow { get { return _swallow; } }
     public float HoldBeforeResult { get { return _holdBeforeResult; } }
 
-    public ResultTitleSettings Title { get { return _title; } }
+    public ResultTitleSettings ResultTitle { get { return _resultTitle; } }
 }

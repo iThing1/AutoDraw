@@ -43,7 +43,7 @@ MonoBehaviour:
     _trailColor: {r: 0, g: 0, b: 0, a: 1}
     _damage:
       _min: 3
-      _max: 5
+      _max: 6
     _criticalChance: 0.1
     _criticalMultiplier: 2
     _normalHit: {fileID: 11400000, guid: 8f01e519d7e777a4fae5f35580a49372, type: 2}

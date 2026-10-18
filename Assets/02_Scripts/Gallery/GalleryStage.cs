@@ -60,10 +60,7 @@ public class GalleryStage : MonoBehaviour
 
     private void OnEnable()
     {
-        if (null != _pauseAction)
-        {
-            _pauseAction.action.Enable();
-        }
+        _pauseAction.Enable();
     }
 
     private void OnDestroy()

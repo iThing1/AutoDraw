@@ -59,7 +59,7 @@ MonoBehaviour:
     _sinkRippleStrength: 0.3
     _residueSplat: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
   _holdBeforeResult: 0.4
-  _title:
+  _resultTitle:
     _text: INK OVER
     _letterPalette: {fileID: 11400000, guid: ffbed08809908924792318e46513ead8, type: 2}
     _spaceWidth: 70

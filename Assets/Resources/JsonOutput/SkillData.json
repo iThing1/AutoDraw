@@ -1,5 +1,5 @@
 {"_items":[
 {"_id":"paint_bomb","_name":"페인트 폭탄","_attackStyleKey":"AttackStyle/PaintBomb","_isStarting":true,"_iconKey":"Icon/Skill/PaintBomb","_description":"주변에 물감을 터뜨린다"},
-{"_id":"black_square","_name":"검은 사각형","_attackStyleKey":"AttackStyle/BlackSquare","_isStarting":false,"_iconKey":"Icon/Skill/BlackSquare","_description":"(임시) 1스테이지 보스의 힘"},
-{"_id":"ink_hands","_name":"잉크 손","_attackStyleKey":"AttackStyle/InkHands","_isStarting":false,"_iconKey":"Icon/Skill/InkHands","_description":"(임시) 2스테이지 보스의 힘"}
+{"_id":"black_square","_name":"검은 사각형","_attackStyleKey":"","_isStarting":false,"_iconKey":"Icon/Skill/BlackSquare","_description":"(임시) 1스테이지 보스의 힘"},
+{"_id":"ink_hands","_name":"잉크 손","_attackStyleKey":"","_isStarting":false,"_iconKey":"Icon/Skill/InkHands","_description":"(임시) 2스테이지 보스의 힘"}
 ]}

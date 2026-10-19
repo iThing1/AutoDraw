@@ -18,6 +18,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     public static TimeScaleManager TimeScale { get { return Instance._timeScaleManager; } }
     public static SlowZoneManager SlowZones { get { return Instance._slowZoneManager; } }
     public static DataTableManager Tables { get { return Instance._dataTableManager; } }
+    public static AssetManager Assets { get { return Instance._assetManager; } }
     // 표를 읽은 뒤에 만들어지고, 그 전에는 null이다.
     public static PlayerModel Player { get { return Instance._player; } }
 
@@ -27,6 +28,9 @@ public class GameManager : SingletonBehaviour<GameManager>
 
     [Header("프리팹")]
     [SerializeField] private CinematicUI _cinematicUIPrefab;
+
+    [Header("데이터")]
+    [SerializeField] private AssetRegistry _assetRegistry;
 
     [Header("사운드")]
     // 효과음(1)보다 낮게 깔아 타격음·경고음이 묻히지 않게 한다.
@@ -38,6 +42,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     private TimeScaleManager _timeScaleManager = new();
     private SlowZoneManager _slowZoneManager = new();
     private DataTableManager _dataTableManager = new();
+    private AssetManager _assetManager = new();
     private PlayerModel _player;
 
     protected override void Init()
@@ -74,7 +79,9 @@ public class GameManager : SingletonBehaviour<GameManager>
         // 표를 읽는 동안 빈 씬이 비치지 않게 먼저 가린다.
         _uiManager.Cinematic.ScreenFader.ShowImmediately();
 
-        await _dataTableManager.LoadAsync(new ResourcesTableLoader(), token);
+        await UniTask.WhenAll(
+            _dataTableManager.LoadAsync(new ResourcesTableLoader(), token),
+            _assetManager.PreloadAsync(_assetRegistry, token));
 
         if (false == CreatePlayer())
         {

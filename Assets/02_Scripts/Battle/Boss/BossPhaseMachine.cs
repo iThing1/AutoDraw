@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -8,6 +7,7 @@ using UnityEngine;
 // 보스의 페이즈를 맡는다. 맞을수록 색이 물들고, 체력 줄에 닿으면 그 줄에서 멈춰 기믹을 쓰며,
 // 마지막이 아닌 페이즈의 바닥에 닿으면 쓰러졌다가 다음 페이즈의 체력으로 다시 일어난다.
 // 진짜로 쓰러지는 것은 마지막 페이즈뿐이라, 전투 매니저는 보스가 죽을 때까지만 기다리면 된다.
+// 색 계산은 BossTint, 쓰러졌다 일어나는 연출은 BossRevival이 맡고, 여기는 언제 무엇을 할지만 정한다.
 [RequireComponent(typeof(BattleUnit))]
 public class BossPhaseMachine : MonoBehaviour
 {
@@ -36,15 +36,11 @@ public class BossPhaseMachine : MonoBehaviour
     private BattleUnit _unit;
     // 손 달린 보스만 있다.
     private BossHands _hands;
+    private BossTint _tint;
+    private BossPhaseState _state = BossPhaseState.Fighting;
     private int _phaseIndex;
     // 다음에 닿을 기믹 줄이자, 지금 색 구간의 번호.
     private int _nextLineIndex;
-    private Color _currentColor;
-    // 기믹·부활 중에 닿은 줄은 끝난 뒤에 처리한다.
-    private bool _isBusy;
-    // 한 단계 물드는 동안에는 맞아도 색을 체력에 맞춰 덮어쓰지 않는다.
-    private bool _isColorShifting;
-    private bool _hasPendingFloor;
     // 기믹·부활을 끊는 소스. 보스가 사라지거나 전투가 끝나면(플레이어가 쓰러짐) 함께 끊겨, 패배 연출 위로 기믹이 계속 돌지 않는다.
     private CancellationTokenSource _flowSource;
 
@@ -54,7 +50,10 @@ public class BossPhaseMachine : MonoBehaviour
     public event Action<bool> OnGimmickActiveChanged;
     // 기믹 결과(해냈으면 true)를 알려, 화면에 성공·실패를 띄우게 한다.
     public event Action<bool> OnGimmickFinished;
+    // 부활 연출이 시작되면 true, 끝나면 false. 그동안 플레이어를 멈추는 일은 전투를 맡은 쪽이 한다.
+    public event Action<bool> OnRevivalChanged;
 
+    public BossPhaseState State { get { return _state; } }
     public int RemainingPhaseCount { get { return _phases.Length - _phaseIndex; } }
     // 지금 페이즈에서 아직 남은 기믹 줄의 체력 비율.
     public IReadOnlyList<float> GimmickRatios { get { return _gimmickRatios; } }
@@ -81,7 +80,7 @@ public class BossPhaseMachine : MonoBehaviour
         _flowSource?.Dispose();
     }
 
-    // 모든 Awake(체력 초기화 포함)가 끝난 뒤, 보스가 화면에 나오기 전에 첫 페이즈를 건다.
+    // 모든 Awake(체력·겉모습 초기화 포함)가 끝난 뒤, 보스가 화면에 나오기 전에 첫 페이즈를 건다.
     private void Start()
     {
         if (null == _phases || 0 == _phases.Length)
@@ -91,6 +90,7 @@ public class BossPhaseMachine : MonoBehaviour
             return;
         }
 
+        _tint = new BossTint(_unit.View);
         _unit.Health.Init(GetPhaseMaxHp(0));
         ApplyPhase(0);
         PrewarmGimmicks();
@@ -98,19 +98,14 @@ public class BossPhaseMachine : MonoBehaviour
 
     private void HandleDamaged(DamageInfo damage)
     {
-        if (_isColorShifting)
-        {
-            return;
-        }
-
-        ApplyColor(GetCurrentColor());
+        _tint.Follow(GetCurrentColor());
     }
 
+    // 다른 일을 하는 중에 닿은 줄은 그 일이 끝날 때(FinishBusy) 처리한다.
     private void HandleFloorReached()
     {
-        if (_isBusy)
+        if (BossPhaseState.Fighting != _state)
         {
-            _hasPendingFloor = true;
             return;
         }
 
@@ -129,7 +124,7 @@ public class BossPhaseMachine : MonoBehaviour
     // 줄에서 멈춰 기믹을 쓰고, 한 단계 물든 뒤 다음 줄까지 체력을 연다. 성공했으면 그로기 동안 더 아프게 맞는다.
     private async UniTaskVoid PlayGimmickAsync(BossPhaseData.GimmickLine line, CancellationToken token)
     {
-        _isBusy = true;
+        _state = BossPhaseState.Gimmick;
 
         try
         {
@@ -148,7 +143,7 @@ public class BossPhaseMachine : MonoBehaviour
 
             // 기믹이 끝나면 잉크가 번지듯 한 단계 크게 물든다.
             ImpactPlayer.Play(_toneShiftImpact, _unit.Body.position);
-            await TweenColorAsync(_currentColor, GetSegmentStartColor(_nextLineIndex), _toneShiftDuration, false, token);
+            await _tint.ShiftAsync(_tint.Current, _tint.GetSegmentStart(_phases[_phaseIndex], _nextLineIndex), _toneShiftDuration, false, token);
 
             UpdateFloor();
 
@@ -183,77 +178,36 @@ public class BossPhaseMachine : MonoBehaviour
         }
     }
 
-    // 납작하게 쓰러졌다가, 위에서 내려온 검은 빛기둥을 받아 다음 페이즈의 색과 체력으로 다시 일어난다.
     private async UniTaskVoid PlayRevivalAsync(CancellationToken token)
     {
-        _isBusy = true;
+        _state = BossPhaseState.Revival;
 
-        Transform boss = _unit.transform;
-        Vector3 startScale = boss.localScale;
-        SpriteRenderer beam = null;
+        BossRevival revival = new BossRevival(_unit, _hands, _revival);
 
         try
         {
             using (_unit.Health.BeginInvulnerable())
             {
                 await StopBossAsync(token);
-                SetPlayerPaused(true);
+                OnRevivalChanged?.Invoke(true);
 
-                using (GameManager.TimeScale.BeginSlowMotion(_revival.SlowTimeScale))
-                {
-                    await RealtimeDelay.WaitAsync(_revival.SlowDuration, token);
-                }
-
-                await CinematicPlayer.EnterAsync(_unit.Body, _revival.Cinematic, token);
-
-                SetHandsGroggy(true);
-
-                Vector2 collapse = _revival.CollapseScale;
-
-                await boss.DOScale(new Vector3(startScale.x * collapse.x, startScale.y * collapse.y, startScale.z), _revival.CollapseDuration)
-                    .SetEase(Ease.OutQuad)
-                    .SetUpdate(true)
-                    .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
-
-                await RealtimeDelay.WaitAsync(_revival.HoldDuration, token);
-
-                beam = SpawnBeam();
-                await DropBeamAsync(beam, token);
-
-                ImpactPlayer.Play(_revival.BeamImpact, _unit.Body.position);
+                await revival.CollapseAsync(token);
 
                 // 빛기둥 안에서 다음 페이즈로 넘어가며, 체력은 다시 차고 몸은 지금 색에서 다음 페이즈 색으로 물든다.
-                Color before = _currentColor;
+                Color before = _tint.Current;
 
                 _phaseIndex++;
                 _unit.Health.Refill(GetPhaseMaxHp(_phaseIndex));
                 ApplyPhase(_phaseIndex);
                 // 새 페이즈 색이 한 프레임 먼저 칠해지지 않게, 물들기 전까지는 이전 색으로 둔다.
-                ApplyColor(before);
+                _tint.Apply(before);
 
-                await TweenColorAsync(before, GetCurrentColor(), _revival.BeamHoldDuration, true, token);
+                await _tint.ShiftAsync(before, GetCurrentColor(), _revival.BeamHoldDuration, true, token);
 
-                SetHandsGroggy(false);
-
-                await boss.DOScale(startScale, _revival.RiseDuration)
-                    .SetEase(_revival.RiseEase)
-                    .SetUpdate(true)
-                    .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
-
-                ImpactPlayer.Play(_revival.RiseImpact, _unit.Body.position);
-
-                if (null != beam)
-                {
-                    await beam.DOFade(0f, _revival.BeamFadeDuration)
-                        .SetUpdate(true)
-                        .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
-                }
-
-                await PlayBannerAsync(_phases[_phaseIndex], token);
-                await CinematicPlayer.ExitAsync(_revival.Cinematic, token);
+                await revival.RiseAsync(_phases[_phaseIndex], token);
             }
 
-            SetPlayerPaused(false);
+            OnRevivalChanged?.Invoke(false);
             ResumeBoss();
         }
         catch (OperationCanceledException)
@@ -262,27 +216,16 @@ public class BossPhaseMachine : MonoBehaviour
         }
         finally
         {
-            boss.localScale = startScale;
-            PooledSprite.Despawn(beam);
+            revival.Cleanup();
             FinishBusy();
         }
-    }
-
-    private async UniTask PlayBannerAsync(BossPhaseData phase, CancellationToken token)
-    {
-        if (string.IsNullOrEmpty(phase.BannerTitle))
-        {
-            return;
-        }
-
-        GameManager.Sound.PlaySfx(_revival.Banner.Sound);
-
-        await GameManager.UI.Cinematic.BossBanner.PlayAsync(phase.BannerTitle, phase.BannerSubtitle, _revival.Banner, token);
     }
 
     // 그로기 동안은 공격도 이동도 하지 않고, 받는 피해가 늘어난다.
     private async UniTask PlayGroggyAsync(CancellationToken token)
     {
+        _state = BossPhaseState.Groggy;
+
         SetHandsGroggy(true);
         _unit.Health.SetDamageMultiplier(_groggyDamageMultiplier);
 
@@ -319,30 +262,6 @@ public class BossPhaseMachine : MonoBehaviour
         _unit.Attacker.Resume();
     }
 
-    // 쓰러졌다 일어나는 동안에는 플레이어도 공격·이동·막기를 멈춘다. 연출 중인 보스에게 계속 쏘아 대면 어색하다.
-    private void SetPlayerPaused(bool isPaused)
-    {
-        AttackTarget target = _unit.Attacker.Context.Target;
-
-        if (null == target || target.IsDefeated)
-        {
-            return;
-        }
-
-        BattleUnit player = target.Unit;
-
-        if (isPaused)
-        {
-            player.Attacker.Interrupt();
-            player.ChangeState(UnitState.Idle);
-        }
-        else
-        {
-            player.ChangeState(UnitState.Move);
-            player.Attacker.Resume();
-        }
-    }
-
     private void ResumeBoss()
     {
         _unit.ChangeState(UnitState.Move);
@@ -357,17 +276,19 @@ public class BossPhaseMachine : MonoBehaviour
         return _flowSource.Token;
     }
 
-    // 기믹·그로기 중에 다음 줄까지 깎였으면, 끝난 뒤 바로 그 줄을 처리한다.
+    // 기믹·그로기·부활 중에 다음 줄까지 깎였으면, 끝난 뒤 바로 그 줄을 처리한다.
+    // 전투가 끝나 끊겼으면 다시 시작하지 않는다. 체력이 끊긴 기믹의 줄에 멈춰 있어 곧바로 다시 들어가기 때문이다.
     private void FinishBusy()
     {
-        _isBusy = false;
+        bool isCanceled = null != _flowSource && _flowSource.IsCancellationRequested;
+
+        _state = BossPhaseState.Fighting;
 
         _flowSource?.Dispose();
         _flowSource = null;
 
-        if (_hasPendingFloor)
+        if (false == isCanceled && _unit.Health.IsAtFloor)
         {
-            _hasPendingFloor = false;
             HandleFloorReached();
         }
     }
@@ -381,7 +302,7 @@ public class BossPhaseMachine : MonoBehaviour
 
         UpdateFloor();
         UpdateGimmickRatios();
-        ApplyColor(GetCurrentColor());
+        _tint.Apply(GetCurrentColor());
 
         OnPhaseChanged?.Invoke();
     }
@@ -417,87 +338,9 @@ public class BossPhaseMachine : MonoBehaviour
         }
     }
 
-    // 지금 구간 안에서 체력이 깎인 만큼 구간의 시작 색에서 끝 색으로 물든다.
     private Color GetCurrentColor()
     {
-        BossPhaseData phase = _phases[_phaseIndex];
-        BossPhaseData.ColorSegment segment = phase.GetColorSegment(_nextLineIndex);
-
-        if (null == segment)
-        {
-            return _currentColor;
-        }
-
-        float top = phase.GetSegmentTop(_nextLineIndex);
-        float bottom = phase.GetSegmentBottom(_nextLineIndex);
-
-        return segment.Evaluate(Mathf.InverseLerp(top, bottom, _unit.Health.Ratio));
-    }
-
-    private Color GetSegmentStartColor(int segmentIndex)
-    {
-        BossPhaseData.ColorSegment segment = _phases[_phaseIndex].GetColorSegment(segmentIndex);
-
-        return null != segment ? segment.From : _currentColor;
-    }
-
-    private void ApplyColor(Color color)
-    {
-        _currentColor = color;
-        _unit.View.SetBaseColor(color);
-    }
-
-    // 위에서 내려올 검은 빛기둥. 처음에는 높이 0으로 숨겨 둔다.
-    private SpriteRenderer SpawnBeam()
-    {
-        if (null == _revival.BeamPrefab)
-        {
-            return null;
-        }
-
-        return PooledSprite.Spawn(_revival.BeamPrefab, _unit.Body.position, 0f, new Vector2(_revival.BeamWidth, 0f), _revival.BeamColor);
-    }
-
-    // 윗끝은 화면 위에 고정한 채 아랫끝이 보스까지 내려온다. 연출이라 실제 시간으로 돈다.
-    private async UniTask DropBeamAsync(SpriteRenderer beam, CancellationToken token)
-    {
-        if (null == beam)
-        {
-            return;
-        }
-
-        Transform beamTransform = beam.transform;
-        Vector3 bottom = _unit.Body.position;
-        Vector3 top = bottom + Vector3.up * _revival.BeamHeight;
-        float width = _revival.BeamWidth;
-
-        await DOVirtual.Float(0f, _revival.BeamHeight, _revival.BeamDropDuration, height =>
-            {
-                beamTransform.position = top + Vector3.down * (height * 0.5f);
-                beamTransform.localScale = new Vector3(width, height, 1f);
-            })
-            .SetEase(Ease.InQuad)
-            .SetUpdate(true)
-            .SetTarget(this)
-            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
-    }
-
-    // 물드는 동안에는 맞아도 체력에 맞춘 색으로 덮어쓰지 않는다. 기믹 뒤에는 게임 시간, 부활 연출은 실제 시간으로 돈다.
-    private async UniTask TweenColorAsync(Color from, Color to, float duration, bool isRealtime, CancellationToken token)
-    {
-        _isColorShifting = true;
-
-        try
-        {
-            await DOVirtual.Color(from, to, duration, ApplyColor)
-                .SetUpdate(isRealtime)
-                .SetTarget(this)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
-        }
-        finally
-        {
-            _isColorShifting = false;
-        }
+        return _tint.Evaluate(_phases[_phaseIndex], _nextLineIndex, _unit.Health.Ratio);
     }
 
     private void SetHandsGroggy(bool isGroggy)

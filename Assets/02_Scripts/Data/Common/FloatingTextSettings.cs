@@ -6,7 +6,6 @@ using UnityEngine;
 [Serializable]
 public class FloatingTextSettings
 {
-    // 짧은 문구 하나. 종류마다 한 줄씩 둔다.
     [Serializable]
     public struct Phrase
     {
@@ -28,7 +27,6 @@ public class FloatingTextSettings
 
     [SerializeField] private Color _normalColor = Color.black;
     [SerializeField] private Color _criticalColor = new Color(0.85f, 0.2f, 0.3f);
-    // 막기(GUARD), 게이지가 모자라 막기가 안 나감(NO INK), 보스 기믹 성공·실패(BREAK·FAILED).
     // 새 문구는 FloatingTextKind에 이름을 더하고 여기에 한 줄을 더하면 된다.
     [SerializeField] private Phrase[] _phrases =
     {

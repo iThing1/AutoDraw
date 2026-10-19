@@ -107,7 +107,7 @@ public class BarrageAttackStyle : AttackStyle
         }
     }
 
-    // 끝까지 줄어든 뒤 풀로 돌려준다. 보스와 함께 파괴되면 트윈이 끊기고, 돌려줄 터렛이 없어 그대로 끝난다.
+    // 끝까지 줄어든 뒤 풀로 돌려준다. 보스와 함께 파괴돼 트윈이 끊겨도 여기로 오므로, 남아 있을 때만 돌려준다.
     private async UniTaskVoid HideAndDespawnAsync(Transform turret)
     {
         turret.DOComplete();
@@ -117,7 +117,6 @@ public class BarrageAttackStyle : AttackStyle
             .SetLink(turret.gameObject)
             .ToUniTask();
 
-        // 보스와 함께 파괴돼 트윈이 끊긴 경우에도 여기로 오므로, 남아 있을 때만 돌려준다.
         if (null == turret)
         {
             return;

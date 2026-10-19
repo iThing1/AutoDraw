@@ -47,6 +47,7 @@ public class BattleManager : MonoBehaviour
 
     private BattleUnit _player;
     private BattleUnit _boss;
+    private BossPhaseMachine _bossPhases;
     private BattleHudView _hud;
     private BattleHudViewModel _hudViewModel;
     private ResultUI _result;
@@ -273,6 +274,11 @@ public class BattleManager : MonoBehaviour
             StartUnit(_player, _boss, battleSource.Token);
             StartUnit(_boss, _player, battleSource.Token);
 
+            if (_boss.TryGetComponent(out _bossPhases))
+            {
+                _bossPhases.OnRevivalChanged += HandleBossRevivalChanged;
+            }
+
             if (null != _boss.Mover)
             {
                 _boss.Mover.RunAsync(battleSource.Token).Forget();
@@ -291,6 +297,11 @@ public class BattleManager : MonoBehaviour
 
             battleSource.Cancel();
 
+            if (null != _bossPhases)
+            {
+                _bossPhases.OnRevivalChanged -= HandleBossRevivalChanged;
+            }
+
             // 쓰러진 쪽은 Dead라 그대로 남는다.
             _player.ChangeState(UnitState.Idle);
             _boss.ChangeState(UnitState.Idle);
@@ -303,6 +314,26 @@ public class BattleManager : MonoBehaviour
     {
         unit.ChangeState(UnitState.Move);
         unit.Attacker.RunAsync(target, _paintCanvas, token).Forget();
+    }
+
+    // 연출 중인 보스에게 계속 쏘아 대면 어색해, 쓰러졌다 일어나는 동안 플레이어도 공격·이동·막기를 멈춘다.
+    private void HandleBossRevivalChanged(bool isReviving)
+    {
+        if (_player.Health.IsDead)
+        {
+            return;
+        }
+
+        if (isReviving)
+        {
+            _player.Attacker.Interrupt();
+            _player.ChangeState(UnitState.Idle);
+        }
+        else
+        {
+            _player.ChangeState(UnitState.Move);
+            _player.Attacker.Resume();
+        }
     }
 
     private async UniTask<Texture2D> PlayEndingAsync(CancellationToken token)

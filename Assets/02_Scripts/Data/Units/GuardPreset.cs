@@ -1,7 +1,6 @@
 using DG.Tweening;
 using UnityEngine;
 
-// 막기의 이름·아이콘과 방패 연출. 막는 시간·비용·쿨타임·반경은 플레이어 스탯(데이터 표)에 있다.
 [CreateAssetMenu(fileName = "GuardPreset", menuName = "Scriptable Objects/GuardPreset")]
 public class GuardPreset : ScriptableObject
 {

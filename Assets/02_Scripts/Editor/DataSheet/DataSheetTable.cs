@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-// 시트 탭 하나. 1줄 설명, 2줄 형식, 3줄 필드 이름, 4줄부터 값이다.
-// 필드 이름이 빈 열은 메모로 보고 건너뛴다. 첫 열은 Id여야 하고 Id는 겹치면 안 된다.
+// 1줄 설명, 2줄 형식, 3줄 필드 이름, 4줄부터 값. 필드 이름이 빈 열은 메모로 보고 건너뛴다.
+// 2줄이 기본 형식이 아니면 enum 이름으로 보고, 칸의 이름을 번호로 바꿔 쓴다(JsonUtility가 enum을 번호로 읽는다).
 public class DataSheetTable
 {
     public const string ID_FIELD = "Id";
@@ -17,7 +17,6 @@ public class DataSheetTable
 
     private readonly List<DataSheetColumn> _columns = new();
     private readonly List<string[]> _rows = new();
-    // 오류 문구에 시트에서 보이는 줄 번호(1부터)를 쓰려고 줄마다 기억한다.
     private readonly List<int> _lineNumbers = new();
     private readonly HashSet<string> _ids = new();
     private readonly string _name;
@@ -30,8 +29,7 @@ public class DataSheetTable
         _name = name;
     }
 
-    // 머리 줄이 잘못되면 null을 돌려준다. 값 줄의 문제는 오류에 모으고 그 줄만 뺀다.
-    public static DataSheetTable Parse(string name, List<string[]> lines, List<string> errors)
+    public static DataSheetTable Parse(string name, List<string[]> lines, Func<string, Type> findEnum, List<string> errors)
     {
         if (lines.Count < FIRST_VALUE_LINE)
         {
@@ -41,7 +39,7 @@ public class DataSheetTable
 
         DataSheetTable table = new(name);
 
-        if (false == table.ReadColumns(lines[TYPE_LINE], lines[FIELD_LINE], errors))
+        if (false == table.ReadColumns(lines[TYPE_LINE], lines[FIELD_LINE], findEnum, errors))
         {
             return null;
         }
@@ -74,7 +72,6 @@ public class DataSheetTable
         return GetCell(row, ID_FIELD);
     }
 
-    // 없는 필드나 빈 칸은 빈 문자열이다.
     public string GetCell(int row, string field)
     {
         int column = FindColumn(field);
@@ -92,7 +89,7 @@ public class DataSheetTable
         return SplitArray(GetCell(row, field));
     }
 
-    // 런타임에서 JsonUtility로 바로 읽도록 {"_items":[...]} 모양으로 쓴다. 필드 이름은 데이터 클래스의 private 필드 이름으로 바꾼다(MaxHp → _maxHp).
+    // JsonUtility로 바로 읽도록 {"_items":[...]} 모양으로, 필드는 private 이름(MaxHp → _maxHp)으로 쓴다.
     public string ToJson(List<string> errors)
     {
         StringBuilder json = new();
@@ -122,7 +119,7 @@ public class DataSheetTable
         return json.ToString();
     }
 
-    private bool ReadColumns(string[] types, string[] fields, List<string> errors)
+    private bool ReadColumns(string[] types, string[] fields, Func<string, Type> findEnum, List<string> errors)
     {
         int errorCount = errors.Count;
 
@@ -145,13 +142,22 @@ public class DataSheetTable
             bool isArray = type.EndsWith(ARRAY_SUFFIX, StringComparison.Ordinal);
             string kindName = isArray ? type.Substring(0, type.Length - ARRAY_SUFFIX.Length) : type;
 
-            if (false == Enum.TryParse(kindName, true, out DataValueKind kind) || false == Enum.IsDefined(typeof(DataValueKind), kind))
+            Type enumType = null;
+
+            if (false == TryParseKind(kindName, out DataValueKind kind))
             {
-                errors.Add($"{Name} : {field} 열의 형식 '{type}'을(를) 모릅니다. string·int·float·bool과 그 배열([])만 됩니다.");
-                continue;
+                enumType = findEnum(kindName);
+
+                if (null == enumType)
+                {
+                    errors.Add($"{Name} : {field} 열의 형식 '{type}'을(를) 모릅니다. string·int·float·bool, 게임 코드의 enum 이름과 그 배열([])만 됩니다.");
+                    continue;
+                }
+
+                kind = DataValueKind.Enum;
             }
 
-            _columns.Add(new DataSheetColumn(field, i, kind, isArray));
+            _columns.Add(new DataSheetColumn(field, i, kind, isArray, enumType));
         }
 
         if (0 == _columns.Count || ID_FIELD != _columns[0].Field)
@@ -213,7 +219,7 @@ public class DataSheetTable
         json.Append(']');
     }
 
-    // 빈 숫자 칸은 0, 빈 bool 칸은 false로 쓴다.
+    // 빈 숫자 칸은 0, 빈 bool 칸은 false다.
     private void AppendScalar(StringBuilder json, DataSheetColumn column, string text, int row, List<string> errors)
     {
         switch (column.Kind)
@@ -269,12 +275,25 @@ public class DataSheetTable
                     json.Append("false");
                 }
                 return;
+
+            // 빈 칸과 번호로 적은 칸은 받지 않는다.
+            case DataValueKind.Enum:
+                if (0 <= Array.IndexOf(Enum.GetNames(column.EnumType), text))
+                {
+                    json.Append(Convert.ToInt32(Enum.Parse(column.EnumType, text), CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture));
+                }
+                else
+                {
+                    AddValueError(column, text, row, errors);
+                    json.Append('0');
+                }
+                return;
         }
     }
 
     private void AddValueError(DataSheetColumn column, string text, int row, List<string> errors)
     {
-        string kindName = column.Kind.ToString().ToLowerInvariant();
+        string kindName = DataValueKind.Enum == column.Kind ? column.EnumType.Name : column.Kind.ToString().ToLowerInvariant();
         errors.Add($"{Name} {_lineNumbers[row]}줄 {column.Field} : '{text}'은(는) {kindName}이(가) 아닙니다.");
     }
 
@@ -289,6 +308,11 @@ public class DataSheetTable
         }
 
         return -1;
+    }
+
+    private static bool TryParseKind(string kindName, out DataValueKind kind)
+    {
+        return Enum.TryParse(kindName, true, out kind) && Enum.IsDefined(typeof(DataValueKind), kind) && DataValueKind.Enum != kind;
     }
 
     private static string ToFieldName(string field)

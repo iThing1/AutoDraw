@@ -23,5 +23,7 @@ MonoBehaviour:
     _gid: 1669804022
   - _name: WeaponData
     _gid: 1875784139
+  - _name: SkillData
+    _gid: 1335169452
   - _name: ConsumableData
     _gid: 1129789069

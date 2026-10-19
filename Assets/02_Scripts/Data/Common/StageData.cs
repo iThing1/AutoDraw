@@ -11,8 +11,15 @@ public class StageData : ScriptableObject
     // 클리어 그림을 저장하는 파일 이름. 표시 이름을 바꿔도 그림이 이어지도록 따로 둔다.
     [SerializeField] private string _saveKey;
 
+    [Header("클리어 보상")]
+    // 처음 깼을 때만 받는다.
+    [SerializeField, Min(0)] private int _rewardPoints;
+    [SerializeField] private string _clearSkillId;
+
     public string DisplayName { get { return _displayName; } }
     public BattleManager StagePrefab { get { return _stagePrefab; } }
     public Texture2D BlankCanvas { get { return _blankCanvas; } }
     public string SaveKey { get { return _saveKey; } }
+    public int RewardPoints { get { return _rewardPoints; } }
+    public string ClearSkillId { get { return _clearSkillId; } }
 }

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-// CSV 글을 줄·칸으로 나눈다. 따옴표로 감싼 칸 안의 쉼표·줄바꿈·겹따옴표("")도 한 칸으로 읽는다.
+// 따옴표로 감싼 칸 안의 쉼표·줄바꿈·겹따옴표("")도 한 칸으로 읽는다.
 public static class CsvReader
 {
     public static List<string[]> Read(string text)
@@ -57,7 +57,6 @@ public static class CsvReader
             }
         }
 
-        // 마지막 줄 끝에 줄바꿈이 없을 때.
         if (0 < cell.Length || 0 < cells.Count)
         {
             EndRow();

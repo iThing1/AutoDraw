@@ -6,7 +6,6 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-// 메뉴 AutoDraw/데이터 가져오기. 구글 시트의 탭을 CSV로 받아 검사하고 JSON으로 쓴다.
 // 오류가 하나라도 있으면 파일을 하나도 바꾸지 않는다(일부 표만 바뀌어 서로 어긋나지 않게).
 public static class DataSheetImporter
 {
@@ -14,8 +13,7 @@ public static class DataSheetImporter
     private const string DIALOG_TITLE = "데이터 가져오기";
     private const int TIMEOUT_SECONDS = 15;
 
-    // 표 사이 규칙은 여기에 더한다.
-    private static readonly IDataSheetRule[] RULES = { new PerkTreeRule() };
+    private static readonly IDataSheetRule[] RULES = { new PerkTreeRule(), new PerkEffectTargetRule(), new StageSkillRule() };
 
     [MenuItem(MENU_PATH)]
     private static void Import()
@@ -74,10 +72,10 @@ public static class DataSheetImporter
         return AssetDatabase.LoadAssetAtPath<DataSheetConfig>(AssetDatabase.GUIDToAssetPath(guids[0]));
     }
 
-    // 탭이 몇 개 안 되고 메뉴를 눌렀을 때만 돌므로, 진행 막대를 띄운 채 하나씩 기다려 받는다.
     private static Dictionary<string, DataSheetTable> DownloadTables(DataSheetConfig config, List<string> errors)
     {
         Dictionary<string, DataSheetTable> tables = new();
+        Dictionary<string, Type> gameEnums = CollectGameEnums();
 
         if (string.IsNullOrWhiteSpace(config.SheetId))
         {
@@ -113,7 +111,7 @@ public static class DataSheetImporter
                     continue;
                 }
 
-                DataSheetTable table = DataSheetTable.Parse(tab.Name, CsvReader.Read(csv), errors);
+                DataSheetTable table = DataSheetTable.Parse(tab.Name, CsvReader.Read(csv), gameEnums.GetValueOrDefault, errors);
 
                 if (null != table)
                 {
@@ -127,6 +125,22 @@ public static class DataSheetImporter
         }
 
         return tables;
+    }
+
+    // 패키지의 같은 이름 enum과 섞이지 않게 게임 코드 어셈블리에서만 찾는다.
+    private static Dictionary<string, Type> CollectGameEnums()
+    {
+        Dictionary<string, Type> enums = new();
+
+        foreach (Type type in typeof(BaseData).Assembly.GetTypes())
+        {
+            if (type.IsEnum && false == type.IsNested)
+            {
+                enums[type.Name] = type;
+            }
+        }
+
+        return enums;
     }
 
     // 공유가 꺼져 있으면 CSV 대신 구글 로그인 화면(HTML)이 온다.
@@ -160,7 +174,6 @@ public static class DataSheetImporter
         }
     }
 
-    // 내용이 같은 파일은 다시 쓰지 않아 쓸데없는 다시 가져오기와 변경 표시를 막는다.
     private static int WriteJsons(string folder, Dictionary<string, string> jsons)
     {
         Directory.CreateDirectory(folder);

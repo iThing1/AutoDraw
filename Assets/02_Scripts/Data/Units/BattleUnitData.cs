@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// 보스와 플레이어가 함께 쓰는 유닛 데이터. 스탯이 어디 있는지(보스는 SO, 플레이어는 데이터 표)는 하위 클래스가 정한다.
 public abstract class BattleUnitData : ScriptableObject
 {
     [Header("배회")]

@@ -28,7 +28,6 @@ public class GuardState : IDisposable
         }
     }
 
-    // 프리셋은 막기 칸의 이름·아이콘에만 쓰고, 규칙 값은 스탯에서 읽는다.
     public GuardState(GuardPreset preset, PlayerStats stats, SkillGauge gauge)
     {
         _preset = preset;

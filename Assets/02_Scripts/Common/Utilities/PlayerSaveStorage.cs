@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using UnityEngine;
 
-// 플레이어 저장 파일을 읽고 쓴다. 파일이 없으면 새 게임으로 본다.
 public static class PlayerSaveStorage
 {
     private const string FOLDER_NAME = "Save";
@@ -10,7 +9,7 @@ public static class PlayerSaveStorage
     private const string BACKUP_EXTENSION = ".bak";
     private const string TEMP_EXTENSION = ".tmp";
 
-    // 파일이 없거나 깨졌으면 false다. 깨진 파일은 .bak으로 옮겨, 다음 저장이 말없이 덮어써 사라지지 않게 한다.
+    // 깨진 파일은 .bak으로 옮겨 다음 저장이 덮어쓰지 않게 한다.
     public static bool TryLoad(out PlayerSaveData save)
     {
         save = null;
@@ -39,7 +38,7 @@ public static class PlayerSaveStorage
         return true;
     }
 
-    // 쓰는 도중 꺼져도 예전 파일이 남도록 임시 파일에 다 쓴 뒤 바꿔 넣는다.
+    // 쓰는 도중 꺼져도 예전 파일이 남도록 임시 파일에 쓴 뒤 바꿔 넣는다.
     public static void Save(PlayerSaveData save)
     {
         if (null == save)

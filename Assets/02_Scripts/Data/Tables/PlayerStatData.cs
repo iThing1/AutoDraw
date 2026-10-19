@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 
-// 플레이어 기본 스탯. 특성으로 더해지는 값은 여기에 쓰지 않고 쓰는 쪽에서 더한다.
 [Serializable]
 public class PlayerStatData : BaseData
 {
@@ -13,6 +12,8 @@ public class PlayerStatData : BaseData
     [SerializeField] private float _guardCooldown;
     [SerializeField] private float _guardRadius;
     [SerializeField] private float _skillGaugeMax;
+    [SerializeField] private float _dashDistance;
+    [SerializeField] private float _dashCooldown;
 
     public int MaxHp { get { return _maxHp; } }
     public float MoveSpeed { get { return _moveSpeed; } }
@@ -22,4 +23,6 @@ public class PlayerStatData : BaseData
     public float GuardCooldown { get { return _guardCooldown; } }
     public float GuardRadius { get { return _guardRadius; } }
     public float SkillGaugeMax { get { return _skillGaugeMax; } }
+    public float DashDistance { get { return _dashDistance; } }
+    public float DashCooldown { get { return _dashCooldown; } }
 }

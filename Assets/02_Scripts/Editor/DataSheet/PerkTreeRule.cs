@@ -2,15 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-// 특성 트리 규칙. 부모는 3개까지이고 모두 있는 노드여야 하며, 위→아래로만 이어지도록 부모가 자식보다 위 줄(Row가 작음)에 있어야 한다.
-// 줄이 위로만 이어지면 부모를 따라 올라가다 자기에게 돌아올 수 없어 순환도 함께 막힌다.
+// 부모는 3개까지, 있는 노드여야 하고, 자식보다 위 줄(Row가 작음)에 있어야 한다.
+// 줄이 위로만 이어지므로 순환도 함께 막힌다.
 public class PerkTreeRule : IDataSheetRule
 {
     private const string NODE_TABLE = "PerkNodeData";
     private const string EFFECT_TABLE = "PerkEffectData";
     private const int MAX_PARENT_COUNT = 3;
-
-    private static readonly string[] ROOTS = { "A", "B", "C" };
 
     public void Check(IReadOnlyDictionary<string, DataSheetTable> tables, List<string> errors)
     {
@@ -25,19 +23,8 @@ public class PerkTreeRule : IDataSheetRule
         {
             string prefix = $"{NODE_TABLE} {nodes.GetLineNumber(row)}줄";
 
-            CheckRoot(nodes, row, prefix, errors);
             CheckParents(nodes, row, prefix, errors);
             CheckEffects(nodes, effects, row, prefix, errors);
-        }
-    }
-
-    private void CheckRoot(DataSheetTable nodes, int row, string prefix, List<string> errors)
-    {
-        string root = nodes.GetCell(row, "Root");
-
-        if (Array.IndexOf(ROOTS, root) < 0)
-        {
-            errors.Add($"{prefix} Root : '{root}'은(는) A·B·C 중 하나가 아닙니다.");
         }
     }
 
@@ -108,7 +95,6 @@ public class PerkTreeRule : IDataSheetRule
         }
     }
 
-    // 형식이 틀린 Row는 표를 JSON으로 바꿀 때 따로 잡히므로 여기서는 비교만 건너뛴다.
     private bool TryGetRow(DataSheetTable nodes, int row, out int value)
     {
         return int.TryParse(nodes.GetCell(row, "Row"), NumberStyles.Integer, CultureInfo.InvariantCulture, out value);

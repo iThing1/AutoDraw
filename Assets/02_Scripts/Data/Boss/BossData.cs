@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// 보스 유닛 데이터. 공통 유닛 값(BattleUnitData)에 보스만 쓰는 값을 더한다. 보스 스탯은 SO에 두므로 이 에셋이 곧 스탯이다.
+// 보스 유닛 데이터. 공통 유닛 값(BattleUnitData)에 보스만 쓰는 값을 더한다.
 [CreateAssetMenu(fileName = "BossData", menuName = "Scriptable Objects/BossData")]
 public class BossData : BattleUnitData, IUnitStats
 {

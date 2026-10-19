@@ -9,7 +9,6 @@ public class GameManager : SingletonBehaviour<GameManager>
     // 기본 용량(트윈 200, 시퀀스 50)을 넘기면 실행 중에 늘리며 끊길 수 있어 처음부터 넉넉히 잡는다.
     private const int TWEENERS_CAPACITY = 800;
     private const int SEQUENCES_CAPACITY = 200;
-    // 플레이어 기본 스탯을 읽을 PlayerStatData 줄.
     private const string PLAYER_STAT_ID = "player";
 
     public static BattleCameraRig CameraRig { get { return Instance._cameraRig; } }
@@ -19,7 +18,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     public static TimeScaleManager TimeScale { get { return Instance._timeScaleManager; } }
     public static SlowZoneManager SlowZones { get { return Instance._slowZoneManager; } }
     public static DataTableManager Tables { get { return Instance._dataTableManager; } }
-    // 게임을 시작해 표를 읽은 뒤에 만들어진다. 그 전에는 null이다.
+    // 표를 읽은 뒤에 만들어지고, 그 전에는 null이다.
     public static PlayerModel Player { get { return Instance._player; } }
 
     [Header("씬")]
@@ -69,7 +68,7 @@ public class GameManager : SingletonBehaviour<GameManager>
         InitAsync(destroyCancellationToken).Forget();
     }
 
-    // 맵이 만들어지자마자 스탯을 읽으므로 표를 읽고 플레이어를 만든 뒤에 맵을 만든다.
+    // 맵이 만들어지자마자 스탯을 읽으므로 플레이어를 만든 뒤에 맵을 만든다.
     private async UniTaskVoid InitAsync(CancellationToken token)
     {
         // 표를 읽는 동안 빈 씬이 비치지 않게 먼저 가린다.
@@ -85,7 +84,6 @@ public class GameManager : SingletonBehaviour<GameManager>
         _mapSpawner.Init();
     }
 
-    // 저장 파일이 있으면 이어서, 없으면 새로 시작한다. 기본 스탯이 표에 없으면 게임을 시작하지 않는다.
     private bool CreatePlayer()
     {
         PlayerStatData baseStats = _dataTableManager.PlayerStats.Get(PLAYER_STAT_ID);

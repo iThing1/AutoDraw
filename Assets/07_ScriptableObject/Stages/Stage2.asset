@@ -16,3 +16,5 @@ MonoBehaviour:
   _stagePrefab: {fileID: 2969957242831443143, guid: f4437aaad3ea1d9c8e583f9cbf6d8add, type: 3}
   _blankCanvas: {fileID: 2800000, guid: 3f7b792a8ea0e4245ba9a0ff5c380267, type: 3}
   _saveKey: Stage2
+  _rewardPoints: 2
+  _clearSkillId: ink_hands

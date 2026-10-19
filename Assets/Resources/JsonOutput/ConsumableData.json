@@ -1,2 +1,4 @@
 {"_items":[
+{"_id":"paint","_name":"물감","_effectType":0,"_value":40,"_charges":1,"_cooldown":10,"_iconKey":"Icon/Item/Paint","_description":"체력을 {0} 회복한다"},
+{"_id":"remover","_name":"리무버","_effectType":1,"_value":3,"_charges":1,"_cooldown":15,"_iconKey":"Icon/Item/Remover","_description":"주변 {0} 반경의 검은 잉크를 지운다"}
 ]}

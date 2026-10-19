@@ -50,6 +50,12 @@ public class AttackTarget
         return Vector2.Distance(position, _unit.Body.position) <= _bodyRadius + attackRadius;
     }
 
+    // 움직이는 공격이 지난 길 위에서 몸에 닿았는지. 이전 자리와 지금 자리를 잇는 선분으로 봐, 빠르게 지나가도 건너뛰지 않는다.
+    public bool IsTouchingSegment(Vector3 from, Vector3 to, float attackRadius)
+    {
+        return IsTouching(Geometry2D.GetClosestPointOnSegment(from, to, _unit.Body.position), attackRadius);
+    }
+
     public bool IsInBlast(Vector3 center, float radius)
     {
         return Vector2.Distance(center, _unit.Body.position) <= radius;

@@ -19,3 +19,7 @@ MonoBehaviour:
     _asset: {fileID: 11400000, guid: 8e7b710ab1b638d4cbe68466fed7d176, type: 2}
   - _key: AttackStyle/PaintBomb
     _asset: {fileID: 11400000, guid: 77e7ea21886d3fe4e9a50423d310c85e, type: 2}
+  - _key: AttackStyle/PaintOrbs
+    _asset: {fileID: 11400000, guid: 5f40d1d0f2d14a6f96592aa38e548ef6, type: 2}
+  - _key: AttackStyle/Roller
+    _asset: {fileID: 11400000, guid: 0ff0a16239974606ac5d22e424d22a9e, type: 2}

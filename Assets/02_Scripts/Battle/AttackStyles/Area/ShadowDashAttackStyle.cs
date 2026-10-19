@@ -90,7 +90,7 @@ public class ShadowDashAttackStyle : AttackStyle
                 shadow.transform.position = previous + step;
                 travelled += step.magnitude;
 
-                if (false == hasStruck && IsTouchingPath(target, previous, shadow.transform.position, radius))
+                if (false == hasStruck && target.IsTouchingSegment(previous, shadow.transform.position, radius))
                 {
                     hasStruck = true;
                     context.Damage.Strike(_hit, target.GetAimPoint(Vector3.zero), gaugeGain);
@@ -103,10 +103,5 @@ public class ShadowDashAttackStyle : AttackStyle
         {
             PooledSprite.Despawn(shadow);
         }
-    }
-
-    private bool IsTouchingPath(AttackTarget target, Vector3 from, Vector3 to, float radius)
-    {
-        return target.IsTouching(Geometry2D.GetClosestPointOnSegment(from, to, target.FollowTransform.position), radius);
     }
 }

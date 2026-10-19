@@ -11,7 +11,7 @@
 {"_id":"guard_duration_add","_effectType":0,"_target":"GuardDuration","_description":"막는 시간 +{0}초"},
 {"_id":"dash_cooldown_add","_effectType":0,"_target":"DashCooldown","_description":"대시 쿨타임 {0}초"},
 {"_id":"dash_distance_add","_effectType":0,"_target":"DashDistance","_description":"대시 거리 +{0}"},
-{"_id":"unlock_fine_brush","_effectType":1,"_target":"fine_brush","_description":"세필 붓을 얻는다"},
+{"_id":"unlock_paint_orbs","_effectType":1,"_target":"paint_orbs","_description":"물감 구슬을 얻는다"},
 {"_id":"unlock_roller","_effectType":1,"_target":"roller","_description":"롤러를 얻는다"},
 {"_id":"unlock_paint","_effectType":2,"_target":"paint","_description":"물감을 얻는다"},
 {"_id":"unlock_remover","_effectType":2,"_target":"remover","_description":"리무버를 얻는다"},

@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2afaab924b798bcd7b4c917a989d9e49, type: 3}
   m_Name: Boss2Data
   m_EditorClassIdentifier: Assembly-CSharp::BossData
-  _moveSpeed: 3
   _wander:
     _useWander: 1
     _areaHalfSize: {x: 6, y: 3}

@@ -52,6 +52,8 @@ public class BattleUnit : MonoBehaviour
     private AttackStyle _attackStyleOverride;
 
     public BattleUnitData Data { get { return _data; } }
+    // 보스는 SO, 플레이어는 데이터 표의 값이다. 데이터가 없으면 null이다.
+    public IUnitStats Stats { get { return null != _data ? _data.Stats : null; } }
     public Health Health { get { return _health; } }
     public AutoAttacker Attacker { get { return _attacker; } }
     public UnitView View { get { return _view; } }
@@ -102,7 +104,7 @@ public class BattleUnit : MonoBehaviour
             return;
         }
 
-        _health.Init(_data.MaxHp);
+        _health.Init(_data.Stats.MaxHp);
     }
 
     private void OnDestroy()

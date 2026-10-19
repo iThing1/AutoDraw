@@ -16,6 +16,7 @@ public class PlayerGuard : MonoBehaviour
 
     private BattleUnit _unit;
     private GuardState _state;
+    private PlayerStats _stats;
     private Vector3 _shieldScale;
     private Color _shieldColor;
 
@@ -34,13 +35,14 @@ public class PlayerGuard : MonoBehaviour
             return;
         }
 
-        _state = new GuardState(_preset, GetComponent<SkillGauge>());
+        _stats = GameManager.Player.Stats;
+        _state = new GuardState(_preset, _stats, GetComponent<SkillGauge>());
 
         if (null != _shield && null != _shield.sprite)
         {
             // 방패 그림 지름을 막기 반경의 두 배로 맞춰, 보이는 방패와 막히는 범위를 같게 한다.
             float spriteDiameter = _shield.sprite.bounds.size.x;
-            _shieldScale = Vector3.one * (_preset.GuardRadius * 2f / spriteDiameter);
+            _shieldScale = Vector3.one * (_stats.GuardRadius * 2f / spriteDiameter);
             _shield.transform.localScale = _shieldScale;
             _shieldColor = _shield.color;
             _shield.enabled = false;
@@ -120,9 +122,9 @@ public class PlayerGuard : MonoBehaviour
 
         try
         {
-            using (_unit.BeginGuard(_preset.GuardRadius))
+            using (_unit.BeginGuard(_stats.GuardRadius))
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(_preset.GuardDuration), cancellationToken: token);
+                await UniTask.Delay(TimeSpan.FromSeconds(_stats.GuardDuration), cancellationToken: token);
             }
         }
         catch (OperationCanceledException)

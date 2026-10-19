@@ -14,10 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GuardPreset
   _displayName: Guard
   _iconColor: {r: 0.55, g: 0.75, b: 1, a: 1}
-  _guardDuration: 0.25
-  _gaugeCost: 20
-  _cooldown: 0.4
-  _guardRadius: 0.75
   _shieldAppearDuration: 0.08
   _shieldAppearEase: 27
   _shieldPunch: 0.3

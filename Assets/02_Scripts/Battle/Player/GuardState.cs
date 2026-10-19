@@ -6,6 +6,7 @@ using UnityEngine;
 public class GuardState : IDisposable
 {
     private readonly GuardPreset _preset;
+    private readonly PlayerStats _stats;
     private readonly SkillGauge _gauge;
     private float _readyTime;
 
@@ -15,21 +16,23 @@ public class GuardState : IDisposable
     public event Action OnReadinessChanged;
 
     public GuardPreset Preset { get { return _preset; } }
-    public bool HasEnoughGauge { get { return _gauge.CanConsume(_preset.GaugeCost); } }
+    public bool HasEnoughGauge { get { return _gauge.CanConsume(_stats.GuardCost); } }
     // 막기 비용 대비 지금 게이지. 1이면 막기를 쓸 수 있다.
     public float GaugeReadyRatio
     {
         get
         {
-            float cost = _preset.GaugeCost;
+            float cost = _stats.GuardCost;
 
             return 0f < cost ? Mathf.Clamp01(_gauge.Current / cost) : 1f;
         }
     }
 
-    public GuardState(GuardPreset preset, SkillGauge gauge)
+    // 프리셋은 막기 칸의 이름·아이콘에만 쓰고, 규칙 값은 스탯에서 읽는다.
+    public GuardState(GuardPreset preset, PlayerStats stats, SkillGauge gauge)
     {
         _preset = preset;
+        _stats = stats;
         _gauge = gauge;
         _gauge.OnChanged += HandleGaugeChanged;
     }
@@ -53,8 +56,8 @@ public class GuardState : IDisposable
     // CheckStart가 Ready일 때만 부른다. 게이지를 쓰고, 막는 시간과 쿨타임이 지나야 다시 쓸 수 있다.
     public void Begin(float now)
     {
-        _gauge.TryConsume(_preset.GaugeCost);
-        _readyTime = now + _preset.GuardDuration + _preset.Cooldown;
+        _gauge.TryConsume(_stats.GuardCost);
+        _readyTime = now + _stats.GuardDuration + _stats.GuardCooldown;
 
         OnStarted?.Invoke();
     }

@@ -353,7 +353,7 @@ public class BossPhaseMachine : MonoBehaviour
 
     private int GetPhaseMaxHp(int index)
     {
-        return Mathf.Max(1, Mathf.RoundToInt(_unit.Data.MaxHp * _phases[index].HpRatio));
+        return Mathf.Max(1, Mathf.RoundToInt(_unit.Stats.MaxHp * _phases[index].HpRatio));
     }
 
     private void PrewarmGimmicks()

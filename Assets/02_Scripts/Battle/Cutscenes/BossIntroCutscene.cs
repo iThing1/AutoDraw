@@ -23,7 +23,7 @@ public class BossIntroCutscene : MonoBehaviour
     {
         await CinematicPlayer.EnterAsync(landingPoint, _preset.Cinematic, token);
         await PlayDropAsync(boss, landingPoint.position, token);
-        await PlayBannerAsync(boss.Data, token);
+        await PlayBannerAsync(boss.Data as BossData, token);
         await CinematicPlayer.ExitAsync(_preset.Cinematic, token);
     }
 
@@ -44,7 +44,8 @@ public class BossIntroCutscene : MonoBehaviour
         ImpactPlayer.Play(_preset.LandImpact, landingPosition);
     }
 
-    private async UniTask PlayBannerAsync(BattleUnitData bossData, CancellationToken token)
+    // 보스 데이터가 아니면(배너 문구가 없는 유닛) 띄우지 않는다.
+    private async UniTask PlayBannerAsync(BossData bossData, CancellationToken token)
     {
         if (null == bossData)
         {

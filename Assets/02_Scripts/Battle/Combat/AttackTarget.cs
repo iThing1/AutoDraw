@@ -65,7 +65,10 @@ public class AttackTarget
     // 방패를 든 동안에는 맞을 자리에 온 공격도 막는다. 방패가 명중 반경보다 작아도 막기를 뚫고 맞지 않게 한다.
     public bool TryBlockHit(Vector3 hitPoint)
     {
-        if (false == IsBlockedAt(hitPoint, 0f) && false == (_unit.IsGuarding && IsHit(hitPoint)))
+        bool isOnShield = IsBlockedAt(hitPoint, 0f);
+        bool isHitWhileGuarding = _unit.IsGuarding && IsHit(hitPoint);
+
+        if (false == isOnShield && false == isHitWhileGuarding)
         {
             return false;
         }

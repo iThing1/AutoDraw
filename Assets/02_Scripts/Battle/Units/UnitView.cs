@@ -2,7 +2,7 @@ using DG.Tweening;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 유닛의 겉모습 연출(피격 플래시, 넉백)을 맡는다. M5에서 플래시는 셰이더로 바뀐다.
+// 유닛의 겉모습 연출(피격 플래시, 넉백, 맞을수록 물드는 바탕색)을 맡는다.
 public class UnitView : MonoBehaviour
 {
     // 피격 때 번쩍일 렌더러. 그림자·이펙트처럼 번쩍이면 안 되는 자식이 섞이지 않도록 프리팹에서 직접 지정한다.

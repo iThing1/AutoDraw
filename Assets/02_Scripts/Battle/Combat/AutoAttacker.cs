@@ -21,6 +21,8 @@ public class AutoAttacker : MonoBehaviour
     // 끊긴 토큰을 아직 쥔 작업(날아가던 탄 등)이 있을 수 있어 Dispose하지 않는다. 링크된 소스는 전투 토큰과 함께 정리된다.
     private CancellationTokenSource _interruptSource;
     private bool _isInterrupted;
+    // 끊긴 동안 기다리는 쪽(공격 루프, 환경 탄막)을 깨우는 신호. 누가 기다릴 때만 만든다.
+    private UniTaskCompletionSource _resumeSource;
     // 쿨타임 조건을 보려고 패턴마다 마지막으로 쏜 시간을 기억한다. 에셋(SO)에 두면 다른 유닛과 섞여 여기 둔다.
     private readonly Dictionary<AttackStyle, float> _lastFireTimes = new();
 
@@ -30,7 +32,6 @@ public class AutoAttacker : MonoBehaviour
     public PaintCanvas PaintCanvas { get { return _paintCanvas; } }
     // 전투가 끝나면(누군가 쓰러지면) 끊기는 토큰. 공격 루프 밖에서 도는 보스 연출도 전투와 함께 끝내는 데 쓴다.
     public CancellationToken BattleToken { get { return _battleToken; } }
-    public bool IsInterrupted { get { return _isInterrupted; } }
 
     private void Awake()
     {
@@ -54,10 +55,7 @@ public class AutoAttacker : MonoBehaviour
             while (false == _owner.Health.IsDead && false == _target.IsDefeated)
             {
                 // 기믹·부활로 끊긴 동안에는 다시 이어질 때까지 새 공격을 고르지 않는다.
-                while (_isInterrupted)
-                {
-                    await UniTask.Yield(PlayerLoopTiming.Update, token);
-                }
+                await WaitUntilResumedAsync(token);
 
                 try
                 {
@@ -98,6 +96,32 @@ public class AutoAttacker : MonoBehaviour
     public void Resume()
     {
         _isInterrupted = false;
+
+        if (null == _resumeSource)
+        {
+            return;
+        }
+
+        UniTaskCompletionSource source = _resumeSource;
+        _resumeSource = null;
+        source.TrySetResult();
+    }
+
+    // 끊기지 않았으면 바로 끝난다. 깨어난 사이 다시 끊겼으면 계속 기다린다.
+    public async UniTask WaitUntilResumedAsync(CancellationToken token)
+    {
+        while (_isInterrupted)
+        {
+            if (null == _resumeSource)
+            {
+                _resumeSource = new UniTaskCompletionSource();
+            }
+
+            await _resumeSource.Task.AttachExternalCancellation(token);
+
+            // Resume을 부른 쪽의 처리가 끝난 다음 프레임에 이어 간다.
+            await UniTask.Yield(PlayerLoopTiming.Update, token);
+        }
     }
 
     public bool IsOnCooldown(AttackStyle style, float cooldown)
@@ -293,7 +317,7 @@ public class AutoAttacker : MonoBehaviour
                 return false;
             }
 
-            await UniTask.Yield(PlayerLoopTiming.Update, token);
+            await _owner.WaitUntilActionEndsAsync(token);
         }
 
         return true;

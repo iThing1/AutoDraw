@@ -162,6 +162,14 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
 
     private void SpawnFloatingText(FloatingTextKind kind, Vector3 worldPosition)
     {
+        FloatingTextSettings.Phrase phrase = _floatingText.GetPhrase(kind);
+
+        // 설정에 없는 종류는 띄우지 않는다.
+        if (string.IsNullOrEmpty(phrase.Text))
+        {
+            return;
+        }
+
         FloatingText floatingText = SpawnText();
 
         if (null == floatingText)
@@ -169,43 +177,7 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
             return;
         }
 
-        floatingText.PlayText(GetFloatingText(kind), GetFloatingColor(kind), ToScreen(worldPosition), _floatingText);
-    }
-
-    private string GetFloatingText(FloatingTextKind kind)
-    {
-        switch (kind)
-        {
-            case FloatingTextKind.Guard:
-                return _floatingText.GuardText;
-
-            case FloatingTextKind.NoGauge:
-                return _floatingText.NoGaugeText;
-
-            case FloatingTextKind.GimmickClear:
-                return _floatingText.GimmickClearText;
-
-            default:
-                return _floatingText.GimmickFailText;
-        }
-    }
-
-    private Color GetFloatingColor(FloatingTextKind kind)
-    {
-        switch (kind)
-        {
-            case FloatingTextKind.Guard:
-                return _floatingText.GuardColor;
-
-            case FloatingTextKind.NoGauge:
-                return _floatingText.NoGaugeColor;
-
-            case FloatingTextKind.GimmickClear:
-                return _floatingText.GimmickClearColor;
-
-            default:
-                return _floatingText.GimmickFailColor;
-        }
+        floatingText.PlayText(phrase.Text, phrase.Color, ToScreen(worldPosition), _floatingText);
     }
 
     private FloatingText SpawnText()

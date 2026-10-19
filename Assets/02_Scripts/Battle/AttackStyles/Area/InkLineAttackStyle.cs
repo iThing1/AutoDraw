@@ -67,14 +67,11 @@ public class InkLineAttackStyle : AttackStyle
     // 예고를 시작하는 순간의 목표 자리를 기준으로 줄을 정해, 예고를 본 뒤 비켜서면 피한다.
     private async UniTask DrawLineAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
     {
-        float angle = UnityEngine.Random.Range(0f, 180f);
-        Vector3 along = Geometry2D.ToDirection(angle);
-        Vector3 side = new Vector3(-along.y, along.x, 0f);
-        Vector3 center = attacker.Target.GetAimPoint(Vector3.zero) + side * UnityEngine.Random.Range(-_offsetRange, _offsetRange);
+        LinePlacement line = LinePlacement.PickNear(attacker.Target.GetAimPoint(Vector3.zero), _offsetRange);
 
-        await Telegraph.PlayLineAsync(_telegraphPrefab, center, angle, _length, _width, _telegraphColor, _warnDuration, token);
+        await Telegraph.PlayLineAsync(_telegraphPrefab, line.Center, line.Angle, _length, _width, _telegraphColor, _warnDuration, token);
 
-        SpriteRenderer stroke = PooledSprite.Spawn(_telegraphPrefab, center, angle, new Vector2(_length, 0f), _strokeColor);
+        SpriteRenderer stroke = PooledSprite.Spawn(_telegraphPrefab, line.Center, line.Angle, new Vector2(_length, 0f), _strokeColor);
 
         try
         {
@@ -82,8 +79,8 @@ public class InkLineAttackStyle : AttackStyle
                 .SetEase(Ease.OutQuad)
                 .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
 
-            ImpactPlayer.Play(_impact, GetClosestPoint(center, along, attacker.Target.GetAimPoint(Vector3.zero)));
-            StrikeIfTouching(attacker, center, along, gaugeGain);
+            ImpactPlayer.Play(_impact, GetClosestPoint(line.Center, line.Along, attacker.Target.GetAimPoint(Vector3.zero)));
+            StrikeIfTouching(attacker, line.Center, line.Along, gaugeGain);
 
             await UniTask.Delay(TimeSpan.FromSeconds(_lingerDuration), cancellationToken: token);
 

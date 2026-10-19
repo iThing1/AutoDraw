@@ -4,7 +4,8 @@ public class SingletonBehaviour<T> : MonoBehaviour where T : SingletonBehaviour<
 {
     private static T _instance;
 
-    private void Awake()
+    // 하위 클래스에서 Awake가 필요하면 override하고 base.Awake()를 불러야 Init이 돈다.
+    protected virtual void Awake()
     {
         Init();
     }

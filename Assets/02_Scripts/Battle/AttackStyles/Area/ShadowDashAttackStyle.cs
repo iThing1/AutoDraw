@@ -51,21 +51,17 @@ public class ShadowDashAttackStyle : AttackStyle
 
         for (int i = 0; i < _dashCount; i++)
         {
-            float angle = UnityEngine.Random.Range(0f, 180f);
-            Vector3 along = Geometry2D.ToDirection(angle);
-            Vector3 side = new Vector3(-along.y, along.x, 0f);
-            Vector3 center = targetPoint + side * UnityEngine.Random.Range(-_offsetRange, _offsetRange);
+            LinePlacement line = LinePlacement.PickNear(targetPoint, _offsetRange);
 
-            dashes.Add(DashAsync(attacker, center, angle, along, _warnDuration + _dashInterval * i, gaugeGain, token));
+            dashes.Add(DashAsync(attacker, line, _warnDuration + _dashInterval * i, gaugeGain, token));
         }
 
         await UniTask.WhenAll(dashes);
     }
 
-    private async UniTask DashAsync(AutoAttacker attacker, Vector3 center, float angle, Vector3 along, float warnDuration, float gaugeGain,
-        CancellationToken token)
+    private async UniTask DashAsync(AutoAttacker attacker, LinePlacement line, float warnDuration, float gaugeGain, CancellationToken token)
     {
-        await Telegraph.PlayLineAsync(_telegraphPrefab, center, angle, _length, _shadowDiameter, _telegraphColor, warnDuration, token);
+        await Telegraph.PlayLineAsync(_telegraphPrefab, line.Center, line.Angle, _length, _shadowDiameter, _telegraphColor, warnDuration, token);
 
         if (null == _shadowPrefab)
         {
@@ -74,8 +70,8 @@ public class ShadowDashAttackStyle : AttackStyle
 
         // 양 끝 중 무작위로 한쪽에서 출발한다.
         float direction = 0.5f > UnityEngine.Random.value ? -1f : 1f;
-        Vector3 start = center - along * (_length * 0.5f * direction);
-        Vector3 velocity = along * (_dashSpeed * direction);
+        Vector3 start = line.Center - line.Along * (_length * 0.5f * direction);
+        Vector3 velocity = line.Along * (_dashSpeed * direction);
         float radius = _shadowDiameter * 0.5f;
 
         SpriteRenderer shadow = PooledSprite.Spawn(_shadowPrefab, start, 0f, new Vector2(_shadowDiameter, _shadowDiameter), _shadowColor);

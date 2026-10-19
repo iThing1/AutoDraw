@@ -32,5 +32,3 @@ MonoBehaviour:
   _projectilePrefab: {fileID: 7624588648995017096, guid: dd8bc6d1b75476545ad3bfa488ffd6ee, type: 3}
   _palette: {fileID: 11400000, guid: 073348c3e2bf9df4fa51d06e2836c5e1, type: 2}
   _framingRadius: 1.5
-  _bannerTitle: 
-  _bannerSubtitle: 

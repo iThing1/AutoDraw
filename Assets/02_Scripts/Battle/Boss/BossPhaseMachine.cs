@@ -301,11 +301,7 @@ public class BossPhaseMachine : MonoBehaviour
         _unit.Attacker.Interrupt();
 
         await UniTask.NextFrame(token);
-
-        while (UnitState.Action == _unit.State)
-        {
-            await UniTask.Yield(PlayerLoopTiming.Update, token);
-        }
+        await _unit.WaitUntilActionEndsAsync(token);
 
         _unit.ChangeState(UnitState.Idle);
     }

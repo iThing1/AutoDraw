@@ -32,9 +32,22 @@ public class EndingCutscene : MonoBehaviour
             PlayExitAsync(token),
             paintCanvas.FadeOutInkAsync(_preset.InkFadeDuration, _preset.InkFadeDelay, _preset.InkFadeEase, token));
 
+        return CapturePainting();
+    }
+
+    // 경계가 없는 스테이지는 찍을 영역을 알 수 없어 그림을 남기지 않는다.
+    private Texture2D CapturePainting()
+    {
+        Collider2D stageBounds = GameManager.CameraRig.CameraBounds;
+
+        if (null == stageBounds)
+        {
+            return null;
+        }
+
         Vector2Int size = _preset.PaintingSize;
 
-        return GameManager.CameraRig.CaptureStage(size.x, size.y);
+        return StageCapture.Capture(GameManager.CameraRig.RenderCamera, stageBounds.bounds, size.x, size.y);
     }
 
     // 마지막 일격의 여운이 남도록 게임 시간을 늦춘 채로 카메라를 보스에게 옮긴다.

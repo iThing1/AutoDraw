@@ -31,6 +31,7 @@ public class GalleryFrame : MonoBehaviour
     private MaterialPropertyBlock _propertyBlock;
     private Color _borderColor;
     private Texture2D _savedPainting;
+    private bool _isPaintingLoaded;
 
     public StageData Stage { get { return _stage; } }
     public bool IsLocked { get { return null == _stage; } }
@@ -61,8 +62,24 @@ public class GalleryFrame : MonoBehaviour
             return;
         }
 
+        // 그림 파일은 깼을 때만 바뀌므로, 처음 한 번과 새로 깬 뒤에만 다시 읽는다.
+        if (false == _isPaintingLoaded)
+        {
+            LoadPainting();
+        }
+    }
+
+    // 새로 깨 그림 파일이 바뀌었으니 다음 Refresh에서 다시 읽게 한다.
+    public void MarkPaintingChanged()
+    {
+        _isPaintingLoaded = false;
+    }
+
+    private void LoadPainting()
+    {
         ReleaseSavedPainting();
         _savedPainting = PaintingStorage.Load(_stage);
+        _isPaintingLoaded = true;
 
         Texture painting = _stage.BlankCanvas;
         string nameplate = _stage.DisplayName;

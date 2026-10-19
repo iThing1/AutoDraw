@@ -297,19 +297,6 @@ public class BattleManager : MonoBehaviour
         unit.Attacker.RunAsync(target, _paintCanvas, token).Forget();
     }
 
-    private void DrawMoveAreaGizmo(BattleUnit unitPrefab, Color color)
-    {
-        if (null == unitPrefab)
-        {
-            return;
-        }
-
-        Rect area = _stageArea.GetMoveArea(unitPrefab);
-
-        Gizmos.color = color;
-        Gizmos.DrawWireCube(area.center, new Vector3(area.width, area.height, 0f));
-    }
-
     private async UniTask<Texture2D> PlayEndingAsync(CancellationToken token)
     {
         UniTask closeHud = CloseHudAsync(token);
@@ -351,7 +338,7 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    // 플레이어는 자동 회복 때문에 거의 쓰러지지 않아, 플레이 중 컴포넌트 우클릭 메뉴로 결과 흐름을 바로 확인한다.
+    // 승리·패배 결과 흐름을 직접 깨거나 져 보지 않고, 플레이 중 컴포넌트 우클릭 메뉴로 바로 확인한다.
     [ContextMenu("테스트/플레이어 처치")]
     private void KillPlayerForTest()
     {
@@ -399,5 +386,18 @@ public class BattleManager : MonoBehaviour
 
         Gizmos.color = Color.magenta;
         Gizmos.DrawWireCube(_bossSpawnPoint.position, new Vector3(halfSize.x * 2f, halfSize.y * 2f, 0f));
+    }
+
+    private void DrawMoveAreaGizmo(BattleUnit unitPrefab, Color color)
+    {
+        if (null == unitPrefab)
+        {
+            return;
+        }
+
+        Rect area = _stageArea.GetMoveArea(unitPrefab);
+
+        Gizmos.color = color;
+        Gizmos.DrawWireCube(area.center, new Vector3(area.width, area.height, 0f));
     }
 }

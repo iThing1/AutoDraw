@@ -16,7 +16,6 @@ public class GameManager : SingletonBehaviour<GameManager>
     public static SoundManager Sound { get { return Instance._soundManager; } }
     public static PoolManager Pool { get { return Instance._poolManager; } }
     public static TimeScaleManager TimeScale { get { return Instance._timeScaleManager; } }
-    public static SlowZoneManager SlowZones { get { return Instance._slowZoneManager; } }
     public static DataTableManager Tables { get { return Instance._dataTableManager; } }
     public static AssetManager Assets { get { return Instance._assetManager; } }
     // 표를 읽은 뒤에 만들어지고, 그 전에는 null이다.
@@ -40,7 +39,6 @@ public class GameManager : SingletonBehaviour<GameManager>
     private UIManager _uiManager = new();
     private PoolManager _poolManager = new();
     private TimeScaleManager _timeScaleManager = new();
-    private SlowZoneManager _slowZoneManager = new();
     private DataTableManager _dataTableManager = new();
     private AssetManager _assetManager = new();
     private PlayerModel _player;

@@ -172,11 +172,10 @@ public class MapSpawner : MonoBehaviour
         GameManager.CameraRig.SetOutputEnabled(true);
     }
 
-    // 지난 맵의 연출이 걸어 둔 히트 스톱·슬로 모션·느려지는 구역, 풀에 남은 파괴된 오브젝트, 내려온 레터박스를 걷어 낸다.
+    // 지난 맵의 연출이 걸어 둔 히트 스톱·슬로 모션, 풀에 남은 파괴된 오브젝트, 내려온 레터박스를 걷어 낸다. 느려지는 구역은 꺼질 때 스스로 빠진다.
     private void ResetSharedState()
     {
         GameManager.TimeScale.ResetToNormal();
-        GameManager.SlowZones.Clear();
         GameManager.Pool.RemoveDestroyed();
         GameManager.UI.Cinematic.Letterbox.HideImmediately();
     }

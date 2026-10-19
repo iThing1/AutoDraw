@@ -49,7 +49,7 @@ public class PlayerInputMover : UnitMover
             }
 
             Vector2 input = Vector2.ClampMagnitude(_moveAction.action.ReadValue<Vector2>(), 1f);
-            Vector2 velocity = (input * GameManager.Player.Stats.MoveSpeed + ExternalVelocity) * GameManager.SlowZones.GetMoveScale(_rigidbody.position);
+            Vector2 velocity = (input * GameManager.Player.Stats.MoveSpeed + ExternalVelocity) * SlowZone.GetMoveScale(_rigidbody.position);
             Vector2 step = velocity * Time.fixedDeltaTime;
 
             SetVelocity(velocity);

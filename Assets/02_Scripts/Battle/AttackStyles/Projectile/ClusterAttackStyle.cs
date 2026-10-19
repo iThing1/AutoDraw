@@ -13,16 +13,16 @@ public class ClusterAttackStyle : AttackStyle
     [SerializeField] private ClusterSettings _cluster = new();
 
     // 덩어리가 공중의 분열 지점까지 날아가 터지고, 조각들이 시간차를 두고 목표 주변으로 쏟아진다.
-    public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        Vector3 start = attacker.Owner.Body.position;
-        Vector3 end = attacker.Target.GetAimPoint(Vector3.zero);
+        Vector3 start = context.Owner.Body.position;
+        Vector3 end = context.Target.GetAimPoint(Vector3.zero);
         Vector3 splitPoint = Vector3.Lerp(start, end, _cluster.SplitRatio) + Vector3.up * _cluster.SplitHeight;
 
-        Color color = attacker.PickColor();
-        bool hasArrived = await attacker.FlyToPointAsync(_shot, start, splitPoint, color, token);
+        Color color = context.Damage.PickColor();
+        bool hasArrived = await context.Launcher.FlyToPointAsync(_shot, start, splitPoint, color, token);
 
-        if (false == hasArrived || attacker.Target.IsDefeated)
+        if (false == hasArrived || context.Target.IsDefeated)
         {
             return;
         }
@@ -33,7 +33,7 @@ public class ClusterAttackStyle : AttackStyle
         {
             Vector3 landingOffset = UnityEngine.Random.insideUnitCircle * _cluster.LandingSpread;
 
-            attacker.FireShot(_cluster.Fragment, splitPoint, landingOffset, gaugeGain, token);
+            context.Launcher.FireShot(_cluster.Fragment, splitPoint, landingOffset, gaugeGain, token);
 
             await UniTask.Delay(TimeSpan.FromSeconds(_cluster.FragmentInterval), cancellationToken: token);
         }

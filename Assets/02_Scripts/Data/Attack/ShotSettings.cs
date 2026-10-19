@@ -1,7 +1,8 @@
 using System;
 using UnityEngine;
 
-// 투사체 한 발의 성질. 단발·연사·파편 조각이 모두 이 설정을 재사용한다.
+// 투사체 한 발의 성질. 날아가는 값(크기·궤적·추적·꼬리)과 맞았을 때의 타격 값(HitSettings)으로 나뉜다.
+// 단발·연사·파편 조각이 모두 이 설정을 재사용한다.
 [Serializable]
 public class ShotSettings
 {
@@ -19,12 +20,7 @@ public class ShotSettings
     [SerializeField] private bool _useTrailColor;
     [SerializeField] private Color _trailColor = Color.black;
 
-    [SerializeField] private IntRange _damage = new(5, 10);
-    [SerializeField, Range(0f, 1f)] private float _criticalChance = 0.2f;
-    [SerializeField, Min(1f)] private float _criticalMultiplier = 2f;
-
-    [SerializeField] private HitFeedbackPreset _normalHit;
-    [SerializeField] private HitFeedbackPreset _criticalHit;
+    [SerializeField] private HitSettings _hit = new();
 
     public float ProjectileScale { get { return _projectileScale; } }
     public TrajectorySettings[] Trajectories { get { return _trajectories; } }
@@ -36,18 +32,5 @@ public class ShotSettings
     public bool UseTrailColor { get { return _useTrailColor; } }
     public Color TrailColor { get { return _trailColor; } }
 
-    public IntRange Damage { get { return _damage; } }
-    public float CriticalChance { get { return _criticalChance; } }
-    public float CriticalMultiplier { get { return _criticalMultiplier; } }
-
-    // 치명타 프리셋이 비어 있으면 일반 프리셋으로 대신한다.
-    public HitFeedbackPreset GetHitFeedback(bool isCritical)
-    {
-        if (isCritical && null != _criticalHit)
-        {
-            return _criticalHit;
-        }
-
-        return _normalHit;
-    }
+    public HitSettings Hit { get { return _hit; } }
 }

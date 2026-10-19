@@ -32,8 +32,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
     [SerializeField, Min(0f)] private float _turnSpeed = 90f;
     [SerializeField, Min(0f)] private float _lifetime = 6f;
     [SerializeField, Min(0f)] private float _trailTime = 0.2f;
-    // 투사체 관련 값은 쓰지 않고 피해·타격 프리셋만 쓴다.
-    [SerializeField] private ShotSettings _orbHit = new();
+    [SerializeField] private HitSettings _orbHit = new();
 
     [Header("되받아침")]
     [SerializeField] private Color _reflectColor = new Color(0.2f, 0.75f, 1f, 1f);
@@ -53,7 +52,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
         }
     }
 
-    public override async UniTask<bool> PlayAsync(BattleUnit boss, CancellationToken token)
+    public override async UniTask<bool> PlayAsync(AttackContext context, CancellationToken token)
     {
         if (null == _orbPrefab || null == _chargePrefab)
         {
@@ -72,7 +71,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
                 break;
             }
 
-            if (await CastAsync(boss, token))
+            if (await CastAsync(context, token))
             {
                 reflectCount++;
             }
@@ -84,19 +83,18 @@ public class ReflectOrbGimmick : PunishingBossGimmick
 
         if (false == isBroken)
         {
-            PunishTarget(boss);
+            PunishTarget(context);
         }
 
         return isBroken;
     }
 
     // 막아 냈으면 true. 그냥 맞으면 피해를 입고, 피하면 아무 일 없이 넘어간다.
-    private async UniTask<bool> CastAsync(BattleUnit boss, CancellationToken token)
+    private async UniTask<bool> CastAsync(AttackContext context, CancellationToken token)
     {
-        AutoAttacker attacker = boss.Attacker;
-        AttackTarget target = attacker.Target;
-        BossHands hands = attacker.Hands;
-        Transform hand = null != hands ? hands.RightHand : boss.Body;
+        AttackTarget target = context.Target;
+        BossHands hands = context.Hands;
+        Transform hand = null != hands ? hands.RightHand : context.Owner.Body;
 
         try
         {
@@ -111,7 +109,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
 
             if (FlightOutcome.Arrived == flight.Outcome)
             {
-                attacker.StrikeUnblockable(_orbHit, flight.LandingPoint);
+                context.Damage.StrikeUnblockable(_orbHit, flight.LandingPoint);
                 return false;
             }
 
@@ -122,9 +120,9 @@ public class ReflectOrbGimmick : PunishingBossGimmick
 
             target.NotifyBlocked(flight.LandingPoint);
 
-            await ProjectileFlight.FlyAsync(_orbPrefab, _reflectShot, flight.LandingPoint, boss.Body.position, _reflectColor, token);
+            await ProjectileFlight.FlyAsync(_orbPrefab, _reflectShot, flight.LandingPoint, context.Owner.Body.position, _reflectColor, token);
 
-            ImpactPlayer.Play(_reflectImpact, boss.Body.position, _reflectColor);
+            ImpactPlayer.Play(_reflectImpact, context.Owner.Body.position, _reflectColor);
 
             return true;
         }

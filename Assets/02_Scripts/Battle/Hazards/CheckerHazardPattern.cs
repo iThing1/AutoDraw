@@ -28,7 +28,7 @@ public class CheckerHazardPattern : HazardPattern
     [SerializeField, Min(0f)] private float _waveInterval = 0.4f;
     [SerializeField] private Color _impactColor = new Color(0.05f, 0.05f, 0.06f, 0.85f);
     [SerializeField, Min(0f)] private float _impactFadeDuration = 0.3f;
-    [SerializeField] private ShotSettings _hit = new();
+    [SerializeField] private HitSettings _hit = new();
     [SerializeField] private ImpactSettings _impact = new();
 
     // 탄은 쏘지 않는다. 한 칸에 예고(바탕·채움)가 뜬 채로 앞 물결의 번쩍임이 남아 있을 수 있어 칸마다 세 장씩 만든다.
@@ -40,7 +40,7 @@ public class CheckerHazardPattern : HazardPattern
         }
     }
 
-    public override async UniTask PlayAsync(AutoAttacker shooter, CancellationToken token)
+    public override async UniTask PlayAsync(AttackContext context, CancellationToken token)
     {
         if (null == _cellPrefab)
         {
@@ -50,12 +50,12 @@ public class CheckerHazardPattern : HazardPattern
 
         GameManager.Sound.PlaySfx(_warningSound);
 
-        Vector3 origin = GetGridOrigin(shooter.Target.FollowTransform.position);
+        Vector3 origin = GetGridOrigin(context.Target.FollowTransform.position);
         int parity = UnityEngine.Random.Range(0, 2);
 
         for (int wave = 0; wave < _waveCount; wave++)
         {
-            await PlayWaveAsync(shooter, origin, (parity + wave) % 2, token);
+            await PlayWaveAsync(context, origin, (parity + wave) % 2, token);
 
             if (wave < _waveCount - 1)
             {
@@ -64,7 +64,7 @@ public class CheckerHazardPattern : HazardPattern
         }
     }
 
-    private async UniTask PlayWaveAsync(AutoAttacker shooter, Vector3 origin, int parity, CancellationToken token)
+    private async UniTask PlayWaveAsync(AttackContext context, Vector3 origin, int parity, CancellationToken token)
     {
         List<Vector3> cells = GetCells(origin, parity);
         List<UniTask> telegraphs = new List<UniTask>(cells.Count);
@@ -85,9 +85,9 @@ public class CheckerHazardPattern : HazardPattern
         }
 
         // 환경 탄막은 보스의 공격이 아니라서 게이지를 쌓지 않는다. 방패를 들고 있으면 막힌다.
-        if (IsInCells(shooter.Target.FollowTransform.position, cells))
+        if (IsInCells(context.Target.FollowTransform.position, cells))
         {
-            shooter.Strike(_hit, shooter.Target.GetAimPoint(Vector3.zero), 0f);
+            context.Damage.Strike(_hit, context.Target.GetAimPoint(Vector3.zero), 0f);
         }
     }
 

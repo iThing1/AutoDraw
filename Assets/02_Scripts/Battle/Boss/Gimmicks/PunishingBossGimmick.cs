@@ -4,17 +4,17 @@ using UnityEngine;
 public abstract class PunishingBossGimmick : BossGimmick
 {
     [Header("실패")]
-    [SerializeField] private ShotSettings _failHit = new();
+    [SerializeField] private HitSettings _failHit = new();
 
-    protected void PunishTarget(BattleUnit boss)
+    protected void PunishTarget(AttackContext context)
     {
-        AttackTarget target = boss.Attacker.Target;
+        AttackTarget target = context.Target;
 
         if (null == target)
         {
             return;
         }
 
-        boss.Attacker.StrikeUnblockable(_failHit, target.GetAimPoint(Vector3.zero));
+        context.Damage.StrikeUnblockable(_failHit, target.GetAimPoint(Vector3.zero));
     }
 }

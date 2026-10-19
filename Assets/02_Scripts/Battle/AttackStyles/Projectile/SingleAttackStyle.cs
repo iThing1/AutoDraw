@@ -8,9 +8,9 @@ public class SingleAttackStyle : AttackStyle
     [Header("발사체")]
     [SerializeField] private ShotSettings _shot = new();
 
-    public override UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    public override UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        attacker.FireShot(_shot, attacker.Owner.Body.position, Vector3.zero, gaugeGain, token);
+        context.Launcher.FireShot(_shot, context.Owner.Body.position, Vector3.zero, gaugeGain, token);
 
         return UniTask.CompletedTask;
     }

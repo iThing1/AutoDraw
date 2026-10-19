@@ -29,7 +29,7 @@ public class InkDropAttackStyle : AttackStyle
 
     [Header("낙하")]
     [SerializeField, Min(0f)] private float _dropRadius = 1.4f;
-    [SerializeField] private ShotSettings _hit = new();
+    [SerializeField] private HitSettings _hit = new();
     [SerializeField] private ImpactSettings _impact = new();
     // 떨어진 자리에 남는 먹물 자국. 비워 두면 남기지 않는다.
     [SerializeField] private HitFeedbackPreset _groundSplat;
@@ -51,7 +51,7 @@ public class InkDropAttackStyle : AttackStyle
         }
     }
 
-    public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         List<UniTask> drops = new List<UniTask>(_dropCount);
 
@@ -59,9 +59,9 @@ public class InkDropAttackStyle : AttackStyle
         {
             float progress = DOVirtual.EasedValue(0f, 1f, 1 < _dropCount ? i / (float)(_dropCount - 1) : 1f, _speedUpEase);
             float warnDuration = Mathf.Lerp(_firstWarnDuration, _lastWarnDuration, progress);
-            Vector3 point = attacker.Target.GetPredictedPoint(warnDuration * _leadRatio);
+            Vector3 point = context.Target.GetPredictedPoint(warnDuration * _leadRatio);
 
-            drops.Add(DropAsync(attacker, point, warnDuration, gaugeGain, token));
+            drops.Add(DropAsync(context, point, warnDuration, gaugeGain, token));
 
             if (i < _dropCount - 1)
             {
@@ -72,16 +72,16 @@ public class InkDropAttackStyle : AttackStyle
         await UniTask.WhenAll(drops);
     }
 
-    private async UniTask DropAsync(AutoAttacker attacker, Vector3 point, float warnDuration, float gaugeGain, CancellationToken token)
+    private async UniTask DropAsync(AttackContext context, Vector3 point, float warnDuration, float gaugeGain, CancellationToken token)
     {
         await Telegraph.PlayCircleAsync(_telegraphPrefab, point, _dropRadius, _telegraphColor, warnDuration, token);
 
         ImpactPlayer.Play(_impact, point);
-        attacker.Blast(_hit, point, _dropRadius, gaugeGain);
+        context.Damage.Blast(_hit, point, _dropRadius, gaugeGain);
 
-        if (null != _groundSplat && null != attacker.PaintCanvas)
+        if (null != _groundSplat && null != context.PaintCanvas)
         {
-            attacker.PaintCanvas.LeaveSplats(point, attacker.PickColor(), true, _groundSplat);
+            context.PaintCanvas.LeaveSplats(point, context.Damage.PickColor(), true, _groundSplat);
         }
 
         if (null != _puddlePrefab)

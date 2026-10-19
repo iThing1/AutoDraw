@@ -10,12 +10,10 @@ public class AutoAttacker : MonoBehaviour
     private SkillGauge _skillGauge;
     private BossHands _hands;
 
-    private AttackTarget _target;
-    private PaintCanvas _paintCanvas;
-    private DamageDealer _damageDealer;
+    // 패턴에 넘길 전투 정보. 전투를 시작할 때 만들고, 그 전에는 null이다.
+    private AttackContext _context;
     private CancellationToken _battleToken;
     private bool _isRunning;
-    private bool _hasLoggedMissingProjectile;
 
     // 기믹·부활이 진행 중인 공격을 끊을 때 쓴다. 끊으면 버리고 다음 공격 때 새로 만든다.
     // 끊긴 토큰을 아직 쥔 작업(날아가던 탄 등)이 있을 수 있어 Dispose하지 않는다. 링크된 소스는 전투 토큰과 함께 정리된다.
@@ -26,10 +24,8 @@ public class AutoAttacker : MonoBehaviour
     // 쿨타임 조건을 보려고 패턴마다 마지막으로 쏜 시간을 기억한다. 에셋(SO)에 두면 다른 유닛과 섞여 여기 둔다.
     private readonly Dictionary<AttackStyle, float> _lastFireTimes = new();
 
-    public BattleUnit Owner { get { return _owner; } }
-    public AttackTarget Target { get { return _target; } }
-    public BossHands Hands { get { return _hands; } }
-    public PaintCanvas PaintCanvas { get { return _paintCanvas; } }
+    // 전투를 시작하기 전에는 null이다.
+    public AttackContext Context { get { return _context; } }
     // 전투가 끝나면(누군가 쓰러지면) 끊기는 토큰. 공격 루프 밖에서 도는 보스 연출도 전투와 함께 끝내는 데 쓴다.
     public CancellationToken BattleToken { get { return _battleToken; } }
 
@@ -44,15 +40,17 @@ public class AutoAttacker : MonoBehaviour
     // 물감 캔버스는 전투를 시작하는 쪽이 넘겨줘, 공격 컴포넌트가 전투 매니저를 직접 찾지 않게 한다.
     public async UniTask RunAsync(BattleUnit target, PaintCanvas paintCanvas, CancellationToken token)
     {
-        _target = new AttackTarget(target);
-        _paintCanvas = paintCanvas;
-        _damageDealer = new DamageDealer(_owner, _skillGauge, _target, paintCanvas);
+        AttackTarget attackTarget = new AttackTarget(target);
+        DamageDealer damage = new DamageDealer(_owner, _skillGauge, attackTarget, paintCanvas);
+        ProjectileLauncher launcher = new ProjectileLauncher(_owner, attackTarget, damage);
+
+        _context = new AttackContext(_owner, attackTarget, _hands, paintCanvas, damage, launcher);
         _battleToken = token;
         _isRunning = true;
 
         try
         {
-            while (false == _owner.Health.IsDead && false == _target.IsDefeated)
+            while (false == _owner.Health.IsDead && false == _context.Target.IsDefeated)
             {
                 // 기믹·부활로 끊긴 동안에는 다시 이어질 때까지 새 공격을 고르지 않는다.
                 await WaitUntilResumedAsync(token);
@@ -150,7 +148,7 @@ public class AutoAttacker : MonoBehaviour
 
         await UniTask.Delay(TimeSpan.FromSeconds(style.AttackInterval), cancellationToken: token);
 
-        if (_owner.Health.IsDead || _target.IsDefeated)
+        if (_owner.Health.IsDead || _context.Target.IsDefeated)
         {
             return true;
         }
@@ -186,79 +184,13 @@ public class AutoAttacker : MonoBehaviour
     // 특수 스킬은 공격 주기와 상관없이 즉시 발동하고, 게이지를 쌓지 않는다.
     public bool TryFireSkill(AttackStyle skill)
     {
-        if (false == _isRunning || _isInterrupted || null == skill || null == _target || _target.IsDefeated)
+        if (false == _isRunning || _isInterrupted || null == skill || null == _context || _context.Target.IsDefeated)
         {
             return false;
         }
 
         FireAsync(skill.PickStyle(this), false, _battleToken).Forget();
         return true;
-    }
-
-    // 공격 스타일들이 함께 쓰는 발사. 맞으면 피해, 타격 연출, 물감 자국, 게이지까지 처리한다.
-    public void FireShot(ShotSettings shot, Vector3 start, Vector3 landingOffset, float gaugeGain, CancellationToken token)
-    {
-        if (false == HasProjectilePrefab())
-        {
-            return;
-        }
-
-        FireShotAsync(_owner.Data.ProjectilePrefab, shot, start, _target.GetAimPoint(landingOffset), gaugeGain, token).Forget();
-    }
-
-    // 목표를 겨누지 않고 정해진 방향으로 사거리만큼 날린다. 날아가는 길에 목표가 닿으면 맞는다.
-    // 추적 강도가 0인 탄과 함께 써서, 플레이어가 피할 자리를 찾아 움직이게 하는 탄막에 쓴다.
-    public void FireShotToward(ShotSettings shot, Vector3 start, Vector2 direction, float range, float gaugeGain, CancellationToken token)
-    {
-        FireShotToward(_owner.Data.ProjectilePrefab, shot, start, direction, range, gaugeGain, token);
-    }
-
-    // 유닛과 다른 투사체로 쏠 때 쓴다(환경 탄막).
-    public void FireShotToward(GameObject projectilePrefab, ShotSettings shot, Vector3 start, Vector2 direction, float range, float gaugeGain,
-        CancellationToken token)
-    {
-        if (false == IsProjectileAssigned(projectilePrefab))
-        {
-            return;
-        }
-
-        Vector3 end = start + (Vector3)(direction.normalized * range);
-
-        FireShotAsync(projectilePrefab, shot, start, end, gaugeGain, token).Forget();
-    }
-
-    // 목표가 아닌 고정된 지점으로 날린다. 파편이 갈라지는 공중 지점처럼 맞히지 않는 비행에 쓴다.
-    public async UniTask<bool> FlyToPointAsync(ShotSettings shot, Vector3 start, Vector3 end, Color color, CancellationToken token)
-    {
-        if (false == HasProjectilePrefab())
-        {
-            return false;
-        }
-
-        FlightResult flight = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, end, color, token);
-
-        return FlightOutcome.Arrived == flight.Outcome;
-    }
-
-    // 맞히는 규칙은 DamageDealer가 맡고, 공격 스타일은 여기를 거쳐 부른다.
-    public void Strike(ShotSettings hit, Vector3 hitPoint, float gaugeGain)
-    {
-        _damageDealer.Strike(hit, hitPoint, gaugeGain);
-    }
-
-    public void StrikeUnblockable(ShotSettings hit, Vector3 hitPoint)
-    {
-        _damageDealer.StrikeUnblockable(hit, hitPoint);
-    }
-
-    public void Blast(ShotSettings hit, Vector3 center, float radius, float gaugeGain)
-    {
-        _damageDealer.Blast(hit, center, radius, gaugeGain);
-    }
-
-    public Color PickColor()
-    {
-        return _damageDealer.PickColor();
     }
 
     private async UniTask FireAsync(AttackStyle style, bool gainsGauge, CancellationToken token)
@@ -285,10 +217,10 @@ public class AutoAttacker : MonoBehaviour
             if (null != _hands && HandGesture.None != style.Tell)
             {
                 hasPosed = true;
-                await _hands.PoseAsync(style.Tell, _target.GetAimPoint(Vector3.zero), style.TellDuration, token);
+                await _hands.PoseAsync(style.Tell, _context.Target.GetAimPoint(Vector3.zero), style.TellDuration, token);
             }
 
-            await style.FireAsync(this, gaugeGain, token);
+            await style.FireAsync(_context, gaugeGain, token);
         }
         catch (OperationCanceledException)
         {
@@ -322,44 +254,5 @@ public class AutoAttacker : MonoBehaviour
         }
 
         return true;
-    }
-
-    private async UniTaskVoid FireShotAsync(GameObject projectilePrefab, ShotSettings shot, Vector3 start, Vector3 end, float gaugeGain,
-        CancellationToken token)
-    {
-        DamageInfo damage = _damageDealer.RollDamage(shot);
-
-        FlightResult flight = await ProjectileFlight.FlyAsync(projectilePrefab, shot, start, end, _target, damage.PaintColor, token);
-
-        if (FlightOutcome.Blocked == flight.Outcome)
-        {
-            _target.NotifyBlocked(flight.LandingPoint);
-        }
-        else if (FlightOutcome.Arrived == flight.Outcome)
-        {
-            _damageDealer.DealHit(shot, damage, flight.LandingPoint, gaugeGain);
-        }
-    }
-
-    private bool HasProjectilePrefab()
-    {
-        return IsProjectileAssigned(_owner.Data.ProjectilePrefab);
-    }
-
-    private bool IsProjectileAssigned(GameObject projectilePrefab)
-    {
-        if (null != projectilePrefab)
-        {
-            return true;
-        }
-
-        // 쏠 때마다 남기면 같은 로그가 쌓여 다른 에러가 묻히므로 한 번만 알린다.
-        if (false == _hasLoggedMissingProjectile)
-        {
-            _hasLoggedMissingProjectile = true;
-            Debug.LogError($"자동 공격 : {_owner.name}이 쏠 투사체 프리팹이 지정되지 않았습니다.");
-        }
-
-        return false;
     }
 }

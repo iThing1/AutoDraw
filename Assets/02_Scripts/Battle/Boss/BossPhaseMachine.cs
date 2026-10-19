@@ -34,6 +34,8 @@ public class BossPhaseMachine : MonoBehaviour
     private readonly List<float> _gimmickRatios = new();
 
     private BattleUnit _unit;
+    // 손 달린 보스만 있다.
+    private BossHands _hands;
     private int _phaseIndex;
     // 다음에 닿을 기믹 줄이자, 지금 색 구간의 번호.
     private int _nextLineIndex;
@@ -60,6 +62,7 @@ public class BossPhaseMachine : MonoBehaviour
     private void Awake()
     {
         _unit = GetComponent<BattleUnit>();
+        TryGetComponent(out _hands);
 
         _unit.Health.OnDamaged += HandleDamaged;
         _unit.Health.OnFloorReached += HandleFloorReached;
@@ -176,7 +179,7 @@ public class BossPhaseMachine : MonoBehaviour
 
         using (_unit.Health.BeginInvulnerable())
         {
-            return await gimmick.PlayAsync(_unit, token);
+            return await gimmick.PlayAsync(_unit.Attacker.Context, token);
         }
     }
 
@@ -319,7 +322,7 @@ public class BossPhaseMachine : MonoBehaviour
     // 쓰러졌다 일어나는 동안에는 플레이어도 공격·이동·막기를 멈춘다. 연출 중인 보스에게 계속 쏘아 대면 어색하다.
     private void SetPlayerPaused(bool isPaused)
     {
-        AttackTarget target = _unit.Attacker.Target;
+        AttackTarget target = _unit.Attacker.Context.Target;
 
         if (null == target || target.IsDefeated)
         {
@@ -499,9 +502,9 @@ public class BossPhaseMachine : MonoBehaviour
 
     private void SetHandsGroggy(bool isGroggy)
     {
-        if (null != _unit.Attacker.Hands)
+        if (null != _hands)
         {
-            _unit.Attacker.Hands.SetGroggy(isGroggy);
+            _hands.SetGroggy(isGroggy);
         }
     }
 

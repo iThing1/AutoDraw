@@ -12,5 +12,5 @@ public abstract class BossGimmick : ScriptableObject
     }
 
     // 플레이어가 기믹을 해내면 true를 돌려준다.
-    public abstract UniTask<bool> PlayAsync(BattleUnit boss, CancellationToken token);
+    public abstract UniTask<bool> PlayAsync(AttackContext context, CancellationToken token);
 }

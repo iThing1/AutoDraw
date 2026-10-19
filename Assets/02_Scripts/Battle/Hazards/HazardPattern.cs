@@ -11,5 +11,5 @@ public abstract class HazardPattern : ScriptableObject
     {
     }
 
-    public abstract UniTask PlayAsync(AutoAttacker shooter, CancellationToken token);
+    public abstract UniTask PlayAsync(AttackContext context, CancellationToken token);
 }

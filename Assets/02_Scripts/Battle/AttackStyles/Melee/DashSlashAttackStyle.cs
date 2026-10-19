@@ -27,8 +27,7 @@ public class DashSlashAttackStyle : AttackStyle
     [SerializeField, Range(0f, 1f)] private float _hitTiming = 0.5f;
     [SerializeField, Min(0f)] private float _trailLingerTime = 0.3f;
 
-    // 투사체 관련 값(크기, 궤적, 꼬리)은 쓰지 않고 피해·치명타·타격 프리셋만 쓴다.
-    [SerializeField] private ShotSettings _hit = new();
+    [SerializeField] private HitSettings _hit = new();
 
     [Header("복귀")]
     [SerializeField, Min(0f)] private float _returnDuration = 0.4f;
@@ -42,19 +41,19 @@ public class DashSlashAttackStyle : AttackStyle
         }
     }
 
-    public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        Transform owner = attacker.Owner.transform;
+        Transform owner = context.Owner.transform;
         Vector3 origin = owner.position;
 
-        await StartDash(owner, origin, attacker.Target)
+        await StartDash(owner, origin, context.Target)
             .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
 
         await UniTask.Delay(TimeSpan.FromSeconds(_delayBeforeSlash), cancellationToken: token);
 
         using (GameManager.TimeScale.BeginSlowMotion(_slowTimeScale))
         {
-            await SwingAsync(attacker, gaugeGain, token);
+            await SwingAsync(context, gaugeGain, token);
         }
 
         await owner.DOMove(origin, _returnDuration)
@@ -63,7 +62,7 @@ public class DashSlashAttackStyle : AttackStyle
     }
 
     // 세상은 느려진 채로 칼만 실제 시간으로 휘둘러, 칼끝의 검은 궤적이 또렷하게 남게 한다.
-    private async UniTask SwingAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    private async UniTask SwingAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         if (null == _bladePrefab)
         {
@@ -71,8 +70,8 @@ public class DashSlashAttackStyle : AttackStyle
             return;
         }
 
-        Vector3 center = attacker.Owner.Body.position;
-        Vector3 toTarget = attacker.Target.GetAimPoint(Vector3.zero) - center;
+        Vector3 center = context.Owner.Body.position;
+        Vector3 toTarget = context.Target.GetAimPoint(Vector3.zero) - center;
         float facingAngle = Geometry2D.ToAngle(toTarget);
         float startAngle = facingAngle + _swingAngle * 0.5f;
         float endAngle = facingAngle - _swingAngle * 0.5f;
@@ -92,9 +91,9 @@ public class DashSlashAttackStyle : AttackStyle
             await RealtimeDelay.WaitAsync(_swingDuration * _hitTiming, token);
 
             // 칼이 닿는 거리 밖으로 벗어났으면 빗나간다.
-            Vector3 hitPoint = Vector3.MoveTowards(attacker.Owner.Body.position, attacker.Target.GetAimPoint(Vector3.zero), _swingRadius);
+            Vector3 hitPoint = Vector3.MoveTowards(context.Owner.Body.position, context.Target.GetAimPoint(Vector3.zero), _swingRadius);
 
-            attacker.Strike(_hit, hitPoint, gaugeGain);
+            context.Damage.Strike(_hit, hitPoint, gaugeGain);
 
             await swing.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
             await RealtimeDelay.WaitAsync(_trailLingerTime, token);

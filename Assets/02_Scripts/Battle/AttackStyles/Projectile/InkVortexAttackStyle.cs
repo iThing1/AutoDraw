@@ -23,11 +23,11 @@ public class InkVortexAttackStyle : AttackStyle
     [Header("손")]
     [SerializeField, Min(0f)] private float _handOrbitSpeed = 540f;
 
-    public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        AttackTarget target = attacker.Target;
-        BossHands hands = attacker.Hands;
-        Vector3 center = attacker.Owner.Body.position;
+        AttackTarget target = context.Target;
+        BossHands hands = context.Hands;
+        Vector3 center = context.Owner.Body.position;
         float angle = UnityEngine.Random.Range(0f, 360f);
         float handAngle = 0f;
         float elapsed = 0f;
@@ -40,7 +40,7 @@ public class InkVortexAttackStyle : AttackStyle
             {
                 if (elapsed >= nextWave)
                 {
-                    FireWave(attacker, center, angle, gaugeGain, token);
+                    FireWave(context, center, angle, gaugeGain, token);
                     angle += _angleStep;
                     nextWave += _waveInterval;
                 }
@@ -77,7 +77,7 @@ public class InkVortexAttackStyle : AttackStyle
         return toBoss / distance * Mathf.Min(_pullSpeed, distance / Time.fixedDeltaTime);
     }
 
-    private void FireWave(AutoAttacker attacker, Vector3 center, float angle, float gaugeGain, CancellationToken token)
+    private void FireWave(AttackContext context, Vector3 center, float angle, float gaugeGain, CancellationToken token)
     {
         float angleBetweenArms = 360f / _armCount;
 
@@ -85,7 +85,7 @@ public class InkVortexAttackStyle : AttackStyle
         {
             Vector2 direction = Geometry2D.ToDirection(angle + angleBetweenArms * i);
 
-            attacker.FireShotToward(_shot, center, direction, _range, gaugeGain, token);
+            context.Launcher.FireShotToward(_shot, center, direction, _range, gaugeGain, token);
         }
     }
 

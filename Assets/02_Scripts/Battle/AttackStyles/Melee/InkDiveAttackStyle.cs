@@ -25,23 +25,23 @@ public class InkDiveAttackStyle : AttackStyle
     [SerializeField, Min(0f)] private float _riseDuration = 0.25f;
     [SerializeField] private Ease _riseEase = Ease.OutBack;
     [SerializeField, Min(0f)] private float _blastRadius = 2.4f;
-    [SerializeField] private ShotSettings _hit = new();
+    [SerializeField] private HitSettings _hit = new();
     [SerializeField] private ImpactSettings _riseImpact = new();
 
     [Header("여러 번")]
     // 2 이상이면 솟아오른 자리에서 곧바로 다시 가라앉아 또 노린다.
     [SerializeField, Min(1)] private int _diveCount = 1;
 
-    public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        Transform owner = attacker.Owner.transform;
+        Transform owner = context.Owner.transform;
         Vector3 startScale = owner.localScale;
 
         try
         {
             for (int i = 0; i < _diveCount; i++)
             {
-                await DiveOnceAsync(attacker, owner, startScale, gaugeGain, token);
+                await DiveOnceAsync(context, owner, startScale, gaugeGain, token);
             }
         }
         finally
@@ -52,11 +52,11 @@ public class InkDiveAttackStyle : AttackStyle
         }
     }
 
-    private async UniTask DiveOnceAsync(AutoAttacker attacker, Transform owner, Vector3 startScale, float gaugeGain, CancellationToken token)
+    private async UniTask DiveOnceAsync(AttackContext context, Transform owner, Vector3 startScale, float gaugeGain, CancellationToken token)
     {
-        using (attacker.Owner.Health.BeginInvulnerable())
+        using (context.Owner.Health.BeginInvulnerable())
         {
-            LeaveInk(attacker, owner.position);
+            LeaveInk(context, owner.position);
 
             await owner.DOScale(Vector3.zero, _sinkDuration)
                 .SetEase(_sinkEase)
@@ -64,10 +64,10 @@ public class InkDiveAttackStyle : AttackStyle
 
             await UniTask.Delay(TimeSpan.FromSeconds(_hiddenDuration), cancellationToken: token);
 
-            Vector3 risePoint = attacker.Target.GetAimPoint(Vector3.zero);
+            Vector3 risePoint = context.Target.GetAimPoint(Vector3.zero);
             risePoint.z = owner.position.z;
 
-            LeaveInk(attacker, risePoint);
+            LeaveInk(context, risePoint);
             await Telegraph.PlayCircleAsync(_telegraphPrefab, risePoint, _blastRadius, _telegraphColor, _warnDuration, token);
 
             owner.position = risePoint;
@@ -78,14 +78,14 @@ public class InkDiveAttackStyle : AttackStyle
         }
 
         ImpactPlayer.Play(_riseImpact, owner.position);
-        attacker.Blast(_hit, owner.position, _blastRadius, gaugeGain);
+        context.Damage.Blast(_hit, owner.position, _blastRadius, gaugeGain);
     }
 
-    private void LeaveInk(AutoAttacker attacker, Vector3 position)
+    private void LeaveInk(AttackContext context, Vector3 position)
     {
-        if (null != _inkSplat && null != attacker.PaintCanvas)
+        if (null != _inkSplat && null != context.PaintCanvas)
         {
-            attacker.PaintCanvas.LeaveSplats(position, attacker.PickColor(), true, _inkSplat);
+            context.PaintCanvas.LeaveSplats(position, context.Damage.PickColor(), true, _inkSplat);
         }
     }
 }

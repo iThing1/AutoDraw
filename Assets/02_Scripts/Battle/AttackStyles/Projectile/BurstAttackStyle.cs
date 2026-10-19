@@ -14,13 +14,13 @@ public class BurstAttackStyle : AttackStyle
     [SerializeField] private IntRange _shotCount = new(3, 3);
     [SerializeField, Min(0f)] private float _burstInterval = 0.08f;
 
-    public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         int shotCount = Mathf.Max(1, _shotCount.PickRandom());
 
         for (int i = 0; i < shotCount; i++)
         {
-            attacker.FireShot(_shot, attacker.Owner.Body.position, Vector3.zero, gaugeGain, token);
+            context.Launcher.FireShot(_shot, context.Owner.Body.position, Vector3.zero, gaugeGain, token);
 
             await UniTask.Delay(TimeSpan.FromSeconds(_burstInterval), cancellationToken: token);
         }

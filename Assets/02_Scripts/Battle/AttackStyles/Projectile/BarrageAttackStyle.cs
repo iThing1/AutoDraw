@@ -37,7 +37,7 @@ public class BarrageAttackStyle : AttackStyle
         }
     }
 
-    public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         if (null == _turretPrefab)
         {
@@ -47,7 +47,7 @@ public class BarrageAttackStyle : AttackStyle
 
         GameManager.Sound.PlaySfx(_turretAppearSound);
 
-        List<Transform> turrets = SpawnTurrets(attacker.Owner.transform);
+        List<Transform> turrets = SpawnTurrets(context.Owner.transform);
 
         try
         {
@@ -57,7 +57,7 @@ public class BarrageAttackStyle : AttackStyle
             {
                 for (int i = 0; i < turrets.Count; i++)
                 {
-                    attacker.FireShot(_turretShot, turrets[i].position, Vector3.zero, gaugeGain, token);
+                    context.Launcher.FireShot(_turretShot, turrets[i].position, Vector3.zero, gaugeGain, token);
                     Recoil(turrets[i]);
                 }
 
@@ -66,7 +66,7 @@ public class BarrageAttackStyle : AttackStyle
 
             await UniTask.Delay(TimeSpan.FromSeconds(_finaleDelay), cancellationToken: token);
 
-            attacker.FireShot(_finaleShot, attacker.Owner.Body.position, Vector3.zero, gaugeGain, token);
+            context.Launcher.FireShot(_finaleShot, context.Owner.Body.position, Vector3.zero, gaugeGain, token);
         }
         finally
         {

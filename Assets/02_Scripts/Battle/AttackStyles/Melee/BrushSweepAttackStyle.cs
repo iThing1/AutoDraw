@@ -25,8 +25,7 @@ public class BrushSweepAttackStyle : AttackStyle
     [SerializeField] private GameObject _trailPrefab;
     [SerializeField, Min(0f)] private float _trailLingerTime = 0.25f;
 
-    // 투사체 관련 값(크기, 궤적, 꼬리)은 쓰지 않고 피해·치명타·타격 프리셋만 쓴다.
-    [SerializeField] private ShotSettings _hit = new();
+    [SerializeField] private HitSettings _hit = new();
 
     [Header("퍼지는 고리")]
     // 속이 빈 고리 선. 프리팹에 반지름 1짜리 원 점이 로컬 좌표로 들어 있어, 크기를 반지름만큼 키워 퍼뜨린다.
@@ -42,7 +41,7 @@ public class BrushSweepAttackStyle : AttackStyle
     // 고리를 여러 겹 연달아 퍼뜨릴 때의 겹 수와 간격. 막기를 다시 쓸 수 있을 만큼 띄운다.
     [SerializeField, Min(1)] private int _ringCount = 1;
     [SerializeField, Min(0f)] private float _ringInterval = 0.45f;
-    [SerializeField] private ShotSettings _ringHit = new();
+    [SerializeField] private HitSettings _ringHit = new();
 
     public override void Prewarm()
     {
@@ -57,17 +56,17 @@ public class BrushSweepAttackStyle : AttackStyle
         }
     }
 
-    public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        Vector3 center = attacker.Owner.Body.position;
+        Vector3 center = context.Owner.Body.position;
 
         await Telegraph.PlayCircleAsync(_telegraphPrefab, center, _radius, _telegraphColor, _warnDuration, token);
 
-        Vector3 toTarget = attacker.Target.GetAimPoint(Vector3.zero) - center;
+        Vector3 toTarget = context.Target.GetAimPoint(Vector3.zero) - center;
         float startAngle = Geometry2D.ToAngle(toTarget) + 180f;
 
         GameObject trail = null != _trailPrefab ? GameManager.Pool.Spawn(_trailPrefab, GetPointOnCircle(center, startAngle), Quaternion.identity) : null;
-        Transform hand = null != attacker.Hands ? attacker.Hands.RightHand : null;
+        Transform hand = null != context.Hands ? context.Hands.RightHand : null;
 
         if (null != trail && trail.TryGetComponent(out TrailRenderer trailRenderer))
         {
@@ -98,13 +97,13 @@ public class BrushSweepAttackStyle : AttackStyle
             await UniTask.Delay(TimeSpan.FromSeconds(_sweepDuration * _hitTiming), cancellationToken: token);
 
             // 범위 밖으로 물러났으면 맞힐 자리가 목표에 닿지 않아 빗나간다.
-            Vector3 hitPoint = Vector3.MoveTowards(center, attacker.Target.GetAimPoint(Vector3.zero), _radius);
-            attacker.Strike(_hit, hitPoint, gaugeGain);
+            Vector3 hitPoint = Vector3.MoveTowards(center, context.Target.GetAimPoint(Vector3.zero), _radius);
+            context.Damage.Strike(_hit, hitPoint, gaugeGain);
 
             await sweep.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
 
             // 고리는 스스로 끝까지 퍼지므로 기다리지 않고, 보스는 다음 공격을 이어 간다.
-            ExpandRingsAsync(attacker, center, gaugeGain, token).Forget();
+            ExpandRingsAsync(context, center, gaugeGain, token).Forget();
 
             await UniTask.Delay(TimeSpan.FromSeconds(_trailLingerTime), cancellationToken: token);
         }
@@ -120,11 +119,11 @@ public class BrushSweepAttackStyle : AttackStyle
         }
     }
 
-    private async UniTaskVoid ExpandRingsAsync(AutoAttacker attacker, Vector3 center, float gaugeGain, CancellationToken token)
+    private async UniTaskVoid ExpandRingsAsync(AttackContext context, Vector3 center, float gaugeGain, CancellationToken token)
     {
         for (int i = 0; i < _ringCount; i++)
         {
-            ExpandRingAsync(attacker, center, gaugeGain, token).Forget();
+            ExpandRingAsync(context, center, gaugeGain, token).Forget();
 
             if (i < _ringCount - 1)
             {
@@ -134,7 +133,7 @@ public class BrushSweepAttackStyle : AttackStyle
     }
 
     // 게임 시간으로 퍼져 히트 스톱 동안에는 함께 멈춘다. 지나가는 순간 한 번만 맞히고, 방패를 들고 있으면 막힌다.
-    private async UniTask ExpandRingAsync(AutoAttacker attacker, Vector3 center, float gaugeGain, CancellationToken token)
+    private async UniTask ExpandRingAsync(AttackContext context, Vector3 center, float gaugeGain, CancellationToken token)
     {
         if (null == _ringPrefab)
         {
@@ -144,7 +143,7 @@ public class BrushSweepAttackStyle : AttackStyle
         LineRenderer ring = GameManager.Pool.Spawn(_ringPrefab.gameObject, center, Quaternion.identity).GetComponent<LineRenderer>();
         ring.widthMultiplier = _ringWidth;
 
-        AttackTarget target = attacker.Target;
+        AttackTarget target = context.Target;
         float radius = _radius;
         bool hasStruck = false;
 
@@ -160,7 +159,7 @@ public class BrushSweepAttackStyle : AttackStyle
                 if (false == hasStruck && IsRingPassing(target, center, previousRadius, radius))
                 {
                     hasStruck = true;
-                    attacker.Strike(_ringHit, target.GetAimPoint(Vector3.zero), gaugeGain);
+                    context.Damage.Strike(_ringHit, target.GetAimPoint(Vector3.zero), gaugeGain);
                 }
 
                 await UniTask.Yield(PlayerLoopTiming.Update, token);

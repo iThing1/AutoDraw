@@ -47,10 +47,11 @@ MonoBehaviour:
     _trailWidth: 0.1
     _useTrailColor: 1
     _trailColor: {r: 0, g: 0, b: 0, a: 1}
-    _damage:
-      _min: 6
-      _max: 8
-    _criticalChance: 0.1
-    _criticalMultiplier: 2
-    _normalHit: {fileID: 11400000, guid: 789e71a3222486742b3aba402f7e49b9, type: 2}
-    _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+    _hit:
+      _damage:
+        _min: 6
+        _max: 8
+      _criticalChance: 0.1
+      _criticalMultiplier: 2
+      _normalHit: {fileID: 11400000, guid: 789e71a3222486742b3aba402f7e49b9, type: 2}
+      _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}

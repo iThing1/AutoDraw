@@ -28,13 +28,15 @@ public class AttackStyleSet : AttackStyle
         // 쏘는 쪽을 모르면(null) 조건 없이 고를 수 있다고 본다.
         public bool IsAvailable(AutoAttacker picker)
         {
-            if (null == picker || null == picker.Target)
+            if (null == picker || null == picker.Context)
             {
                 return true;
             }
 
+            AttackContext context = picker.Context;
+
             // 거리 조건은 이동이 움직이는 루트끼리 잰다. 넉백으로 흔들리는 Body로 재면 경계에서 패턴 선택이 오락가락한다.
-            float distance = Vector2.Distance(picker.Owner.transform.position, picker.Target.Unit.transform.position);
+            float distance = Vector2.Distance(context.Owner.transform.position, context.Target.Unit.transform.position);
 
             if (distance < _minDistance || (0f < _maxDistance && distance > _maxDistance))
             {
@@ -84,16 +86,17 @@ public class AttackStyleSet : AttackStyle
     }
 
     // 자동 공격은 PickStyle로 고른 스타일을 직접 쏘므로, 이 묶음이 그대로 넘어온 경우에만 여기서 하나를 골라 쏜다.
-    public override UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    // 쿨타임을 아는 쏘는 쪽이 없으므로 거리·쿨타임 조건 없이 고른다.
+    public override UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        AttackStyle style = PickStyle(attacker);
+        AttackStyle style = PickStyle(null);
 
         if (this == style)
         {
             return UniTask.CompletedTask;
         }
 
-        return style.FireAsync(attacker, gaugeGain, token);
+        return style.FireAsync(context, gaugeGain, token);
     }
 
     public override void Prewarm()

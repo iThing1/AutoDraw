@@ -92,11 +92,11 @@ public class DataSheetTable
         return SplitArray(GetCell(row, field));
     }
 
-    // 런타임에서 JsonUtility로 바로 읽도록 {"items":[...]} 모양으로 쓴다.
+    // 런타임에서 JsonUtility로 바로 읽도록 {"_items":[...]} 모양으로 쓴다. 필드 이름은 데이터 클래스의 private 필드 이름으로 바꾼다(MaxHp → _maxHp).
     public string ToJson(List<string> errors)
     {
         StringBuilder json = new();
-        json.Append("{\"items\":[");
+        json.Append("{\"_items\":[");
 
         for (int row = 0; row < _rows.Count; row++)
         {
@@ -111,7 +111,7 @@ public class DataSheetTable
                     json.Append(',');
                 }
 
-                json.Append('"').Append(column.Field).Append("\":");
+                json.Append('"').Append(ToFieldName(column.Field)).Append("\":");
                 AppendValue(json, column, row, errors);
             }
 
@@ -289,6 +289,11 @@ public class DataSheetTable
         }
 
         return -1;
+    }
+
+    private static string ToFieldName(string field)
+    {
+        return "_" + char.ToLowerInvariant(field[0]) + field.Substring(1);
     }
 
     private static void AppendString(StringBuilder json, string text)

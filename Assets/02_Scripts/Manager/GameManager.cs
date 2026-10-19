@@ -1,4 +1,6 @@
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using System.Threading;
 using UnityEngine;
 
 public class GameManager : SingletonBehaviour<GameManager>
@@ -14,6 +16,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     public static PoolManager Pool { get { return Instance._poolManager; } }
     public static TimeScaleManager TimeScale { get { return Instance._timeScaleManager; } }
     public static SlowZoneManager SlowZones { get { return Instance._slowZoneManager; } }
+    public static DataTableManager Tables { get { return Instance._dataTableManager; } }
 
     [Header("씬")]
     [SerializeField] private BattleCameraRig _cameraRig;
@@ -31,6 +34,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     private PoolManager _poolManager = new();
     private TimeScaleManager _timeScaleManager = new();
     private SlowZoneManager _slowZoneManager = new();
+    private DataTableManager _dataTableManager = new();
 
     protected override void Init()
     {
@@ -56,6 +60,17 @@ public class GameManager : SingletonBehaviour<GameManager>
             Debug.LogError("게임 매니저 : MapSpawner가 지정되지 않았습니다.");
             return;
         }
+
+        InitAsync(destroyCancellationToken).Forget();
+    }
+
+    // 맵이 만들어지자마자 스탯을 읽으므로 표를 다 읽은 뒤에 맵을 만든다.
+    private async UniTaskVoid InitAsync(CancellationToken token)
+    {
+        // 표를 읽는 동안 빈 씬이 비치지 않게 먼저 가린다.
+        _uiManager.Cinematic.ScreenFader.ShowImmediately();
+
+        await _dataTableManager.LoadAsync(new ResourcesTableLoader(), token);
 
         _mapSpawner.Init();
     }

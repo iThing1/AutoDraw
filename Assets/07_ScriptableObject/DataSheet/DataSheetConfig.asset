@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1a5d5a3f07249f7a3504c447b73979d, type: 3}
+  m_Name: DataSheetConfig
+  m_EditorClassIdentifier: Assembly-CSharp-Editor::DataSheetConfig
+  _sheetId: 1DqqOZX9S6ijoNiXtwrj715ZGe0_fuO2nZyCUQBhvyyQ
+  _outputFolder: Assets/Resources/JsonOutput
+  _tabs:
+  - _name: PlayerStatData
+    _gid: 725274957
+  - _name: PerkNodeData
+    _gid: 981365430
+  - _name: PerkEffectData
+    _gid: 1669804022
+  - _name: WeaponData
+    _gid: 1875784139
+  - _name: ConsumableData
+    _gid: 1129789069

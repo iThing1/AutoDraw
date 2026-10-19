@@ -78,6 +78,7 @@ public class WanderMover : UnitMover
             return false;
         }
 
+        // 추격 판단도 루트끼리 잰다. 조준·명중만 Body 기준이다.
         return Vector3.Distance(transform.position, target.Unit.transform.position) > settings.ChaseDistance;
     }
 

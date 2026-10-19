@@ -208,17 +208,18 @@ public class AutoAttacker : MonoBehaviour
 
     // 목표를 겨누지 않고 정해진 방향으로 사거리만큼 날린다. 날아가는 길에 목표가 닿으면 맞는다.
     // 추적 강도가 0인 탄과 함께 써서, 플레이어가 피할 자리를 찾아 움직이게 하는 탄막에 쓴다.
+    public void FireShotToward(ShotSettings shot, Vector3 start, Vector2 direction, float range, float gaugeGain, CancellationToken token)
+    {
+        FireShotToward(_owner.Data.ProjectilePrefab, shot, start, direction, range, gaugeGain, token);
+    }
+
+    // 유닛과 다른 투사체로 쏠 때 쓴다(환경 탄막).
     public void FireShotToward(GameObject projectilePrefab, ShotSettings shot, Vector3 start, Vector2 direction, float range, float gaugeGain,
         CancellationToken token)
     {
-        if (null == projectilePrefab)
+        if (false == IsProjectileAssigned(projectilePrefab))
         {
-            if (false == HasProjectilePrefab())
-            {
-                return;
-            }
-
-            projectilePrefab = _owner.Data.ProjectilePrefab;
+            return;
         }
 
         Vector3 end = start + (Vector3)(direction.normalized * range);
@@ -342,7 +343,12 @@ public class AutoAttacker : MonoBehaviour
 
     private bool HasProjectilePrefab()
     {
-        if (null != _owner.Data.ProjectilePrefab)
+        return IsProjectileAssigned(_owner.Data.ProjectilePrefab);
+    }
+
+    private bool IsProjectileAssigned(GameObject projectilePrefab)
+    {
+        if (null != projectilePrefab)
         {
             return true;
         }
@@ -351,7 +357,7 @@ public class AutoAttacker : MonoBehaviour
         if (false == _hasLoggedMissingProjectile)
         {
             _hasLoggedMissingProjectile = true;
-            Debug.LogError($"자동 공격 : {_owner.name}의 투사체 프리팹이 지정되지 않았습니다.");
+            Debug.LogError($"자동 공격 : {_owner.name}이 쏠 투사체 프리팹이 지정되지 않았습니다.");
         }
 
         return false;

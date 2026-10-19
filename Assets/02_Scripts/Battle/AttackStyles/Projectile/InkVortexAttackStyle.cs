@@ -85,7 +85,7 @@ public class InkVortexAttackStyle : AttackStyle
         {
             Vector2 direction = Geometry2D.ToDirection(angle + angleBetweenArms * i);
 
-            attacker.FireShotToward(null, _shot, center, direction, _range, gaugeGain, token);
+            attacker.FireShotToward(_shot, center, direction, _range, gaugeGain, token);
         }
     }
 

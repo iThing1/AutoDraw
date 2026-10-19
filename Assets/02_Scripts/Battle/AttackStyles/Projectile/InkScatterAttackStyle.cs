@@ -51,7 +51,7 @@ public class InkScatterAttackStyle : AttackStyle
         {
             Vector2 direction = Geometry2D.ToDirection(startAngle + step * i);
 
-            attacker.FireShotToward(null, _shot, origin, direction, _range, gaugeGain, token);
+            attacker.FireShotToward(_shot, origin, direction, _range, gaugeGain, token);
         }
     }
 

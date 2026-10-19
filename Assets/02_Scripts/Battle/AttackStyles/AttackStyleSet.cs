@@ -33,6 +33,7 @@ public class AttackStyleSet : AttackStyle
                 return true;
             }
 
+            // 거리 조건은 이동이 움직이는 루트끼리 잰다. 넉백으로 흔들리는 Body로 재면 경계에서 패턴 선택이 오락가락한다.
             float distance = Vector2.Distance(picker.Owner.transform.position, picker.Target.Unit.transform.position);
 
             if (distance < _minDistance || (0f < _maxDistance && distance > _maxDistance))

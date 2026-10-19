@@ -81,7 +81,7 @@ public class CheckerHazardPattern : HazardPattern
 
         for (int i = 0; i < cells.Count; i++)
         {
-            FlashCell(cells[i], size);
+            FlashCellAsync(cells[i], size).Forget();
         }
 
         // 환경 탄막은 보스의 공격이 아니라서 게이지를 쌓지 않는다. 방패를 들고 있으면 막힌다.
@@ -92,13 +92,15 @@ public class CheckerHazardPattern : HazardPattern
     }
 
     // 떨어진 칸이 진하게 번쩍였다가 사라진다. 판정은 이미 끝나 기다리지 않는다.
-    private void FlashCell(Vector3 center, float size)
+    private async UniTaskVoid FlashCellAsync(Vector3 center, float size)
     {
         SpriteRenderer cell = PooledSprite.Spawn(_cellPrefab, center, 0f, new Vector2(size, size), _impactColor);
 
-        cell.DOFade(0f, _impactFadeDuration)
+        await cell.DOFade(0f, _impactFadeDuration)
             .SetEase(Ease.InQuad)
-            .OnComplete(() => PooledSprite.Despawn(cell));
+            .ToUniTask();
+
+        PooledSprite.Despawn(cell);
     }
 
     // 플레이어가 가운데 칸에 오도록 격자 왼쪽 아래 모서리를 잡는다.

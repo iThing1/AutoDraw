@@ -183,7 +183,7 @@ public class DarknessGimmick : BossGimmick
 
         for (int i = 0; i < _shotsPerBurst; i++)
         {
-            attacker.FireShotToward(null, _shot, origin, Geometry2D.ToDirection(startAngle + step * i), _range, 0f, token);
+            attacker.FireShotToward(_shot, origin, Geometry2D.ToDirection(startAngle + step * i), _range, 0f, token);
         }
 
         if (0 == _aimedShotCount)
@@ -198,7 +198,7 @@ public class DarknessGimmick : BossGimmick
 
         for (int i = 0; i < _aimedShotCount; i++)
         {
-            attacker.FireShotToward(null, _aimedShot, origin, Geometry2D.ToDirection(aimedStart + aimedStep * i), _range, 0f, token);
+            attacker.FireShotToward(_aimedShot, origin, Geometry2D.ToDirection(aimedStart + aimedStep * i), _range, 0f, token);
         }
     }
 }

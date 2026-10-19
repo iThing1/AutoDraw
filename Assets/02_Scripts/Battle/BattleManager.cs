@@ -96,12 +96,15 @@ public class BattleManager : MonoBehaviour
 
     private bool HasRequiredReferences()
     {
+        // 빠지면 전투를 시작할 수 없는 것만 여기서 묻는다. 빠져도 그 기능만 꺼지는 부품(막기·공격 입력 등)은 스스로 Awake에서 알린다.
         // 앞에서부터 확인해 처음 비어 있는 참조에서 멈춘다.
         // nameof는 컴파일할 때 필드 이름을 문자열로 바꿔 줘서, 필드 이름을 바꿔도 로그가 함께 바뀐다.
         bool hasAllReferences = IsAssigned(_playerSpawnPoint, nameof(_playerSpawnPoint))
             && IsAssigned(_bossSpawnPoint, nameof(_bossSpawnPoint))
             && IsAssigned(_playerPrefab, nameof(_playerPrefab))
             && IsAssigned(_bossPrefab, nameof(_bossPrefab))
+            && IsAssigned(_playerPrefab.Data, $"{nameof(_playerPrefab)}.{nameof(BattleUnit.Data)}")
+            && IsAssigned(_bossPrefab.Data, $"{nameof(_bossPrefab)}.{nameof(BattleUnit.Data)}")
             && IsAssigned(_introTrigger, nameof(_introTrigger))
             && IsAssigned(_introCutscene, nameof(_introCutscene))
             && IsAssigned(_paintCanvas, nameof(_paintCanvas))
@@ -122,6 +125,12 @@ public class BattleManager : MonoBehaviour
         {
             Debug.LogError("전투 매니저 : 플레이어 프리팹에 이동 컴포넌트(UnitMover)가 붙어 있지 않습니다.");
             return false;
+        }
+
+        // 보스 데이터가 BossData가 아니면 등장 배너가 조용히 빠지므로 알린다. 배너만 없을 뿐이라 전투는 그대로 진행한다.
+        if (false == (_bossPrefab.Data is BossData))
+        {
+            Debug.LogError("전투 매니저 : 보스 프리팹의 데이터가 BossData가 아니라 등장 배너를 띄우지 않습니다.");
         }
 
         // 하위 컴포넌트는 빠진 항목을 직접 로그로 남기므로 결과만 확인한다.

@@ -1,4 +1,6 @@
+using Cysharp.Threading.Tasks;
 using System;
+using System.Threading;
 using UnityEngine;
 
 [RequireComponent(typeof(Health), typeof(AutoAttacker), typeof(UnitView))]
@@ -43,6 +45,8 @@ public class BattleUnit : MonoBehaviour
 
     private int _guardCount;
     private float _guardRadius;
+    // Action이 끝나기를 기다리는 쪽을 깨우는 신호. 누가 기다릴 때만 만든다.
+    private UniTaskCompletionSource _actionEndSource;
 
     // 키로 고른 공격이 데이터 에셋을 고치지 않도록, 실행 중에만 쓰는 덮어쓰기 값을 따로 둔다.
     private AttackStyle _attackStyleOverride;
@@ -116,9 +120,15 @@ public class BattleUnit : MonoBehaviour
             return;
         }
 
+        UnitState previousState = _state;
         _state = nextState;
 
         OnStateChanged?.Invoke(_state);
+
+        if (UnitState.Action == previousState)
+        {
+            NotifyActionEnded();
+        }
     }
 
     public bool TryBeginAction()
@@ -144,6 +154,23 @@ public class BattleUnit : MonoBehaviour
         ChangeState(_stateBeforeAction);
     }
 
+    // 다른 동작(패턴·막기)이 끝날 때까지 기다린다. Action이 아니면 바로 끝난다.
+    public async UniTask WaitUntilActionEndsAsync(CancellationToken token)
+    {
+        while (UnitState.Action == _state)
+        {
+            if (null == _actionEndSource)
+            {
+                _actionEndSource = new UniTaskCompletionSource();
+            }
+
+            await _actionEndSource.Task.AttachExternalCancellation(token);
+
+            // 상태를 바꾸는 호출 안에서 바로 다음 동작이 시작되지 않게 한 프레임 뒤에 이어 간다.
+            await UniTask.Yield(PlayerLoopTiming.Update, token);
+        }
+    }
+
     public GuardScope BeginGuard(float radius)
     {
         _guardCount++;
@@ -165,6 +192,18 @@ public class BattleUnit : MonoBehaviour
     private void EndGuard()
     {
         _guardCount = Mathf.Max(0, _guardCount - 1);
+    }
+
+    private void NotifyActionEnded()
+    {
+        if (null == _actionEndSource)
+        {
+            return;
+        }
+
+        UniTaskCompletionSource source = _actionEndSource;
+        _actionEndSource = null;
+        source.TrySetResult();
     }
 
     private void HandleDied()

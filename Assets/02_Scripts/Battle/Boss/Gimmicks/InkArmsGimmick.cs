@@ -39,7 +39,7 @@ public class InkArmsGimmick : BossGimmick
     [SerializeField] private IntRange _armsPerLunge = new IntRange(1, 2);
     // 팔의 모양·기어 오는 빠르기·꿈틀거림은 먹물 삼킴 연출의 값을 같이 쓴다.
     [SerializeField] private InkSwallowSettings _arms = new();
-    [SerializeField] private ShotSettings _grabHit = new();
+    [SerializeField] private HitSettings _grabHit = new();
 
     public override void Prewarm()
     {
@@ -51,15 +51,14 @@ public class InkArmsGimmick : BossGimmick
         }
     }
 
-    public override async UniTask<bool> PlayAsync(BattleUnit boss, CancellationToken token)
+    public override async UniTask<bool> PlayAsync(AttackContext context, CancellationToken token)
     {
-        if (null == _arms.ArmPrefab || null == boss.Attacker.PaintCanvas)
+        if (null == _arms.ArmPrefab || null == context.PaintCanvas)
         {
             Debug.LogError($"잉크 팔 : {name}에 팔 프리팹이 없거나 물감 캔버스를 찾을 수 없습니다.");
             return true;
         }
 
-        AutoAttacker attacker = boss.Attacker;
         List<Transform> pools = new List<Transform>(_poolCount);
         List<Transform> sources = new List<Transform>(_armsPerLunge.Max);
         List<UniTask> lunges = new List<UniTask>();
@@ -67,25 +66,25 @@ public class InkArmsGimmick : BossGimmick
 
         try
         {
-            if (null != attacker.Hands)
+            if (null != context.Hands)
             {
-                attacker.Hands.PoseAsync(HandGesture.BothRaise, attacker.Target.GetAimPoint(Vector3.zero), _poolSettleDuration, token).Forget();
+                context.Hands.PoseAsync(HandGesture.BothRaise, context.Target.GetAimPoint(Vector3.zero), _poolSettleDuration, token).Forget();
             }
 
-            await ScatterPoolsAsync(attacker, pools, token);
+            await ScatterPoolsAsync(context, pools, token);
 
-            if (null != attacker.Hands)
+            if (null != context.Hands)
             {
-                attacker.Hands.PoseAsync(HandGesture.BothPress, attacker.Target.GetAimPoint(Vector3.zero), _lungeInterval, token).Forget();
+                context.Hands.PoseAsync(HandGesture.BothPress, context.Target.GetAimPoint(Vector3.zero), _lungeInterval, token).Forget();
             }
 
-            while (elapsed < _duration && false == attacker.Target.IsDefeated)
+            while (elapsed < _duration && false == context.Target.IsDefeated)
             {
-                PickSources(attacker, pools, _armsPerLunge.PickRandom(), sources);
+                PickSources(context, pools, _armsPerLunge.PickRandom(), sources);
 
                 for (int i = 0; i < sources.Count; i++)
                 {
-                    lunges.Add(LungeAsync(attacker, sources[i], token));
+                    lunges.Add(LungeAsync(context, sources[i], token));
                 }
 
                 await UniTask.Delay(TimeSpan.FromSeconds(_lungeInterval), cancellationToken: token);
@@ -96,9 +95,9 @@ public class InkArmsGimmick : BossGimmick
         }
         finally
         {
-            if (null != attacker.Hands)
+            if (null != context.Hands)
             {
-                attacker.Hands.ReturnToRest();
+                context.Hands.ReturnToRest();
             }
         }
 
@@ -106,14 +105,14 @@ public class InkArmsGimmick : BossGimmick
     }
 
     // 플레이어 둘레 곳곳에 웅덩이를 하나씩 찍는다. 이 웅덩이들이 팔이 나올 자리다.
-    private async UniTask ScatterPoolsAsync(AutoAttacker attacker, List<Transform> pools, CancellationToken token)
+    private async UniTask ScatterPoolsAsync(AttackContext context, List<Transform> pools, CancellationToken token)
     {
-        Vector3 center = attacker.Target.FollowTransform.position;
+        Vector3 center = context.Target.FollowTransform.position;
 
         for (int i = 0; i < _poolCount; i++)
         {
             Vector3 position = center + (Vector3)(UnityEngine.Random.insideUnitCircle * _poolScatterRadius);
-            PaintSplat pool = attacker.PaintCanvas.LeaveInkSplat(position, _poolStyle, _arms.InkColor, _poolScale.PickRandom());
+            PaintSplat pool = context.PaintCanvas.LeaveInkSplat(position, _poolStyle, _arms.InkColor, _poolScale.PickRandom());
 
             if (null != pool)
             {
@@ -127,13 +126,13 @@ public class InkArmsGimmick : BossGimmick
     }
 
     // 웅덩이가 꿈틀한 뒤 팔이 뻗어 나온다. 다 뻗은 순간 붙잡을 자리에 있으면 붙잡힌다.
-    private async UniTask LungeAsync(AutoAttacker attacker, Transform source, CancellationToken token)
+    private async UniTask LungeAsync(AttackContext context, Transform source, CancellationToken token)
     {
         TwitchSource(source);
 
         await UniTask.Delay(TimeSpan.FromSeconds(_arms.SourceTwitchDuration), cancellationToken: token);
 
-        AttackTarget target = attacker.Target;
+        AttackTarget target = context.Target;
         Vector3 root = source.position;
         Vector3 grabPoint = target.GetPredictedPoint(_leadTime);
 
@@ -163,7 +162,7 @@ public class InkArmsGimmick : BossGimmick
                 {
                     // 명중 반경 밖으로 비켜섰으면 빗나가고, 방패를 들고 있으면 막힌다.
                     hasStruck = true;
-                    attacker.Strike(_grabHit, grabPoint, 0f);
+                    context.Damage.Strike(_grabHit, grabPoint, 0f);
                 }
 
                 arm.Tick(frame);
@@ -185,7 +184,7 @@ public class InkArmsGimmick : BossGimmick
     }
 
     // 플레이어와 알맞게 떨어진 웅덩이를 무작위 순서로 count개까지 고른다. 하나도 없으면 너무 가깝지 않은 것 중 가장 가까운 것을 쓴다.
-    private void PickSources(AutoAttacker attacker, List<Transform> pools, int count, List<Transform> result)
+    private void PickSources(AttackContext context, List<Transform> pools, int count, List<Transform> result)
     {
         result.Clear();
 
@@ -194,7 +193,7 @@ public class InkArmsGimmick : BossGimmick
             return;
         }
 
-        Vector3 center = attacker.Target.FollowTransform.position;
+        Vector3 center = context.Target.FollowTransform.position;
         int startIndex = UnityEngine.Random.Range(0, pools.Count);
         Transform nearest = null;
         float nearestDistance = float.MaxValue;

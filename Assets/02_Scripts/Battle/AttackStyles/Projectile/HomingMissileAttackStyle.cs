@@ -25,8 +25,7 @@ public class HomingMissileAttackStyle : AttackStyle
     [Header("폭발")]
     [SerializeField, Min(0f)] private float _blastRadius = 2.5f;
     [SerializeField] private ImpactSettings _blastImpact = new();
-    // 투사체 관련 값은 쓰지 않고 피해·치명타·타격 프리셋만 쓴다.
-    [SerializeField] private ShotSettings _hit = new();
+    [SerializeField] private HitSettings _hit = new();
 
     // 미사일은 수명 동안 남아 있어 다음 공격과 겹칠 수 있으므로, 두 번 쏠 만큼 만들어 둔다.
     public override void Prewarm()
@@ -37,8 +36,8 @@ public class HomingMissileAttackStyle : AttackStyle
         }
     }
 
-    // 발사만 기다리고, 날아가는 미사일은 각자 끝까지 날게 둔다. 5초씩 기다리면 다음 공격이 너무 늦어진다.
-    public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    // 발사만 기다리고, 날아가는 미사일은 각자 끝까지 날게 둔다. 수명만큼 기다리면 다음 공격이 너무 늦어진다.
+    public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         if (null == _missilePrefab)
         {
@@ -49,24 +48,24 @@ public class HomingMissileAttackStyle : AttackStyle
         for (int i = 0; i < _missileCount; i++)
         {
             GameManager.Sound.PlaySfx(_launchSound);
-            FlyMissileAsync(attacker, gaugeGain, token).Forget();
+            FlyMissileAsync(context, gaugeGain, token).Forget();
 
             await UniTask.Delay(TimeSpan.FromSeconds(_launchInterval), cancellationToken: token);
         }
     }
 
     // 게임 시간으로 날아 히트 스톱 동안에는 함께 멈춘다. 전투가 끝나 취소되면 터지지 않고 사라진다.
-    private async UniTaskVoid FlyMissileAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    private async UniTaskVoid FlyMissileAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        AttackTarget target = attacker.Target;
-        Vector3 start = attacker.Owner.Body.position;
+        AttackTarget target = context.Target;
+        Vector3 start = context.Owner.Body.position;
 
         GameObject missile = GameManager.Pool.Spawn(_missilePrefab, start, Quaternion.identity);
         Transform missileTransform = missile.transform;
 
         if (missile.TryGetComponent(out SpriteRenderer missileRenderer))
         {
-            missileRenderer.color = attacker.PickColor();
+            missileRenderer.color = context.Damage.PickColor();
         }
 
         if (missile.TryGetComponent(out TrailRenderer trail))
@@ -76,30 +75,13 @@ public class HomingMissileAttackStyle : AttackStyle
 
         float spread = UnityEngine.Random.Range(-_launchSpreadAngle, _launchSpreadAngle);
         Vector3 direction = Quaternion.Euler(0f, 0f, spread) * (target.GetAimPoint(Vector3.zero) - start).normalized;
-        float elapsed = 0f;
 
         try
         {
-            while (elapsed < _lifetime)
-            {
-                await UniTask.Yield(PlayerLoopTiming.Update, token);
+            FlightResult flight = await missile.GetOrAddComponent<HomingMotion>()
+                .FlyAsync(target, new HomingFlight(direction, _speed, _turnSpeed, _lifetime, _collisionRadius), token);
 
-                float deltaTime = Time.deltaTime;
-                elapsed += deltaTime;
-
-                Vector3 toTarget = target.GetAimPoint(Vector3.zero) - missileTransform.position;
-                direction = Vector3.RotateTowards(direction, toTarget.normalized, _turnSpeed * Mathf.Deg2Rad * deltaTime, 0f);
-
-                missileTransform.position += direction * (_speed * deltaTime);
-                missileTransform.rotation = Quaternion.Euler(0f, 0f, Geometry2D.ToAngle(direction));
-
-                if (target.IsBlockedAt(missileTransform.position, _collisionRadius) || target.IsTouching(missileTransform.position, _collisionRadius))
-                {
-                    break;
-                }
-            }
-
-            Explode(attacker, missileTransform.position, gaugeGain);
+            Explode(context, flight.LandingPoint, gaugeGain);
         }
         catch (OperationCanceledException)
         {
@@ -112,10 +94,10 @@ public class HomingMissileAttackStyle : AttackStyle
     }
 
     // 방패에 닿아 멈췄어도 그 자리에서 터지고, 피해는 Blast가 방패를 다시 확인해 막는다.
-    private void Explode(AutoAttacker attacker, Vector3 position, float gaugeGain)
+    private void Explode(AttackContext context, Vector3 position, float gaugeGain)
     {
         ImpactPlayer.Play(_blastImpact, position);
 
-        attacker.Blast(_hit, position, _blastRadius, gaugeGain);
+        context.Damage.Blast(_hit, position, _blastRadius, gaugeGain);
     }
 }

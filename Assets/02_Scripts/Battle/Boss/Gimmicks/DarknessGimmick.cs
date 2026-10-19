@@ -51,7 +51,7 @@ public class DarknessGimmick : BossGimmick
         }
     }
 
-    public override async UniTask<bool> PlayAsync(BattleUnit boss, CancellationToken token)
+    public override async UniTask<bool> PlayAsync(AttackContext context, CancellationToken token)
     {
         if (null == _darknessPrefab)
         {
@@ -59,17 +59,16 @@ public class DarknessGimmick : BossGimmick
             return true;
         }
 
-        AutoAttacker attacker = boss.Attacker;
-        Transform bossTransform = boss.transform;
+        Transform bossTransform = context.Owner.transform;
         Vector3 origin = bossTransform.position;
         Color clear = new Color(_darkColor.r, _darkColor.g, _darkColor.b, 0f);
-        SpriteRenderer darkness = PooledSprite.Spawn(_darknessPrefab, attacker.Target.FollowTransform.position, 0f, new Vector2(_coverSize, _coverSize), clear);
+        SpriteRenderer darkness = PooledSprite.Spawn(_darknessPrefab, context.Target.FollowTransform.position, 0f, new Vector2(_coverSize, _coverSize), clear);
 
         try
         {
-            if (null != attacker.Hands)
+            if (null != context.Hands)
             {
-                attacker.Hands.PoseAsync(HandGesture.BothRaise, attacker.Target.GetAimPoint(Vector3.zero), _fadeDuration, token).Forget();
+                context.Hands.PoseAsync(HandGesture.BothRaise, context.Target.GetAimPoint(Vector3.zero), _fadeDuration, token).Forget();
             }
 
             FadeDarkness(darkness, _darkColor.a);
@@ -81,25 +80,25 @@ public class DarknessGimmick : BossGimmick
             bool isCueing = false;
 
             // 게임 시간으로 돌아 히트 스톱 동안에는 함께 멈춘다. 구멍은 매 프레임 플레이어를 따라가며 점점 좁아진다.
-            while (elapsed < _duration && false == attacker.Target.IsDefeated)
+            while (elapsed < _duration && false == context.Target.IsDefeated)
             {
                 float progress = elapsed / _duration;
                 float size = _coverSize * Mathf.Lerp(1f, _endScale, progress);
 
-                darkness.transform.position = attacker.Target.FollowTransform.position;
+                darkness.transform.position = context.Target.FollowTransform.position;
                 darkness.transform.localScale = new Vector3(size, size, 1f);
 
                 if (false == isCueing && elapsed >= nextBurst)
                 {
                     isCueing = true;
-                    Reposition(boss);
-                    ImpactPlayer.Play(_cue, boss.Body.position);
+                    Reposition(context);
+                    ImpactPlayer.Play(_cue, context.Owner.Body.position);
                 }
 
                 if (isCueing && elapsed >= nextBurst + _cueDuration)
                 {
                     isCueing = false;
-                    FireBurst(attacker, token);
+                    FireBurst(context, token);
                     nextBurst += _cueDuration + Mathf.Lerp(_firstBurstInterval, _lastBurstInterval, progress);
                 }
 
@@ -120,24 +119,24 @@ public class DarknessGimmick : BossGimmick
 
             PooledSprite.Despawn(darkness);
 
-            if (null != attacker.Hands)
+            if (null != context.Hands)
             {
-                attacker.Hands.ReturnToRest();
+                context.Hands.ReturnToRest();
             }
         }
     }
 
     // 어둠 속에서 보스가 플레이어 둘레 아무 데로나 옮긴다. 어둠이 유닛을 덮어 옮기는 모습은 보이지 않는다.
     // 플레이어가 구석에 있으면 바깥쪽 자리가 이동 범위로 잘려 코앞이 되므로, 잘린 뒤에도 최소 거리가 남는 방향을 다시 뽑는다.
-    private void Reposition(BattleUnit boss)
+    private void Reposition(AttackContext context)
     {
-        Vector3 center = boss.Attacker.Target.FollowTransform.position;
-        Vector3 best = boss.transform.position;
+        Vector3 center = context.Target.FollowTransform.position;
+        Vector3 best = context.Owner.transform.position;
         float bestDistance = -1f;
 
         for (int i = 0; i < REPOSITION_TRY_COUNT; i++)
         {
-            Vector3 position = PickRepositionPoint(boss, center);
+            Vector3 position = PickRepositionPoint(context, center);
             float distance = Vector2.Distance(position, center);
 
             if (distance > bestDistance)
@@ -152,17 +151,17 @@ public class DarknessGimmick : BossGimmick
             }
         }
 
-        boss.transform.position = best;
+        context.Owner.transform.position = best;
     }
 
-    private Vector3 PickRepositionPoint(BattleUnit boss, Vector3 center)
+    private Vector3 PickRepositionPoint(AttackContext context, Vector3 center)
     {
         Vector3 position = center + Geometry2D.ToDirection(UnityEngine.Random.Range(0f, 360f)) * _repositionDistance.PickRandom();
-        position.z = boss.transform.position.z;
+        position.z = context.Owner.transform.position.z;
 
-        if (null != boss.Mover)
+        if (null != context.Owner.Mover)
         {
-            position = boss.Mover.ClampPosition(position);
+            position = context.Owner.Mover.ClampPosition(position);
         }
 
         return position;
@@ -175,15 +174,15 @@ public class DarknessGimmick : BossGimmick
     }
 
     // 보스 자리에서 사방으로 한 바퀴 퍼뜨리고, 플레이어 쪽으로 빠른 부채꼴을 함께 쏜다.
-    private void FireBurst(AutoAttacker attacker, CancellationToken token)
+    private void FireBurst(AttackContext context, CancellationToken token)
     {
-        Vector3 origin = attacker.Owner.Body.position;
+        Vector3 origin = context.Owner.Body.position;
         float startAngle = UnityEngine.Random.Range(0f, 360f);
         float step = 360f / _shotsPerBurst;
 
         for (int i = 0; i < _shotsPerBurst; i++)
         {
-            attacker.FireShotToward(null, _shot, origin, Geometry2D.ToDirection(startAngle + step * i), _range, 0f, token);
+            context.Launcher.FireShotToward(_shot, origin, Geometry2D.ToDirection(startAngle + step * i), _range, 0f, token);
         }
 
         if (0 == _aimedShotCount)
@@ -191,14 +190,14 @@ public class DarknessGimmick : BossGimmick
             return;
         }
 
-        Vector3 toTarget = attacker.Target.GetAimPoint(Vector3.zero) - origin;
+        Vector3 toTarget = context.Target.GetAimPoint(Vector3.zero) - origin;
         float centerAngle = Geometry2D.ToAngle(toTarget);
         float aimedStep = 1 < _aimedShotCount ? _aimedSpread / (_aimedShotCount - 1) : 0f;
         float aimedStart = 1 < _aimedShotCount ? centerAngle - _aimedSpread * 0.5f : centerAngle;
 
         for (int i = 0; i < _aimedShotCount; i++)
         {
-            attacker.FireShotToward(null, _aimedShot, origin, Geometry2D.ToDirection(aimedStart + aimedStep * i), _range, 0f, token);
+            context.Launcher.FireShotToward(_aimedShot, origin, Geometry2D.ToDirection(aimedStart + aimedStep * i), _range, 0f, token);
         }
     }
 }

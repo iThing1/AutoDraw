@@ -25,10 +25,6 @@ public class BattleUnitData : ScriptableObject
     // 전투 카메라가 이 유닛을 화면에 담을 때 확보하는 반경. 몸집이 큰 유닛일수록 크게 준다.
     [SerializeField, Min(0f)] private float _framingRadius = 1.5f;
 
-    [Header("보스 이름 배너")]
-    [SerializeField] private string _bannerTitle;
-    [SerializeField] private string _bannerSubtitle;
-
     public float MoveSpeed { get { return _moveSpeed; } }
 
     public WanderSettings Wander { get { return _wander; } }
@@ -42,7 +38,4 @@ public class BattleUnitData : ScriptableObject
     public PaintPalette Palette { get { return _palette; } }
 
     public float FramingRadius { get { return _framingRadius; } }
-
-    public string BannerTitle { get { return _bannerTitle; } }
-    public string BannerSubtitle { get { return _bannerSubtitle; } }
 }

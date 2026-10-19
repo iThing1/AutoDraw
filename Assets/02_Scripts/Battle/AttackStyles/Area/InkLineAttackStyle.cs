@@ -31,7 +31,7 @@ public class InkLineAttackStyle : AttackStyle
     [SerializeField, Min(0f)] private float _strokeDuration = 0.12f;
     [SerializeField, Min(0f)] private float _lingerDuration = 0.35f;
     [SerializeField, Min(0f)] private float _fadeDuration = 0.25f;
-    [SerializeField] private ShotSettings _hit = new();
+    [SerializeField] private HitSettings _hit = new();
     [SerializeField] private ImpactSettings _impact = new();
 
     public override void Prewarm()
@@ -42,7 +42,7 @@ public class InkLineAttackStyle : AttackStyle
         }
     }
 
-    public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         List<UniTask> lines = new List<UniTask>(_volleyCount * _linesPerVolley.Max);
 
@@ -52,7 +52,7 @@ public class InkLineAttackStyle : AttackStyle
 
             for (int i = 0; i < lineCount; i++)
             {
-                lines.Add(DrawLineAsync(attacker, gaugeGain, token));
+                lines.Add(DrawLineAsync(context, gaugeGain, token));
             }
 
             if (volley < _volleyCount - 1)
@@ -65,16 +65,13 @@ public class InkLineAttackStyle : AttackStyle
     }
 
     // 예고를 시작하는 순간의 목표 자리를 기준으로 줄을 정해, 예고를 본 뒤 비켜서면 피한다.
-    private async UniTask DrawLineAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    private async UniTask DrawLineAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        float angle = UnityEngine.Random.Range(0f, 180f);
-        Vector3 along = Geometry2D.ToDirection(angle);
-        Vector3 side = new Vector3(-along.y, along.x, 0f);
-        Vector3 center = attacker.Target.GetAimPoint(Vector3.zero) + side * UnityEngine.Random.Range(-_offsetRange, _offsetRange);
+        LinePlacement line = LinePlacement.PickNear(context.Target.GetAimPoint(Vector3.zero), _offsetRange);
 
-        await Telegraph.PlayLineAsync(_telegraphPrefab, center, angle, _length, _width, _telegraphColor, _warnDuration, token);
+        await Telegraph.PlayLineAsync(_telegraphPrefab, line.Center, line.Angle, _length, _width, _telegraphColor, _warnDuration, token);
 
-        SpriteRenderer stroke = PooledSprite.Spawn(_telegraphPrefab, center, angle, new Vector2(_length, 0f), _strokeColor);
+        SpriteRenderer stroke = PooledSprite.Spawn(_telegraphPrefab, line.Center, line.Angle, new Vector2(_length, 0f), _strokeColor);
 
         try
         {
@@ -82,8 +79,8 @@ public class InkLineAttackStyle : AttackStyle
                 .SetEase(Ease.OutQuad)
                 .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
 
-            ImpactPlayer.Play(_impact, GetClosestPoint(center, along, attacker.Target.GetAimPoint(Vector3.zero)));
-            StrikeIfTouching(attacker, center, along, gaugeGain);
+            ImpactPlayer.Play(_impact, GetClosestPoint(line.Center, line.Along, context.Target.GetAimPoint(Vector3.zero)));
+            StrikeIfTouching(context, line.Center, line.Along, gaugeGain);
 
             await UniTask.Delay(TimeSpan.FromSeconds(_lingerDuration), cancellationToken: token);
 
@@ -97,13 +94,13 @@ public class InkLineAttackStyle : AttackStyle
     }
 
     // 획의 굵기 안에 몸이 걸쳐 있으면 맞는다. 방패를 들고 있으면 막힌다.
-    private void StrikeIfTouching(AutoAttacker attacker, Vector3 center, Vector3 along, float gaugeGain)
+    private void StrikeIfTouching(AttackContext context, Vector3 center, Vector3 along, float gaugeGain)
     {
-        Vector3 targetPoint = attacker.Target.GetAimPoint(Vector3.zero);
+        Vector3 targetPoint = context.Target.GetAimPoint(Vector3.zero);
 
-        if (attacker.Target.IsTouching(GetClosestPoint(center, along, targetPoint), _width * 0.5f))
+        if (context.Target.IsTouching(GetClosestPoint(center, along, targetPoint), _width * 0.5f))
         {
-            attacker.Strike(_hit, targetPoint, gaugeGain);
+            context.Damage.Strike(_hit, targetPoint, gaugeGain);
         }
     }
 

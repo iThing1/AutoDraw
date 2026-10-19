@@ -21,13 +21,13 @@ public class InkScatterAttackStyle : AttackStyle
 
     [SerializeField] private ShotSettings _shot = new();
 
-    public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        float centerAngle = GetAngleToTarget(attacker);
+        float centerAngle = GetAngleToTarget(context);
 
         for (int wave = 0; wave < _waveCount; wave++)
         {
-            FireWave(attacker, centerAngle + _angleStepPerWave * wave, gaugeGain, token);
+            FireWave(context, centerAngle + _angleStepPerWave * wave, gaugeGain, token);
 
             if (wave < _waveCount - 1)
             {
@@ -36,9 +36,9 @@ public class InkScatterAttackStyle : AttackStyle
         }
     }
 
-    private void FireWave(AutoAttacker attacker, float centerAngle, float gaugeGain, CancellationToken token)
+    private void FireWave(AttackContext context, float centerAngle, float gaugeGain, CancellationToken token)
     {
-        Vector3 origin = null != attacker.Hands ? attacker.Hands.RightHand.position : attacker.Owner.Body.position;
+        Vector3 origin = null != context.Hands ? context.Hands.RightHand.position : context.Owner.Body.position;
         float step = 1 < _shotCount ? _spreadAngle / (_shotCount - 1) : 0f;
         float startAngle = centerAngle - _spreadAngle * 0.5f;
 
@@ -51,12 +51,12 @@ public class InkScatterAttackStyle : AttackStyle
         {
             Vector2 direction = Geometry2D.ToDirection(startAngle + step * i);
 
-            attacker.FireShotToward(null, _shot, origin, direction, _range, gaugeGain, token);
+            context.Launcher.FireShotToward(_shot, origin, direction, _range, gaugeGain, token);
         }
     }
 
-    private float GetAngleToTarget(AutoAttacker attacker)
+    private float GetAngleToTarget(AttackContext context)
     {
-        return Geometry2D.ToAngle(attacker.Target.FollowTransform.position - attacker.Owner.Body.position);
+        return Geometry2D.ToAngle(context.Target.FollowTransform.position - context.Owner.Body.position);
     }
 }

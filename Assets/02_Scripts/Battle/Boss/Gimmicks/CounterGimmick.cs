@@ -26,7 +26,7 @@ public class CounterGimmick : BossGimmick
     [SerializeField] private Ease _dashEase = Ease.InQuad;
     // 플레이어 몸 중심에서 이 거리에 멈춘다. 몸이 겹치도록 짧게 둔다.
     [SerializeField, Min(0f)] private float _stopDistance = 0.4f;
-    [SerializeField] private ShotSettings _dashHit = new();
+    [SerializeField] private HitSettings _dashHit = new();
     [SerializeField, Min(0f)] private float _returnDuration = 0.4f;
 
     [Header("받아침")]
@@ -44,9 +44,9 @@ public class CounterGimmick : BossGimmick
         }
     }
 
-    public override async UniTask<bool> PlayAsync(BattleUnit boss, CancellationToken token)
+    public override async UniTask<bool> PlayAsync(AttackContext context, CancellationToken token)
     {
-        Transform bossTransform = boss.transform;
+        Transform bossTransform = context.Owner.transform;
         Vector3 origin = bossTransform.position;
         int streak = 0;
 
@@ -55,7 +55,7 @@ public class CounterGimmick : BossGimmick
         {
             while (streak < _requiredStreak)
             {
-                streak = await AttemptAsync(boss, token) ? streak + 1 : 0;
+                streak = await AttemptAsync(context, token) ? streak + 1 : 0;
 
                 await bossTransform.DOMove(origin, _returnDuration)
                     .SetEase(Ease.OutQuad)
@@ -71,9 +71,9 @@ public class CounterGimmick : BossGimmick
         {
             bossTransform.DOKill();
 
-            if (null != boss.Attacker.Hands)
+            if (null != context.Hands)
             {
-                boss.Attacker.Hands.ReturnToRest();
+                context.Hands.ReturnToRest();
             }
         }
 
@@ -81,20 +81,19 @@ public class CounterGimmick : BossGimmick
     }
 
     // 받아쳤으면 true. 비켜서서 부딪히지 않았으면 피해 없이 다음 기회로 넘어간다.
-    private async UniTask<bool> AttemptAsync(BattleUnit boss, CancellationToken token)
+    private async UniTask<bool> AttemptAsync(AttackContext context, CancellationToken token)
     {
-        AutoAttacker attacker = boss.Attacker;
-        AttackTarget target = attacker.Target;
+        AttackTarget target = context.Target;
 
-        if (null != attacker.Hands)
+        if (null != context.Hands)
         {
-            attacker.Hands.PoseAsync(HandGesture.RightWindUp, target.GetAimPoint(Vector3.zero), _warnDuration, token).Forget();
+            context.Hands.PoseAsync(HandGesture.RightWindUp, target.GetAimPoint(Vector3.zero), _warnDuration, token).Forget();
         }
 
-        await PlayWarnAsync(boss, token);
+        await PlayWarnAsync(context, token);
 
-        float bodyRadius = boss.GetBodyRadius();
-        Transform bossTransform = boss.transform;
+        float bodyRadius = context.Owner.GetBodyRadius();
+        Transform bossTransform = context.Owner.transform;
         Vector3 start = bossTransform.position;
         bool isCountered = false;
         bool hasCollided = false;
@@ -109,7 +108,7 @@ public class CounterGimmick : BossGimmick
 
                 bossTransform.position = Vector3.LerpUnclamped(start, target.GetApproachPoint(start, _stopDistance), progress);
 
-                Vector3 body = boss.Body.position;
+                Vector3 body = context.Owner.Body.position;
 
                 if (target.IsBlockedAt(body, bodyRadius))
                 {
@@ -127,20 +126,20 @@ public class CounterGimmick : BossGimmick
 
         if (isCountered)
         {
-            await bossTransform.DOMove(PlayCounter(boss), _knockbackDuration)
+            await bossTransform.DOMove(PlayCounter(context), _knockbackDuration)
                 .SetEase(Ease.OutQuad)
                 .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
         }
         else if (hasCollided)
         {
-            attacker.Strike(_dashHit, target.GetAimPoint(Vector3.zero), 0f);
+            context.Damage.Strike(_dashHit, target.GetAimPoint(Vector3.zero), 0f);
         }
 
         return isCountered;
     }
 
     // 몸 둘레의 붉은 원이 몸 크기까지 조여 든다. 다 조여 드는 순간 돌진하므로, 원을 보고 막기 타이밍을 잡는다.
-    private async UniTask PlayWarnAsync(BattleUnit boss, CancellationToken token)
+    private async UniTask PlayWarnAsync(AttackContext context, CancellationToken token)
     {
         if (null == _warnPrefab)
         {
@@ -148,8 +147,8 @@ public class CounterGimmick : BossGimmick
             return;
         }
 
-        float endDiameter = boss.GetBodyRadius() * 2f;
-        SpriteRenderer warn = PooledSprite.Spawn(_warnPrefab, boss.Body.position, 0f, new Vector2(_warnStartDiameter, _warnStartDiameter), _warnColor);
+        float endDiameter = context.Owner.GetBodyRadius() * 2f;
+        SpriteRenderer warn = PooledSprite.Spawn(_warnPrefab, context.Owner.Body.position, 0f, new Vector2(_warnStartDiameter, _warnStartDiameter), _warnColor);
 
         try
         {
@@ -164,10 +163,10 @@ public class CounterGimmick : BossGimmick
     }
 
     // 받아친 순간 크게 멈칫하고, 보스가 플레이어 반대쪽으로 튕겨 나갈 자리를 돌려준다.
-    private Vector3 PlayCounter(BattleUnit boss)
+    private Vector3 PlayCounter(AttackContext context)
     {
-        AttackTarget target = boss.Attacker.Target;
-        Vector3 body = boss.Body.position;
+        AttackTarget target = context.Target;
+        Vector3 body = context.Owner.Body.position;
 
         target.NotifyBlocked(body);
         GameManager.TimeScale.PlayHitStop(_counterHitStopDuration, _counterHitStopTimeScale);
@@ -176,6 +175,6 @@ public class CounterGimmick : BossGimmick
         Vector3 away = body - target.FollowTransform.position;
         away.z = 0f;
 
-        return boss.transform.position + (0f < away.sqrMagnitude ? away.normalized : Vector3.right) * _knockbackDistance;
+        return context.Owner.transform.position + (0f < away.sqrMagnitude ? away.normalized : Vector3.right) * _knockbackDistance;
     }
 }

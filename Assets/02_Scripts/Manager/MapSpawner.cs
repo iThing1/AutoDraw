@@ -83,6 +83,7 @@ public class MapSpawner : MonoBehaviour
 
         PaintingStorage.Save(_currentStage, painting);
         Destroy(painting);
+        _gallery.MarkPaintingChanged(_currentStage);
     }
 
     private async UniTaskVoid EnterStageAsync(StageData stage, CancellationToken token)

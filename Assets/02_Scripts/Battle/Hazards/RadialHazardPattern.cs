@@ -47,7 +47,7 @@ public class RadialHazardPattern : HazardPattern
         }
     }
 
-    public override async UniTask PlayAsync(AutoAttacker shooter, CancellationToken token)
+    public override async UniTask PlayAsync(AttackContext context, CancellationToken token)
     {
         GameManager.Sound.PlaySfx(_warningSound);
 
@@ -55,11 +55,11 @@ public class RadialHazardPattern : HazardPattern
 
         float angleBetweenShots = FULL_CIRCLE / _shotsPerWave;
         float waveAngle = UnityEngine.Random.Range(0f, FULL_CIRCLE);
-        float gapCenter = GetAngleToTarget(shooter) + PickGapShift();
+        float gapCenter = GetAngleToTarget(context) + PickGapShift();
 
         for (int wave = 0; wave < _waveCount; wave++)
         {
-            FireWave(shooter, waveAngle, angleBetweenShots, gapCenter, token);
+            FireWave(context, waveAngle, angleBetweenShots, gapCenter, token);
 
             waveAngle += _angleStepPerWave;
             gapCenter += PickGapShift();
@@ -69,9 +69,9 @@ public class RadialHazardPattern : HazardPattern
     }
 
     // 쏘는 쪽이 움직이는 중이어도 발사마다 그 자리에서 퍼진다.
-    private void FireWave(AutoAttacker shooter, float startAngle, float angleBetweenShots, float gapCenter, CancellationToken token)
+    private void FireWave(AttackContext context, float startAngle, float angleBetweenShots, float gapCenter, CancellationToken token)
     {
-        Vector3 origin = shooter.Owner.Body.position;
+        Vector3 origin = context.Owner.Body.position;
 
         for (int i = 0; i < _shotsPerWave; i++)
         {
@@ -85,11 +85,11 @@ public class RadialHazardPattern : HazardPattern
             Vector2 direction = Geometry2D.ToDirection(angle);
 
             // 환경 탄막은 보스의 공격이 아니라서 게이지를 쌓지 않는다.
-            shooter.FireShotToward(_projectilePrefab, _shot, origin, direction, _range, 0f, token);
+            context.Launcher.FireShotToward(GetProjectilePrefab(context.Owner.Data.ProjectilePrefab), _shot, origin, direction, _range, 0f, token);
         }
     }
 
-    // DeltaAngle은 두 각도의 차이를 -180~180도로 돌려줘, 360도를 넘어간 각도도 바르게 비교한다.
+    // 360도를 넘어간 각도도 바르게 비교하도록 차이를 -180~180도로 잰다.
     private bool IsInGap(float angle, float gapCenter)
     {
         return 0f < _gapAngle && Mathf.Abs(Mathf.DeltaAngle(angle, gapCenter)) <= _gapAngle * 0.5f;
@@ -107,8 +107,8 @@ public class RadialHazardPattern : HazardPattern
         return null != _projectilePrefab ? _projectilePrefab : defaultProjectile;
     }
 
-    private float GetAngleToTarget(AutoAttacker shooter)
+    private float GetAngleToTarget(AttackContext context)
     {
-        return Geometry2D.ToAngle(shooter.Target.FollowTransform.position - shooter.Owner.Body.position);
+        return Geometry2D.ToAngle(context.Target.FollowTransform.position - context.Owner.Body.position);
     }
 }

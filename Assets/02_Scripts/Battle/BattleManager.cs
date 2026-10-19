@@ -47,6 +47,7 @@ public class BattleManager : MonoBehaviour
 
     private BattleUnit _player;
     private BattleUnit _boss;
+    private BossPhaseMachine _bossPhases;
     private BattleHudView _hud;
     private BattleHudViewModel _hudViewModel;
     private ResultUI _result;
@@ -96,12 +97,14 @@ public class BattleManager : MonoBehaviour
 
     private bool HasRequiredReferences()
     {
+        // 빠지면 전투를 시작할 수 없는 것만 여기서 묻는다. 빠져도 그 기능만 꺼지는 부품(막기·공격 입력 등)은 스스로 Awake에서 알린다.
         // 앞에서부터 확인해 처음 비어 있는 참조에서 멈춘다.
-        // nameof는 컴파일할 때 필드 이름을 문자열로 바꿔 줘서, 필드 이름을 바꿔도 로그가 함께 바뀐다.
         bool hasAllReferences = IsAssigned(_playerSpawnPoint, nameof(_playerSpawnPoint))
             && IsAssigned(_bossSpawnPoint, nameof(_bossSpawnPoint))
             && IsAssigned(_playerPrefab, nameof(_playerPrefab))
             && IsAssigned(_bossPrefab, nameof(_bossPrefab))
+            && IsAssigned(_playerPrefab.Data, $"{nameof(_playerPrefab)}.{nameof(BattleUnit.Data)}")
+            && IsAssigned(_bossPrefab.Data, $"{nameof(_bossPrefab)}.{nameof(BattleUnit.Data)}")
             && IsAssigned(_introTrigger, nameof(_introTrigger))
             && IsAssigned(_introCutscene, nameof(_introCutscene))
             && IsAssigned(_paintCanvas, nameof(_paintCanvas))
@@ -124,6 +127,12 @@ public class BattleManager : MonoBehaviour
             return false;
         }
 
+        // 보스 데이터가 BossData가 아니면 등장 배너가 조용히 빠지므로 알린다. 배너만 없을 뿐이라 전투는 그대로 진행한다.
+        if (false == (_bossPrefab.Data is BossData))
+        {
+            Debug.LogError("전투 매니저 : 보스 프리팹의 데이터가 BossData가 아니라 등장 배너를 띄우지 않습니다.");
+        }
+
         // 하위 컴포넌트는 빠진 항목을 직접 로그로 남기므로 결과만 확인한다.
         return _introCutscene.HasRequiredReferences()
             && GameManager.CameraRig.HasRequiredReferences()
@@ -132,7 +141,7 @@ public class BattleManager : MonoBehaviour
             && _defeatCutscene.HasRequiredReferences();
     }
 
-    // System.Object와 이름이 겹쳐 UnityEngine.Object로 적는다. Unity 오브젝트 타입으로 받아야 파괴된 오브젝트도 null로 본다.
+    // Unity 오브젝트 타입으로 받아야 파괴된 오브젝트도 null로 본다.
     private bool IsAssigned(UnityEngine.Object target, string label)
     {
         if (null != target)
@@ -265,6 +274,11 @@ public class BattleManager : MonoBehaviour
             StartUnit(_player, _boss, battleSource.Token);
             StartUnit(_boss, _player, battleSource.Token);
 
+            if (_boss.TryGetComponent(out _bossPhases))
+            {
+                _bossPhases.OnRevivalChanged += HandleBossRevivalChanged;
+            }
+
             if (null != _boss.Mover)
             {
                 _boss.Mover.RunAsync(battleSource.Token).Forget();
@@ -276,12 +290,17 @@ public class BattleManager : MonoBehaviour
                 _environmentHazard.RunAsync(_boss.Attacker, battleSource.Token).Forget();
             }
 
-            // WhenAny는 먼저 끝난 작업의 순서 번호를 돌려준다. 0은 보스, 1은 플레이어가 먼저 쓰러진 것이다.
+            // 먼저 쓰러진 쪽의 순서 번호다. 0은 보스, 1은 플레이어다.
             int defeatedIndex = await UniTask.WhenAny(
                 _boss.Health.WaitForDeathAsync(token),
                 _player.Health.WaitForDeathAsync(token));
 
             battleSource.Cancel();
+
+            if (null != _bossPhases)
+            {
+                _bossPhases.OnRevivalChanged -= HandleBossRevivalChanged;
+            }
 
             // 쓰러진 쪽은 Dead라 그대로 남는다.
             _player.ChangeState(UnitState.Idle);
@@ -297,17 +316,24 @@ public class BattleManager : MonoBehaviour
         unit.Attacker.RunAsync(target, _paintCanvas, token).Forget();
     }
 
-    private void DrawMoveAreaGizmo(BattleUnit unitPrefab, Color color)
+    // 연출 중인 보스에게 계속 쏘아 대면 어색해, 쓰러졌다 일어나는 동안 플레이어도 공격·이동·막기를 멈춘다.
+    private void HandleBossRevivalChanged(bool isReviving)
     {
-        if (null == unitPrefab)
+        if (_player.Health.IsDead)
         {
             return;
         }
 
-        Rect area = _stageArea.GetMoveArea(unitPrefab);
-
-        Gizmos.color = color;
-        Gizmos.DrawWireCube(area.center, new Vector3(area.width, area.height, 0f));
+        if (isReviving)
+        {
+            _player.Attacker.Interrupt();
+            _player.ChangeState(UnitState.Idle);
+        }
+        else
+        {
+            _player.ChangeState(UnitState.Move);
+            _player.Attacker.Resume();
+        }
     }
 
     private async UniTask<Texture2D> PlayEndingAsync(CancellationToken token)
@@ -351,7 +377,7 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    // 플레이어는 자동 회복 때문에 거의 쓰러지지 않아, 플레이 중 컴포넌트 우클릭 메뉴로 결과 흐름을 바로 확인한다.
+    // 승리·패배 결과 흐름을 직접 깨거나 져 보지 않고, 플레이 중 컴포넌트 우클릭 메뉴로 바로 확인한다.
     [ContextMenu("테스트/플레이어 처치")]
     private void KillPlayerForTest()
     {
@@ -399,5 +425,18 @@ public class BattleManager : MonoBehaviour
 
         Gizmos.color = Color.magenta;
         Gizmos.DrawWireCube(_bossSpawnPoint.position, new Vector3(halfSize.x * 2f, halfSize.y * 2f, 0f));
+    }
+
+    private void DrawMoveAreaGizmo(BattleUnit unitPrefab, Color color)
+    {
+        if (null == unitPrefab)
+        {
+            return;
+        }
+
+        Rect area = _stageArea.GetMoveArea(unitPrefab);
+
+        Gizmos.color = color;
+        Gizmos.DrawWireCube(area.center, new Vector3(area.width, area.height, 0f));
     }
 }

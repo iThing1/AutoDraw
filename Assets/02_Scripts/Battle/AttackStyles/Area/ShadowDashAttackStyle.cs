@@ -28,7 +28,7 @@ public class ShadowDashAttackStyle : AttackStyle
     [SerializeField, Min(0.1f)] private float _shadowDiameter = 2.2f;
     [SerializeField, Min(0.1f)] private float _dashSpeed = 45f;
     [SerializeField, Min(0f)] private float _dashInterval = 0.35f;
-    [SerializeField] private ShotSettings _hit = new();
+    [SerializeField] private HitSettings _hit = new();
 
     public override void Prewarm()
     {
@@ -44,28 +44,24 @@ public class ShadowDashAttackStyle : AttackStyle
     }
 
     // 길은 시작할 때 한꺼번에 정해 모두 보여 주고, 길마다 차오르는 시간을 달리해 그림자가 나갈 순서를 알린다.
-    public override async UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         List<UniTask> dashes = new List<UniTask>(_dashCount);
-        Vector3 targetPoint = attacker.Target.GetAimPoint(Vector3.zero);
+        Vector3 targetPoint = context.Target.GetAimPoint(Vector3.zero);
 
         for (int i = 0; i < _dashCount; i++)
         {
-            float angle = UnityEngine.Random.Range(0f, 180f);
-            Vector3 along = Geometry2D.ToDirection(angle);
-            Vector3 side = new Vector3(-along.y, along.x, 0f);
-            Vector3 center = targetPoint + side * UnityEngine.Random.Range(-_offsetRange, _offsetRange);
+            LinePlacement line = LinePlacement.PickNear(targetPoint, _offsetRange);
 
-            dashes.Add(DashAsync(attacker, center, angle, along, _warnDuration + _dashInterval * i, gaugeGain, token));
+            dashes.Add(DashAsync(context, line, _warnDuration + _dashInterval * i, gaugeGain, token));
         }
 
         await UniTask.WhenAll(dashes);
     }
 
-    private async UniTask DashAsync(AutoAttacker attacker, Vector3 center, float angle, Vector3 along, float warnDuration, float gaugeGain,
-        CancellationToken token)
+    private async UniTask DashAsync(AttackContext context, LinePlacement line, float warnDuration, float gaugeGain, CancellationToken token)
     {
-        await Telegraph.PlayLineAsync(_telegraphPrefab, center, angle, _length, _shadowDiameter, _telegraphColor, warnDuration, token);
+        await Telegraph.PlayLineAsync(_telegraphPrefab, line.Center, line.Angle, _length, _shadowDiameter, _telegraphColor, warnDuration, token);
 
         if (null == _shadowPrefab)
         {
@@ -74,12 +70,12 @@ public class ShadowDashAttackStyle : AttackStyle
 
         // 양 끝 중 무작위로 한쪽에서 출발한다.
         float direction = 0.5f > UnityEngine.Random.value ? -1f : 1f;
-        Vector3 start = center - along * (_length * 0.5f * direction);
-        Vector3 velocity = along * (_dashSpeed * direction);
+        Vector3 start = line.Center - line.Along * (_length * 0.5f * direction);
+        Vector3 velocity = line.Along * (_dashSpeed * direction);
         float radius = _shadowDiameter * 0.5f;
 
         SpriteRenderer shadow = PooledSprite.Spawn(_shadowPrefab, start, 0f, new Vector2(_shadowDiameter, _shadowDiameter), _shadowColor);
-        AttackTarget target = attacker.Target;
+        AttackTarget target = context.Target;
         float travelled = 0f;
         bool hasStruck = false;
 
@@ -97,7 +93,7 @@ public class ShadowDashAttackStyle : AttackStyle
                 if (false == hasStruck && IsTouchingPath(target, previous, shadow.transform.position, radius))
                 {
                     hasStruck = true;
-                    attacker.Strike(_hit, target.GetAimPoint(Vector3.zero), gaugeGain);
+                    context.Damage.Strike(_hit, target.GetAimPoint(Vector3.zero), gaugeGain);
                 }
 
                 await UniTask.Yield(PlayerLoopTiming.Update, token);

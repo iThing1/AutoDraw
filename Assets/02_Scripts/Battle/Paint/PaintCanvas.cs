@@ -48,7 +48,6 @@ public class PaintCanvas : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            // insideUnitCircle은 Vector2라서, 위치에 더하려고 Vector3로 바꾼다.
             Vector3 position = center + (Vector3)(Random.insideUnitCircle * preset.SplatSpread);
             float scale = preset.SplatScale.PickRandom();
 
@@ -83,7 +82,7 @@ public class PaintCanvas : MonoBehaviour
         {
             if (_splats[i].IsInk)
             {
-                DespawnSplat(_splats[i]);
+                _splats[i].Despawn();
                 _splats.RemoveAt(i);
             }
         }
@@ -180,6 +179,7 @@ public class PaintCanvas : MonoBehaviour
     }
 
     // 상한을 넘으면 보스 잉크 중 가장 오래된 것부터 지운다. 플레이어 물감은 클리어 그림에 남아야 해서 잉크가 하나도 없을 때만 지운다.
+    // 목록에서는 바로 빼 상한을 비우고, 그림만 흐려지며 사라진다.
     private void RemoveOldest()
     {
         PaintSplat oldest = 0 < _inkSplats.Count ? _inkSplats[0] : _splats[0];
@@ -191,31 +191,6 @@ public class PaintCanvas : MonoBehaviour
             _inkSplats.RemoveAt(0);
         }
 
-        FadeOutAndDespawn(oldest);
-    }
-
-    // 목록에서는 바로 빼 상한을 비우고, 그림만 흐려지며 사라진다. 스테이지와 함께 파괴되면 트윈도 함께 정리된다.
-    private void FadeOutAndDespawn(PaintSplat splat)
-    {
-        splat.transform.DOKill();
-        splat.SpriteRenderer.DOKill();
-
-        if (0f >= _removeFadeDuration)
-        {
-            GameManager.Pool.Despawn(splat.gameObject);
-            return;
-        }
-
-        splat.SpriteRenderer.DOFade(0f, _removeFadeDuration)
-            .SetUpdate(true)
-            .SetLink(splat.gameObject)
-            .OnComplete(() => GameManager.Pool.Despawn(splat.gameObject));
-    }
-
-    private void DespawnSplat(PaintSplat splat)
-    {
-        splat.transform.DOKill();
-        splat.SpriteRenderer.DOKill();
-        GameManager.Pool.Despawn(splat.gameObject);
+        oldest.FadeOutAndDespawn(_removeFadeDuration);
     }
 }

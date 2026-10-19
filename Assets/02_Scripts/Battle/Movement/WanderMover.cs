@@ -36,7 +36,7 @@ public class WanderMover : UnitMover
         if (IsTargetTooFar(settings))
         {
             // 다가간 자리를 새 배회 중심으로 삼아, 다가간 뒤 원래 자리로 되돌아가지 않게 한다.
-            destination = ClampPosition(Unit.Attacker.Target.GetApproachPoint(transform.position, settings.ChaseStopDistance));
+            destination = ClampPosition(GetTarget().GetApproachPoint(transform.position, settings.ChaseStopDistance));
             _center = destination;
             speed = settings.Speed.Max;
         }
@@ -71,14 +71,23 @@ public class WanderMover : UnitMover
 
     private bool IsTargetTooFar(WanderSettings settings)
     {
-        AttackTarget target = Unit.Attacker.Target;
+        AttackTarget target = GetTarget();
 
         if (null == target || 0f >= settings.ChaseDistance)
         {
             return false;
         }
 
+        // 추격 판단도 루트끼리 잰다. 조준·명중만 Body 기준이다.
         return Vector3.Distance(transform.position, target.Unit.transform.position) > settings.ChaseDistance;
+    }
+
+    // 전투가 시작되기 전(공격 맥락이 없을 때)에는 null이다.
+    private AttackTarget GetTarget()
+    {
+        AttackContext context = Unit.Attacker.Context;
+
+        return null != context ? context.Target : null;
     }
 
     // 지금 위치에서 너무 가까운 지점은 움직임이 거의 보이지 않으므로, 최소 거리 이상 떨어진 지점을 고른다.

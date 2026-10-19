@@ -129,6 +129,18 @@ public class GalleryStage : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    // 방금 깬 스테이지의 액자만 다음 Show에서 그림을 다시 읽게 한다.
+    public void MarkPaintingChanged(StageData stage)
+    {
+        for (int i = 0; i < _frames.Length; i++)
+        {
+            if (stage == _frames[i].Stage)
+            {
+                _frames[i].MarkPaintingChanged();
+            }
+        }
+    }
+
     private void HandleFocusChanged(GalleryFrame frame)
     {
         if (null != _hud)

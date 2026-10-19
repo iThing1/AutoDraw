@@ -32,8 +32,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
     [SerializeField, Min(0f)] private float _turnSpeed = 90f;
     [SerializeField, Min(0f)] private float _lifetime = 6f;
     [SerializeField, Min(0f)] private float _trailTime = 0.2f;
-    // 투사체 관련 값은 쓰지 않고 피해·타격 프리셋만 쓴다.
-    [SerializeField] private ShotSettings _orbHit = new();
+    [SerializeField] private HitSettings _orbHit = new();
 
     [Header("되받아침")]
     [SerializeField] private Color _reflectColor = new Color(0.2f, 0.75f, 1f, 1f);
@@ -53,7 +52,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
         }
     }
 
-    public override async UniTask<bool> PlayAsync(BattleUnit boss, CancellationToken token)
+    public override async UniTask<bool> PlayAsync(AttackContext context, CancellationToken token)
     {
         if (null == _orbPrefab || null == _chargePrefab)
         {
@@ -72,7 +71,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
                 break;
             }
 
-            if (await CastAsync(boss, token))
+            if (await CastAsync(context, token))
             {
                 reflectCount++;
             }
@@ -84,19 +83,18 @@ public class ReflectOrbGimmick : PunishingBossGimmick
 
         if (false == isBroken)
         {
-            PunishTarget(boss);
+            PunishTarget(context);
         }
 
         return isBroken;
     }
 
     // 막아 냈으면 true. 그냥 맞으면 피해를 입고, 피하면 아무 일 없이 넘어간다.
-    private async UniTask<bool> CastAsync(BattleUnit boss, CancellationToken token)
+    private async UniTask<bool> CastAsync(AttackContext context, CancellationToken token)
     {
-        AutoAttacker attacker = boss.Attacker;
-        AttackTarget target = attacker.Target;
-        BossHands hands = attacker.Hands;
-        Transform hand = null != hands ? hands.RightHand : boss.Body;
+        AttackTarget target = context.Target;
+        BossHands hands = context.Hands;
+        Transform hand = null != hands ? hands.RightHand : context.Owner.Body;
 
         try
         {
@@ -111,7 +109,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
 
             if (FlightOutcome.Arrived == flight.Outcome)
             {
-                attacker.StrikeUnblockable(_orbHit, flight.LandingPoint);
+                context.Damage.StrikeUnblockable(_orbHit, flight.LandingPoint);
                 return false;
             }
 
@@ -122,9 +120,9 @@ public class ReflectOrbGimmick : PunishingBossGimmick
 
             target.NotifyBlocked(flight.LandingPoint);
 
-            await ProjectileFlight.FlyAsync(_orbPrefab, _reflectShot, flight.LandingPoint, boss.Body.position, _reflectColor, token);
+            await ProjectileFlight.FlyAsync(_orbPrefab, _reflectShot, flight.LandingPoint, context.Owner.Body.position, _reflectColor, token);
 
-            ImpactPlayer.Play(_reflectImpact, boss.Body.position, _reflectColor);
+            ImpactPlayer.Play(_reflectImpact, context.Owner.Body.position, _reflectColor);
 
             return true;
         }
@@ -137,8 +135,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
         }
     }
 
-    // 일정한 빠르기로 방향만 꺾어 쫓아온다. 목표가 움직인 만큼 위치를 더해 주는 보통 탄과 달리, 플레이어가 빨리 달려도 구체가 빨라지지 않는다.
-    // 게임 시간으로 날고, 시간 왜곡 안에서는 다른 탄처럼 느려진다. 수명이 다하면 빗나간 것이다.
+    // 크게 키운 보스 탄을 유도 비행으로 날린다. 수명이 다하면 빗나간 것이다.
     private async UniTask<FlightResult> FlyOrbAsync(AttackTarget target, Vector3 start, CancellationToken token)
     {
         GameObject orb = GameManager.Pool.Spawn(_orbPrefab, start, Quaternion.identity);
@@ -160,35 +157,10 @@ public class ReflectOrbGimmick : PunishingBossGimmick
 
         float speed = _orbSpeed.PickRandom();
         Vector3 direction = (target.GetAimPoint(Vector3.zero) - start).normalized;
-        float elapsed = 0f;
 
         try
         {
-            while (elapsed < _lifetime)
-            {
-                await UniTask.Yield(PlayerLoopTiming.Update, token);
-
-                float deltaTime = Time.deltaTime * GameManager.SlowZones.GetProjectileScale(orbTransform.position);
-                elapsed += Time.deltaTime;
-
-                Vector3 toTarget = target.GetAimPoint(Vector3.zero) - orbTransform.position;
-                direction = Vector3.RotateTowards(direction, toTarget.normalized, _turnSpeed * Mathf.Deg2Rad * deltaTime, 0f);
-                orbTransform.position += direction * (speed * deltaTime);
-
-                Vector3 position = orbTransform.position;
-
-                if (target.IsBlockedAt(position, radius))
-                {
-                    return new FlightResult(FlightOutcome.Blocked, position);
-                }
-
-                if (target.IsTouching(position, radius))
-                {
-                    return new FlightResult(FlightOutcome.Arrived, position);
-                }
-            }
-
-            return new FlightResult(FlightOutcome.Missed, orbTransform.position);
+            return await orb.GetOrAddComponent<HomingMotion>().FlyAsync(target, new HomingFlight(direction, speed, _turnSpeed, _lifetime, radius), token);
         }
         finally
         {

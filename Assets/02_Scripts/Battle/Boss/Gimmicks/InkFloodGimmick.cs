@@ -50,7 +50,7 @@ public class InkFloodGimmick : PunishingBossGimmick
         }
     }
 
-    public override async UniTask<bool> PlayAsync(BattleUnit boss, CancellationToken token)
+    public override async UniTask<bool> PlayAsync(AttackContext context, CancellationToken token)
     {
         if (null == _floodPrefab)
         {
@@ -58,20 +58,19 @@ public class InkFloodGimmick : PunishingBossGimmick
             return true;
         }
 
-        AutoAttacker attacker = boss.Attacker;
-        AttackTarget target = attacker.Target;
+        AttackTarget target = context.Target;
         Color clear = new Color(_floodColor.r, _floodColor.g, _floodColor.b, 0f);
-        SpriteRenderer flood = PooledSprite.Spawn(_floodPrefab, boss.transform.position, 0f, new Vector2(_floodSize, _floodSize), clear);
-        SpriteRenderer dim = SpawnDim(boss.transform.position);
+        SpriteRenderer flood = PooledSprite.Spawn(_floodPrefab, context.Owner.transform.position, 0f, new Vector2(_floodSize, _floodSize), clear);
+        SpriteRenderer dim = SpawnDim(context.Owner.transform.position);
 
         try
         {
-            if (null != attacker.Hands)
+            if (null != context.Hands)
             {
-                attacker.Hands.PoseAsync(HandGesture.BothRaise, target.GetAimPoint(Vector3.zero), _warnDuration, token).Forget();
+                context.Hands.PoseAsync(HandGesture.BothRaise, target.GetAimPoint(Vector3.zero), _warnDuration, token).Forget();
             }
 
-            LeaveIslands(attacker, target.GetAimPoint(Vector3.zero));
+            LeaveIslands(context, target.GetAimPoint(Vector3.zero));
             FadeDim(dim, _dimAlpha);
 
             await flood.DOFade(_floodColor.a, _warnDuration)
@@ -83,11 +82,11 @@ public class InkFloodGimmick : PunishingBossGimmick
 
             ImpactPlayer.Play(_surgeImpact, target.GetAimPoint(Vector3.zero));
 
-            bool isSafe = null != attacker.PaintCanvas && attacker.PaintCanvas.IsPaintedAt(target.FollowTransform.position, _footRadius);
+            bool isSafe = null != context.PaintCanvas && context.PaintCanvas.IsPaintedAt(target.FollowTransform.position, _footRadius);
 
             if (false == isSafe)
             {
-                PunishTarget(boss);
+                PunishTarget(context);
             }
 
             await UniTask.Delay(TimeSpan.FromSeconds(_holdDuration), cancellationToken: token);
@@ -104,9 +103,9 @@ public class InkFloodGimmick : PunishingBossGimmick
             PooledSprite.Despawn(flood);
             PooledSprite.Despawn(dim);
 
-            if (null != attacker.Hands)
+            if (null != context.Hands)
             {
-                attacker.Hands.ReturnToRest();
+                context.Hands.ReturnToRest();
             }
         }
     }
@@ -133,10 +132,10 @@ public class InkFloodGimmick : PunishingBossGimmick
     }
 
     // 플레이어 팔레트 색으로 칠해, 플레이어가 칠한 물감과 같은 것임을 알 수 있게 한다.
-    private void LeaveIslands(AutoAttacker attacker, Vector3 center)
+    private void LeaveIslands(AttackContext context, Vector3 center)
     {
-        PaintCanvas canvas = attacker.PaintCanvas;
-        PaintPalette palette = attacker.Target.Unit.Data.Palette;
+        PaintCanvas canvas = context.PaintCanvas;
+        PaintPalette palette = context.Target.Unit.Data.Palette;
 
         if (null == canvas || null == _islandStyle)
         {

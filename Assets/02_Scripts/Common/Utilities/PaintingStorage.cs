@@ -37,7 +37,8 @@ public static class PaintingStorage
         }
 
         Texture2D painting = new Texture2D(2, 2);
-        painting.LoadImage(File.ReadAllBytes(path));
+        // 액자에 그리기만 하므로 CPU 쪽 사본은 버린다(markNonReadable).
+        painting.LoadImage(File.ReadAllBytes(path), true);
 
         return painting;
     }

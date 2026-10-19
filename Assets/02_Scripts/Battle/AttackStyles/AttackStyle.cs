@@ -45,5 +45,5 @@ public abstract class AttackStyle : ScriptableObject
     {
     }
 
-    public abstract UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token);
+    public abstract UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token);
 }

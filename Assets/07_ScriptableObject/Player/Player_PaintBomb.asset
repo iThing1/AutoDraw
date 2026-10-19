@@ -41,13 +41,14 @@ MonoBehaviour:
     _trailWidth: 0.25
     _useTrailColor: 0
     _trailColor: {r: 0, g: 0, b: 0, a: 1}
-    _damage:
-      _min: 0
-      _max: 0
-    _criticalChance: 0
-    _criticalMultiplier: 2
-    _normalHit: {fileID: 0}
-    _criticalHit: {fileID: 0}
+    _hit:
+      _damage:
+        _min: 0
+        _max: 0
+      _criticalChance: 0
+      _criticalMultiplier: 2
+      _normalHit: {fileID: 0}
+      _criticalHit: {fileID: 0}
   _cluster:
     _splitRatio: 0.55
     _splitHeight: 5
@@ -102,10 +103,11 @@ MonoBehaviour:
       _trailWidth: 0.1
       _useTrailColor: 0
       _trailColor: {r: 0, g: 0, b: 0, a: 1}
-      _damage:
-        _min: 6
-        _max: 9
-      _criticalChance: 0.15
-      _criticalMultiplier: 2
-      _normalHit: {fileID: 11400000, guid: a1472993146643b4caf6ff2f32ea6da5, type: 2}
-      _criticalHit: {fileID: 11400000, guid: 153bdefa60cf5ff4da3be8afa326f656, type: 2}
+      _hit:
+        _damage:
+          _min: 6
+          _max: 9
+        _criticalChance: 0.15
+        _criticalMultiplier: 2
+        _normalHit: {fileID: 11400000, guid: a1472993146643b4caf6ff2f32ea6da5, type: 2}
+        _criticalHit: {fileID: 11400000, guid: 153bdefa60cf5ff4da3be8afa326f656, type: 2}

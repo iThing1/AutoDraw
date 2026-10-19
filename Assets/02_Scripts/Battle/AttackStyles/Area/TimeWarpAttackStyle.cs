@@ -24,7 +24,7 @@ public class TimeWarpAttackStyle : AttackStyle
         }
     }
 
-    public override UniTask FireAsync(AutoAttacker attacker, float gaugeGain, CancellationToken token)
+    public override UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         if (null == _zonePrefab)
         {
@@ -34,7 +34,7 @@ public class TimeWarpAttackStyle : AttackStyle
 
         for (int i = 0; i < _zoneCount; i++)
         {
-            Vector3 center = attacker.Target.GetPredictedPoint(_zoneLeadTime * i);
+            Vector3 center = context.Target.GetPredictedPoint(_zoneLeadTime * i);
             SlowZone zone = GameManager.Pool.Spawn(_zonePrefab.gameObject, center, Quaternion.identity).GetComponent<SlowZone>();
 
             zone.PlayAsync(_zone, token).Forget();

@@ -33,7 +33,7 @@ public class EnvironmentHazard : MonoBehaviour
     }
 
     // 게임 시간으로 기다려, 히트 스톱과 슬로 모션 동안에는 다음 패턴도 함께 늦춘다.
-    public async UniTask RunAsync(AutoAttacker shooter, CancellationToken token)
+    public async UniTask RunAsync(AutoAttacker attacker, CancellationToken token)
     {
         if (null == _patterns || 0 == _patterns.Length)
         {
@@ -42,19 +42,18 @@ public class EnvironmentHazard : MonoBehaviour
 
         await UniTask.Delay(TimeSpan.FromSeconds(_firstDelay), cancellationToken: token);
 
-        while (false == shooter.Owner.Health.IsDead && false == shooter.Target.IsDefeated)
+        AttackContext context = attacker.Context;
+
+        while (false == context.Owner.Health.IsDead && false == context.Target.IsDefeated)
         {
             // 보스가 기믹·부활로 멈춘 동안에는 새 탄막을 꺼내지 않아, 기믹과 탄막이 겹치지 않게 한다.
-            while (shooter.IsInterrupted)
-            {
-                await UniTask.Yield(PlayerLoopTiming.Update, token);
-            }
+            await attacker.WaitUntilResumedAsync(token);
 
             HazardPattern pattern = PickPattern();
 
             if (null != pattern)
             {
-                await pattern.PlayAsync(shooter, token);
+                await pattern.PlayAsync(context, token);
             }
 
             await UniTask.Delay(TimeSpan.FromSeconds(_interval.PickRandom()), cancellationToken: token);

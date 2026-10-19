@@ -44,13 +44,14 @@ MonoBehaviour:
     _trailWidth: 0.08
     _useTrailColor: 1
     _trailColor: {r: 0, g: 0, b: 0, a: 1}
-    _damage:
-      _min: 3
-      _max: 5
-    _criticalChance: 0.1
-    _criticalMultiplier: 2
-    _normalHit: {fileID: 11400000, guid: 3e2afe8de358077d09a19ac1f877e59e, type: 2}
-    _criticalHit: {fileID: 11400000, guid: 3e2afe8de358077d09a19ac1f877e59e, type: 2}
+    _hit:
+      _damage:
+        _min: 3
+        _max: 5
+      _criticalChance: 0.1
+      _criticalMultiplier: 2
+      _normalHit: {fileID: 11400000, guid: 3e2afe8de358077d09a19ac1f877e59e, type: 2}
+      _criticalHit: {fileID: 11400000, guid: 3e2afe8de358077d09a19ac1f877e59e, type: 2}
   _finaleDelay: 0.35
   _finaleShot:
     _projectileScale: 2.2
@@ -68,10 +69,11 @@ MonoBehaviour:
     _trailWidth: 0.3
     _useTrailColor: 1
     _trailColor: {r: 0, g: 0, b: 0, a: 1}
-    _damage:
-      _min: 10
-      _max: 14
-    _criticalChance: 0.2
-    _criticalMultiplier: 2
-    _normalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
-    _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+    _hit:
+      _damage:
+        _min: 10
+        _max: 14
+      _criticalChance: 0.2
+      _criticalMultiplier: 2
+      _normalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+      _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}

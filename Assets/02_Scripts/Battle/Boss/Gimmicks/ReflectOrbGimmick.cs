@@ -135,8 +135,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
         }
     }
 
-    // 일정한 빠르기로 방향만 꺾어 쫓아온다. 목표가 움직인 만큼 위치를 더해 주는 보통 탄과 달리, 플레이어가 빨리 달려도 구체가 빨라지지 않는다.
-    // 게임 시간으로 날고, 시간 왜곡 안에서는 다른 탄처럼 느려진다. 수명이 다하면 빗나간 것이다.
+    // 크게 키운 보스 탄을 유도 비행으로 날린다. 수명이 다하면 빗나간 것이다.
     private async UniTask<FlightResult> FlyOrbAsync(AttackTarget target, Vector3 start, CancellationToken token)
     {
         GameObject orb = GameManager.Pool.Spawn(_orbPrefab, start, Quaternion.identity);
@@ -158,35 +157,10 @@ public class ReflectOrbGimmick : PunishingBossGimmick
 
         float speed = _orbSpeed.PickRandom();
         Vector3 direction = (target.GetAimPoint(Vector3.zero) - start).normalized;
-        float elapsed = 0f;
 
         try
         {
-            while (elapsed < _lifetime)
-            {
-                await UniTask.Yield(PlayerLoopTiming.Update, token);
-
-                float deltaTime = Time.deltaTime * GameManager.SlowZones.GetProjectileScale(orbTransform.position);
-                elapsed += Time.deltaTime;
-
-                Vector3 toTarget = target.GetAimPoint(Vector3.zero) - orbTransform.position;
-                direction = Vector3.RotateTowards(direction, toTarget.normalized, _turnSpeed * Mathf.Deg2Rad * deltaTime, 0f);
-                orbTransform.position += direction * (speed * deltaTime);
-
-                Vector3 position = orbTransform.position;
-
-                if (target.IsBlockedAt(position, radius))
-                {
-                    return new FlightResult(FlightOutcome.Blocked, position);
-                }
-
-                if (target.IsTouching(position, radius))
-                {
-                    return new FlightResult(FlightOutcome.Arrived, position);
-                }
-            }
-
-            return new FlightResult(FlightOutcome.Missed, orbTransform.position);
+            return await orb.GetOrAddComponent<HomingMotion>().FlyAsync(target, new HomingFlight(direction, speed, _turnSpeed, _lifetime, radius), token);
         }
         finally
         {

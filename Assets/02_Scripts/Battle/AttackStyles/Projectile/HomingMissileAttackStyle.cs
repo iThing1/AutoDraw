@@ -75,30 +75,13 @@ public class HomingMissileAttackStyle : AttackStyle
 
         float spread = UnityEngine.Random.Range(-_launchSpreadAngle, _launchSpreadAngle);
         Vector3 direction = Quaternion.Euler(0f, 0f, spread) * (target.GetAimPoint(Vector3.zero) - start).normalized;
-        float elapsed = 0f;
 
         try
         {
-            while (elapsed < _lifetime)
-            {
-                await UniTask.Yield(PlayerLoopTiming.Update, token);
+            FlightResult flight = await missile.GetOrAddComponent<HomingMotion>()
+                .FlyAsync(target, new HomingFlight(direction, _speed, _turnSpeed, _lifetime, _collisionRadius), token);
 
-                float deltaTime = Time.deltaTime;
-                elapsed += deltaTime;
-
-                Vector3 toTarget = target.GetAimPoint(Vector3.zero) - missileTransform.position;
-                direction = Vector3.RotateTowards(direction, toTarget.normalized, _turnSpeed * Mathf.Deg2Rad * deltaTime, 0f);
-
-                missileTransform.position += direction * (_speed * deltaTime);
-                missileTransform.rotation = Quaternion.Euler(0f, 0f, Geometry2D.ToAngle(direction));
-
-                if (target.IsBlockedAt(missileTransform.position, _collisionRadius) || target.IsTouching(missileTransform.position, _collisionRadius))
-                {
-                    break;
-                }
-            }
-
-            Explode(context, missileTransform.position, gaugeGain);
+            Explode(context, flight.LandingPoint, gaugeGain);
         }
         catch (OperationCanceledException)
         {

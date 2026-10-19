@@ -35,6 +35,18 @@ public class PlayerGuard : MonoBehaviour
             return;
         }
 
+        // 유틸리티 칸에 막기를 끼웠을 때만 쓴다. 꺼 두면 입력도 받지 않고, State가 null이라 HUD도 막기 칸을 숨긴다.
+        if (UtilityType.Guard != GameManager.Player.Loadout.Utility)
+        {
+            if (null != _shield)
+            {
+                _shield.enabled = false;
+            }
+
+            enabled = false;
+            return;
+        }
+
         _stats = GameManager.Player.Stats;
         _state = new GuardState(_preset, _stats, GetComponent<SkillGauge>());
 

@@ -2,40 +2,38 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// 기본 공격 키로 공격을 고르고, 게이지가 가득 차면 스킬 키로 특수 스킬을 발동한다. 키 배치는 입력 에셋에서 바꾼다.
+// 무기 칸 키로 공격을 고르고, 게이지가 가득 차면 스킬 키로 특수 스킬을 발동한다. 키 배치는 입력 에셋에서 바꾼다.
+// 끼운 장비는 전투를 시작할 때 플레이어 모델에서 읽는다. 바꾼 장비는 다음 전투부터 쓴다.
 [RequireComponent(typeof(BattleUnit), typeof(SkillGauge))]
 public class PlayerAttackInput : MonoBehaviour
 {
-    [SerializeField] private PlayerAttackLoadout _loadout;
-    // 로드아웃의 기본 공격과 같은 순서로 넣는다. 0번 입력이 0번 기본 공격을 고른다.
+    private const int BASIC_SLOT = 0;
+    private const int HEAVY_SLOT = 1;
+    private const int WEAPON_SLOT_COUNT = 2;
+
+    // 무기 칸과 같은 순서로 넣는다(0 = 기본 무기, 1 = 화력 무기).
     [SerializeField] private InputActionReference[] _basicAttackActions;
     [SerializeField] private InputActionReference _skillAction;
 
     public event Action<int> OnBasicStyleChanged;
     public event Action OnSkillFired;
 
+    private readonly AttackStyle[] _slotStyles = new AttackStyle[WEAPON_SLOT_COUNT];
+    private readonly WeaponModifier[] _slotModifiers = new WeaponModifier[WEAPON_SLOT_COUNT];
+
     private BattleUnit _unit;
     private SkillGauge _skillGauge;
+    private AttackStyle _skillStyle;
     private int _selectedIndex = -1;
 
-    public PlayerAttackLoadout Loadout { get { return _loadout; } }
     public SkillGauge SkillGauge { get { return _skillGauge; } }
     public int SelectedIndex { get { return _selectedIndex; } }
     public string SkillKeyLabel { get { return _skillAction.GetKeyLabel(); } }
+    // 끼운 스킬의 공격 방식이 아직 없으면 null이다.
+    public AttackStyle SkillStyle { get { return _skillStyle; } }
 
-    // 기본 공격과 입력 중 적은 쪽까지만 쓴다. 키가 없는 공격은 고를 수 없다.
-    public int BasicStyleCount
-    {
-        get
-        {
-            if (null == _loadout || null == _loadout.BasicStyles || null == _basicAttackActions)
-            {
-                return 0;
-            }
-
-            return Mathf.Min(_loadout.BasicStyles.Length, _basicAttackActions.Length);
-        }
-    }
+    // 무기 칸과 입력 중 적은 쪽까지만 쓴다. 키가 없는 칸은 고를 수 없다.
+    public int SlotCount { get { return null != _basicAttackActions ? Mathf.Min(WEAPON_SLOT_COUNT, _basicAttackActions.Length) : 0; } }
 
     private void Awake()
     {
@@ -43,10 +41,14 @@ public class PlayerAttackInput : MonoBehaviour
         _skillGauge = GetComponent<SkillGauge>();
         _skillGauge.Init(GameManager.Player.Stats.SkillGaugeMax);
 
-        if (null == _loadout)
+        // 기본값(0, 0)이면 간격이 0이 되므로 표에 없는 칸도 보정 없음으로 둔다.
+        for (int i = 0; i < WEAPON_SLOT_COUNT; i++)
         {
-            Debug.LogError($"플레이어 공격 입력 : {name}에 PlayerAttackLoadout이 지정되지 않았습니다.");
+            _slotModifiers[i] = WeaponModifier.NONE;
         }
+
+
+        ReadLoadout(GameManager.Player.Loadout);
     }
 
     private void OnEnable()
@@ -64,22 +66,17 @@ public class PlayerAttackInput : MonoBehaviour
 
     private void Start()
     {
-        if (0 < BasicStyleCount)
+        if (0 < SlotCount)
         {
-            SelectBasic(0);
+            SelectBasic(BASIC_SLOT);
         }
     }
 
     private void Update()
     {
-        if (null == _loadout)
-        {
-            return;
-        }
+        int slotCount = SlotCount;
 
-        int basicCount = BasicStyleCount;
-
-        for (int i = 0; i < basicCount; i++)
+        for (int i = 0; i < slotCount; i++)
         {
             if (_basicAttackActions[i].WasPressedThisFrame())
             {
@@ -94,6 +91,11 @@ public class PlayerAttackInput : MonoBehaviour
         }
     }
 
+    public AttackStyle GetSlotStyle(int index)
+    {
+        return 0 <= index && index < WEAPON_SLOT_COUNT ? _slotStyles[index] : null;
+    }
+
     public string GetBasicKeyLabel(int index)
     {
         if (null == _basicAttackActions || index >= _basicAttackActions.Length)
@@ -104,9 +106,51 @@ public class PlayerAttackInput : MonoBehaviour
         return _basicAttackActions[index].GetKeyLabel();
     }
 
+    private void ReadLoadout(PlayerLoadout loadout)
+    {
+        ReadWeapon(BASIC_SLOT, loadout.BasicWeaponId);
+        ReadWeapon(HEAVY_SLOT, loadout.HeavyWeaponId);
+
+        if (GameManager.Tables.Skills.TryGet(loadout.SkillId, out SkillData skill))
+        {
+            _skillStyle = GameManager.Assets.Get<AttackStyle>(skill.AttackStyleKey);
+        }
+    }
+
+    private void ReadWeapon(int slot, string weaponId)
+    {
+        if (false == GameManager.Tables.Weapons.TryGet(weaponId, out WeaponData weapon))
+        {
+            Debug.LogError($"플레이어 공격 입력 : {slot}번 칸의 무기 {weaponId}이(가) 표에 없습니다.");
+            return;
+        }
+
+        _slotStyles[slot] = GameManager.Assets.Get<AttackStyle>(weapon.AttackStyleKey);
+        _slotModifiers[slot] = new WeaponModifier(weapon.DamageBonus, weapon.IntervalScale);
+    }
+
+    // 끼운 무기와 스킬의 공격을 미리 만든다. 전투 매니저가 다른 유닛과 함께 부른다.
+    public void Prewarm()
+    {
+        for (int i = 0; i < WEAPON_SLOT_COUNT; i++)
+        {
+            PrewarmStyle(_slotStyles[i]);
+        }
+
+        PrewarmStyle(_skillStyle);
+    }
+
+    private static void PrewarmStyle(AttackStyle style)
+    {
+        if (null != style)
+        {
+            style.Prewarm();
+        }
+    }
+
     private void SelectBasic(int index)
     {
-        AttackStyle style = _loadout.BasicStyles[index];
+        AttackStyle style = _slotStyles[index];
 
         if (null == style || index == _selectedIndex)
         {
@@ -114,7 +158,7 @@ public class PlayerAttackInput : MonoBehaviour
         }
 
         _selectedIndex = index;
-        _unit.OverrideAttackStyle(style);
+        _unit.OverrideAttackStyle(style, _slotModifiers[index]);
 
         OnBasicStyleChanged?.Invoke(index);
     }
@@ -127,7 +171,7 @@ public class PlayerAttackInput : MonoBehaviour
             return;
         }
 
-        if (false == _unit.Attacker.TryFireSkill(_loadout.SkillStyle))
+        if (false == _unit.Attacker.TryFireSkill(_skillStyle))
         {
             return;
         }

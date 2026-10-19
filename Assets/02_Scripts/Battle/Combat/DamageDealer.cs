@@ -8,15 +8,28 @@ public class DamageDealer
     private readonly SkillGauge _skillGauge;
     private readonly AttackTarget _target;
     private readonly PaintCanvas _paintCanvas;
+    private readonly bool _appliesWeaponModifier;
     private int _nextColorIndex;
 
     // 게이지는 플레이어만 있어 null일 수 있다.
-    public DamageDealer(BattleUnit owner, SkillGauge skillGauge, AttackTarget target, PaintCanvas paintCanvas)
+    private DamageDealer(BattleUnit owner, SkillGauge skillGauge, AttackTarget target, PaintCanvas paintCanvas, bool appliesWeaponModifier)
     {
         _owner = owner;
         _skillGauge = skillGauge;
         _target = target;
         _paintCanvas = paintCanvas;
+        _appliesWeaponModifier = appliesWeaponModifier;
+    }
+
+    public static DamageDealer ForWeapon(BattleUnit owner, SkillGauge skillGauge, AttackTarget target, PaintCanvas paintCanvas)
+    {
+        return new DamageDealer(owner, skillGauge, target, paintCanvas, true);
+    }
+
+    // 스킬은 무기 보정을 받지 않는다.
+    public static DamageDealer ForSkill(BattleUnit owner, SkillGauge skillGauge, AttackTarget target, PaintCanvas paintCanvas)
+    {
+        return new DamageDealer(owner, skillGauge, target, paintCanvas, false);
     }
 
     // 날아가는 과정 없이 바로 맞힌다. 근접 공격처럼 투사체가 없는 공격에 쓴다.
@@ -76,7 +89,8 @@ public class DamageDealer
     // 피해량과 물감 색은 쏘는 순간 정해, 날아가는 투사체의 색과 맞은 자리의 물감 색이 같게 한다.
     public DamageInfo RollDamage(HitSettings hit)
     {
-        int amount = hit.Damage.PickRandom();
+        int damageBonus = _appliesWeaponModifier ? _owner.WeaponModifier.DamageBonus : 0;
+        int amount = hit.Damage.PickRandom(damageBonus);
         bool isCritical = Random.value < hit.CriticalChance;
 
         if (isCritical)

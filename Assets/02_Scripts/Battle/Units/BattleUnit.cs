@@ -50,6 +50,7 @@ public class BattleUnit : MonoBehaviour
 
     // 키로 고른 공격이 데이터 에셋을 고치지 않도록, 실행 중에만 쓰는 덮어쓰기 값을 따로 둔다.
     private AttackStyle _attackStyleOverride;
+    private WeaponModifier _weaponModifier = WeaponModifier.NONE;
 
     public BattleUnitData Data { get { return _data; } }
     public IUnitStats Stats { get { return null != _data ? _data.Stats : null; } }
@@ -67,6 +68,7 @@ public class BattleUnit : MonoBehaviour
     public Transform Body { get { return null != _body ? _body : transform; } }
 
     public AttackStyle AttackStyle { get { return null != _attackStyleOverride ? _attackStyleOverride : GetDataAttackStyle(); } }
+    public WeaponModifier WeaponModifier { get { return _weaponModifier; } }
 
     // 몸 그림의 가로·세로 절반 크기(월드). 렌더러의 bounds는 꺼진 오브젝트나 프리팹에서 0이 되므로, 스프라이트 크기에 스케일을 곱해 읽는다.
     // 등장 전이라 꺼져 있는 보스와 씬 뷰 기즈모(프리팹)에서도 같은 값이 나온다. 몸 그림이 없으면 0이다.
@@ -187,7 +189,13 @@ public class BattleUnit : MonoBehaviour
 
     public void OverrideAttackStyle(AttackStyle attackStyle)
     {
+        OverrideAttackStyle(attackStyle, WeaponModifier.NONE);
+    }
+
+    public void OverrideAttackStyle(AttackStyle attackStyle, WeaponModifier modifier)
+    {
         _attackStyleOverride = attackStyle;
+        _weaponModifier = modifier;
     }
 
     private void EndGuard()

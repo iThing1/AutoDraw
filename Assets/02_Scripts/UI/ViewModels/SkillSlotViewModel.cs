@@ -5,7 +5,7 @@ public class SkillSlotViewModel : AttackSlotViewModel
     private SkillGauge _gauge;
 
     public SkillSlotViewModel(PlayerAttackInput input)
-        : base(input.SkillKeyLabel, input.Loadout.SkillStyle, true)
+        : base(input.SkillKeyLabel, input.SkillStyle, true)
     {
         _input = input;
         _gauge = input.SkillGauge;

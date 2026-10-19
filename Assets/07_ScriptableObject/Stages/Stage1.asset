@@ -16,3 +16,5 @@ MonoBehaviour:
   _stagePrefab: {fileID: 2969957242831443143, guid: f69c14c14a264e3429d4d59d17eddbb3, type: 3}
   _blankCanvas: {fileID: 2800000, guid: 3f7b792a8ea0e4245ba9a0ff5c380267, type: 3}
   _saveKey: Stage1
+  _rewardPoints: 1
+  _clearSkillId: black_square

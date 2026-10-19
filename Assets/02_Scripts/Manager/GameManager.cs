@@ -1,4 +1,6 @@
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using System.Threading;
 using UnityEngine;
 
 public class GameManager : SingletonBehaviour<GameManager>
@@ -7,6 +9,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     // 기본 용량(트윈 200, 시퀀스 50)을 넘기면 실행 중에 늘리며 끊길 수 있어 처음부터 넉넉히 잡는다.
     private const int TWEENERS_CAPACITY = 800;
     private const int SEQUENCES_CAPACITY = 200;
+    private const string PLAYER_STAT_ID = "player";
 
     public static BattleCameraRig CameraRig { get { return Instance._cameraRig; } }
     public static UIManager UI { get { return Instance._uiManager; } }
@@ -14,6 +17,9 @@ public class GameManager : SingletonBehaviour<GameManager>
     public static PoolManager Pool { get { return Instance._poolManager; } }
     public static TimeScaleManager TimeScale { get { return Instance._timeScaleManager; } }
     public static SlowZoneManager SlowZones { get { return Instance._slowZoneManager; } }
+    public static DataTableManager Tables { get { return Instance._dataTableManager; } }
+    // 표를 읽은 뒤에 만들어지고, 그 전에는 null이다.
+    public static PlayerModel Player { get { return Instance._player; } }
 
     [Header("씬")]
     [SerializeField] private BattleCameraRig _cameraRig;
@@ -31,6 +37,8 @@ public class GameManager : SingletonBehaviour<GameManager>
     private PoolManager _poolManager = new();
     private TimeScaleManager _timeScaleManager = new();
     private SlowZoneManager _slowZoneManager = new();
+    private DataTableManager _dataTableManager = new();
+    private PlayerModel _player;
 
     protected override void Init()
     {
@@ -57,6 +65,39 @@ public class GameManager : SingletonBehaviour<GameManager>
             return;
         }
 
+        InitAsync(destroyCancellationToken).Forget();
+    }
+
+    // 맵이 만들어지자마자 스탯을 읽으므로 플레이어를 만든 뒤에 맵을 만든다.
+    private async UniTaskVoid InitAsync(CancellationToken token)
+    {
+        // 표를 읽는 동안 빈 씬이 비치지 않게 먼저 가린다.
+        _uiManager.Cinematic.ScreenFader.ShowImmediately();
+
+        await _dataTableManager.LoadAsync(new ResourcesTableLoader(), token);
+
+        if (false == CreatePlayer())
+        {
+            return;
+        }
+
         _mapSpawner.Init();
+    }
+
+    private bool CreatePlayer()
+    {
+        PlayerStatData baseStats = _dataTableManager.PlayerStats.Get(PLAYER_STAT_ID);
+
+        if (null == baseStats)
+        {
+            Debug.LogError($"게임 매니저 : 플레이어 기본 스탯({PLAYER_STAT_ID})이 없어 게임을 시작하지 않습니다.");
+            return false;
+        }
+
+        _player = PlayerSaveStorage.TryLoad(out PlayerSaveData save)
+            ? PlayerModel.FromSave(save, baseStats)
+            : PlayerModel.CreateNew(baseStats);
+
+        return true;
     }
 }

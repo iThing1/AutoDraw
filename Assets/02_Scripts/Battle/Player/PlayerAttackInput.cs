@@ -41,14 +41,12 @@ public class PlayerAttackInput : MonoBehaviour
     {
         _unit = GetComponent<BattleUnit>();
         _skillGauge = GetComponent<SkillGauge>();
+        _skillGauge.Init(GameManager.Player.Stats.SkillGaugeMax);
 
         if (null == _loadout)
         {
             Debug.LogError($"플레이어 공격 입력 : {name}에 PlayerAttackLoadout이 지정되지 않았습니다.");
-            return;
         }
-
-        _skillGauge.Init(_loadout.SkillGaugeMax);
     }
 
     private void OnEnable()

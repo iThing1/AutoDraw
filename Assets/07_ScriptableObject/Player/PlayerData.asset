@@ -9,10 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8fb33b84bd505cb4d9e92f11e51f1d76, type: 3}
+  m_Script: {fileID: 11500000, guid: 8153e575feca4f2faa71e24d2441b7d2, type: 3}
   m_Name: PlayerData
-  m_EditorClassIdentifier: Assembly-CSharp::BattleUnitData
-  _moveSpeed: 7
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerUnitData
   _wander:
     _useWander: 0
     _areaHalfSize: {x: 4, y: 2}
@@ -26,8 +25,6 @@ MonoBehaviour:
     _moveEase: 4
     _chaseDistance: 12
     _chaseStopDistance: 7
-  _maxHp: 200
-  _hitRadius: 0.9
   _attackStyle: {fileID: 11400000, guid: 3c74d8da002e5b642a82aa46f39fe1af, type: 2}
   _projectilePrefab: {fileID: 7624588648995017096, guid: dd8bc6d1b75476545ad3bfa488ffd6ee, type: 3}
   _palette: {fileID: 11400000, guid: 073348c3e2bf9df4fa51d06e2836c5e1, type: 2}

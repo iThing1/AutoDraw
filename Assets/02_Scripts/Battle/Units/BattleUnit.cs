@@ -52,6 +52,7 @@ public class BattleUnit : MonoBehaviour
     private AttackStyle _attackStyleOverride;
 
     public BattleUnitData Data { get { return _data; } }
+    public IUnitStats Stats { get { return null != _data ? _data.Stats : null; } }
     public Health Health { get { return _health; } }
     public AutoAttacker Attacker { get { return _attacker; } }
     public UnitView View { get { return _view; } }
@@ -102,7 +103,7 @@ public class BattleUnit : MonoBehaviour
             return;
         }
 
-        _health.Init(_data.MaxHp);
+        _health.Init(_data.Stats.MaxHp);
     }
 
     private void OnDestroy()

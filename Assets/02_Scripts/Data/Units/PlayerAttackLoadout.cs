@@ -6,9 +6,7 @@ public class PlayerAttackLoadout : ScriptableObject
 {
     [SerializeField] private AttackStyle[] _basicStyles;
     [SerializeField] private AttackStyle _skillStyle;
-    [SerializeField, Min(1f)] private float _skillGaugeMax = 100f;
 
     public AttackStyle[] BasicStyles { get { return _basicStyles; } }
     public AttackStyle SkillStyle { get { return _skillStyle; } }
-    public float SkillGaugeMax { get { return _skillGaugeMax; } }
 }

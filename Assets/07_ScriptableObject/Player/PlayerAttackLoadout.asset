@@ -16,4 +16,3 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3c74d8da002e5b642a82aa46f39fe1af, type: 2}
   - {fileID: 11400000, guid: 8e7b710ab1b638d4cbe68466fed7d176, type: 2}
   _skillStyle: {fileID: 11400000, guid: 77e7ea21886d3fe4e9a50423d310c85e, type: 2}
-  _skillGaugeMax: 100

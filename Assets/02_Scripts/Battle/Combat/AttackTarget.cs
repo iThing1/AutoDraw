@@ -40,7 +40,7 @@ public class AttackTarget
     // 명중 반경 밖으로 움직였으면 피한 것이다.
     public bool IsHit(Vector3 hitPoint)
     {
-        return Vector2.Distance(hitPoint, _unit.Body.position) <= _unit.Data.HitRadius;
+        return Vector2.Distance(hitPoint, _unit.Body.position) <= _unit.Stats.HitRadius;
     }
 
     // 날아가는 탄이 몸 그림과 겹쳤는지. 넉넉한 도착 판정(명중 반경)과 달리 실제 크기로 봐서,

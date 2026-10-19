@@ -1,0 +1,6 @@
+{"_items":[
+{"_id":"light_brush","_name":"기본 붓","_type":0,"_attackStyleKey":"AttackStyle/Light","_damageBonus":0,"_intervalScale":1,"_isStarting":true,"_iconKey":"Icon/Weapon/LightBrush","_description":"가볍고 빠르게 찍는다"},
+{"_id":"fine_brush","_name":"세필 붓","_type":0,"_attackStyleKey":"AttackStyle/Light","_damageBonus":1,"_intervalScale":0.85,"_isStarting":false,"_iconKey":"Icon/Weapon/FineBrush","_description":"기본 붓보다 빠르고 조금 더 아프다"},
+{"_id":"heavy_brush","_name":"넓은 붓","_type":1,"_attackStyleKey":"AttackStyle/Heavy","_damageBonus":0,"_intervalScale":1,"_isStarting":true,"_iconKey":"Icon/Weapon/HeavyBrush","_description":"느리지만 크게 찍는다"},
+{"_id":"roller","_name":"롤러","_type":1,"_attackStyleKey":"AttackStyle/Heavy","_damageBonus":6,"_intervalScale":1.15,"_isStarting":false,"_iconKey":"Icon/Weapon/Roller","_description":"넓은 붓보다 느리지만 훨씬 아프다"}
+]}

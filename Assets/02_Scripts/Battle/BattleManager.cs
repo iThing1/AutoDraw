@@ -98,7 +98,6 @@ public class BattleManager : MonoBehaviour
     {
         // 빠지면 전투를 시작할 수 없는 것만 여기서 묻는다. 빠져도 그 기능만 꺼지는 부품(막기·공격 입력 등)은 스스로 Awake에서 알린다.
         // 앞에서부터 확인해 처음 비어 있는 참조에서 멈춘다.
-        // nameof는 컴파일할 때 필드 이름을 문자열로 바꿔 줘서, 필드 이름을 바꿔도 로그가 함께 바뀐다.
         bool hasAllReferences = IsAssigned(_playerSpawnPoint, nameof(_playerSpawnPoint))
             && IsAssigned(_bossSpawnPoint, nameof(_bossSpawnPoint))
             && IsAssigned(_playerPrefab, nameof(_playerPrefab))
@@ -141,7 +140,7 @@ public class BattleManager : MonoBehaviour
             && _defeatCutscene.HasRequiredReferences();
     }
 
-    // System.Object와 이름이 겹쳐 UnityEngine.Object로 적는다. Unity 오브젝트 타입으로 받아야 파괴된 오브젝트도 null로 본다.
+    // Unity 오브젝트 타입으로 받아야 파괴된 오브젝트도 null로 본다.
     private bool IsAssigned(UnityEngine.Object target, string label)
     {
         if (null != target)
@@ -285,7 +284,7 @@ public class BattleManager : MonoBehaviour
                 _environmentHazard.RunAsync(_boss.Attacker, battleSource.Token).Forget();
             }
 
-            // WhenAny는 먼저 끝난 작업의 순서 번호를 돌려준다. 0은 보스, 1은 플레이어가 먼저 쓰러진 것이다.
+            // 먼저 쓰러진 쪽의 순서 번호다. 0은 보스, 1은 플레이어다.
             int defeatedIndex = await UniTask.WhenAny(
                 _boss.Health.WaitForDeathAsync(token),
                 _player.Health.WaitForDeathAsync(token));

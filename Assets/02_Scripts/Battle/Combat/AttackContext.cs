@@ -25,8 +25,6 @@ public class AttackContext
     // 손 달린 보스만 있다. 없으면 null이다.
     public BossHands Hands { get { return _hands; } }
     public PaintCanvas PaintCanvas { get { return _paintCanvas; } }
-    // 맞았는지 가리고 피해·타격 연출·물감 자국·게이지를 처리한다.
     public DamageDealer Damage { get { return _damage; } }
-    // 투사체를 쏘고, 날아간 결과를 피해 처리로 넘긴다.
     public ProjectileLauncher Launcher { get { return _launcher; } }
 }

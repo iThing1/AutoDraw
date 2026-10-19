@@ -7,7 +7,7 @@ using UnityEngine;
 
 // 보스의 페이즈를 맡는다. 맞을수록 색이 물들고, 체력 줄에 닿으면 그 줄에서 멈춰 기믹을 쓰며,
 // 마지막이 아닌 페이즈의 바닥에 닿으면 쓰러졌다가 다음 페이즈의 체력으로 다시 일어난다.
-// 진짜로 쓰러지는 것은 마지막 페이즈뿐이라, 전투 매니저는 지금처럼 보스가 죽을 때까지만 기다리면 된다.
+// 진짜로 쓰러지는 것은 마지막 페이즈뿐이라, 전투 매니저는 보스가 죽을 때까지만 기다리면 된다.
 [RequireComponent(typeof(BattleUnit))]
 public class BossPhaseMachine : MonoBehaviour
 {

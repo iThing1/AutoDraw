@@ -60,7 +60,7 @@ public class ResultUI : MonoBehaviour
         _buttonGroup.interactable = true;
         _buttonGroup.blocksRaycasts = true;
 
-        // WhenAny는 먼저 눌린 버튼의 순서 번호를 돌려준다. 0은 다시 하기, 1은 갤러리다.
+        // 먼저 눌린 버튼의 순서 번호다. 0은 다시 하기, 1은 갤러리다.
         int choiceIndex = await UniTask.WhenAny(_retryButton.OnClickAsync(token), _galleryButton.OnClickAsync(token));
 
         _buttonGroup.interactable = false;

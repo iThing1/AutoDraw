@@ -9,7 +9,7 @@ using UnityEngine;
 // 1. BeginSlowMotion은 반드시 using 문으로 감싼다. 블록을 벗어나면 정상 종료·예외·취소 모두 자동으로 풀린다.
 //        using (GameManager.TimeScale.BeginSlowMotion(_slowTimeScale))
 //        {
-//            await SwingAsync(attacker, gaugeGain, token);
+//            await SwingAsync(context, gaugeGain, token);
 //        }
 // 2. 돌려받은 값을 using 없이 버리면 풀 방법이 없어 슬로 모션이 계속 남는다.
 // 3. 여러 슬로 모션이 겹치면 나중에 건 쪽이 이긴다. 먼저 건 쪽의 블록이 나중에 끝나도 나중 것은 풀리지 않는다.
@@ -17,7 +17,6 @@ using UnityEngine;
 public class TimeScaleManager
 {
     // using 블록이 끝나면 Dispose가 불려 슬로 모션을 푼다. 푸는 길을 이것 하나로 두려고 ClearSlowMotion은 private이다.
-    // struct라서 걸 때마다 메모리를 새로 잡지 않는다.
     public readonly struct SlowMotionScope : IDisposable
     {
         private readonly TimeScaleManager _manager;

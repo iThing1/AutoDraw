@@ -36,7 +36,7 @@ public class HomingMissileAttackStyle : AttackStyle
         }
     }
 
-    // 발사만 기다리고, 날아가는 미사일은 각자 끝까지 날게 둔다. 5초씩 기다리면 다음 공격이 너무 늦어진다.
+    // 발사만 기다리고, 날아가는 미사일은 각자 끝까지 날게 둔다. 수명만큼 기다리면 다음 공격이 너무 늦어진다.
     public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         if (null == _missilePrefab)

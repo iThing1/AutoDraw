@@ -10,7 +10,6 @@ public class AutoAttacker : MonoBehaviour
     private SkillGauge _skillGauge;
     private BossHands _hands;
 
-    // 패턴에 넘길 전투 정보. 전투를 시작할 때 만들고, 그 전에는 null이다.
     private AttackContext _context;
     private CancellationToken _battleToken;
     private bool _isRunning;

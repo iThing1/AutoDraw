@@ -89,7 +89,7 @@ public class RadialHazardPattern : HazardPattern
         }
     }
 
-    // DeltaAngle은 두 각도의 차이를 -180~180도로 돌려줘, 360도를 넘어간 각도도 바르게 비교한다.
+    // 360도를 넘어간 각도도 바르게 비교하도록 차이를 -180~180도로 잰다.
     private bool IsInGap(float angle, float gapCenter)
     {
         return 0f < _gapAngle && Mathf.Abs(Mathf.DeltaAngle(angle, gapCenter)) <= _gapAngle * 0.5f;

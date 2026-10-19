@@ -100,8 +100,8 @@ public class GameManager : SingletonBehaviour<GameManager>
         }
 
         _player = PlayerSaveStorage.TryLoad(out PlayerSaveData save)
-            ? PlayerModel.FromSave(save, baseStats)
-            : PlayerModel.CreateNew(baseStats);
+            ? PlayerModel.FromSave(save, baseStats, _dataTableManager)
+            : PlayerModel.CreateNew(baseStats, _dataTableManager);
 
         return true;
     }

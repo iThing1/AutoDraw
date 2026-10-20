@@ -141,15 +141,23 @@ public class GalleryStage : MonoBehaviour
         }
     }
 
-    private void HandleFocusChanged(GalleryFrame frame)
+    private void HandleFocusChanged(GalleryInteractable target)
     {
         if (null != _hud)
         {
-            _hud.ShowFocus(frame);
+            _hud.ShowFocus(target);
         }
     }
 
-    private void HandleInteract(GalleryFrame frame)
+    private void HandleInteract(GalleryInteractable target)
+    {
+        if (target is GalleryFrame frame)
+        {
+            InteractFrame(frame);
+        }
+    }
+
+    private void InteractFrame(GalleryFrame frame)
     {
         if (frame.IsLocked)
         {

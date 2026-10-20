@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 
 // 갤러리 벽의 액자. 스테이지가 비어 있으면 천으로 덮인 잠긴 액자이고, 깬 스테이지는 완성된 그림으로 바뀐다.
-public class GalleryFrame : MonoBehaviour
+public class GalleryFrame : GalleryInteractable
 {
     private const string LOCKED_LABEL = "LOCKED";
     private static readonly int BASE_MAP_ID = Shader.PropertyToID("_BaseMap");
@@ -34,9 +34,9 @@ public class GalleryFrame : MonoBehaviour
     private bool _isPaintingLoaded;
 
     public StageData Stage { get { return _stage; } }
-    public bool IsLocked { get { return null == _stage; } }
+    public override bool IsLocked { get { return null == _stage; } }
     public Transform ViewPoint { get { return _viewPoint; } }
-    public string Label { get { return IsLocked ? LOCKED_LABEL : _stage.DisplayName; } }
+    public override string Label { get { return IsLocked ? LOCKED_LABEL : _stage.DisplayName; } }
 
     private void Awake()
     {
@@ -107,7 +107,7 @@ public class GalleryFrame : MonoBehaviour
         }
     }
 
-    public void SetHighlighted(bool isHighlighted)
+    public override void SetHighlighted(bool isHighlighted)
     {
         Color color = _borderColor;
 

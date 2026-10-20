@@ -36,6 +36,33 @@ public class PlayerLoadout
         return _weaponIds.Contains(weaponId);
     }
 
+    public bool HasSkill(string skillId)
+    {
+        return _skillIds.Contains(skillId);
+    }
+
+    public bool HasConsumable(string consumableId)
+    {
+        return _consumableIds.Contains(consumableId);
+    }
+
+    public bool HasUtility(UtilityType utility)
+    {
+        return _utilities.Contains(utility);
+    }
+
+    // 공격 방식이 아직 없는 스킬은 끼우면 전투에서 쓸 수 없다.
+    public bool IsSkillReady(string skillId)
+    {
+        return _tables.Skills.TryGet(skillId, out SkillData skill) && false == string.IsNullOrEmpty(skill.AttackStyleKey);
+    }
+
+    // 대시는 아직 전투에 없어 끼우면 막기만 빠진다. 대시를 만들면 지운다.
+    public bool IsUtilityReady(UtilityType utility)
+    {
+        return UtilityType.Dash != utility;
+    }
+
     private PlayerLoadout(DataTableManager tables)
     {
         _tables = tables;
@@ -132,7 +159,7 @@ public class PlayerLoadout
 
     public bool TryEquipSkill(string skillId)
     {
-        if (false == _skillIds.Contains(skillId))
+        if (false == _skillIds.Contains(skillId) || false == IsSkillReady(skillId))
         {
             return false;
         }
@@ -145,7 +172,7 @@ public class PlayerLoadout
 
     public bool TryEquipUtility(UtilityType utility)
     {
-        if (false == _utilities.Contains(utility))
+        if (false == _utilities.Contains(utility) || false == IsUtilityReady(utility))
         {
             return false;
         }

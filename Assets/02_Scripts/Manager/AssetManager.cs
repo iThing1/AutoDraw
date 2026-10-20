@@ -58,4 +58,18 @@ public class AssetManager
         Debug.LogError($"에셋 매니저 : {key}은(는) {typeof(T).Name}이(가) 아닙니다.");
         return null;
     }
+
+    // 아이콘처럼 아직 만들지 않았을 수 있는 키에 쓴다. 없으면 오류 없이 false다.
+    public bool TryGet<T>(string key, out T asset) where T : Object
+    {
+        asset = null;
+
+        if (string.IsNullOrEmpty(key) || false == _assets.TryGetValue(key, out Object found))
+        {
+            return false;
+        }
+
+        asset = found as T;
+        return null != asset;
+    }
 }

@@ -267,6 +267,7 @@ public class GalleryStage : MonoBehaviour
         SetCursorLocked(true);
     }
 
+    // 어떻게 닫든(닫기 버튼, Esc, 갤러리를 떠날 때) 바꾼 장비를 저장한다.
     private void CloseLoadout()
     {
         if (null == _loadoutView)
@@ -277,6 +278,8 @@ public class GalleryStage : MonoBehaviour
         _loadoutViewModel.OnCloseRequested -= HandleLoadoutClosed;
         _loadoutViewModel.UnBind();
         _loadoutViewModel = null;
+
+        GameManager.SavePlayer();
 
         GameManager.UI.Close(_loadoutView);
         _loadoutView = null;

@@ -89,6 +89,12 @@ public class GameManager : SingletonBehaviour<GameManager>
         _mapSpawner.Init();
     }
 
+    // 장비 화면을 닫을 때처럼 진행이 바뀐 뒤에 부른다. 저장하는 곳이 늘어도 입구는 여기 하나로 둔다.
+    public static void SavePlayer()
+    {
+        PlayerSaveStorage.Save(Instance._player.ToSaveData());
+    }
+
     private bool CreatePlayer()
     {
         PlayerStatData baseStats = _dataTableManager.PlayerStats.Get(PLAYER_STAT_ID);

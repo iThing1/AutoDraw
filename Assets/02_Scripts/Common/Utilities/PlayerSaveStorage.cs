@@ -60,6 +60,17 @@ public static class PlayerSaveStorage
         File.Move(tempPath, path);
     }
 
+    // 시험할 때 처음 상태로 돌리려고 쓴다. 깨진 파일을 옮겨 둔 .bak은 남긴다.
+    public static void Delete()
+    {
+        string path = GetPath();
+
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+    }
+
     private static void MoveToBackup(string path)
     {
         string backupPath = path + BACKUP_EXTENSION;

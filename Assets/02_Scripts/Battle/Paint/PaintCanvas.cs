@@ -131,6 +131,31 @@ public class PaintCanvas : MonoBehaviour
         return false;
     }
 
+    // 아직 캔버스에 남은 잉크이고, 그 뒤에 찍힌 플레이어 물감에 가운데가 덮이지 않았는지.
+    public bool IsInkExposed(PaintSplat ink)
+    {
+        int index = _splats.IndexOf(ink);
+
+        if (0 > index || false == ink.IsInk)
+        {
+            return false;
+        }
+
+        Vector3 center = ink.transform.position;
+
+        for (int i = index + 1; i < _splats.Count; i++)
+        {
+            PaintSplat splat = _splats[i];
+
+            if (false == splat.IsInk && Vector2.Distance(center, splat.transform.position) <= splat.SpriteRenderer.bounds.extents.x)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private PaintSplat SpawnSplat(Vector3 position, SplatStyle style, Color color, bool isInk, float scale)
     {
         if (_splats.Count >= _maxSplatCount)

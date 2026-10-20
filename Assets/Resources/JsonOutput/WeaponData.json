@@ -1,6 +1,6 @@
 {"_items":[
-{"_id":"light_brush","_name":"기본 붓","_type":0,"_attackStyleKey":"AttackStyle/Light","_damageBonus":0,"_intervalScale":1,"_isStarting":true,"_iconKey":"Icon/Weapon/LightBrush","_description":"가볍고 빠르게 찍는다"},
-{"_id":"paint_orbs","_name":"물감 구슬","_type":0,"_attackStyleKey":"AttackStyle/PaintOrbs","_damageBonus":0,"_intervalScale":1,"_isStarting":false,"_iconKey":"Icon/Weapon/PaintOrbs","_description":"몸 둘레를 돌다가 하나씩 날아가 때리고 돌아온다. 가까울수록 자주 때린다"},
-{"_id":"heavy_brush","_name":"넓은 붓","_type":1,"_attackStyleKey":"AttackStyle/Heavy","_damageBonus":0,"_intervalScale":1,"_isStarting":true,"_iconKey":"Icon/Weapon/HeavyBrush","_description":"느리지만 크게 찍는다"},
-{"_id":"roller","_name":"롤러","_type":1,"_attackStyleKey":"AttackStyle/Roller","_damageBonus":0,"_intervalScale":1,"_isStarting":false,"_iconKey":"Icon/Weapon/Roller","_description":"유도 없이 느리게 굴러가 맞히면 크게 아프고, 지나간 길에 물감을 깔다"}
+{"_id":"light_brush","_name":"Light Brush","_type":0,"_attackStyleKey":"AttackStyle/Light","_damageBonus":0,"_intervalScale":1,"_isStarting":true,"_iconKey":"Icon/Weapon/LightBrush","_description":"Quick, light strokes.","_previewKey":""},
+{"_id":"paint_orbs","_name":"Paint Orbs","_type":0,"_attackStyleKey":"AttackStyle/PaintOrbs","_damageBonus":0,"_intervalScale":1,"_isStarting":false,"_iconKey":"Icon/Weapon/PaintOrbs","_description":"Orbs circle you and fly out one at a time. Hits more often up close.","_previewKey":""},
+{"_id":"heavy_brush","_name":"Wide Brush","_type":1,"_attackStyleKey":"AttackStyle/Heavy","_damageBonus":0,"_intervalScale":1,"_isStarting":true,"_iconKey":"Icon/Weapon/HeavyBrush","_description":"Slow but leaves a big mark.","_previewKey":""},
+{"_id":"roller","_name":"Roller","_type":1,"_attackStyleKey":"AttackStyle/Roller","_damageBonus":0,"_intervalScale":1,"_isStarting":false,"_iconKey":"Icon/Weapon/Roller","_description":"Rolls slowly without homing and paints its path. Bursts on the second hit.","_previewKey":""}
 ]}

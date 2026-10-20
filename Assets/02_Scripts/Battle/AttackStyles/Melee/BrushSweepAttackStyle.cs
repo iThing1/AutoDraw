@@ -100,7 +100,7 @@ public class BrushSweepAttackStyle : AttackStyle
             Vector3 hitPoint = Vector3.MoveTowards(center, context.Target.GetAimPoint(Vector3.zero), _radius);
             context.Damage.Strike(_hit, hitPoint, gaugeGain);
 
-            await sweep.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+            await sweep.ToUniTaskKillOnCancel(token);
 
             // 고리는 스스로 끝까지 퍼지므로 기다리지 않고, 보스는 다음 공격을 이어 간다.
             ExpandRingsAsync(context, center, gaugeGain, token).Forget();

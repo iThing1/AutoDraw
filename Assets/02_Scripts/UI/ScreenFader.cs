@@ -32,6 +32,6 @@ public class ScreenFader : MonoBehaviour
 
         return _canvasGroup.DOFade(alpha, _fadeDuration)
             .SetUpdate(true)
-            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+            .ToUniTaskKillOnCancel(token);
     }
 }

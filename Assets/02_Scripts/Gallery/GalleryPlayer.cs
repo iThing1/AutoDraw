@@ -127,7 +127,7 @@ public class GalleryPlayer : MonoBehaviour
             .Join(_camera.DORotateQuaternion(viewPoint.rotation, duration))
             .SetEase(ease);
 
-        return move.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+        return move.ToUniTaskKillOnCancel(token);
     }
 
     // 돌아올 때 그림 앞에서 시작해 서 있던 자리로 물러나도록, 카메라만 액자 앞에 먼저 둔다.
@@ -146,7 +146,7 @@ public class GalleryPlayer : MonoBehaviour
             .Join(_camera.DOLocalRotateQuaternion(Quaternion.Euler(_pitch, 0f, 0f), duration))
             .SetEase(ease);
 
-        return move.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+        return move.ToUniTaskKillOnCancel(token);
     }
 
     // 좌우는 몸을 돌리고 위아래는 카메라만 숙여, 걸어가는 방향이 고개 각도에 따라 기울지 않게 한다.

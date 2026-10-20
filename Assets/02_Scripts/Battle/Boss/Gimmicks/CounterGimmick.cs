@@ -59,7 +59,7 @@ public class CounterGimmick : BossGimmick
 
                 await bossTransform.DOMove(origin, _returnDuration)
                     .SetEase(Ease.OutQuad)
-                    .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                    .ToUniTaskKillOnCancel(token);
 
                 if (streak < _requiredStreak)
                 {
@@ -122,13 +122,13 @@ public class CounterGimmick : BossGimmick
             })
             .SetEase(_dashEase);
 
-        await dash.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+        await dash.ToUniTaskKillOnCancel(token);
 
         if (isCountered)
         {
             await bossTransform.DOMove(PlayCounter(context), _knockbackDuration)
                 .SetEase(Ease.OutQuad)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                .ToUniTaskKillOnCancel(token);
         }
         else if (hasCollided)
         {
@@ -154,7 +154,7 @@ public class CounterGimmick : BossGimmick
         {
             await warn.transform.DOScale(new Vector3(endDiameter, endDiameter, 1f), _warnDuration)
                 .SetEase(Ease.InQuad)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                .ToUniTaskKillOnCancel(token);
         }
         finally
         {

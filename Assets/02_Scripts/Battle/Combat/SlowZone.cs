@@ -94,7 +94,7 @@ public class SlowZone : MonoBehaviour
             await DOVirtual.Float(0f, settings.Radius, settings.GrowDuration, SetRadius)
                 .SetEase(Ease.OutQuad)
                 .SetTarget(transform)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                .ToUniTaskKillOnCancel(token);
 
             transform.localScale = new Vector3(diameter, diameter, 1f);
 
@@ -107,7 +107,7 @@ public class SlowZone : MonoBehaviour
                 .Join(transform.DOPunchScale(transform.localScale * settings.EndPunch, settings.EndDuration, PunchTween.VIBRATO, PunchTween.ELASTICITY))
                 .Join(_renderer.DOFade(0f, settings.EndDuration))
                 .SetTarget(transform)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                .ToUniTaskKillOnCancel(token);
         }
         finally
         {

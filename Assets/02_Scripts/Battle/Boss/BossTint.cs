@@ -68,7 +68,7 @@ public class BossTint
             await DOVirtual.Color(from, to, duration, Apply)
                 .SetUpdate(isRealtime)
                 .SetTarget(this)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                .ToUniTaskKillOnCancel(token);
         }
         finally
         {

@@ -51,7 +51,7 @@ public class TrajectoryMotion : ProjectileMotion
             .OnUpdate(_updateFlight);
 
         // 전투가 끝나 토큰이 취소되면 트윈을 멈추고, 예외를 던지는 대신 isCanceled를 true로 돌려받는다.
-        bool isCanceled = await _flight.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token).SuppressCancellationThrow();
+        bool isCanceled = await _flight.ToUniTaskKillOnCancel(token).SuppressCancellationThrow();
 
         Vector3 landingPoint = FlightOutcome.Missed != ContactOutcome ? ContactPoint : CachedTransform.position;
         FlightOutcome outcome = GetOutcome(isCanceled, landingPoint);
@@ -121,7 +121,7 @@ public class TrajectoryMotion : ProjectileMotion
             .Join(CachedTransform.DOScale(0f, travelTime).SetEase(Ease.InQuad))
             .OnUpdate(_updatePass);
 
-        bool isCanceled = await _pass.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token).SuppressCancellationThrow();
+        bool isCanceled = await _pass.ToUniTaskKillOnCancel(token).SuppressCancellationThrow();
 
         if (FlightOutcome.Missed != ContactOutcome)
         {

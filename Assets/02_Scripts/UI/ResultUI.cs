@@ -55,7 +55,7 @@ public class ResultUI : MonoBehaviour
 
         await _buttonGroup.DOFade(1f, _buttonFadeDuration)
             .SetUpdate(true)
-            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+            .ToUniTaskKillOnCancel(token);
 
         _buttonGroup.interactable = true;
         _buttonGroup.blocksRaycasts = true;
@@ -95,7 +95,7 @@ public class ResultUI : MonoBehaviour
 
         await _letterRoot.DOPunchScale(Vector3.one * settings.FinishPunch, settings.LetterPopDuration, PunchTween.VIBRATO, PunchTween.ELASTICITY)
             .SetUpdate(true)
-            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+            .ToUniTaskKillOnCancel(token);
     }
 
     // 글자가 나오기 시작할 때 함께 깔리도록 기다리지 않는다.

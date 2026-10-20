@@ -77,7 +77,7 @@ public class InkLineAttackStyle : AttackStyle
         {
             await stroke.transform.DOScaleY(_width, _strokeDuration)
                 .SetEase(Ease.OutQuad)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                .ToUniTaskKillOnCancel(token);
 
             ImpactPlayer.Play(_impact, GetClosestPoint(line.Center, line.Along, context.Target.GetAimPoint(Vector3.zero)));
             StrikeIfTouching(context, line.Center, line.Along, gaugeGain);
@@ -85,7 +85,7 @@ public class InkLineAttackStyle : AttackStyle
             await UniTask.Delay(TimeSpan.FromSeconds(_lingerDuration), cancellationToken: token);
 
             await stroke.DOFade(0f, _fadeDuration)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                .ToUniTaskKillOnCancel(token);
         }
         finally
         {

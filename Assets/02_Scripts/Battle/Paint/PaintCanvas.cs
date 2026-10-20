@@ -67,7 +67,7 @@ public class PaintCanvas : MonoBehaviour
                 .SetEase(ease)
                 .SetUpdate(true);
 
-            fades.Add(fade.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token));
+            fades.Add(fade.ToUniTaskKillOnCancel(token));
         }
 
         await UniTask.WhenAll(fades);

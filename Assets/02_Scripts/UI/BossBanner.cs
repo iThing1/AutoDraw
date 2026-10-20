@@ -33,7 +33,7 @@ public class BossBanner : MonoBehaviour
             .Join(_content.DOScale(1f, settings.InDuration).SetEase(settings.InEase))
             .SetUpdate(true);
 
-        await enter.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+        await enter.ToUniTaskKillOnCancel(token);
 
         await RealtimeDelay.WaitAsync(settings.HoldDuration, token);
 
@@ -42,6 +42,6 @@ public class BossBanner : MonoBehaviour
             .Join(_content.DOAnchorPosY(_contentPosition.y + settings.ExitMoveY, settings.OutDuration).SetEase(settings.OutEase))
             .SetUpdate(true);
 
-        await exit.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+        await exit.ToUniTaskKillOnCancel(token);
     }
 }

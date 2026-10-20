@@ -38,7 +38,7 @@ public class BossRevival
         await _boss.transform.DOScale(new Vector3(_startScale.x * collapse.x, _startScale.y * collapse.y, _startScale.z), _settings.CollapseDuration)
             .SetEase(Ease.OutQuad)
             .SetUpdate(true)
-            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+            .ToUniTaskKillOnCancel(token);
 
         await RealtimeDelay.WaitAsync(_settings.HoldDuration, token);
 
@@ -55,7 +55,7 @@ public class BossRevival
         await _boss.transform.DOScale(_startScale, _settings.RiseDuration)
             .SetEase(_settings.RiseEase)
             .SetUpdate(true)
-            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+            .ToUniTaskKillOnCancel(token);
 
         ImpactPlayer.Play(_settings.RiseImpact, _boss.Body.position);
 
@@ -63,7 +63,7 @@ public class BossRevival
         {
             await _beam.DOFade(0f, _settings.BeamFadeDuration)
                 .SetUpdate(true)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                .ToUniTaskKillOnCancel(token);
         }
 
         await PlayBannerAsync(nextPhase, token);
@@ -110,7 +110,7 @@ public class BossRevival
             .SetEase(Ease.InQuad)
             .SetUpdate(true)
             .SetTarget(this)
-            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+            .ToUniTaskKillOnCancel(token);
     }
 
     private async UniTask PlayBannerAsync(BossPhaseData phase, CancellationToken token)

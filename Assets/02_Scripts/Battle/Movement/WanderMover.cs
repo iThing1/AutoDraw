@@ -52,7 +52,7 @@ public class WanderMover : UnitMover
         _moveTween = transform.DOMove(destination, duration).SetEase(settings.MoveEase);
 
         // 이동이 끊겨도 예외 대신 결과로 받고, 전투가 끝났을 때만 멈춘다.
-        await _moveTween.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token).SuppressCancellationThrow();
+        await _moveTween.ToUniTaskKillOnCancel(token).SuppressCancellationThrow();
 
         token.ThrowIfCancellationRequested();
 

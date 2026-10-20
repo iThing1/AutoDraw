@@ -48,7 +48,7 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
 
         return _canvasGroup.DOFade(0f, _fadeDuration)
             .SetUpdate(true)
-            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+            .ToUniTaskKillOnCancel(token);
     }
 
     protected override void OnBind()

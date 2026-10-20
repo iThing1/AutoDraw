@@ -32,7 +32,7 @@ public static class Telegraph
 
             await fill.transform.DOScale(new Vector3(size.x, size.y, 1f), duration)
                 .SetEase(Ease.Linear)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                .ToUniTaskKillOnCancel(token);
         }
         finally
         {

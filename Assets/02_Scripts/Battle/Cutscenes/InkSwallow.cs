@@ -80,7 +80,7 @@ public class InkSwallow
             _sinkSource.DOComplete();
             await _sinkSource.DOPunchScale(_sinkSource.localScale * _settings.SinkRippleStrength, _settings.SinkRippleDuration, PunchTween.VIBRATO, PunchTween.ELASTICITY)
                 .SetUpdate(true)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                .ToUniTaskKillOnCancel(token);
         }
         finally
         {

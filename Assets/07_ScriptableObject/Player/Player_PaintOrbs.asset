@@ -15,7 +15,7 @@ MonoBehaviour:
   _displayName: Orbs
   _iconColor: {r: 0.6, g: 1, b: 0.75, a: 1}
   _attackInterval: 0.1
-  _gaugeGainPerHit: 2
+  _gaugeGainPerHit: 5
   _waitUntilFinished: 1
   _stopsMovement: 0
   _tell: 0
@@ -26,11 +26,12 @@ MonoBehaviour:
   _orbitRadius: 1.6
   _orbitPeriod: 1.2
   _transitionDuration: 0.25
-  _hitInterval: 0.4
+  _launchInterval: 0.4
+  _flySpeed: 18
   _hit:
     _damage:
-      _min: 2
-      _max: 4
+      _min: 7
+      _max: 11
     _criticalChance: 0.1
     _criticalMultiplier: 2
     _normalHit: {fileID: 11400000, guid: 16470e74d27d413ead6a23e374f8bd94, type: 2}

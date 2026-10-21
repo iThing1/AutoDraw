@@ -50,6 +50,10 @@ public class AttackSlotView : ViewBase<AttackSlotViewModel>
                 DrawSelected();
                 break;
 
+            case nameof(AttackSlotViewModel.DisplayName):
+                _nameText.text = ViewModel.DisplayName;
+                break;
+
             case nameof(AttackSlotViewModel.GaugeRatio):
                 DrawGauge();
                 break;

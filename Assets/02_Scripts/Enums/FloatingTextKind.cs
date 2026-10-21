@@ -5,4 +5,6 @@ public enum FloatingTextKind
     NoGauge,
     GimmickClear,
     GimmickFail,
+    // 문구에 회복량 자리({0})가 있다.
+    Heal,
 }

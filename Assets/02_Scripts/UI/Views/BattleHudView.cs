@@ -21,6 +21,7 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
     [SerializeField] private AttackSlotView[] _basicSlots;
     [SerializeField] private AttackSlotView _skillSlot;
     [SerializeField] private AttackSlotView _guardSlot;
+    [SerializeField] private AttackSlotView _itemSlot;
 
     [Header("떠오르는 문구")]
     // 피해 숫자와 GUARD·NO INK·BREAK 같은 짧은 문구를 같은 프리팹으로 띄운다.
@@ -61,15 +62,18 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
         BindBasicSlots(viewModel.BasicSlots);
         BindSlot(_skillSlot, viewModel.SkillSlot);
         BindSlot(_guardSlot, viewModel.GuardSlot);
+        BindSlot(_itemSlot, viewModel.ItemSlot);
 
         viewModel.OnDamageText += SpawnDamageText;
         viewModel.OnFloatingText += SpawnFloatingText;
+        viewModel.OnHealText += SpawnHealText;
     }
 
     protected override void OnUnbind()
     {
         ViewModel.OnDamageText -= SpawnDamageText;
         ViewModel.OnFloatingText -= SpawnFloatingText;
+        ViewModel.OnHealText -= SpawnHealText;
 
         _playerHealthBar.UnBind();
         _bossHealthBar.UnBind();
@@ -87,6 +91,11 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
         if (null != _guardSlot)
         {
             _guardSlot.UnBind();
+        }
+
+        if (null != _itemSlot)
+        {
+            _itemSlot.UnBind();
         }
     }
 
@@ -171,9 +180,22 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
     private void SpawnFloatingText(FloatingTextKind kind, Vector3 worldPosition)
     {
         FloatingTextSettings.Phrase phrase = _floatingText.GetPhrase(kind);
+        SpawnPhrase(phrase.Text, phrase.Color, worldPosition);
+    }
 
-        // 설정에 없는 종류는 띄우지 않는다.
-        if (string.IsNullOrEmpty(phrase.Text))
+    // 회복 문구는 "+{0}"처럼 회복량 자리를 둔다.
+    private void SpawnHealText(int amount, Vector3 worldPosition)
+    {
+        FloatingTextSettings.Phrase phrase = _floatingText.GetPhrase(FloatingTextKind.Heal);
+        string text = string.IsNullOrEmpty(phrase.Text) ? phrase.Text : string.Format(phrase.Text, amount);
+
+        SpawnPhrase(text, phrase.Color, worldPosition);
+    }
+
+    // 설정에 없는 종류는 문구가 비어 있어 띄우지 않는다.
+    private void SpawnPhrase(string text, Color color, Vector3 worldPosition)
+    {
+        if (string.IsNullOrEmpty(text))
         {
             return;
         }
@@ -185,7 +207,7 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
             return;
         }
 
-        floatingText.PlayText(phrase.Text, phrase.Color, ToScreen(worldPosition), _floatingText);
+        floatingText.PlayText(text, color, ToScreen(worldPosition), _floatingText);
     }
 
     private FloatingText SpawnText()

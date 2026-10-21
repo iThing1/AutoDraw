@@ -6,7 +6,7 @@ using UnityEngine;
 public abstract class AttackSlotViewModel : ViewModelBase
 {
     private readonly string _keyLabel;
-    private readonly string _displayName;
+    private string _displayName;
     private readonly Color _iconColor;
     private readonly bool _usesGauge;
     private bool _isSelected;
@@ -37,6 +37,18 @@ public abstract class AttackSlotViewModel : ViewModelBase
         _displayName = displayName;
         _iconColor = iconColor;
         _usesGauge = usesGauge;
+    }
+
+    // 남은 횟수처럼 이름에 붙는 값이 바뀔 때 쓴다.
+    protected void SetDisplayName(string displayName)
+    {
+        if (_displayName == displayName)
+        {
+            return;
+        }
+
+        _displayName = displayName;
+        NotifyPropertyChanged(nameof(DisplayName));
     }
 
     protected void SetSelected(bool isSelected)

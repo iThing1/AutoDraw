@@ -11,6 +11,7 @@ public class BattleHudViewModel : ViewModelBase
     private readonly List<AttackSlotViewModel> _basicSlots = new();
     private readonly AttackSlotViewModel _skillSlot;
     private readonly AttackSlotViewModel _guardSlot;
+    private readonly AttackSlotViewModel _itemSlot;
 
     private BattleUnit _player;
     private BattleUnit _boss;
@@ -21,6 +22,8 @@ public class BattleHudViewModel : ViewModelBase
     public event Action<DamageInfo> OnDamageText;
     // 막기·게이지 부족·기믹 결과 문구를 월드 위치에 띄운다.
     public event Action<FloatingTextKind, Vector3> OnFloatingText;
+    // 회복할 때마다 실제로 찬 양을 띄운다.
+    public event Action<int, Vector3> OnHealText;
 
     public HealthBarViewModel PlayerHealth { get { return _playerHealth; } }
     public HealthBarViewModel BossHealth { get { return _bossHealth; } }
@@ -28,6 +31,7 @@ public class BattleHudViewModel : ViewModelBase
     // 해당 컴포넌트가 없는 플레이어면 null이다.
     public AttackSlotViewModel SkillSlot { get { return _skillSlot; } }
     public AttackSlotViewModel GuardSlot { get { return _guardSlot; } }
+    public AttackSlotViewModel ItemSlot { get { return _itemSlot; } }
 
     public int RemainingPhaseCount { get { return null != _bossPhases ? _bossPhases.RemainingPhaseCount : 1; } }
     // 페이즈가 하나뿐인 보스나 마지막 페이즈에서는 숨긴다.
@@ -59,7 +63,13 @@ public class BattleHudViewModel : ViewModelBase
             _guard.OnRejected += HandleGuardRejected;
         }
 
+        if (player.TryGetComponent(out PlayerConsumable consumable) && null != consumable.State)
+        {
+            _itemSlot = new ConsumableSlotViewModel(consumable.KeyLabel, consumable.State, consumable.IconColor);
+        }
+
         _player.Health.OnDamaged += HandleDamaged;
+        _player.Health.OnHealed += HandleHealed;
         _boss.Health.OnDamaged += HandleDamaged;
         _player.OnBlocked += HandleBlocked;
 
@@ -90,6 +100,11 @@ public class BattleHudViewModel : ViewModelBase
             _guardSlot.UnBind();
         }
 
+        if (null != _itemSlot)
+        {
+            _itemSlot.UnBind();
+        }
+
         if (null != _guard)
         {
             _guard.OnRejected -= HandleGuardRejected;
@@ -99,6 +114,7 @@ public class BattleHudViewModel : ViewModelBase
         if (null != _player)
         {
             _player.Health.OnDamaged -= HandleDamaged;
+            _player.Health.OnHealed -= HandleHealed;
             _player.OnBlocked -= HandleBlocked;
             _player = null;
         }
@@ -120,6 +136,11 @@ public class BattleHudViewModel : ViewModelBase
     private void HandleDamaged(DamageInfo damage)
     {
         OnDamageText?.Invoke(damage);
+    }
+
+    private void HandleHealed(int amount)
+    {
+        OnHealText?.Invoke(amount, _player.Body.position);
     }
 
     private void HandleBlocked(Vector3 hitPoint)

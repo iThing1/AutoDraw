@@ -251,7 +251,7 @@ public class GalleryStage : MonoBehaviour
             return;
         }
 
-        _loadoutViewModel = new LoadoutViewModel(GameManager.Player.Loadout, GameManager.Tables, GameManager.Assets);
+        _loadoutViewModel = new LoadoutViewModel(GameManager.Player, GameManager.Tables, GameManager.Assets);
         _loadoutViewModel.OnCloseRequested += HandleLoadoutClosed;
         _loadoutView.Bind(_loadoutViewModel);
 

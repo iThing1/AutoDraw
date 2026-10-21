@@ -30,7 +30,7 @@ public class PlayerConsumable : MonoBehaviour
 
     // 전투를 시작하는 쪽이 플레이어를 만든 직후 부른다.
     // 소모품 칸이 비었거나 효과 에셋이 없으면 꺼 두고, State가 null이라 HUD도 소모품 칸을 숨긴다.
-    public void Setup(string consumableId, DataTableManager tables, AssetManager assets)
+    public void Setup(string consumableId, PlayerStats stats, DataTableManager tables, AssetManager assets)
     {
         if (false == enabled || false == tables.Consumables.TryGet(consumableId, out ConsumableData data))
         {
@@ -46,7 +46,7 @@ public class PlayerConsumable : MonoBehaviour
             return;
         }
 
-        _state = new ConsumableState(data);
+        _state = new ConsumableState(data, stats);
     }
 
     private void OnEnable()
@@ -80,6 +80,6 @@ public class PlayerConsumable : MonoBehaviour
         }
 
         _state.Use(Time.time);
-        _effect.Apply(context, _state.Data.Value);
+        _effect.Apply(context, _state.Value);
     }
 }

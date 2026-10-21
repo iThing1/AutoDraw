@@ -23,8 +23,9 @@ public class LoadoutViewModel : ViewModelBase
     // 마지막으로 고른 장비의 공격 예시 영상. 없으면 null이다.
     public VideoClip Preview { get { return _preview; } }
 
-    public LoadoutViewModel(PlayerLoadout loadout, DataTableManager tables, AssetManager assets)
+    public LoadoutViewModel(PlayerModel player, DataTableManager tables, AssetManager assets)
     {
+        PlayerLoadout loadout = player.Loadout;
         _loadout = loadout;
 
         // 화면 위에서부터 이 순서로 놓인다. LoadoutView의 칸 키도 같은 순서로 넣는다.
@@ -34,7 +35,7 @@ public class LoadoutViewModel : ViewModelBase
             new WeaponLoadoutSlot("Heavy", WeaponType.Heavy, loadout, tables, assets),
             new SkillLoadoutSlot(loadout, tables, assets),
             new UtilityLoadoutSlot(loadout, assets),
-            new ConsumableLoadoutSlot(loadout, tables, assets),
+            new ConsumableLoadoutSlot(loadout, player.Stats, tables, assets),
         };
 
         for (int i = 0; i < slots.Length; i++)

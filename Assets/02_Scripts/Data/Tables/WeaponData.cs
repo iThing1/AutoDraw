@@ -14,6 +14,7 @@ public class WeaponData : BaseData
     [SerializeField] private bool _isStarting;
     [SerializeField] private string _iconKey;
     [SerializeField] private string _description;
+    [SerializeField] private string _previewKey;
 
     public string Name { get { return _name; } }
     public WeaponType Type { get { return _type; } }
@@ -23,4 +24,6 @@ public class WeaponData : BaseData
     public bool IsStarting { get { return _isStarting; } }
     public string IconKey { get { return _iconKey; } }
     public string Description { get { return _description; } }
+    // 비어 있으면 미리보기 영상이 없다.
+    public string PreviewKey { get { return _previewKey; } }
 }

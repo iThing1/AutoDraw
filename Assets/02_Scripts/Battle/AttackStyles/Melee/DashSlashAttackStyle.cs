@@ -47,7 +47,7 @@ public class DashSlashAttackStyle : AttackStyle
         Vector3 origin = owner.position;
 
         await StartDash(owner, origin, context.Target)
-            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+            .ToUniTaskKillOnCancel(token);
 
         await UniTask.Delay(TimeSpan.FromSeconds(_delayBeforeSlash), cancellationToken: token);
 
@@ -58,7 +58,7 @@ public class DashSlashAttackStyle : AttackStyle
 
         await owner.DOMove(origin, _returnDuration)
             .SetEase(_returnEase)
-            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+            .ToUniTaskKillOnCancel(token);
     }
 
     // 세상은 느려진 채로 칼만 실제 시간으로 휘둘러, 칼끝의 검은 궤적이 또렷하게 남게 한다.
@@ -95,7 +95,7 @@ public class DashSlashAttackStyle : AttackStyle
 
             context.Damage.Strike(_hit, hitPoint, gaugeGain);
 
-            await swing.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+            await swing.ToUniTaskKillOnCancel(token);
             await RealtimeDelay.WaitAsync(_trailLingerTime, token);
         }
         finally

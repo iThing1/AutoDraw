@@ -3,11 +3,10 @@ using TMPro;
 using UnityEngine;
 
 // 갤러리 벽의 액자. 스테이지가 비어 있으면 천으로 덮인 잠긴 액자이고, 깬 스테이지는 완성된 그림으로 바뀐다.
-public class GalleryFrame : MonoBehaviour
+public class GalleryFrame : GalleryInteractable
 {
     private const string LOCKED_LABEL = "LOCKED";
     private static readonly int BASE_MAP_ID = Shader.PropertyToID("_BaseMap");
-    private static readonly int BASE_COLOR_ID = Shader.PropertyToID("_BaseColor");
 
     // 비워 두면 잠긴 액자가 된다.
     [SerializeField] private StageData _stage;
@@ -15,8 +14,6 @@ public class GalleryFrame : MonoBehaviour
     [Header("모양")]
     [SerializeField] private Renderer _painting;
     [SerializeField] private GameObject _cloth;
-    [SerializeField] private Renderer _border;
-    [SerializeField] private Color _highlightColor = new Color(0.85f, 0.65f, 0.3f, 1f);
     // 들어갈 때 카메라가 다가가 멈추는 자리. 그림이 화면을 거의 채우는 거리에 둔다.
     [SerializeField] private Transform _viewPoint;
 
@@ -29,19 +26,18 @@ public class GalleryFrame : MonoBehaviour
     [SerializeField, Min(0f)] private float _lockedShakeStrength = 0.04f;
 
     private MaterialPropertyBlock _propertyBlock;
-    private Color _borderColor;
     private Texture2D _savedPainting;
     private bool _isPaintingLoaded;
 
     public StageData Stage { get { return _stage; } }
-    public bool IsLocked { get { return null == _stage; } }
+    public override bool IsLocked { get { return null == _stage; } }
     public Transform ViewPoint { get { return _viewPoint; } }
-    public string Label { get { return IsLocked ? LOCKED_LABEL : _stage.DisplayName; } }
+    public override string Label { get { return IsLocked ? LOCKED_LABEL : _stage.DisplayName; } }
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         _propertyBlock = new MaterialPropertyBlock();
-        _borderColor = _border.sharedMaterial.GetColor(BASE_COLOR_ID);
     }
 
     // 파일에서 불러온 그림은 에셋이 아니라 직접 지워야 남지 않는다.
@@ -105,20 +101,6 @@ public class GalleryFrame : MonoBehaviour
             Destroy(_savedPainting);
             _savedPainting = null;
         }
-    }
-
-    public void SetHighlighted(bool isHighlighted)
-    {
-        Color color = _borderColor;
-
-        if (isHighlighted)
-        {
-            color = _highlightColor;
-        }
-
-        _border.GetPropertyBlock(_propertyBlock);
-        _propertyBlock.SetColor(BASE_COLOR_ID, color);
-        _border.SetPropertyBlock(_propertyBlock);
     }
 
     public void PlayLocked()

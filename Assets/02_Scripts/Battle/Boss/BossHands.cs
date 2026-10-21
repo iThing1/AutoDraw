@@ -101,7 +101,7 @@ public class BossHands : MonoBehaviour
             ShowGlow(_rightGlow, _rightTellColor);
         }
 
-        await BuildPose(gesture, aimPoint, duration).ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+        await BuildPose(gesture, aimPoint, duration).ToUniTaskKillOnCancel(token);
     }
 
     private Sequence BuildPose(HandGesture gesture, Vector3 aimPoint, float duration)

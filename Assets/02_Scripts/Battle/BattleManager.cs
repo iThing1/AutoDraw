@@ -206,6 +206,12 @@ public class BattleManager : MonoBehaviour
         {
             data.AttackStyle.Prewarm();
         }
+
+        // 플레이어 공격은 장비 칸에서 고르므로 데이터가 아닌 공격 입력이 들고 있다.
+        if (unit.TryGetComponent(out PlayerAttackInput attackInput))
+        {
+            attackInput.Prewarm();
+        }
     }
 
     private async UniTaskVoid RunAsync(CancellationToken token)

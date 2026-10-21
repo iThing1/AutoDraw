@@ -92,7 +92,7 @@ public abstract class ProjectileMotion : MonoBehaviour
     // 느려지는 구역 안에 있는 동안의 이 탄 속도 배율. 게임 전체 시간은 건드리지 않는다.
     protected float GetSlowScale()
     {
-        return GameManager.SlowZones.GetProjectileScale(_transform.position);
+        return SlowZone.GetProjectileScale(_transform.position);
     }
 
     // 비행이 끝나면 목표를 놓아, 풀에 있는 동안 전투 객체를 붙잡지 않는다.

@@ -98,6 +98,6 @@ public static class SpriteShatter
             .Insert(fadeDelay, piece.DOFade(0f, settings.FadeDuration))
             .SetUpdate(true);
 
-        return sequence.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+        return sequence.ToUniTaskKillOnCancel(token);
     }
 }

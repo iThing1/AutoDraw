@@ -1006,6 +1006,7 @@ MonoBehaviour:
   _cameraRig: {fileID: 1938150102}
   _cinematicUIPrefab: {fileID: 6658607233805704159, guid: 2b193404ac6794343b9d5fa875708906, type: 3}
   _mapSpawner: {fileID: 2132573753}
+  _assetRegistry: {fileID: 11400000, guid: 3c1bc77973cc41fb847ede61fa60f94b, type: 2}
 --- !u!114 &2132573753
 MonoBehaviour:
   m_ObjectHideFlags: 0

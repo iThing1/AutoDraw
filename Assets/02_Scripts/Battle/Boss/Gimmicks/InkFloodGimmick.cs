@@ -75,10 +75,10 @@ public class InkFloodGimmick : PunishingBossGimmick
 
             await flood.DOFade(_floodColor.a, _warnDuration)
                 .SetEase(Ease.InQuad)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                .ToUniTaskKillOnCancel(token);
 
             await flood.DOFade(_surgeAlpha, _surgeDuration)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                .ToUniTaskKillOnCancel(token);
 
             ImpactPlayer.Play(_surgeImpact, target.GetAimPoint(Vector3.zero));
 
@@ -94,7 +94,7 @@ public class InkFloodGimmick : PunishingBossGimmick
             FadeDim(dim, 0f);
 
             await flood.DOFade(0f, _recedeDuration)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                .ToUniTaskKillOnCancel(token);
 
             return isSafe;
         }

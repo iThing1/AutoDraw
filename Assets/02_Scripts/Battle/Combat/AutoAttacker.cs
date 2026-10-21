@@ -11,6 +11,7 @@ public class AutoAttacker : MonoBehaviour
     private BossHands _hands;
 
     private AttackContext _context;
+    private AttackContext _skillContext;
     private CancellationToken _battleToken;
     private bool _isRunning;
 
@@ -40,10 +41,8 @@ public class AutoAttacker : MonoBehaviour
     public async UniTask RunAsync(BattleUnit target, PaintCanvas paintCanvas, CancellationToken token)
     {
         AttackTarget attackTarget = new AttackTarget(target);
-        DamageDealer damage = new DamageDealer(_owner, _skillGauge, attackTarget, paintCanvas);
-        ProjectileLauncher launcher = new ProjectileLauncher(_owner, attackTarget, damage);
-
-        _context = new AttackContext(_owner, attackTarget, _hands, paintCanvas, damage, launcher);
+        _context = CreateContext(attackTarget, paintCanvas, DamageDealer.ForWeapon(_owner, _skillGauge, attackTarget, paintCanvas));
+        _skillContext = CreateContext(attackTarget, paintCanvas, DamageDealer.ForSkill(_owner, _skillGauge, attackTarget, paintCanvas));
         _battleToken = token;
         _isRunning = true;
 
@@ -145,7 +144,7 @@ public class AutoAttacker : MonoBehaviour
         // 여러 패턴을 묶은 스타일이면 이번에 쓸 패턴을 먼저 골라, 간격·대기·멈춤을 그 패턴의 값으로 정한다.
         AttackStyle style = selectedStyle.PickStyle(this);
 
-        await UniTask.Delay(TimeSpan.FromSeconds(style.AttackInterval), cancellationToken: token);
+        await WaitIntervalAsync(selectedStyle, style, token);
 
         if (_owner.Health.IsDead || _context.Target.IsDefeated)
         {
@@ -160,14 +159,39 @@ public class AutoAttacker : MonoBehaviour
 
         if (style.WaitUntilFinished)
         {
-            await FireAsync(style, true, token);
+            await FireAsync(style, _context, true, token);
         }
         else
         {
-            FireAsync(style, true, token).Forget();
+            FireAsync(style, _context, true, token).Forget();
         }
 
         return true;
+    }
+
+    // 기다리는 동안 공격을 바꾸면 바뀐 공격의 간격보다 오래 기다리지 않는다. 고르자마자 나와야 하는 공전 구슬 같은 공격을 위해서다.
+    private async UniTask WaitIntervalAsync(AttackStyle selectedStyle, AttackStyle style, CancellationToken token)
+    {
+        float interval = GetInterval(style);
+        float elapsed = 0f;
+
+        while (elapsed < interval)
+        {
+            await UniTask.Yield(PlayerLoopTiming.Update, token);
+            elapsed += Time.deltaTime;
+
+            AttackStyle current = _owner.AttackStyle;
+
+            if (selectedStyle != current && null != current)
+            {
+                interval = Mathf.Min(interval, GetInterval(current));
+            }
+        }
+    }
+
+    private float GetInterval(AttackStyle style)
+    {
+        return style.AttackInterval * _owner.WeaponModifier.IntervalScale;
     }
 
     private CancellationToken GetAttackToken(CancellationToken battleToken)
@@ -188,11 +212,11 @@ public class AutoAttacker : MonoBehaviour
             return false;
         }
 
-        FireAsync(skill.PickStyle(this), false, _battleToken).Forget();
+        FireAsync(skill.PickStyle(this), _skillContext, false, _battleToken).Forget();
         return true;
     }
 
-    private async UniTask FireAsync(AttackStyle style, bool gainsGauge, CancellationToken token)
+    private async UniTask FireAsync(AttackStyle style, AttackContext context, bool gainsGauge, CancellationToken token)
     {
         float gaugeGain = gainsGauge ? style.GaugeGainPerHit : 0f;
         bool hasBegunAction = false;
@@ -216,10 +240,10 @@ public class AutoAttacker : MonoBehaviour
             if (null != _hands && HandGesture.None != style.Tell)
             {
                 hasPosed = true;
-                await _hands.PoseAsync(style.Tell, _context.Target.GetAimPoint(Vector3.zero), style.TellDuration, token);
+                await _hands.PoseAsync(style.Tell, context.Target.GetAimPoint(Vector3.zero), style.TellDuration, token);
             }
 
-            await style.FireAsync(_context, gaugeGain, token);
+            await style.FireAsync(context, gaugeGain, token);
         }
         catch (OperationCanceledException)
         {
@@ -238,6 +262,14 @@ public class AutoAttacker : MonoBehaviour
                 _owner.EndAction();
             }
         }
+    }
+
+    // 무기 공격과 스킬은 피해 처리를 따로 써, 무기 보정이 스킬에 붙지 않게 한다.
+    private AttackContext CreateContext(AttackTarget attackTarget, PaintCanvas paintCanvas, DamageDealer damage)
+    {
+        ProjectileLauncher launcher = new ProjectileLauncher(_owner, attackTarget, damage);
+
+        return new AttackContext(_owner, attackTarget, _hands, paintCanvas, damage, launcher);
     }
 
     private async UniTask<bool> WaitAndBeginActionAsync(CancellationToken token)

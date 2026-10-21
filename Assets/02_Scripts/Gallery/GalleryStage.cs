@@ -29,6 +29,9 @@ public class GalleryStage : MonoBehaviour
     [SerializeField] private InputActionReference _pauseAction;
     [SerializeField] private PauseMenuUI _pauseMenuPrefab;
 
+    [Header("장비")]
+    [SerializeField] private LoadoutView _loadoutViewPrefab;
+
     [Header("사운드")]
     [SerializeField] private AudioClip _bgm;
     [SerializeField, Min(0f)] private float _bgmFadeDuration = 1f;
@@ -36,6 +39,8 @@ public class GalleryStage : MonoBehaviour
     private GalleryPlayer _player;
     private GalleryHudUI _hud;
     private PauseMenuUI _pauseMenu;
+    private LoadoutView _loadoutView;
+    private LoadoutViewModel _loadoutViewModel;
     // 돌아왔을 때 이 액자 앞에서 물러나며 시작하려고 기억해 둔다.
     private GalleryFrame _enteredFrame;
 
@@ -69,7 +74,7 @@ public class GalleryStage : MonoBehaviour
         _player.OnInteract -= HandleInteract;
     }
 
-    // 걸어 다닐 수 있을 때만 멈춘다. 액자로 다가가거나 물러나는 중에는 무시한다.
+    // Esc는 열린 창부터 닫고, 걸어 다닐 수 있을 때만 멈춘다. 액자로 다가가거나 물러나는 중에는 무시한다.
     private void Update()
     {
         if (false == _pauseAction.WasPressedThisFrame())
@@ -77,7 +82,11 @@ public class GalleryStage : MonoBehaviour
             return;
         }
 
-        if (null != _pauseMenu)
+        if (null != _loadoutView)
+        {
+            HandleLoadoutClosed();
+        }
+        else if (null != _pauseMenu)
         {
             Resume();
         }
@@ -119,6 +128,7 @@ public class GalleryStage : MonoBehaviour
     public void Hide()
     {
         ClosePauseMenu();
+        CloseLoadout();
         _player.SetControlEnabled(false);
 
         GameManager.UI.Close(_hud);
@@ -141,15 +151,27 @@ public class GalleryStage : MonoBehaviour
         }
     }
 
-    private void HandleFocusChanged(GalleryFrame frame)
+    private void HandleFocusChanged(GalleryInteractable target)
     {
         if (null != _hud)
         {
-            _hud.ShowFocus(frame);
+            _hud.ShowFocus(target);
         }
     }
 
-    private void HandleInteract(GalleryFrame frame)
+    private void HandleInteract(GalleryInteractable target)
+    {
+        if (target is GalleryFrame frame)
+        {
+            InteractFrame(frame);
+        }
+        else if (target is LoadoutStand)
+        {
+            OpenLoadout();
+        }
+    }
+
+    private void InteractFrame(GalleryFrame frame)
     {
         if (frame.IsLocked)
         {
@@ -218,6 +240,49 @@ public class GalleryStage : MonoBehaviour
         _pauseMenu.OnResume -= Resume;
         GameManager.UI.Close(_pauseMenu);
         _pauseMenu = null;
+    }
+
+    private void OpenLoadout()
+    {
+        _loadoutView = GameManager.UI.Open(_loadoutViewPrefab, UILayer.Content);
+
+        if (null == _loadoutView)
+        {
+            return;
+        }
+
+        _loadoutViewModel = new LoadoutViewModel(GameManager.Player.Loadout, GameManager.Tables, GameManager.Assets);
+        _loadoutViewModel.OnCloseRequested += HandleLoadoutClosed;
+        _loadoutView.Bind(_loadoutViewModel);
+
+        SetControlEnabled(false);
+        SetCursorLocked(false);
+    }
+
+    private void HandleLoadoutClosed()
+    {
+        CloseLoadout();
+
+        SetControlEnabled(true);
+        SetCursorLocked(true);
+    }
+
+    // 어떻게 닫든(닫기 버튼, Esc, 갤러리를 떠날 때) 바꾼 장비를 저장한다.
+    private void CloseLoadout()
+    {
+        if (null == _loadoutView)
+        {
+            return;
+        }
+
+        _loadoutViewModel.OnCloseRequested -= HandleLoadoutClosed;
+        _loadoutViewModel.UnBind();
+        _loadoutViewModel = null;
+
+        GameManager.SavePlayer();
+
+        GameManager.UI.Close(_loadoutView);
+        _loadoutView = null;
     }
 
     private void SetControlEnabled(bool isEnabled)

@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8c39e6419a84b5eb40973477b7e20cd, type: 3}
+  m_Name: Player_Roller
+  m_EditorClassIdentifier: Assembly-CSharp::RollerAttackStyle
+  _displayName: Roller
+  _iconColor: {r: 1, g: 0.82, b: 0.45, a: 1}
+  _attackInterval: 1.2
+  _gaugeGainPerHit: 15
+  _waitUntilFinished: 0
+  _stopsMovement: 0
+  _tell: 0
+  _tellDuration: 0.5
+  _rollerPrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
+  _width: 2.4
+  _thickness: 0.7
+  _speed: 4
+  _length: 14
+  _rollWobble: 0.15
+  _rollWobbleSpeed: 12
+  _stripeStyle: {fileID: 11400000, guid: 775407243f820dd757fd5ca4151a2591, type: 2}
+  _stripeSpacing: 0.8
+  _stripeScale:
+    _min: 0.9
+    _max: 1.2
+  _maxHits: 2
+  _hit:
+    _damage:
+      _min: 25
+      _max: 35
+    _criticalChance: 0.3
+    _criticalMultiplier: 2
+    _normalHit: {fileID: 11400000, guid: e9c3f1b326a44c298886b834f11749f9, type: 2}
+    _criticalHit: {fileID: 11400000, guid: e80d253bffc04a2b9dd3e8c76dd31792, type: 2}
+  _burstImpact:
+    _shakeForce: 0.8
+    _sounds:
+    - {fileID: 8300000, guid: 719f60a1210744d4991b5897a355751c, type: 3}
+    - {fileID: 8300000, guid: 62a4fc432d1e58e4aac35a1475bbb55e, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0, g: 0, b: 0, a: 1}
+    _effectScale: 2
+    _effectLifetime: 2

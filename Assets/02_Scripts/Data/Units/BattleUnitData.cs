@@ -5,9 +5,6 @@ public abstract class BattleUnitData : ScriptableObject
     [Header("배회")]
     [SerializeField] private WanderSettings _wander = new();
 
-    [Header("공격")]
-    [SerializeField] private AttackStyle _attackStyle;
-
     [Header("겉모습")]
     [SerializeField] private GameObject _projectilePrefab;
     [SerializeField] private PaintPalette _palette;
@@ -20,7 +17,7 @@ public abstract class BattleUnitData : ScriptableObject
 
     public WanderSettings Wander { get { return _wander; } }
 
-    public AttackStyle AttackStyle { get { return _attackStyle; } }
+    public abstract AttackStyle AttackStyle { get; }
 
     public GameObject ProjectilePrefab { get { return _projectilePrefab; } }
     public PaintPalette Palette { get { return _palette; } }

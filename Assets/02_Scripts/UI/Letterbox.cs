@@ -40,7 +40,7 @@ public class Letterbox : MonoBehaviour
             .SetEase(ease)
             .SetUpdate(true);
 
-        return sequence.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+        return sequence.ToUniTaskKillOnCancel(token);
     }
 
     private Vector2 GetTopAnchorMin(float ratio)

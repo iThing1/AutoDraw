@@ -102,7 +102,7 @@ MonoBehaviour:
   _crosshair: {fileID: 6410000000000000005}
   _label: {fileID: 6410000000000000012}
   _prompt: {fileID: 6410000000000000016}
-  _enterFormat: '[{0}] ENTER'
+  _promptFormat: '[{0}] {1}'
 --- !u!1 &6410000000000000005
 GameObject:
   m_ObjectHideFlags: 0

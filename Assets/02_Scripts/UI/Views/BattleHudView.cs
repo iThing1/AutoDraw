@@ -48,7 +48,7 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
 
         return _canvasGroup.DOFade(0f, _fadeDuration)
             .SetUpdate(true)
-            .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+            .ToUniTaskKillOnCancel(token);
     }
 
     protected override void OnBind()
@@ -125,9 +125,17 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
         }
     }
 
+    // 쓰지 않는 칸(유틸리티가 막기가 아닐 때의 막기 칸 등)은 숨긴다.
     private void BindSlot(AttackSlotView slot, AttackSlotViewModel viewModel)
     {
-        if (null != slot && null != viewModel)
+        if (null == slot)
+        {
+            return;
+        }
+
+        slot.gameObject.SetActive(null != viewModel);
+
+        if (null != viewModel)
         {
             slot.Bind(viewModel);
         }

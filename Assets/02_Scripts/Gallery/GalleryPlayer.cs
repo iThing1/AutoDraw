@@ -5,7 +5,7 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// 갤러리를 1인칭으로 걸어 다니며, 화면 가운데로 바라보는 액자를 찾아 상호작용 키로 고른다.
+// 갤러리를 1인칭으로 걸어 다니며, 화면 가운데로 바라보는 액자·보관대를 찾아 상호작용 키로 고른다.
 [RequireComponent(typeof(CharacterController))]
 public class GalleryPlayer : MonoBehaviour
 {
@@ -30,14 +30,14 @@ public class GalleryPlayer : MonoBehaviour
     private Vector3 _cameraHomePosition;
     private float _pitch;
     private bool _isControlEnabled;
-    private GalleryFrame _focusedFrame;
+    private GalleryInteractable _focused;
 
     private Vector3 _savedPosition;
     private Quaternion _savedRotation;
     private float _savedPitch;
 
-    public event Action<GalleryFrame> OnFocusChanged;
-    public event Action<GalleryFrame> OnInteract;
+    public event Action<GalleryInteractable> OnFocusChanged;
+    public event Action<GalleryInteractable> OnInteract;
 
     // HUD에 보여 줄 상호작용 키 이름. 입력 에셋에서 키를 바꾸면 따라 바뀐다.
     public string InteractKeyLabel { get { return _interactAction.GetKeyLabel(); } }
@@ -79,9 +79,9 @@ public class GalleryPlayer : MonoBehaviour
         Move();
         UpdateFocus();
 
-        if (null != _focusedFrame && _interactAction.WasPressedThisFrame())
+        if (null != _focused && _interactAction.WasPressedThisFrame())
         {
-            OnInteract?.Invoke(_focusedFrame);
+            OnInteract?.Invoke(_focused);
         }
     }
 
@@ -127,7 +127,7 @@ public class GalleryPlayer : MonoBehaviour
             .Join(_camera.DORotateQuaternion(viewPoint.rotation, duration))
             .SetEase(ease);
 
-        return move.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+        return move.ToUniTaskKillOnCancel(token);
     }
 
     // 돌아올 때 그림 앞에서 시작해 서 있던 자리로 물러나도록, 카메라만 액자 앞에 먼저 둔다.
@@ -146,7 +146,7 @@ public class GalleryPlayer : MonoBehaviour
             .Join(_camera.DOLocalRotateQuaternion(Quaternion.Euler(_pitch, 0f, 0f), duration))
             .SetEase(ease);
 
-        return move.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+        return move.ToUniTaskKillOnCancel(token);
     }
 
     // 좌우는 몸을 돌리고 위아래는 카메라만 숙여, 걸어가는 방향이 고개 각도에 따라 기울지 않게 한다.
@@ -169,39 +169,39 @@ public class GalleryPlayer : MonoBehaviour
         _controller.SimpleMove(direction * _moveSpeed);
     }
 
-    // 액자 콜라이더는 액자 컴포넌트와 같은 오브젝트에 있어, 맞은 오브젝트만 확인한다.
+    // 콜라이더는 상호작용 컴포넌트와 같은 오브젝트에 있어, 맞은 오브젝트만 확인한다.
     private void UpdateFocus()
     {
-        GalleryFrame frame = null;
+        GalleryInteractable target = null;
 
         if (Physics.Raycast(_camera.position, _camera.forward, out RaycastHit hit, _interactDistance))
         {
-            hit.collider.TryGetComponent(out frame);
+            hit.collider.TryGetComponent(out target);
         }
 
-        SetFocus(frame);
+        SetFocus(target);
     }
 
-    // 바라보던 액자의 강조를 끄고 새로 바라보는 액자를 강조한다.
-    private void SetFocus(GalleryFrame frame)
+    // 바라보던 물건의 강조를 끄고 새로 바라보는 물건을 강조한다.
+    private void SetFocus(GalleryInteractable target)
     {
-        if (frame == _focusedFrame)
+        if (target == _focused)
         {
             return;
         }
 
-        if (null != _focusedFrame)
+        if (null != _focused)
         {
-            _focusedFrame.SetHighlighted(false);
+            _focused.SetHighlighted(false);
         }
 
-        _focusedFrame = frame;
+        _focused = target;
 
-        if (null != frame)
+        if (null != target)
         {
-            frame.SetHighlighted(true);
+            target.SetHighlighted(true);
         }
 
-        OnFocusChanged?.Invoke(frame);
+        OnFocusChanged?.Invoke(target);
     }
 }

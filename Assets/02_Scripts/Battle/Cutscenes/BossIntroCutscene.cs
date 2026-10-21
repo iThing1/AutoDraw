@@ -39,7 +39,7 @@ public class BossIntroCutscene : MonoBehaviour
             .SetEase(_preset.BossDropEase)
             .SetUpdate(true);
 
-        await drop.ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+        await drop.ToUniTaskKillOnCancel(token);
 
         ImpactPlayer.Play(_preset.LandImpact, landingPosition);
     }

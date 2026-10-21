@@ -13,7 +13,7 @@ public static class DataSheetImporter
     private const string DIALOG_TITLE = "데이터 가져오기";
     private const int TIMEOUT_SECONDS = 15;
 
-    private static readonly IDataSheetRule[] RULES = { new PerkTreeRule(), new PerkEffectTargetRule(), new StageSkillRule() };
+    private static readonly IDataSheetRule[] RULES = { new PerkTreeRule(), new PerkEffectTargetRule(), new StageSkillRule(), new AssetKeyRule() };
 
     [MenuItem(MENU_PATH)]
     private static void Import()

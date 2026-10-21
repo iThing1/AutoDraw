@@ -1,11 +1,11 @@
-// 기본 공격 칸. 키로 고른 공격이면 선택 표시가 켜진다.
+// 무기 칸(기본·화력). 키로 고른 칸이면 선택 표시가 켜진다.
 public class BasicAttackSlotViewModel : AttackSlotViewModel
 {
     private readonly int _index;
     private PlayerAttackInput _input;
 
     public BasicAttackSlotViewModel(PlayerAttackInput input, int index)
-        : base(input.GetBasicKeyLabel(index), input.Loadout.BasicStyles[index], false)
+        : base(input.GetBasicKeyLabel(index), input.GetSlotStyle(index), false)
     {
         _input = input;
         _index = index;

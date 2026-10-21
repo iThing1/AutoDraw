@@ -60,7 +60,7 @@ public class InkDiveAttackStyle : AttackStyle
 
             await owner.DOScale(Vector3.zero, _sinkDuration)
                 .SetEase(_sinkEase)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                .ToUniTaskKillOnCancel(token);
 
             await UniTask.Delay(TimeSpan.FromSeconds(_hiddenDuration), cancellationToken: token);
 
@@ -74,7 +74,7 @@ public class InkDiveAttackStyle : AttackStyle
 
             await owner.DOScale(startScale, _riseDuration)
                 .SetEase(_riseEase)
-                .ToUniTask(TweenCancelBehaviour.KillAndCancelAwait, token);
+                .ToUniTaskKillOnCancel(token);
         }
 
         ImpactPlayer.Play(_riseImpact, owner.position);

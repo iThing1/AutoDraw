@@ -1164,7 +1164,7 @@ MonoBehaviour:
   _bossHealthBar: {fileID: 8278502422303877329}
   _bossPhaseText: {fileID: 6100000000000000018}
   _bossPhaseFormat: x{0}
-  _basicSlots:
+  _weaponSlots:
   - {fileID: 6356057960825916949}
   - {fileID: 1924539115944971099}
   _skillSlot: {fileID: 291768563873768782}

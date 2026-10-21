@@ -12,10 +12,10 @@ public class PlayerAttackInput : MonoBehaviour
     private const int WEAPON_SLOT_COUNT = 2;
 
     // 무기 칸과 같은 순서로 넣는다(0 = 기본 무기, 1 = 화력 무기).
-    [SerializeField] private InputActionReference[] _basicAttackActions;
+    [SerializeField] private InputActionReference[] _weaponActions;
     [SerializeField] private InputActionReference _skillAction;
 
-    public event Action<int> OnBasicStyleChanged;
+    public event Action<int> OnWeaponSelected;
     public event Action OnSkillFired;
 
     private readonly AttackStyle[] _slotStyles = new AttackStyle[WEAPON_SLOT_COUNT];
@@ -33,7 +33,7 @@ public class PlayerAttackInput : MonoBehaviour
     public AttackStyle SkillStyle { get { return _skillStyle; } }
 
     // 무기 칸과 입력 중 적은 쪽까지만 쓴다. 키가 없는 칸은 고를 수 없다.
-    public int SlotCount { get { return null != _basicAttackActions ? Mathf.Min(WEAPON_SLOT_COUNT, _basicAttackActions.Length) : 0; } }
+    public int SlotCount { get { return null != _weaponActions ? Mathf.Min(WEAPON_SLOT_COUNT, _weaponActions.Length) : 0; } }
 
     private void Awake()
     {
@@ -63,11 +63,11 @@ public class PlayerAttackInput : MonoBehaviour
 
     private void OnEnable()
     {
-        if (null != _basicAttackActions)
+        if (null != _weaponActions)
         {
-            for (int i = 0; i < _basicAttackActions.Length; i++)
+            for (int i = 0; i < _weaponActions.Length; i++)
             {
-                _basicAttackActions[i].Enable();
+                _weaponActions[i].Enable();
             }
         }
 
@@ -78,7 +78,7 @@ public class PlayerAttackInput : MonoBehaviour
     {
         if (0 < SlotCount)
         {
-            SelectBasic(BASIC_SLOT);
+            SelectWeapon(BASIC_SLOT);
         }
     }
 
@@ -88,9 +88,9 @@ public class PlayerAttackInput : MonoBehaviour
 
         for (int i = 0; i < slotCount; i++)
         {
-            if (_basicAttackActions[i].WasPressedThisFrame())
+            if (_weaponActions[i].WasPressedThisFrame())
             {
-                SelectBasic(i);
+                SelectWeapon(i);
                 return;
             }
         }
@@ -106,14 +106,14 @@ public class PlayerAttackInput : MonoBehaviour
         return 0 <= index && index < WEAPON_SLOT_COUNT ? _slotStyles[index] : null;
     }
 
-    public string GetBasicKeyLabel(int index)
+    public string GetWeaponKeyLabel(int index)
     {
-        if (null == _basicAttackActions || index >= _basicAttackActions.Length)
+        if (null == _weaponActions || index >= _weaponActions.Length)
         {
             return string.Empty;
         }
 
-        return _basicAttackActions[index].GetKeyLabel();
+        return _weaponActions[index].GetKeyLabel();
     }
 
     private void ReadWeapon(int slot, string weaponId, DataTableManager tables, AssetManager assets)
@@ -147,7 +147,7 @@ public class PlayerAttackInput : MonoBehaviour
         }
     }
 
-    private void SelectBasic(int index)
+    private void SelectWeapon(int index)
     {
         AttackStyle style = _slotStyles[index];
 
@@ -159,7 +159,7 @@ public class PlayerAttackInput : MonoBehaviour
         _selectedIndex = index;
         _unit.OverrideAttackStyle(style, _slotModifiers[index]);
 
-        OnBasicStyleChanged?.Invoke(index);
+        OnWeaponSelected?.Invoke(index);
     }
 
     // 발동에 성공했을 때만 게이지를 비워, 전투 밖에서 눌러도 게이지가 날아가지 않게 한다.

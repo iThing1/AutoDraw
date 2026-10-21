@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 하단 HUD의 칸 하나. 기본 공격은 선택 표시, 스킬·막기·소모품은 게이지 채움을 보여 준다.
+// 하단 HUD의 칸 하나. 무기 칸은 선택 표시, 스킬·막기·소모품은 게이지 채움을 보여 준다.
 public class ActionSlotView : ViewBase<ActionSlotViewModel>
 {
     [SerializeField] private Image _icon;

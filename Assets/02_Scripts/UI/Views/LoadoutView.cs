@@ -16,34 +16,15 @@ public class LoadoutView : ViewBase<LoadoutViewModel>
     [SerializeField] private Button _closeButton;
 
     [Header("예시 영상")]
+    // 영상 플레이어가 RenderTexture 에셋에 그리고, 이 RawImage가 그 텍스처를 보여 준다.
     [SerializeField] private RawImage _preview;
-    [SerializeField] private Vector2Int _previewSize = new Vector2Int(384, 216);
+    [SerializeField] private VideoPlayer _videoPlayer;
 
     private readonly List<LoadoutSlotView> _slotViews = new();
-    private VideoPlayer _videoPlayer;
-    private RenderTexture _previewTexture;
 
     private void Awake()
     {
         _closeButton.onClick.AddListener(HandleCloseClicked);
-
-        _previewTexture = new RenderTexture(_previewSize.x, _previewSize.y, 0);
-        _preview.texture = _previewTexture;
-
-        _videoPlayer = _preview.gameObject.GetOrAddComponent<VideoPlayer>();
-        _videoPlayer.playOnAwake = false;
-        _videoPlayer.isLooping = true;
-        _videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
-        _videoPlayer.renderMode = VideoRenderMode.RenderTexture;
-        _videoPlayer.targetTexture = _previewTexture;
-    }
-
-    protected override void OnDestroy()
-    {
-        base.OnDestroy();
-
-        _previewTexture.Release();
-        Destroy(_previewTexture);
     }
 
     // 키 이름은 화면에만 쓰는 값이라 ViewModel 대신 여기서 입력 에셋을 읽는다.

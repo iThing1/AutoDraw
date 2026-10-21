@@ -18,7 +18,7 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
     [SerializeField] private string _bossPhaseFormat = "x{0}";
 
     [Header("하단 칸")]
-    [SerializeField] private ActionSlotView[] _basicSlots;
+    [SerializeField] private ActionSlotView[] _weaponSlots;
     [SerializeField] private ActionSlotView _skillSlot;
     [SerializeField] private ActionSlotView _guardSlot;
     [SerializeField] private ActionSlotView _itemSlot;
@@ -59,7 +59,7 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
         _playerHealthBar.Bind(viewModel.PlayerHealth);
         _bossHealthBar.Bind(viewModel.BossHealth);
 
-        BindBasicSlots(viewModel.BasicSlots);
+        BindWeaponSlots(viewModel.WeaponSlots);
         BindSlot(_skillSlot, viewModel.SkillSlot);
         BindSlot(_guardSlot, viewModel.GuardSlot);
         BindSlot(_itemSlot, viewModel.ItemSlot);
@@ -78,9 +78,9 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
         _playerHealthBar.UnBind();
         _bossHealthBar.UnBind();
 
-        for (int i = 0; i < _basicSlots.Length; i++)
+        for (int i = 0; i < _weaponSlots.Length; i++)
         {
-            _basicSlots[i].UnBind();
+            _weaponSlots[i].UnBind();
         }
 
         if (null != _skillSlot)
@@ -118,18 +118,18 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
         DrawPhaseCount();
     }
 
-    // 쓰는 기본 공격 수만큼만 칸을 켠다.
-    private void BindBasicSlots(IReadOnlyList<ActionSlotViewModel> slots)
+    // 쓰는 무기 칸 수만큼만 칸을 켠다.
+    private void BindWeaponSlots(IReadOnlyList<ActionSlotViewModel> slots)
     {
-        for (int i = 0; i < _basicSlots.Length; i++)
+        for (int i = 0; i < _weaponSlots.Length; i++)
         {
             bool hasSlot = i < slots.Count;
 
-            _basicSlots[i].gameObject.SetActive(hasSlot);
+            _weaponSlots[i].gameObject.SetActive(hasSlot);
 
             if (hasSlot)
             {
-                _basicSlots[i].Bind(slots[i]);
+                _weaponSlots[i].Bind(slots[i]);
             }
         }
     }

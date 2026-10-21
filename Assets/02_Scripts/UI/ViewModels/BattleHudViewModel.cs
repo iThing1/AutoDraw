@@ -8,7 +8,7 @@ public class BattleHudViewModel : ViewModelBase
 {
     private readonly HealthBarViewModel _playerHealth;
     private readonly HealthBarViewModel _bossHealth;
-    private readonly List<ActionSlotViewModel> _basicSlots = new();
+    private readonly List<ActionSlotViewModel> _weaponSlots = new();
     private readonly ActionSlotViewModel _skillSlot;
     private readonly ActionSlotViewModel _guardSlot;
     private readonly ActionSlotViewModel _itemSlot;
@@ -27,7 +27,7 @@ public class BattleHudViewModel : ViewModelBase
 
     public HealthBarViewModel PlayerHealth { get { return _playerHealth; } }
     public HealthBarViewModel BossHealth { get { return _bossHealth; } }
-    public IReadOnlyList<ActionSlotViewModel> BasicSlots { get { return _basicSlots; } }
+    public IReadOnlyList<ActionSlotViewModel> WeaponSlots { get { return _weaponSlots; } }
     // 해당 컴포넌트가 없는 플레이어면 null이다.
     public ActionSlotViewModel SkillSlot { get { return _skillSlot; } }
     public ActionSlotViewModel GuardSlot { get { return _guardSlot; } }
@@ -50,7 +50,7 @@ public class BattleHudViewModel : ViewModelBase
         {
             for (int i = 0; i < attackInput.SlotCount; i++)
             {
-                _basicSlots.Add(new BasicActionSlotViewModel(attackInput, i));
+                _weaponSlots.Add(new WeaponSlotViewModel(attackInput, i));
             }
 
             _skillSlot = new SkillSlotViewModel(attackInput);
@@ -85,9 +85,9 @@ public class BattleHudViewModel : ViewModelBase
         _playerHealth.UnBind();
         _bossHealth.UnBind();
 
-        for (int i = 0; i < _basicSlots.Count; i++)
+        for (int i = 0; i < _weaponSlots.Count; i++)
         {
-            _basicSlots[i].UnBind();
+            _weaponSlots[i].UnBind();
         }
 
         if (null != _skillSlot)

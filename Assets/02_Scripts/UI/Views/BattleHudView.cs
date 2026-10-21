@@ -163,7 +163,7 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
 
         if (isVisible)
         {
-            _bossPhaseText.text = string.Format(_bossPhaseFormat, ViewModel.RemainingPhaseCount);
+            _bossPhaseText.SetText(_bossPhaseFormat, ViewModel.RemainingPhaseCount);
         }
     }
 
@@ -187,9 +187,18 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
     private void SpawnHealText(int amount, Vector3 worldPosition)
     {
         FloatingTextSettings.Phrase phrase = _floatingText.GetPhrase(FloatingTextKind.Heal);
-        string text = string.IsNullOrEmpty(phrase.Text) ? phrase.Text : string.Format(phrase.Text, amount);
 
-        SpawnPhrase(text, phrase.Color, worldPosition);
+        if (string.IsNullOrEmpty(phrase.Text))
+        {
+            return;
+        }
+
+        FloatingText floatingText = SpawnText();
+
+        if (null != floatingText)
+        {
+            floatingText.PlayNumber(phrase.Text, amount, phrase.Color, ToScreen(worldPosition), _floatingText);
+        }
     }
 
     // 설정에 없는 종류는 문구가 비어 있어 띄우지 않는다.

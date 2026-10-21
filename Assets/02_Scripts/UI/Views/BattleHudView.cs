@@ -5,7 +5,7 @@ using System.Threading;
 using TMPro;
 using UnityEngine;
 
-// 전투 HUD. 하위 View(체력바·공격 칸)에 ViewModel의 하위 ViewModel을 꽂고, 남은 페이즈 수와 떠오르는 문구만 직접 그린다.
+// 전투 HUD. 하위 View(체력바·하단 칸)에 ViewModel의 하위 ViewModel을 꽂고, 남은 페이즈 수와 떠오르는 문구만 직접 그린다.
 public class BattleHudView : ViewBase<BattleHudViewModel>
 {
     [SerializeField] private CanvasGroup _canvasGroup;
@@ -17,11 +17,11 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
     [SerializeField] private TMP_Text _bossPhaseText;
     [SerializeField] private string _bossPhaseFormat = "x{0}";
 
-    [Header("공격 슬롯")]
-    [SerializeField] private AttackSlotView[] _basicSlots;
-    [SerializeField] private AttackSlotView _skillSlot;
-    [SerializeField] private AttackSlotView _guardSlot;
-    [SerializeField] private AttackSlotView _itemSlot;
+    [Header("하단 칸")]
+    [SerializeField] private ActionSlotView[] _basicSlots;
+    [SerializeField] private ActionSlotView _skillSlot;
+    [SerializeField] private ActionSlotView _guardSlot;
+    [SerializeField] private ActionSlotView _itemSlot;
 
     [Header("떠오르는 문구")]
     // 피해 숫자와 GUARD·NO INK·BREAK 같은 짧은 문구를 같은 프리팹으로 띄운다.
@@ -119,7 +119,7 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
     }
 
     // 쓰는 기본 공격 수만큼만 칸을 켠다.
-    private void BindBasicSlots(IReadOnlyList<AttackSlotViewModel> slots)
+    private void BindBasicSlots(IReadOnlyList<ActionSlotViewModel> slots)
     {
         for (int i = 0; i < _basicSlots.Length; i++)
         {
@@ -135,7 +135,7 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
     }
 
     // 쓰지 않는 칸(유틸리티가 막기가 아닐 때의 막기 칸 등)은 숨긴다.
-    private void BindSlot(AttackSlotView slot, AttackSlotViewModel viewModel)
+    private void BindSlot(ActionSlotView slot, ActionSlotViewModel viewModel)
     {
         if (null == slot)
         {

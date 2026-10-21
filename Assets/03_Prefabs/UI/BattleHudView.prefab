@@ -763,7 +763,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 495e332cb42aecf49b1704b057ef8e92, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttackSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::ActionSlotView
   _icon: {fileID: 837108944415702429}
   _keyText: {fileID: 4955234699023265643}
   _nameText: {fileID: 317581433215668839}
@@ -2206,7 +2206,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 495e332cb42aecf49b1704b057ef8e92, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttackSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::ActionSlotView
   _icon: {fileID: 1590480300098666753}
   _keyText: {fileID: 6868940707439420866}
   _nameText: {fileID: 3270972245773280457}
@@ -2342,7 +2342,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 495e332cb42aecf49b1704b057ef8e92, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttackSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::ActionSlotView
   _icon: {fileID: 1035428091751075752}
   _keyText: {fileID: 2572894318130284190}
   _nameText: {fileID: 4309648906910507206}
@@ -3390,7 +3390,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 495e332cb42aecf49b1704b057ef8e92, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttackSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::ActionSlotView
   _icon: {fileID: 7300000003317395804}
   _keyText: {fileID: 7300000006634791608}
   _nameText: {fileID: 7300000009952187412}
@@ -3722,7 +3722,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 495e332cb42aecf49b1704b057ef8e92, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttackSlotView
+  m_EditorClassIdentifier: Assembly-CSharp::ActionSlotView
   _icon: {fileID: 1540815819306678976}
   _keyText: {fileID: 7606259904152835072}
   _nameText: {fileID: 8500618729507837952}

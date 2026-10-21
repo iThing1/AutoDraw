@@ -1,9 +1,9 @@
 using System;
 using UnityEngine;
 
-// 하단 HUD 공격 칸 하나에 보일 값. 키 이름·표시 이름·아이콘 색은 처음에 정해지고, 선택 여부와 게이지는 하위 클래스가 모델을 보고 바꾼다.
-// 칸마다 데이터를 주는 곳(기본 공격 선택, 스킬 게이지, 막기 비용)이 달라 하위 클래스로 나누고, 그리는 View는 하나를 같이 쓴다.
-public abstract class AttackSlotViewModel : ViewModelBase
+// 하단 HUD 칸 하나(공격·스킬·막기·소모품)에 보일 값. 키 이름·아이콘 색은 처음에 정해지고, 선택 여부·게이지·이름은 하위 클래스가 모델을 보고 바꾼다.
+// 칸마다 데이터를 주는 곳(기본 공격 선택, 스킬 게이지, 막기 비용, 소모품 횟수)이 달라 하위 클래스로 나누고, 그리는 View는 하나를 같이 쓴다.
+public abstract class ActionSlotViewModel : ViewModelBase
 {
     private readonly string _keyLabel;
     private string _displayName;
@@ -26,12 +26,12 @@ public abstract class AttackSlotViewModel : ViewModelBase
     // 게이지가 다 차 지금 쓸 수 있는지.
     public bool IsReady { get { return _isReady; } }
 
-    protected AttackSlotViewModel(string keyLabel, AttackStyle style, bool usesGauge)
+    protected ActionSlotViewModel(string keyLabel, AttackStyle style, bool usesGauge)
         : this(keyLabel, null != style ? style.DisplayName : string.Empty, null != style ? style.IconColor : Color.white, usesGauge)
     {
     }
 
-    protected AttackSlotViewModel(string keyLabel, string displayName, Color iconColor, bool usesGauge)
+    protected ActionSlotViewModel(string keyLabel, string displayName, Color iconColor, bool usesGauge)
     {
         _keyLabel = keyLabel;
         _displayName = displayName;

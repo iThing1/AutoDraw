@@ -1,5 +1,5 @@
 // 특수 스킬 칸. 스킬 게이지가 다 차면 쓸 수 있고, 발동하면 한 번 튄다.
-public class SkillSlotViewModel : AttackSlotViewModel
+public class SkillSlotViewModel : ActionSlotViewModel
 {
     private PlayerAttackInput _input;
     private SkillGauge _gauge;

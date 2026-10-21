@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // 소모품 칸. 남은 횟수를 이름 옆에 붙이고, 횟수가 남았고 쿨타임이 다 찼을 때 쓸 수 있다. 쓰면 한 번 튄다.
-public class ConsumableSlotViewModel : AttackSlotViewModel
+public class ConsumableSlotViewModel : ActionSlotViewModel
 {
     private const string NAME_FORMAT = "{0} x{1}";
 

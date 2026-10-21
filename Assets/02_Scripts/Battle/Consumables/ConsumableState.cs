@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 // 끼운 소모품 하나의 남은 횟수와 쿨타임. 전투를 시작할 때 표 값으로 만든다.
 // 입력과 효과는 PlayerConsumable이 맡고, 화면은 이 상태만 보고 소모품 칸을 그린다. 시간은 부르는 쪽이 넘긴다(게임 시간).
@@ -7,7 +6,7 @@ public class ConsumableState
 {
     private readonly ConsumableData _data;
     private int _charges;
-    private float _readyTime;
+    private readonly Cooldown _cooldown = new();
     private float _cooldownRatio = 1f;
 
     public event Action OnUsed;
@@ -27,15 +26,15 @@ public class ConsumableState
 
     public bool CanUse(float now)
     {
-        return 0 < _charges && now >= _readyTime;
+        return 0 < _charges && _cooldown.IsReady(now);
     }
 
     // CanUse일 때만 부른다.
     public void Use(float now)
     {
         _charges--;
-        _readyTime = now + _data.Cooldown;
-        _cooldownRatio = 0f < _data.Cooldown ? 0f : 1f;
+        _cooldown.Start(now, _data.Cooldown);
+        _cooldownRatio = _cooldown.GetRatio(now);
 
         OnUsed?.Invoke();
         OnChanged?.Invoke();
@@ -49,7 +48,7 @@ public class ConsumableState
             return;
         }
 
-        _cooldownRatio = Mathf.Clamp01(1f - (_readyTime - now) / _data.Cooldown);
+        _cooldownRatio = _cooldown.GetRatio(now);
         OnChanged?.Invoke();
     }
 }

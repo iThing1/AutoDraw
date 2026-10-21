@@ -17,11 +17,11 @@ public class InkSwallow
     private readonly BattleUnit _target;
     private readonly InkSwallowSettings _settings;
     private readonly PaintCanvas _paintCanvas;
-    private readonly List<Transform> _sources = new();
+    private readonly List<PaintMark> _sources = new();
     private readonly List<InkArm> _arms = new();
 
     private Vector3 _center;
-    private Transform _sinkSource;
+    private PaintMark _sinkSource;
 
     private InkSwallow(BattleUnit target, InkSwallowSettings settings, PaintCanvas paintCanvas)
     {
@@ -74,13 +74,11 @@ public class InkSwallow
 
             if (null != _settings.ResidueSplat)
             {
-                _paintCanvas.LeaveSplats(_sinkSource.position, _settings.InkColor, true, _settings.ResidueSplat);
+                _paintCanvas.LeaveSplats(_sinkSource.Position, _settings.InkColor, true, _settings.ResidueSplat);
             }
 
-            _sinkSource.DOComplete();
-            await _sinkSource.DOPunchScale(_sinkSource.localScale * _settings.SinkRippleStrength, _settings.SinkRippleDuration, PunchTween.VIBRATO, PunchTween.ELASTICITY)
-                .SetUpdate(true)
-                .ToUniTaskKillOnCancel(token);
+            _paintCanvas.Twitch(_sinkSource, _settings.SinkRippleStrength, _settings.SinkRippleDuration, true);
+            await UniTask.Delay(System.TimeSpan.FromSeconds(_settings.SinkRippleDuration), true, cancellationToken: token);
         }
         finally
         {
@@ -95,26 +93,26 @@ public class InkSwallow
     private void FindSources()
     {
         int wantedCount = _settings.SourceCount.PickRandom();
-        List<PaintSplat> candidates = new List<PaintSplat>();
-        IReadOnlyList<PaintSplat> inkSplats = _paintCanvas.InkSplats;
+        List<PaintMark> candidates = new List<PaintMark>();
+        IReadOnlyList<PaintMark> inkMarks = _paintCanvas.InkMarks;
 
-        for (int i = 0; i < inkSplats.Count; i++)
+        for (int i = 0; i < inkMarks.Count; i++)
         {
-            float distance = Vector2.Distance(inkSplats[i].transform.position, _center);
+            float distance = Vector2.Distance(inkMarks[i].Position, _center);
 
             if (MIN_SOURCE_DISTANCE <= distance && _settings.SourceSearchRadius >= distance)
             {
-                candidates.Add(inkSplats[i]);
+                candidates.Add(inkMarks[i]);
             }
         }
 
         while (_sources.Count < wantedCount && 0 < candidates.Count)
         {
             int nearestIndex = FindNearestIndex(candidates);
-            Transform nearest = candidates[nearestIndex].transform;
+            PaintMark nearest = candidates[nearestIndex];
             candidates.RemoveAt(nearestIndex);
 
-            if (IsFarFromSources(nearest.position))
+            if (IsFarFromSources(nearest.Position))
             {
                 _sources.Add(nearest);
             }
@@ -124,7 +122,7 @@ public class InkSwallow
         {
             Vector3 direction = Quaternion.Euler(0f, 0f, Random.Range(0f, 360f)) * Vector3.right;
             Vector3 position = _center + direction * _settings.FallbackDistance.PickRandom();
-            PaintSplat splat = _paintCanvas.LeaveInkSplat(position, _settings.FallbackSplatStyle, _settings.InkColor, _settings.FallbackSplatScale.PickRandom());
+            PaintMark splat = _paintCanvas.LeaveInkSplat(position, _settings.FallbackSplatStyle, _settings.InkColor, _settings.FallbackSplatScale.PickRandom());
 
             if (null == splat)
             {
@@ -132,7 +130,7 @@ public class InkSwallow
                 return;
             }
 
-            _sources.Add(splat.transform);
+            _sources.Add(splat);
         }
     }
 
@@ -162,7 +160,7 @@ public class InkSwallow
         {
             for (int arm = 0; arm < armCounts[i]; arm++)
             {
-                Vector3 root = _sources[i].position + (Vector3)(Random.insideUnitCircle * _settings.RootSpread);
+                Vector3 root = _sources[i].Position + (Vector3)(Random.insideUnitCircle * _settings.RootSpread);
                 Vector3 grabPoint = _center + (Vector3)(Random.insideUnitCircle * _settings.GrabSpread);
                 float startTime = firstStartTime + _settings.ArmStartDelay.PickRandom();
 
@@ -179,11 +177,7 @@ public class InkSwallow
     {
         for (int i = 0; i < _sources.Count; i++)
         {
-            Transform source = _sources[i];
-
-            source.DOComplete();
-            source.DOPunchScale(source.localScale * _settings.SourceTwitchStrength, _settings.SourceTwitchDuration, PunchTween.VIBRATO, PunchTween.ELASTICITY)
-                .SetUpdate(true);
+            _paintCanvas.Twitch(_sources[i], _settings.SourceTwitchStrength, _settings.SourceTwitchDuration, true);
         }
     }
 
@@ -195,7 +189,7 @@ public class InkSwallow
         Vector3 startScale = targetTransform.localScale;
         Vector3 bodyStartPosition = bodyTransform.localPosition;
         Color bodyStartColor = body.color;
-        Vector3 sinkPoint = _sinkSource.position;
+        Vector3 sinkPoint = _sinkSource.Position;
 
         float grabStart = GetLastArrivalTime();
         float pullStart = grabStart + _settings.GrabDuration + _settings.PullDelay;
@@ -231,14 +225,14 @@ public class InkSwallow
         bodyTransform.localPosition = bodyStartPosition;
     }
 
-    private int FindNearestIndex(List<PaintSplat> splats)
+    private int FindNearestIndex(List<PaintMark> marks)
     {
         int nearestIndex = 0;
         float nearestDistance = float.MaxValue;
 
-        for (int i = 0; i < splats.Count; i++)
+        for (int i = 0; i < marks.Count; i++)
         {
-            float distance = Vector2.Distance(splats[i].transform.position, _center);
+            float distance = Vector2.Distance(marks[i].Position, _center);
 
             if (distance < nearestDistance)
             {
@@ -254,7 +248,7 @@ public class InkSwallow
     {
         for (int i = 0; i < _sources.Count; i++)
         {
-            if (Vector2.Distance(position, _sources[i].position) < MIN_SOURCE_SEPARATION)
+            if (Vector2.Distance(position, _sources[i].Position) < MIN_SOURCE_SEPARATION)
             {
                 return false;
             }

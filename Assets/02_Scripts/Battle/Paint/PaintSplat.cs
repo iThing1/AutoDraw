@@ -52,6 +52,17 @@ public class PaintSplat : MonoBehaviour
             .OnComplete(_returnCallback);
     }
 
+    // 한 번 튀었다가 풀로 돌아간다. 구운 자국 위에 잠깐 띄워 꿈틀하는 것처럼 보일 때 쓴다.
+    public void PunchAndDespawn(Vector3 punch, float duration, bool isRealtime)
+    {
+        transform.DOKill();
+        _spriteRenderer.DOKill();
+        transform.DOPunchScale(punch, duration, PunchTween.VIBRATO, PunchTween.ELASTICITY)
+            .SetUpdate(isRealtime)
+            .SetLink(gameObject)
+            .OnComplete(_returnCallback);
+    }
+
     private void ReturnToPool()
     {
         GameManager.Pool.Despawn(gameObject);

@@ -70,6 +70,7 @@ public class BattleManager : MonoBehaviour
         if (null != _stageArea)
         {
             GameManager.CameraRig.SetCameraBounds(_stageArea.Collider);
+            _paintCanvas.Init(_stageArea.Collider.bounds);
         }
 
         GameManager.CameraRig.FollowPlayer(_player.transform);

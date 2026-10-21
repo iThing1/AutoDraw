@@ -8,8 +8,6 @@ public class PerkEffectTargetRule : IDataSheetRule
     private const string CONSUMABLE_TABLE = "ConsumableData";
     private const char FIELD_SEPARATOR = '.';
 
-    private static readonly string[] CONSUMABLE_FIELDS = { "Value", "Charges", "Cooldown" };
-
     public void Check(IReadOnlyDictionary<string, DataSheetTable> tables, List<string> errors)
     {
         if (false == tables.TryGetValue(EFFECT_TABLE, out DataSheetTable effects))
@@ -87,9 +85,9 @@ public class PerkEffectTargetRule : IDataSheetRule
 
         string field = target.Substring(separator + 1);
 
-        if (Array.IndexOf(CONSUMABLE_FIELDS, field) < 0)
+        if (false == IsName<ConsumableStat>(field))
         {
-            return $"소모품 필드 {field}은(는) 올릴 수 없습니다. {string.Join("·", CONSUMABLE_FIELDS)}만 됩니다.";
+            return $"소모품 필드 {field}은(는) 올릴 수 없습니다. {string.Join("·", Enum.GetNames(typeof(ConsumableStat)))}만 됩니다.";
         }
 
         return CheckId(consumables, CONSUMABLE_TABLE, target.Substring(0, separator));

@@ -1,12 +1,16 @@
 using System.Collections.Generic;
 
-// 깬 스테이지와 얻은 특성 포인트. 남은 포인트는 찍은 특성의 비용을 빼서 구해, 표의 비용을 바꿔도 저장과 어긋나지 않게 한다.
+// 깬 스테이지, 얻은 특성 포인트, 찍은 특성. 남은 포인트는 찍은 특성의 비용을 빼서 구해, 표의 비용을 바꿔도 저장과 어긋나지 않게 한다.
+// 찍을 수 있는지는 PerkTree가 정하고, 여기는 기록만 한다.
 public class PlayerProgress
 {
     private readonly List<string> _clearedStageKeys = new();
+    private readonly List<string> _perkIds = new();
     private int _earnedPoints;
 
     public IReadOnlyList<string> ClearedStageKeys { get { return _clearedStageKeys; } }
+    // 찍은 순서대로다.
+    public IReadOnlyList<string> PerkIds { get { return _perkIds; } }
     public int EarnedPoints { get { return _earnedPoints; } }
 
     private PlayerProgress()
@@ -28,6 +32,11 @@ public class PlayerProgress
             foreach (string stageKey in save.ClearedStageKeys)
             {
                 progress.AddCleared(stageKey);
+            }
+
+            foreach (string perkId in save.PerkIds)
+            {
+                progress.AddPerk(perkId);
             }
 
             progress._earnedPoints = save.EarnedPoints;
@@ -57,6 +66,35 @@ public class PlayerProgress
         _earnedPoints += rewardPoints;
 
         return true;
+    }
+
+    public bool HasPerk(string perkId)
+    {
+        return _perkIds.Contains(perkId);
+    }
+
+    public void AddPerk(string perkId)
+    {
+        if (false == string.IsNullOrEmpty(perkId) && false == _perkIds.Contains(perkId))
+        {
+            _perkIds.Add(perkId);
+        }
+    }
+
+    public void RemovePerk(string perkId)
+    {
+        _perkIds.Remove(perkId);
+    }
+
+    public void ClearPerks()
+    {
+        _perkIds.Clear();
+    }
+
+    // 시험 메뉴에서만 쓴다. 실제 포인트는 처음 깬 스테이지에서만 얻는다.
+    public void AddPoints(int points)
+    {
+        _earnedPoints += points;
     }
 
     private bool AddCleared(string stageKey)

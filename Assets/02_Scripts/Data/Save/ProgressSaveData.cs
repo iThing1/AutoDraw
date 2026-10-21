@@ -6,9 +6,11 @@ using UnityEngine;
 public class ProgressSaveData
 {
     [SerializeField] private string[] _clearedStageKeys;
+    [SerializeField] private string[] _perkIds;
     [SerializeField] private int _earnedPoints;
 
     public IReadOnlyList<string> ClearedStageKeys { get { return _clearedStageKeys ?? Array.Empty<string>(); } }
+    public IReadOnlyList<string> PerkIds { get { return _perkIds ?? Array.Empty<string>(); } }
     public int EarnedPoints { get { return _earnedPoints; } }
 
     // JsonUtility가 불러올 때 쓴다.
@@ -18,13 +20,20 @@ public class ProgressSaveData
 
     public ProgressSaveData(PlayerProgress progress)
     {
-        _clearedStageKeys = new string[progress.ClearedStageKeys.Count];
+        _clearedStageKeys = ToArray(progress.ClearedStageKeys);
+        _perkIds = ToArray(progress.PerkIds);
+        _earnedPoints = progress.EarnedPoints;
+    }
 
-        for (int i = 0; i < _clearedStageKeys.Length; i++)
+    private static string[] ToArray(IReadOnlyList<string> list)
+    {
+        string[] array = new string[list.Count];
+
+        for (int i = 0; i < list.Count; i++)
         {
-            _clearedStageKeys[i] = progress.ClearedStageKeys[i];
+            array[i] = list[i];
         }
 
-        _earnedPoints = progress.EarnedPoints;
+        return array;
     }
 }

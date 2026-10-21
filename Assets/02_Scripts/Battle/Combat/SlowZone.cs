@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -16,6 +15,8 @@ public class SlowZone : MonoBehaviour
     private SlowZoneSettings _settings;
     // 자라는 동안에는 겉모습과 함께 판정 반경도 커진다.
     private float _radius;
+    // 리무버에 지워지면 남은 시간을 기다리지 않고 바로 사라진다.
+    private bool _isCleared;
 
     public float MoveScale { get { return _settings.MoveScale; } }
     public float ProjectileScale { get { return _settings.ProjectileScale; } }
@@ -51,6 +52,21 @@ public class SlowZone : MonoBehaviour
         return scale;
     }
 
+    // 지우는 원에 조금이라도 걸친 구역을 끝낸다. 느려지는 효과는 바로 빠지고, 겉모습은 끝나는 연출을 탄다.
+    public static void ClearAround(Vector3 center, float radius)
+    {
+        for (int i = ACTIVE_ZONES.Count - 1; i >= 0; i--)
+        {
+            SlowZone zone = ACTIVE_ZONES[i];
+
+            if (Vector2.Distance(center, zone.transform.position) <= radius + zone._radius)
+            {
+                zone._isCleared = true;
+                ACTIVE_ZONES.RemoveAt(i);
+            }
+        }
+    }
+
     // 에디터에서 Reload Domain을 꺼도 지난 플레이의 구역이 남지 않게 한다.
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ClearActiveZones()
@@ -79,6 +95,7 @@ public class SlowZone : MonoBehaviour
     {
         _settings = settings;
         _radius = 0f;
+        _isCleared = false;
         _renderer.color = settings.Color;
         transform.localScale = Vector3.zero;
 
@@ -98,7 +115,10 @@ public class SlowZone : MonoBehaviour
 
             transform.localScale = new Vector3(diameter, diameter, 1f);
 
-            await UniTask.Delay(TimeSpan.FromSeconds(settings.Duration), cancellationToken: token);
+            for (float elapsed = 0f; elapsed < settings.Duration && false == _isCleared; elapsed += Time.deltaTime)
+            {
+                await UniTask.Yield(PlayerLoopTiming.Update, token);
+            }
 
             // 깨지는 순간부터 느려지지 않게 먼저 빼고, 겉모습만 튀었다 사라진다.
             ACTIVE_ZONES.Remove(this);

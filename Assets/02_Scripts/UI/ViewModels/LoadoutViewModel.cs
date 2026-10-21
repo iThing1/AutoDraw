@@ -10,6 +10,7 @@ public class LoadoutViewModel : ViewModelBase
     private const string LOCKED_NOTE = "Locked.";
     private const string NOT_READY_NOTE = "Coming soon.";
     private const string NO_CONSUMABLE_LABEL = "None";
+    private const string CONSUMABLE_USAGE_FORMAT = "Uses: {0} | Cooldown: {1}s";
 
     private static readonly UtilityType[] UTILITIES = (UtilityType[])Enum.GetValues(typeof(UtilityType));
     // 공격 방식 색이 없는 장비(유틸리티·소모품 등)의 임시 아이콘 색.
@@ -74,7 +75,7 @@ public class LoadoutViewModel : ViewModelBase
             }
 
             string id = weapon.Id;
-            items.Add(CreateItem(weapon.Name, weapon.Description, weapon.IconKey, weapon.AttackStyleKey, weapon.PreviewKey,
+            items.Add(CreateItem(weapon.Name, weapon.Description, weapon.IconKey, GetStyleColor(weapon.AttackStyleKey), weapon.PreviewKey,
                 () => GetState(_loadout.HasWeapon(id), id == GetEquippedWeaponId(type), true),
                 () => _loadout.TryEquipWeapon(id)));
         }
@@ -89,7 +90,7 @@ public class LoadoutViewModel : ViewModelBase
         foreach (SkillData skill in _tables.Skills.All)
         {
             string id = skill.Id;
-            items.Add(CreateItem(skill.Name, skill.Description, skill.IconKey, skill.AttackStyleKey, skill.PreviewKey,
+            items.Add(CreateItem(skill.Name, skill.Description, skill.IconKey, GetStyleColor(skill.AttackStyleKey), skill.PreviewKey,
                 () => GetState(_loadout.HasSkill(id), id == _loadout.SkillId, _loadout.IsSkillReady(id)),
                 () => _loadout.TryEquipSkill(id)));
         }
@@ -123,7 +124,7 @@ public class LoadoutViewModel : ViewModelBase
         foreach (ConsumableData consumable in _tables.Consumables.All)
         {
             string id = consumable.Id;
-            items.Add(CreateItem(consumable.Name, string.Format(consumable.Description, consumable.Value), consumable.IconKey, string.Empty, string.Empty,
+            items.Add(CreateItem(consumable.Name, DescribeConsumable(consumable), consumable.IconKey, GetEffectColor(consumable.EffectKey), string.Empty,
                 () => GetState(_loadout.HasConsumable(id), id == _loadout.ConsumableId, true),
                 () => _loadout.TryEquipConsumable(id)));
         }
@@ -131,23 +132,36 @@ public class LoadoutViewModel : ViewModelBase
         return new LoadoutSlotViewModel("Item", items);
     }
 
-    // 표에 없는 장비(유틸리티, 소모품 없음)는 아이콘·공격 방식·영상이 없다.
+    // 표에 없는 장비(유틸리티, 소모품 없음)는 아이콘·영상이 없고 기본색을 쓴다.
     private LoadoutItemViewModel CreateItem(string label, string description, Func<LoadoutItemState> getState, Action equip)
     {
-        return CreateItem(label, description, string.Empty, string.Empty, string.Empty, getState, equip);
+        return CreateItem(label, description, string.Empty, DEFAULT_ICON_COLOR, string.Empty, getState, equip);
     }
 
-    // 아이콘은 아직 없을 수 있어 조용히 찾고, 공격 방식·영상은 가져오기 때 검사한 키라 그대로 찾는다.
-    private LoadoutItemViewModel CreateItem(string label, string description, string iconKey, string attackStyleKey, string previewKey,
+    // 아이콘은 아직 없을 수 있어 조용히 찾고, 영상은 가져오기 때 검사한 키라 그대로 찾는다.
+    private LoadoutItemViewModel CreateItem(string label, string description, string iconKey, Color iconColor, string previewKey,
         Func<LoadoutItemState> getState, Action equip)
     {
         _assets.TryGet(iconKey, out Sprite icon);
-        AttackStyle style = _assets.Get<AttackStyle>(attackStyleKey);
-        Color iconColor = null != style ? style.IconColor : DEFAULT_ICON_COLOR;
 
         VideoClip preview = _assets.Get<VideoClip>(previewKey);
 
         return new LoadoutItemViewModel(label, description, icon, iconColor, preview, getState, equip, HandleItemSelected);
+    }
+
+    // 공격 방식·효과 에셋의 색을 아이콘 대신 쓴다. 가져오기 때 검사한 키라 그대로 찾고, 키가 비었으면 기본색이다.
+    private Color GetStyleColor(string attackStyleKey)
+    {
+        AttackStyle style = _assets.Get<AttackStyle>(attackStyleKey);
+
+        return null != style ? style.IconColor : DEFAULT_ICON_COLOR;
+    }
+
+    private Color GetEffectColor(string effectKey)
+    {
+        ConsumableEffect effect = _assets.Get<ConsumableEffect>(effectKey);
+
+        return null != effect ? effect.IconColor : DEFAULT_ICON_COLOR;
     }
 
     private string GetEquippedWeaponId(WeaponType type)
@@ -185,6 +199,15 @@ public class LoadoutViewModel : ViewModelBase
         }
 
         return isEquipped ? LoadoutItemState.Equipped : LoadoutItemState.Owned;
+    }
+
+    // 표 설명의 {0}에 효과 값을 넣고, 아래에 사용 횟수와 쿨타임을 붙인다.
+    private static string DescribeConsumable(ConsumableData consumable)
+    {
+        string effect = string.Format(consumable.Description, consumable.Value);
+        string usage = string.Format(CONSUMABLE_USAGE_FORMAT, consumable.Charges, consumable.Cooldown);
+
+        return $"{effect}\n{usage}";
     }
 
     private static string Describe(string description, LoadoutItemState state)

@@ -1,4 +1,4 @@
 {"_items":[
-{"_id":"paint","_name":"Paint","_effectType":0,"_value":40,"_charges":1,"_cooldown":10,"_iconKey":"Icon/Item/Paint","_description":"Restores {0} HP."},
-{"_id":"remover","_name":"Remover","_effectType":1,"_value":3,"_charges":1,"_cooldown":15,"_iconKey":"Icon/Item/Remover","_description":"Erases black ink within a radius of {0}."}
+{"_id":"paint","_name":"Paint","_effectKey":"Consumable/Paint","_value":40,"_charges":1,"_cooldown":10,"_iconKey":"Icon/Item/Paint","_description":"Restores {0} HP."},
+{"_id":"remover","_name":"Remover","_effectKey":"Consumable/Remover","_value":3,"_charges":1,"_cooldown":15,"_iconKey":"Icon/Item/Remover","_description":"Erases black ink within a radius of {0}."}
 ]}

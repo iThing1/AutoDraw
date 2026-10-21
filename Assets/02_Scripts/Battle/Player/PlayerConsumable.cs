@@ -25,18 +25,20 @@ public class PlayerConsumable : MonoBehaviour
         {
             Debug.LogError($"플레이어 소모품 : {name}에 소모품 입력이 지정되지 않았습니다.");
             enabled = false;
-            return;
         }
+    }
 
-        // 소모품 칸이 비어 있으면 꺼 두고, State가 null이라 HUD도 소모품 칸을 숨긴다.
-        if (false == GameManager.Tables.Consumables.TryGet(GameManager.Player.Loadout.ConsumableId, out ConsumableData data))
+    // 전투를 시작하는 쪽이 플레이어를 만든 직후 부른다.
+    // 소모품 칸이 비었거나 효과 에셋이 없으면 꺼 두고, State가 null이라 HUD도 소모품 칸을 숨긴다.
+    public void Setup(string consumableId, DataTableManager tables, AssetManager assets)
+    {
+        if (false == enabled || false == tables.Consumables.TryGet(consumableId, out ConsumableData data))
         {
             enabled = false;
             return;
         }
 
-        // 효과 에셋이 없으면(키가 비었거나 레지스트리에 없으면) 쓸 수 없어 끈다.
-        _effect = GameManager.Assets.Get<ConsumableEffect>(data.EffectKey);
+        _effect = assets.Get<ConsumableEffect>(data.EffectKey);
 
         if (null == _effect)
         {
@@ -54,6 +56,11 @@ public class PlayerConsumable : MonoBehaviour
 
     private void Update()
     {
+        if (null == _state)
+        {
+            return;
+        }
+
         _state.Tick(Time.time);
 
         if (_itemAction.WasPressedThisFrame())

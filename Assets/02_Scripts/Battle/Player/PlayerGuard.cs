@@ -29,25 +29,29 @@ public class PlayerGuard : MonoBehaviour
     {
         _unit = GetComponent<BattleUnit>();
 
+        if (null != _shield)
+        {
+            _shield.enabled = false;
+        }
+
         if (null == _guardAction || null == _preset)
         {
             Debug.LogError($"플레이어 막기 : {name}에 막기 입력 또는 GuardPreset이 지정되지 않았습니다.");
-            return;
+            enabled = false;
         }
+    }
 
-        // 유틸리티 칸에 막기를 끼웠을 때만 쓴다. 꺼 두면 입력도 받지 않고, State가 null이라 HUD도 막기 칸을 숨긴다.
-        if (UtilityType.Guard != GameManager.Player.Loadout.Utility)
+    // 전투를 시작하는 쪽이 플레이어를 만든 직후 부른다. 유틸리티 칸에 막기를 끼웠을 때만 쓴다.
+    // 꺼 두면 입력도 받지 않고, State가 null이라 HUD도 막기 칸을 숨긴다.
+    public void Setup(UtilityType utility, PlayerStats stats)
+    {
+        if (false == enabled || UtilityType.Guard != utility)
         {
-            if (null != _shield)
-            {
-                _shield.enabled = false;
-            }
-
             enabled = false;
             return;
         }
 
-        _stats = GameManager.Player.Stats;
+        _stats = stats;
         _state = new GuardState(_preset, _stats, GetComponent<SkillGauge>());
 
         if (null != _shield && null != _shield.sprite)
@@ -57,7 +61,6 @@ public class PlayerGuard : MonoBehaviour
             _shieldScale = Vector3.one * (_stats.GuardRadius * 2f / spriteDiameter);
             _shield.transform.localScale = _shieldScale;
             _shieldColor = _shield.color;
-            _shield.enabled = false;
         }
     }
 

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // 무기 칸 키로 공격을 고르고, 게이지가 가득 차면 스킬 키로 특수 스킬을 발동한다. 키 배치는 입력 에셋에서 바꾼다.
-// 끼운 장비는 전투를 시작할 때 플레이어 모델에서 읽는다. 바꾼 장비는 다음 전투부터 쓴다.
+// 끼운 장비는 전투를 시작할 때 PlayerSetup이 넘겨준다. 바꾼 장비는 다음 전투부터 쓴다.
 [RequireComponent(typeof(BattleUnit), typeof(SkillGauge))]
 public class PlayerAttackInput : MonoBehaviour
 {
@@ -39,16 +39,26 @@ public class PlayerAttackInput : MonoBehaviour
     {
         _unit = GetComponent<BattleUnit>();
         _skillGauge = GetComponent<SkillGauge>();
-        _skillGauge.Init(GameManager.Player.Stats.SkillGaugeMax);
 
         // 기본값(0, 0)이면 간격이 0이 되므로 표에 없는 칸도 보정 없음으로 둔다.
         for (int i = 0; i < WEAPON_SLOT_COUNT; i++)
         {
             _slotModifiers[i] = WeaponModifier.NONE;
         }
+    }
 
+    // 전투를 시작하는 쪽이 플레이어를 만든 직후(Start 전에) 부른다. 첫 무기 선택과 미리 생성이 끼운 장비를 보고 이뤄진다.
+    public void Setup(PlayerLoadout loadout, PlayerStats stats, DataTableManager tables, AssetManager assets)
+    {
+        _skillGauge.Init(stats.SkillGaugeMax);
 
-        ReadLoadout(GameManager.Player.Loadout);
+        ReadWeapon(BASIC_SLOT, loadout.BasicWeaponId, tables, assets);
+        ReadWeapon(HEAVY_SLOT, loadout.HeavyWeaponId, tables, assets);
+
+        if (tables.Skills.TryGet(loadout.SkillId, out SkillData skill))
+        {
+            _skillStyle = assets.Get<AttackStyle>(skill.AttackStyleKey);
+        }
     }
 
     private void OnEnable()
@@ -106,26 +116,15 @@ public class PlayerAttackInput : MonoBehaviour
         return _basicAttackActions[index].GetKeyLabel();
     }
 
-    private void ReadLoadout(PlayerLoadout loadout)
+    private void ReadWeapon(int slot, string weaponId, DataTableManager tables, AssetManager assets)
     {
-        ReadWeapon(BASIC_SLOT, loadout.BasicWeaponId);
-        ReadWeapon(HEAVY_SLOT, loadout.HeavyWeaponId);
-
-        if (GameManager.Tables.Skills.TryGet(loadout.SkillId, out SkillData skill))
-        {
-            _skillStyle = GameManager.Assets.Get<AttackStyle>(skill.AttackStyleKey);
-        }
-    }
-
-    private void ReadWeapon(int slot, string weaponId)
-    {
-        if (false == GameManager.Tables.Weapons.TryGet(weaponId, out WeaponData weapon))
+        if (false == tables.Weapons.TryGet(weaponId, out WeaponData weapon))
         {
             Debug.LogError($"플레이어 공격 입력 : {slot}번 칸의 무기 {weaponId}이(가) 표에 없습니다.");
             return;
         }
 
-        _slotStyles[slot] = GameManager.Assets.Get<AttackStyle>(weapon.AttackStyleKey);
+        _slotStyles[slot] = assets.Get<AttackStyle>(weapon.AttackStyleKey);
         _slotModifiers[slot] = new WeaponModifier(weapon.DamageBonus, weapon.IntervalScale);
     }
 

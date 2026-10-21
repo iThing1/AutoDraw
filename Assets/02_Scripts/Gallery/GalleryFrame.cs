@@ -63,6 +63,10 @@ public class GalleryFrame : GalleryInteractable
         {
             LoadPainting();
         }
+
+        // 그림을 찍지 못하고 깬 경우에도 맞도록, 깼는지는 그림 파일이 아닌 진행 기록으로 본다.
+        bool isCleared = GameManager.Player.Progress.IsCleared(_stage.SaveKey);
+        _nameplate.text = isCleared ? string.Format(_clearedNameplateFormat, _stage.DisplayName) : _stage.DisplayName;
     }
 
     // 새로 깨 그림 파일이 바뀌었으니 다음 Refresh에서 다시 읽게 한다.
@@ -77,16 +81,7 @@ public class GalleryFrame : GalleryInteractable
         _savedPainting = PaintingStorage.Load(_stage);
         _isPaintingLoaded = true;
 
-        Texture painting = _stage.BlankCanvas;
-        string nameplate = _stage.DisplayName;
-
-        if (null != _savedPainting)
-        {
-            painting = _savedPainting;
-            nameplate = string.Format(_clearedNameplateFormat, _stage.DisplayName);
-        }
-
-        _nameplate.text = nameplate;
+        Texture painting = null != _savedPainting ? _savedPainting : _stage.BlankCanvas;
 
         // 액자마다 그림만 다르므로 재질은 하나를 함께 쓰고 그림만 따로 넣는다.
         _painting.GetPropertyBlock(_propertyBlock);

@@ -10,18 +10,22 @@ public class PlayerSaveData
 
     [SerializeField] private int _version = CURRENT_VERSION;
     [SerializeField] private LoadoutSaveData _loadout;
+    [SerializeField] private ProgressSaveData _progress;
 
     public int Version { get { return _version; } }
     // 장비를 저장하기 전 파일이면 비어 있거나 null이다.
     public LoadoutSaveData Loadout { get { return _loadout; } }
+    // 진행을 저장하기 전 파일이면 비어 있거나 null이다.
+    public ProgressSaveData Progress { get { return _progress; } }
 
     // JsonUtility가 불러올 때 쓴다.
     public PlayerSaveData()
     {
     }
 
-    public PlayerSaveData(LoadoutSaveData loadout)
+    public PlayerSaveData(LoadoutSaveData loadout, ProgressSaveData progress)
     {
         _loadout = loadout;
+        _progress = progress;
     }
 }

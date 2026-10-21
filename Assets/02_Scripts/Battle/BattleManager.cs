@@ -158,6 +158,16 @@ public class BattleManager : MonoBehaviour
         _player = Instantiate(_playerPrefab, _playerSpawnPoint.position, Quaternion.identity, transform);
         _player.name = _playerPrefab.name;
 
+        // 장비와 스탯은 Start 전에 넘겨, 첫 무기 선택과 미리 생성이 끼운 장비를 보고 이뤄지게 한다.
+        if (_player.TryGetComponent(out PlayerSetup playerSetup))
+        {
+            playerSetup.Setup(GameManager.Player, GameManager.Tables, GameManager.Assets);
+        }
+        else
+        {
+            Debug.LogError($"전투 매니저 : {_player.name}에 PlayerSetup이 없어 장비를 넘기지 못했습니다.");
+        }
+
         _boss = Instantiate(_bossPrefab, _bossSpawnPoint.position, Quaternion.identity, transform);
         _boss.name = _bossPrefab.name;
 

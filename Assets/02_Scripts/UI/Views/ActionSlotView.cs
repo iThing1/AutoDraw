@@ -3,8 +3,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 하단 HUD의 공격 아이콘 한 칸. 기본 공격은 선택 표시, 스킬·막기는 게이지 채움을 보여 준다.
-public class AttackSlotView : ViewBase<AttackSlotViewModel>
+// 하단 HUD의 칸 하나. 무기 칸은 선택 표시, 스킬·막기·소모품은 게이지 채움을 보여 준다.
+public class ActionSlotView : ViewBase<ActionSlotViewModel>
 {
     [SerializeField] private Image _icon;
     [SerializeField] private TMP_Text _keyText;
@@ -46,11 +46,15 @@ public class AttackSlotView : ViewBase<AttackSlotViewModel>
     {
         switch (propertyName)
         {
-            case nameof(AttackSlotViewModel.IsSelected):
+            case nameof(ActionSlotViewModel.IsSelected):
                 DrawSelected();
                 break;
 
-            case nameof(AttackSlotViewModel.GaugeRatio):
+            case nameof(ActionSlotViewModel.DisplayName):
+                _nameText.text = ViewModel.DisplayName;
+                break;
+
+            case nameof(ActionSlotViewModel.GaugeRatio):
                 DrawGauge();
                 break;
 

@@ -292,6 +292,8 @@ GameObject:
   - component: {fileID: 5964630480403215121}
   - component: {fileID: 3533665038697895136}
   - component: {fileID: 4719283746501928374}
+  - component: {fileID: 4719283746501928375}
+  - component: {fileID: 4719283746501928376}
   m_Layer: 15
   m_Name: Player
   m_TagString: Player
@@ -457,7 +459,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e3a4e0c4836d1b44b352f8437f7fe28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttackInput
-  _basicAttackActions:
+  _weaponActions:
   - {fileID: 7556292513268214159, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   - {fileID: 4842117460415523917, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   _skillAction: {fileID: 6070815292295317116, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
@@ -489,3 +491,28 @@ MonoBehaviour:
   _guardAction: {fileID: 2921190797050176757, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   _preset: {fileID: 11400000, guid: 68261445d29e469cb2756aa0038ba1df, type: 2}
   _shield: {fileID: 6291847305618274930}
+--- !u!114 &4719283746501928375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9124088967955213027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0db9dbe073d697bdc9c1e59b57a5335d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerConsumable
+  _itemAction: {fileID: 7330769682500039129, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+--- !u!114 &4719283746501928376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9124088967955213027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72a6d7209c49b7106c689b3ff8666e9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSetup

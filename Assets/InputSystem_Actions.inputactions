@@ -123,6 +123,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Item",
+                    "type": "Button",
+                    "id": "44b411cb-11e7-4f40-84a0-8e58e53eefd4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Pause",
                     "type": "Button",
                     "id": "3ba09fe8-4c6a-4d2e-ace7-14b17dafd32f",
@@ -218,6 +227,28 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "Skill",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8684508b-b103-406e-981e-28a8609e8087",
+                    "path": "<Keyboard>/4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Item",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "906b5bab-4af2-46a5-80d4-b60740063432",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Item",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04f7476f09d63707935c85a6a5791e3c, type: 3}
+  m_Name: Consumable_Remover
+  m_EditorClassIdentifier: Assembly-CSharp::RemoveInkEffect
+  _iconColor: {r: 0.85, g: 0.92, b: 1, a: 1}
+  _impact:
+    _shakeForce: 0.4
+    _sounds:
+    - {fileID: 8300000, guid: 719f60a1210744d4991b5897a355751c, type: 3}
+    _pitch:
+      _min: 1.1
+      _max: 1.2
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 1, g: 1, b: 1, a: 1}
+    _effectScale: 2.5
+    _effectLifetime: 2

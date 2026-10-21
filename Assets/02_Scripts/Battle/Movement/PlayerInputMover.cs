@@ -10,12 +10,19 @@ public class PlayerInputMover : UnitMover
     [SerializeField] private InputActionReference _moveAction;
 
     private Rigidbody2D _rigidbody;
+    private PlayerStats _stats;
 
     protected override void Awake()
     {
         base.Awake();
 
         _rigidbody = GetComponent<Rigidbody2D>();
+    }
+
+    // 전투를 시작하는 쪽이 플레이어를 만든 직후 부른다. 이동 속도는 특성으로 바뀔 수 있어 스탯에서 매번 읽는다.
+    public void Setup(PlayerStats stats)
+    {
+        _stats = stats;
     }
 
     protected override void OnRunStarted()
@@ -26,6 +33,11 @@ public class PlayerInputMover : UnitMover
             return;
         }
 
+        if (null == _stats)
+        {
+            Debug.LogError($"플레이어 이동 : {name}에 스탯이 넘어오지 않았습니다. PlayerSetup.Setup을 먼저 불러야 합니다.");
+        }
+
         _moveAction.Enable();
     }
 
@@ -33,7 +45,7 @@ public class PlayerInputMover : UnitMover
     // 화면 프레임보다 물리 프레임이 잦을 때 걸음이 빠지지 않도록, Move인 동안은 물리 프레임 안에서 계속 돈다.
     protected override async UniTask MoveOnceAsync(CancellationToken token)
     {
-        if (null == _moveAction)
+        if (null == _moveAction || null == _stats)
         {
             return;
         }
@@ -49,7 +61,7 @@ public class PlayerInputMover : UnitMover
             }
 
             Vector2 input = Vector2.ClampMagnitude(_moveAction.action.ReadValue<Vector2>(), 1f);
-            Vector2 velocity = (input * GameManager.Player.Stats.MoveSpeed + ExternalVelocity) * SlowZone.GetMoveScale(_rigidbody.position);
+            Vector2 velocity = (input * _stats.MoveSpeed + ExternalVelocity) * SlowZone.GetMoveScale(_rigidbody.position);
             Vector2 step = velocity * Time.fixedDeltaTime;
 
             SetVelocity(velocity);

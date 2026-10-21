@@ -23,3 +23,7 @@ MonoBehaviour:
     _asset: {fileID: 11400000, guid: 5f40d1d0f2d14a6f96592aa38e548ef6, type: 2}
   - _key: AttackStyle/Roller
     _asset: {fileID: 11400000, guid: 0ff0a16239974606ac5d22e424d22a9e, type: 2}
+  - _key: Consumable/Paint
+    _asset: {fileID: 11400000, guid: 27592a341201b633cf13db793f93ffe4, type: 2}
+  - _key: Consumable/Remover
+    _asset: {fileID: 11400000, guid: be73f1307aff4592e92859dc131e8a94, type: 2}

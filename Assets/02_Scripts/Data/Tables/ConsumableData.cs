@@ -5,8 +5,9 @@ using UnityEngine;
 public class ConsumableData : BaseData
 {
     [SerializeField] private string _name;
-    [SerializeField] private ConsumableEffectType _effectType;
-    // Heal이면 회복량, RemoveInk이면 지우는 반경이다.
+    // AssetRegistry의 ConsumableEffect 키. 효과와 겉모습은 이 에셋이 정한다.
+    [SerializeField] private string _effectKey;
+    // 회복 효과면 회복량, 잉크 지우기 효과면 지우는 반경이다.
     [SerializeField] private float _value;
     [SerializeField] private int _charges;
     [SerializeField] private float _cooldown;
@@ -14,7 +15,7 @@ public class ConsumableData : BaseData
     [SerializeField] private string _description;
 
     public string Name { get { return _name; } }
-    public ConsumableEffectType EffectType { get { return _effectType; } }
+    public string EffectKey { get { return _effectKey; } }
     public float Value { get { return _value; } }
     public int Charges { get { return _charges; } }
     public float Cooldown { get { return _cooldown; } }

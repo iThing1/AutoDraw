@@ -34,6 +34,7 @@ public class FloatingTextSettings
         new Phrase(FloatingTextKind.NoGauge, "NO INK", new Color(0.45f, 0.45f, 0.45f)),
         new Phrase(FloatingTextKind.GimmickClear, "BREAK", new Color(0.2f, 0.6f, 0.95f)),
         new Phrase(FloatingTextKind.GimmickFail, "FAILED", new Color(0.85f, 0.2f, 0.3f)),
+        new Phrase(FloatingTextKind.Heal, "+{0}", new Color(0.25f, 0.75f, 0.35f)),
     };
     [SerializeField, Min(0f)] private float _normalScale = 1f;
     [SerializeField, Min(0f)] private float _criticalScale = 1.6f;

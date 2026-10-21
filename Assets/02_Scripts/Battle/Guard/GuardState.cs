@@ -8,7 +8,7 @@ public class GuardState : IDisposable
     private readonly GuardPreset _preset;
     private readonly PlayerStats _stats;
     private readonly SkillGauge _gauge;
-    private float _readyTime;
+    private readonly Cooldown _cooldown = new();
 
     public event Action OnStarted;
     public event Action<GuardStartResult> OnRejected;
@@ -49,14 +49,14 @@ public class GuardState : IDisposable
             return GuardStartResult.OutOfGauge;
         }
 
-        return now < _readyTime ? GuardStartResult.OnCooldown : GuardStartResult.Ready;
+        return _cooldown.IsReady(now) ? GuardStartResult.Ready : GuardStartResult.OnCooldown;
     }
 
     // CheckStart가 Ready일 때만 부른다. 게이지를 쓰고, 막는 시간과 쿨타임이 지나야 다시 쓸 수 있다.
     public void Begin(float now)
     {
         _gauge.TryConsume(_stats.GuardCost);
-        _readyTime = now + _stats.GuardDuration + _stats.GuardCooldown;
+        _cooldown.Start(now, _stats.GuardDuration + _stats.GuardCooldown);
 
         OnStarted?.Invoke();
     }
@@ -69,7 +69,7 @@ public class GuardState : IDisposable
     // 막아 냈으면 쿨타임을 지워, 지금 방패가 내려가는 즉시 다음 막기를 쓸 수 있게 한다. 연달아 오는 공격을 막기로 받아치는 보상이다.
     public void ResetCooldown()
     {
-        _readyTime = 0f;
+        _cooldown.Clear();
     }
 
     private void HandleGaugeChanged()

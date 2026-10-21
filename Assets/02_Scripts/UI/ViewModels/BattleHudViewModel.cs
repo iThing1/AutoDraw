@@ -2,15 +2,16 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 전투 HUD 전체에 보일 값. 체력바·공격 칸의 ViewModel을 만들어 품고, 남은 페이즈 수와 떠오르는 문구를 맡는다.
+// 전투 HUD 전체에 보일 값. 체력바·하단 칸의 ViewModel을 만들어 품고, 남은 페이즈 수와 떠오르는 문구를 맡는다.
 // 전투를 시작하는 쪽이 플레이어와 보스를 넘겨 만들고, HUD를 닫을 때 UnBind로 하위 ViewModel까지 함께 푼다.
 public class BattleHudViewModel : ViewModelBase
 {
     private readonly HealthBarViewModel _playerHealth;
     private readonly HealthBarViewModel _bossHealth;
-    private readonly List<AttackSlotViewModel> _basicSlots = new();
-    private readonly AttackSlotViewModel _skillSlot;
-    private readonly AttackSlotViewModel _guardSlot;
+    private readonly List<ActionSlotViewModel> _weaponSlots = new();
+    private readonly ActionSlotViewModel _skillSlot;
+    private readonly ActionSlotViewModel _guardSlot;
+    private readonly ActionSlotViewModel _itemSlot;
 
     private BattleUnit _player;
     private BattleUnit _boss;
@@ -21,13 +22,16 @@ public class BattleHudViewModel : ViewModelBase
     public event Action<DamageInfo> OnDamageText;
     // 막기·게이지 부족·기믹 결과 문구를 월드 위치에 띄운다.
     public event Action<FloatingTextKind, Vector3> OnFloatingText;
+    // 회복할 때마다 실제로 찬 양을 띄운다.
+    public event Action<int, Vector3> OnHealText;
 
     public HealthBarViewModel PlayerHealth { get { return _playerHealth; } }
     public HealthBarViewModel BossHealth { get { return _bossHealth; } }
-    public IReadOnlyList<AttackSlotViewModel> BasicSlots { get { return _basicSlots; } }
+    public IReadOnlyList<ActionSlotViewModel> WeaponSlots { get { return _weaponSlots; } }
     // 해당 컴포넌트가 없는 플레이어면 null이다.
-    public AttackSlotViewModel SkillSlot { get { return _skillSlot; } }
-    public AttackSlotViewModel GuardSlot { get { return _guardSlot; } }
+    public ActionSlotViewModel SkillSlot { get { return _skillSlot; } }
+    public ActionSlotViewModel GuardSlot { get { return _guardSlot; } }
+    public ActionSlotViewModel ItemSlot { get { return _itemSlot; } }
 
     public int RemainingPhaseCount { get { return null != _bossPhases ? _bossPhases.RemainingPhaseCount : 1; } }
     // 페이즈가 하나뿐인 보스나 마지막 페이즈에서는 숨긴다.
@@ -46,7 +50,7 @@ public class BattleHudViewModel : ViewModelBase
         {
             for (int i = 0; i < attackInput.SlotCount; i++)
             {
-                _basicSlots.Add(new BasicAttackSlotViewModel(attackInput, i));
+                _weaponSlots.Add(new WeaponSlotViewModel(attackInput, i));
             }
 
             _skillSlot = new SkillSlotViewModel(attackInput);
@@ -59,7 +63,13 @@ public class BattleHudViewModel : ViewModelBase
             _guard.OnRejected += HandleGuardRejected;
         }
 
+        if (player.TryGetComponent(out PlayerConsumable consumable) && null != consumable.State)
+        {
+            _itemSlot = new ConsumableSlotViewModel(consumable.KeyLabel, consumable.State, consumable.IconColor);
+        }
+
         _player.Health.OnDamaged += HandleDamaged;
+        _player.Health.OnHealed += HandleHealed;
         _boss.Health.OnDamaged += HandleDamaged;
         _player.OnBlocked += HandleBlocked;
 
@@ -75,9 +85,9 @@ public class BattleHudViewModel : ViewModelBase
         _playerHealth.UnBind();
         _bossHealth.UnBind();
 
-        for (int i = 0; i < _basicSlots.Count; i++)
+        for (int i = 0; i < _weaponSlots.Count; i++)
         {
-            _basicSlots[i].UnBind();
+            _weaponSlots[i].UnBind();
         }
 
         if (null != _skillSlot)
@@ -90,6 +100,11 @@ public class BattleHudViewModel : ViewModelBase
             _guardSlot.UnBind();
         }
 
+        if (null != _itemSlot)
+        {
+            _itemSlot.UnBind();
+        }
+
         if (null != _guard)
         {
             _guard.OnRejected -= HandleGuardRejected;
@@ -99,6 +114,7 @@ public class BattleHudViewModel : ViewModelBase
         if (null != _player)
         {
             _player.Health.OnDamaged -= HandleDamaged;
+            _player.Health.OnHealed -= HandleHealed;
             _player.OnBlocked -= HandleBlocked;
             _player = null;
         }
@@ -120,6 +136,11 @@ public class BattleHudViewModel : ViewModelBase
     private void HandleDamaged(DamageInfo damage)
     {
         OnDamageText?.Invoke(damage);
+    }
+
+    private void HandleHealed(int amount)
+    {
+        OnHealText?.Invoke(amount, _player.Body.position);
     }
 
     private void HandleBlocked(Vector3 hitPoint)

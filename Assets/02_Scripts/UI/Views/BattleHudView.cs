@@ -5,7 +5,7 @@ using System.Threading;
 using TMPro;
 using UnityEngine;
 
-// 전투 HUD. 하위 View(체력바·공격 칸)에 ViewModel의 하위 ViewModel을 꽂고, 남은 페이즈 수와 떠오르는 문구만 직접 그린다.
+// 전투 HUD. 하위 View(체력바·하단 칸)에 ViewModel의 하위 ViewModel을 꽂고, 남은 페이즈 수와 떠오르는 문구만 직접 그린다.
 public class BattleHudView : ViewBase<BattleHudViewModel>
 {
     [SerializeField] private CanvasGroup _canvasGroup;
@@ -17,10 +17,11 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
     [SerializeField] private TMP_Text _bossPhaseText;
     [SerializeField] private string _bossPhaseFormat = "x{0}";
 
-    [Header("공격 슬롯")]
-    [SerializeField] private AttackSlotView[] _basicSlots;
-    [SerializeField] private AttackSlotView _skillSlot;
-    [SerializeField] private AttackSlotView _guardSlot;
+    [Header("하단 칸")]
+    [SerializeField] private ActionSlotView[] _weaponSlots;
+    [SerializeField] private ActionSlotView _skillSlot;
+    [SerializeField] private ActionSlotView _guardSlot;
+    [SerializeField] private ActionSlotView _itemSlot;
 
     [Header("떠오르는 문구")]
     // 피해 숫자와 GUARD·NO INK·BREAK 같은 짧은 문구를 같은 프리팹으로 띄운다.
@@ -58,25 +59,28 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
         _playerHealthBar.Bind(viewModel.PlayerHealth);
         _bossHealthBar.Bind(viewModel.BossHealth);
 
-        BindBasicSlots(viewModel.BasicSlots);
+        BindWeaponSlots(viewModel.WeaponSlots);
         BindSlot(_skillSlot, viewModel.SkillSlot);
         BindSlot(_guardSlot, viewModel.GuardSlot);
+        BindSlot(_itemSlot, viewModel.ItemSlot);
 
         viewModel.OnDamageText += SpawnDamageText;
         viewModel.OnFloatingText += SpawnFloatingText;
+        viewModel.OnHealText += SpawnHealText;
     }
 
     protected override void OnUnbind()
     {
         ViewModel.OnDamageText -= SpawnDamageText;
         ViewModel.OnFloatingText -= SpawnFloatingText;
+        ViewModel.OnHealText -= SpawnHealText;
 
         _playerHealthBar.UnBind();
         _bossHealthBar.UnBind();
 
-        for (int i = 0; i < _basicSlots.Length; i++)
+        for (int i = 0; i < _weaponSlots.Length; i++)
         {
-            _basicSlots[i].UnBind();
+            _weaponSlots[i].UnBind();
         }
 
         if (null != _skillSlot)
@@ -87,6 +91,11 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
         if (null != _guardSlot)
         {
             _guardSlot.UnBind();
+        }
+
+        if (null != _itemSlot)
+        {
+            _itemSlot.UnBind();
         }
     }
 
@@ -109,24 +118,24 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
         DrawPhaseCount();
     }
 
-    // 쓰는 기본 공격 수만큼만 칸을 켠다.
-    private void BindBasicSlots(IReadOnlyList<AttackSlotViewModel> slots)
+    // 쓰는 무기 칸 수만큼만 칸을 켠다.
+    private void BindWeaponSlots(IReadOnlyList<ActionSlotViewModel> slots)
     {
-        for (int i = 0; i < _basicSlots.Length; i++)
+        for (int i = 0; i < _weaponSlots.Length; i++)
         {
             bool hasSlot = i < slots.Count;
 
-            _basicSlots[i].gameObject.SetActive(hasSlot);
+            _weaponSlots[i].gameObject.SetActive(hasSlot);
 
             if (hasSlot)
             {
-                _basicSlots[i].Bind(slots[i]);
+                _weaponSlots[i].Bind(slots[i]);
             }
         }
     }
 
     // 쓰지 않는 칸(유틸리티가 막기가 아닐 때의 막기 칸 등)은 숨긴다.
-    private void BindSlot(AttackSlotView slot, AttackSlotViewModel viewModel)
+    private void BindSlot(ActionSlotView slot, ActionSlotViewModel viewModel)
     {
         if (null == slot)
         {
@@ -171,9 +180,22 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
     private void SpawnFloatingText(FloatingTextKind kind, Vector3 worldPosition)
     {
         FloatingTextSettings.Phrase phrase = _floatingText.GetPhrase(kind);
+        SpawnPhrase(phrase.Text, phrase.Color, worldPosition);
+    }
 
-        // 설정에 없는 종류는 띄우지 않는다.
-        if (string.IsNullOrEmpty(phrase.Text))
+    // 회복 문구는 "+{0}"처럼 회복량 자리를 둔다.
+    private void SpawnHealText(int amount, Vector3 worldPosition)
+    {
+        FloatingTextSettings.Phrase phrase = _floatingText.GetPhrase(FloatingTextKind.Heal);
+        string text = string.IsNullOrEmpty(phrase.Text) ? phrase.Text : string.Format(phrase.Text, amount);
+
+        SpawnPhrase(text, phrase.Color, worldPosition);
+    }
+
+    // 설정에 없는 종류는 문구가 비어 있어 띄우지 않는다.
+    private void SpawnPhrase(string text, Color color, Vector3 worldPosition)
+    {
+        if (string.IsNullOrEmpty(text))
         {
             return;
         }
@@ -185,7 +207,7 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
             return;
         }
 
-        floatingText.PlayText(phrase.Text, phrase.Color, ToScreen(worldPosition), _floatingText);
+        floatingText.PlayText(text, color, ToScreen(worldPosition), _floatingText);
     }
 
     private FloatingText SpawnText()

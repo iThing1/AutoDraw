@@ -8,13 +8,14 @@ using Object = UnityEngine.Object;
 // 빈 키는 아직 만들지 않은 에셋이라 넘어간다. IconKey는 아이콘을 넣을 때 검사를 더한다.
 public class AssetKeyRule : IDataSheetRule
 {
-    private static readonly string[] KEY_TABLES = { "WeaponData", "SkillData" };
-
-    // 키 열과 그 키가 가리켜야 하는 에셋 형식.
-    private static readonly (string Field, Type AssetType)[] KEY_FIELDS =
+    // 표, 키 열, 그 키가 가리켜야 하는 에셋 형식.
+    private static readonly (string Table, string Field, Type AssetType)[] KEYS =
     {
-        ("AttackStyleKey", typeof(AttackStyle)),
-        ("PreviewKey", typeof(VideoClip)),
+        ("WeaponData", "AttackStyleKey", typeof(AttackStyle)),
+        ("WeaponData", "PreviewKey", typeof(VideoClip)),
+        ("SkillData", "AttackStyleKey", typeof(AttackStyle)),
+        ("SkillData", "PreviewKey", typeof(VideoClip)),
+        ("ConsumableData", "EffectKey", typeof(ConsumableEffect)),
     };
 
     public void Check(IReadOnlyDictionary<string, DataSheetTable> tables, List<string> errors)
@@ -26,14 +27,9 @@ public class AssetKeyRule : IDataSheetRule
             return;
         }
 
-        foreach (string tableName in KEY_TABLES)
+        foreach ((string tableName, string field, Type assetType) in KEYS)
         {
-            if (false == tables.TryGetValue(tableName, out DataSheetTable table))
-            {
-                continue;
-            }
-
-            foreach ((string field, Type assetType) in KEY_FIELDS)
+            if (tables.TryGetValue(tableName, out DataSheetTable table))
             {
                 CheckKeys(table, tableName, field, assetType, assets, errors);
             }

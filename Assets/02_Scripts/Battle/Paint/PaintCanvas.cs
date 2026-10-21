@@ -90,6 +90,24 @@ public class PaintCanvas : MonoBehaviour
         _inkSplats.Clear();
     }
 
+    // 리무버처럼 한 자리의 잉크만 지운다. 목록에서는 바로 빼고, 그림만 흐려지며 사라진다.
+    public void RemoveInkAround(Vector3 center, float radius)
+    {
+        for (int i = _inkSplats.Count - 1; i >= 0; i--)
+        {
+            PaintSplat splat = _inkSplats[i];
+
+            if (Vector2.Distance(center, splat.transform.position) > radius)
+            {
+                continue;
+            }
+
+            _inkSplats.RemoveAt(i);
+            _splats.Remove(splat);
+            splat.FadeOutAndDespawn(_removeFadeDuration);
+        }
+    }
+
     // 연출이 새로 찍은 잉크 자국 자리를 써야 할 때(주변에 잉크가 없어 새로 찍는 경우 등) 찍은 자국을 돌려준다.
     public PaintSplat LeaveInkSplat(Vector3 position, SplatStyle style, Color color, float scale)
     {

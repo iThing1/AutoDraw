@@ -19,6 +19,9 @@ public abstract class GalleryInteractable : MonoBehaviour
     public abstract string Label { get; }
     public virtual bool IsLocked { get { return false; } }
 
+    // 상호작용 키를 눌렀다. 무엇을 할지는 물건마다 다르고, 갤러리의 일(액자 들어가기·창 열기)은 gallery에 맡긴다.
+    public abstract void Interact(GalleryStage gallery);
+
     protected virtual void Awake()
     {
         _highlightBlock = new MaterialPropertyBlock();

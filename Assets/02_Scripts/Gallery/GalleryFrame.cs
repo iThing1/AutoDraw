@@ -98,7 +98,18 @@ public class GalleryFrame : GalleryInteractable
         }
     }
 
-    public void PlayLocked()
+    public override void Interact(GalleryStage gallery)
+    {
+        if (IsLocked)
+        {
+            PlayLocked();
+            return;
+        }
+
+        gallery.EnterFrame(this);
+    }
+
+    private void PlayLocked()
     {
         transform.DOComplete();
         transform.DOShakePosition(_lockedShakeDuration, _lockedShakeStrength);

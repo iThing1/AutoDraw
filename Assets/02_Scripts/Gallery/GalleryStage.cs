@@ -32,6 +32,9 @@ public class GalleryStage : MonoBehaviour
     [Header("장비")]
     [SerializeField] private LoadoutView _loadoutViewPrefab;
 
+    [Header("특성")]
+    [SerializeField] private PerkTreeView _perkTreeViewPrefab;
+
     [Header("사운드")]
     [SerializeField] private AudioClip _bgm;
     [SerializeField, Min(0f)] private float _bgmFadeDuration = 1f;
@@ -39,8 +42,9 @@ public class GalleryStage : MonoBehaviour
     private GalleryPlayer _player;
     private GalleryHudUI _hud;
     private PauseMenuUI _pauseMenu;
-    private LoadoutView _loadoutView;
-    private LoadoutViewModel _loadoutViewModel;
+    // 상호작용으로 연 창(장비, 특성 트리). 한 번에 하나만 연다.
+    private Component _screen;
+    private GalleryScreenViewModel _screenViewModel;
     // 돌아왔을 때 이 액자 앞에서 물러나며 시작하려고 기억해 둔다.
     private GalleryFrame _enteredFrame;
 
@@ -82,9 +86,9 @@ public class GalleryStage : MonoBehaviour
             return;
         }
 
-        if (null != _loadoutView)
+        if (null != _screen)
         {
-            HandleLoadoutClosed();
+            HandleScreenClosed();
         }
         else if (null != _pauseMenu)
         {
@@ -128,7 +132,7 @@ public class GalleryStage : MonoBehaviour
     public void Hide()
     {
         ClosePauseMenu();
-        CloseLoadout();
+        CloseScreen();
         _player.SetControlEnabled(false);
 
         GameManager.UI.Close(_hud);
@@ -151,6 +155,22 @@ public class GalleryStage : MonoBehaviour
         }
     }
 
+    // 아래는 상호작용한 물건(GalleryInteractable.Interact)이 부른다.
+    public void EnterFrame(GalleryFrame frame)
+    {
+        EnterFrameAsync(frame, destroyCancellationToken).Forget();
+    }
+
+    public void OpenLoadout()
+    {
+        OpenScreen(_loadoutViewPrefab, new LoadoutViewModel(GameManager.Player, GameManager.Tables, GameManager.Assets));
+    }
+
+    public void OpenPerkTree()
+    {
+        OpenScreen(_perkTreeViewPrefab, new PerkTreeViewModel(GameManager.Player, GameManager.Tables, GameManager.Assets));
+    }
+
     private void HandleFocusChanged(GalleryInteractable target)
     {
         if (null != _hud)
@@ -161,25 +181,7 @@ public class GalleryStage : MonoBehaviour
 
     private void HandleInteract(GalleryInteractable target)
     {
-        if (target is GalleryFrame frame)
-        {
-            InteractFrame(frame);
-        }
-        else if (target is LoadoutStand)
-        {
-            OpenLoadout();
-        }
-    }
-
-    private void InteractFrame(GalleryFrame frame)
-    {
-        if (frame.IsLocked)
-        {
-            frame.PlayLocked();
-            return;
-        }
-
-        EnterFrameAsync(frame, destroyCancellationToken).Forget();
+        target.Interact(this);
     }
 
     // 돌아왔을 때 그 자리에서 다시 걷도록, 다가가기 전에 서 있던 자리를 기억해 둔다.
@@ -242,47 +244,58 @@ public class GalleryStage : MonoBehaviour
         _pauseMenu = null;
     }
 
-    private void OpenLoadout()
+    // 창이 이미 열려 있거나 열리지 않으면 만든 ViewModel의 구독을 바로 푼다.
+    private void OpenScreen<TView, TViewModel>(TView prefab, TViewModel viewModel)
+        where TView : ViewBase<TViewModel>
+        where TViewModel : GalleryScreenViewModel
     {
-        _loadoutView = GameManager.UI.Open(_loadoutViewPrefab, UILayer.Content);
-
-        if (null == _loadoutView)
+        if (null != _screen)
         {
+            viewModel.UnBind();
             return;
         }
 
-        _loadoutViewModel = new LoadoutViewModel(GameManager.Player, GameManager.Tables, GameManager.Assets);
-        _loadoutViewModel.OnCloseRequested += HandleLoadoutClosed;
-        _loadoutView.Bind(_loadoutViewModel);
+        TView view = GameManager.UI.Open(prefab, UILayer.Content);
+
+        if (null == view)
+        {
+            viewModel.UnBind();
+            return;
+        }
+
+        _screen = view;
+        _screenViewModel = viewModel;
+        _screenViewModel.OnCloseRequested += HandleScreenClosed;
+        view.Bind(viewModel);
 
         SetControlEnabled(false);
         SetCursorLocked(false);
     }
 
-    private void HandleLoadoutClosed()
+    private void HandleScreenClosed()
     {
-        CloseLoadout();
+        CloseScreen();
 
         SetControlEnabled(true);
         SetCursorLocked(true);
     }
 
-    // 어떻게 닫든(닫기 버튼, Esc, 갤러리를 떠날 때) 바꾼 장비를 저장한다.
-    private void CloseLoadout()
+    // 어떻게 닫든(닫기 버튼, Esc, 갤러리를 떠날 때) 창에서 바꾼 것(장비, 특성)을 저장한다.
+    private void CloseScreen()
     {
-        if (null == _loadoutView)
+        if (null == _screen)
         {
             return;
         }
 
-        _loadoutViewModel.OnCloseRequested -= HandleLoadoutClosed;
-        _loadoutViewModel.UnBind();
-        _loadoutViewModel = null;
+        _screenViewModel.OnCloseRequested -= HandleScreenClosed;
+        _screenViewModel.UnBind();
+        _screenViewModel = null;
 
         GameManager.SavePlayer();
 
-        GameManager.UI.Close(_loadoutView);
-        _loadoutView = null;
+        GameManager.UI.Close(_screen);
+        _screen = null;
     }
 
     private void SetControlEnabled(bool isEnabled)

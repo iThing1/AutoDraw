@@ -1,10 +1,9 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine.Video;
 
 // 장비 화면에 보일 값. 칸(LoadoutSlot)마다 버튼 ViewModel을 만들어 두고, 장비가 바뀌면 상태만 다시 매긴다.
 // 화면을 여는 쪽이 만들고, 닫을 때 UnBind로 장비 구독을 푼다.
-public class LoadoutViewModel : ViewModelBase
+public class LoadoutViewModel : GalleryScreenViewModel
 {
     private const string LOCKED_NOTE = "Locked.";
     private const string NOT_READY_NOTE = "Coming soon.";
@@ -13,9 +12,6 @@ public class LoadoutViewModel : ViewModelBase
     private readonly List<LoadoutSlotViewModel> _slots = new();
     private string _description = string.Empty;
     private VideoClip _preview;
-
-    // 닫기를 눌렀다. 화면을 닫는 것은 연 쪽이 한다.
-    public event Action OnCloseRequested;
 
     public IReadOnlyList<LoadoutSlotViewModel> Slots { get { return _slots; } }
     // 마지막으로 고른 장비의 설명.
@@ -54,11 +50,6 @@ public class LoadoutViewModel : ViewModelBase
         {
             _slots[i].UnBind();
         }
-    }
-
-    public void RequestClose()
-    {
-        OnCloseRequested?.Invoke();
     }
 
     private void HandleLoadoutChanged()

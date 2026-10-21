@@ -6,4 +6,9 @@ public class LoadoutStand : GalleryInteractable
     [SerializeField] private string _label = "EQUIPMENT";
 
     public override string Label { get { return _label; } }
+
+    public override void Interact(GalleryStage gallery)
+    {
+        gallery.OpenLoadout();
+    }
 }

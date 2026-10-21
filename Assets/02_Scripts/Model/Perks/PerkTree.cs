@@ -26,6 +26,11 @@ public class PerkTree
         return _nodes.TryGet(nodeId, out _);
     }
 
+    public bool TryGetNode(string nodeId, out PerkNodeData node)
+    {
+        return _nodes.TryGet(nodeId, out node);
+    }
+
     public int GetAvailablePoints(PlayerProgress progress)
     {
         return progress.EarnedPoints - GetSpentPoints(progress);

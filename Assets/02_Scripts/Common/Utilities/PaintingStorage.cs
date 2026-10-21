@@ -1,7 +1,7 @@
 using System.IO;
 using UnityEngine;
 
-// 클리어할 때 찍은 그림을 저장하고 불러온다. 그림이 있으면 깬 스테이지로 본다.
+// 클리어할 때 찍은 그림을 저장하고 불러온다. 깼는지는 그림이 아닌 진행 기록(PlayerProgress)으로 본다.
 public static class PaintingStorage
 {
     private const string FOLDER_NAME = "Paintings";

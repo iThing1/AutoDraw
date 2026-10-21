@@ -14,7 +14,7 @@ public class PlayerSetup : MonoBehaviour
 
         GetComponent<PlayerAttackInput>().Setup(loadout, stats, tables, assets);
         GetComponent<PlayerGuard>().Setup(loadout.Utility, stats);
-        GetComponent<PlayerConsumable>().Setup(loadout.ConsumableId, tables, assets);
+        GetComponent<PlayerConsumable>().Setup(loadout.ConsumableId, stats, tables, assets);
         GetComponent<PlayerInputMover>().Setup(stats);
     }
 }

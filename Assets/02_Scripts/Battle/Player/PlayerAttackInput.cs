@@ -52,8 +52,8 @@ public class PlayerAttackInput : MonoBehaviour
     {
         _skillGauge.Init(stats.SkillGaugeMax);
 
-        ReadWeapon(BASIC_SLOT, loadout.BasicWeaponId, tables, assets);
-        ReadWeapon(HEAVY_SLOT, loadout.HeavyWeaponId, tables, assets);
+        ReadWeapon(BASIC_SLOT, loadout.BasicWeaponId, stats, tables, assets);
+        ReadWeapon(HEAVY_SLOT, loadout.HeavyWeaponId, stats, tables, assets);
 
         if (tables.Skills.TryGet(loadout.SkillId, out SkillData skill))
         {
@@ -116,7 +116,7 @@ public class PlayerAttackInput : MonoBehaviour
         return _weaponActions[index].GetKeyLabel();
     }
 
-    private void ReadWeapon(int slot, string weaponId, DataTableManager tables, AssetManager assets)
+    private void ReadWeapon(int slot, string weaponId, PlayerStats stats, DataTableManager tables, AssetManager assets)
     {
         if (false == tables.Weapons.TryGet(weaponId, out WeaponData weapon))
         {
@@ -125,7 +125,7 @@ public class PlayerAttackInput : MonoBehaviour
         }
 
         _slotStyles[slot] = assets.Get<AttackStyle>(weapon.AttackStyleKey);
-        _slotModifiers[slot] = new WeaponModifier(weapon.DamageBonus, weapon.IntervalScale);
+        _slotModifiers[slot] = new WeaponModifier(weapon.DamageBonus + stats.GetWeaponDamageBonus(weapon.Type), weapon.IntervalScale);
     }
 
     // 끼운 무기와 스킬의 공격을 미리 만든다. 전투 매니저가 다른 유닛과 함께 부른다.

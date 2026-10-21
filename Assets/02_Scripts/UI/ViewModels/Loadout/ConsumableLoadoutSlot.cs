@@ -6,14 +6,14 @@ public class ConsumableLoadoutSlot : LoadoutSlot
     private const string NONE_LABEL = "None";
     private const string USAGE_FORMAT = "Uses: {0} | Cooldown: {1}s";
 
-    public ConsumableLoadoutSlot(PlayerLoadout loadout, DataTableManager tables, AssetManager assets)
+    public ConsumableLoadoutSlot(PlayerLoadout loadout, PlayerStats stats, DataTableManager tables, AssetManager assets)
         : base("Item", loadout, assets)
     {
         AddEntry(string.Empty, NONE_LABEL, string.Empty, string.Empty, DEFAULT_ICON_COLOR, string.Empty);
 
         foreach (ConsumableData consumable in tables.Consumables.All)
         {
-            AddEntry(consumable.Id, consumable.Name, Describe(consumable), consumable.IconKey, GetEffectColor(consumable.EffectKey), string.Empty);
+            AddEntry(consumable.Id, consumable.Name, Describe(consumable, stats), consumable.IconKey, GetEffectColor(consumable.EffectKey), string.Empty);
         }
     }
 
@@ -37,11 +37,11 @@ public class ConsumableLoadoutSlot : LoadoutSlot
         return string.IsNullOrEmpty(entry.Id);
     }
 
-    // 표 설명의 {0}에 효과 값을 넣고, 아래에 사용 횟수와 쿨타임을 붙인다.
-    private static string Describe(ConsumableData consumable)
+    // 표 설명의 {0}에 효과 값을 넣고, 아래에 사용 횟수와 쿨타임을 붙인다. 모두 특성 보너스를 더한 값이다.
+    private static string Describe(ConsumableData consumable, PlayerStats stats)
     {
-        string effect = string.Format(consumable.Description, consumable.Value);
-        string usage = string.Format(USAGE_FORMAT, consumable.Charges, consumable.Cooldown);
+        string effect = string.Format(consumable.Description, stats.GetConsumableValue(consumable));
+        string usage = string.Format(USAGE_FORMAT, stats.GetConsumableCharges(consumable), stats.GetConsumableCooldown(consumable));
 
         return $"{effect}\n{usage}";
     }

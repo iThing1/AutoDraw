@@ -73,9 +73,13 @@ public class MapSpawner : MonoBehaviour
         }
     }
 
-    // 갤러리로 돌아가면 이 그림이 액자에 걸린다. 텍스처는 파일로 남겼으니 바로 지운다.
+    // 보상은 그림을 찍지 못했어도 받고, 결과 화면에서 꺼도 남도록 바로 저장한다.
+    // 갤러리로 돌아가면 그림이 액자에 걸린다. 텍스처는 파일로 남겼으니 바로 지운다.
     private void HandleStageCleared(Texture2D painting)
     {
+        GameManager.Player.ClaimFirstClear(_currentStage);
+        GameManager.SavePlayer();
+
         if (null == painting)
         {
             return;

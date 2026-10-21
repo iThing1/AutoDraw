@@ -33,7 +33,7 @@ public class ConsumableSlotViewModel : ActionSlotViewModel
 
     private static string FormatName(ConsumableState state)
     {
-        return string.Format(NAME_FORMAT, state.Data.Name, state.Charges);
+        return string.Format(NAME_FORMAT, state.Data.Name, state.Charges.ToString());
     }
 
     // 쿨타임 중에는 매 프레임 불려, 이름은 횟수가 바뀐 때만 새로 만든다.

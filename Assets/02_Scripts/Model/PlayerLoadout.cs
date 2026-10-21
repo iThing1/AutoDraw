@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // 기본 무기 칸에는 Basic, 화력 무기 칸에는 Heavy 무기만 끼운다. 처음 장비(IsStarting)와 막기는 늘 가진 것으로 본다.
+// 특성으로 얻은 장비는 저장하지 않고, 찍은 특성에서 다시 만든다. 그래서 특성을 초기화하면 함께 빠진다.
 public class PlayerLoadout
 {
     public event Action OnChanged;
@@ -12,6 +13,9 @@ public class PlayerLoadout
     private readonly List<string> _skillIds = new();
     private readonly List<string> _consumableIds = new();
     private readonly List<UtilityType> _utilities = new();
+    private readonly List<string> _perkWeaponIds = new();
+    private readonly List<string> _perkConsumableIds = new();
+    private readonly List<UtilityType> _perkUtilities = new();
 
     private string _basicWeaponId;
     private string _heavyWeaponId;
@@ -20,6 +24,7 @@ public class PlayerLoadout
     // 비어 있으면 소모품 없이 들어간다.
     private string _consumableId;
 
+    // 저장하는 가진 것이다. 특성으로 얻은 것은 들어 있지 않다.
     public IReadOnlyList<string> WeaponIds { get { return _weaponIds; } }
     public IReadOnlyList<string> SkillIds { get { return _skillIds; } }
     public IReadOnlyList<string> ConsumableIds { get { return _consumableIds; } }
@@ -33,7 +38,7 @@ public class PlayerLoadout
 
     public bool HasWeapon(string weaponId)
     {
-        return _weaponIds.Contains(weaponId);
+        return _weaponIds.Contains(weaponId) || _perkWeaponIds.Contains(weaponId);
     }
 
     public bool HasSkill(string skillId)
@@ -43,12 +48,12 @@ public class PlayerLoadout
 
     public bool HasConsumable(string consumableId)
     {
-        return _consumableIds.Contains(consumableId);
+        return _consumableIds.Contains(consumableId) || _perkConsumableIds.Contains(consumableId);
     }
 
     public bool HasUtility(UtilityType utility)
     {
-        return _utilities.Contains(utility);
+        return _utilities.Contains(utility) || _perkUtilities.Contains(utility);
     }
 
     // 공격 방식이 아직 없는 스킬은 끼우면 전투에서 쓸 수 없다.
@@ -78,6 +83,7 @@ public class PlayerLoadout
     }
 
     // 표에서 사라진 Id는 버리고, 비게 된 칸은 처음 장비로 채운다. 시트에서 행을 지워도 저장 파일 때문에 깨지지 않게 한다.
+    // 끼운 것은 특성으로 얻은 장비가 들어온 뒤에 RestoreEquipped로 따로 되살린다. 그 전에는 처음 장비를 끼워 둔다.
     public static PlayerLoadout FromSave(LoadoutSaveData save, DataTableManager tables)
     {
         PlayerLoadout loadout = new(tables);
@@ -85,16 +91,26 @@ public class PlayerLoadout
         if (null != save)
         {
             loadout.RestoreOwned(save);
-            loadout.TryEquipWeapon(save.BasicWeaponId);
-            loadout.TryEquipWeapon(save.HeavyWeaponId);
-            loadout.TryEquipSkill(save.SkillId);
-            loadout.TryEquipUtility(save.Utility);
-            loadout.TryEquipConsumable(save.ConsumableId);
         }
 
         loadout.EquipDefaults();
 
         return loadout;
+    }
+
+    // 지금 가진 것으로 끼울 수 없는 칸은 그대로 둔다.
+    public void RestoreEquipped(LoadoutSaveData save)
+    {
+        if (null == save)
+        {
+            return;
+        }
+
+        TryEquipWeapon(save.BasicWeaponId);
+        TryEquipWeapon(save.HeavyWeaponId);
+        TryEquipSkill(save.SkillId);
+        TryEquipUtility(save.Utility);
+        TryEquipConsumable(save.ConsumableId);
     }
 
     public LoadoutSaveData ToSaveData()
@@ -133,7 +149,7 @@ public class PlayerLoadout
     // 무기의 Type이 들어갈 칸을 정한다.
     public bool TryEquipWeapon(string weaponId)
     {
-        if (false == _weaponIds.Contains(weaponId) || false == _tables.Weapons.TryGet(weaponId, out WeaponData weapon))
+        if (false == HasWeapon(weaponId) || false == _tables.Weapons.TryGet(weaponId, out WeaponData weapon))
         {
             return false;
         }
@@ -172,7 +188,7 @@ public class PlayerLoadout
 
     public bool TryEquipUtility(UtilityType utility)
     {
-        if (false == _utilities.Contains(utility) || false == IsUtilityReady(utility))
+        if (false == HasUtility(utility) || false == IsUtilityReady(utility))
         {
             return false;
         }
@@ -186,7 +202,7 @@ public class PlayerLoadout
     // 빈 Id는 소모품을 빼는 것이다.
     public bool TryEquipConsumable(string consumableId)
     {
-        if (false == string.IsNullOrEmpty(consumableId) && false == _consumableIds.Contains(consumableId))
+        if (false == string.IsNullOrEmpty(consumableId) && false == HasConsumable(consumableId))
         {
             return false;
         }
@@ -195,6 +211,59 @@ public class PlayerLoadout
         OnChanged?.Invoke();
 
         return true;
+    }
+
+    // 특성을 다시 계산할 때 처음에 부른다. 끼운 칸은 다 넣은 뒤 RefreshEquipped에서 맞춘다.
+    public void ClearPerkItems()
+    {
+        _perkWeaponIds.Clear();
+        _perkConsumableIds.Clear();
+        _perkUtilities.Clear();
+    }
+
+    public void AddPerkWeapon(string weaponId)
+    {
+        TryAddId(_perkWeaponIds, weaponId, _tables.Weapons.TryGet(weaponId, out _), "무기");
+    }
+
+    public void AddPerkConsumable(string consumableId)
+    {
+        TryAddId(_perkConsumableIds, consumableId, _tables.Consumables.TryGet(consumableId, out _), "소모품");
+    }
+
+    public void AddPerkUtility(UtilityType utility)
+    {
+        if (false == _perkUtilities.Contains(utility))
+        {
+            _perkUtilities.Add(utility);
+        }
+    }
+
+    // 특성을 다시 계산한 뒤 부른다. 특성을 되돌려 더는 갖지 않은 장비를 끼고 있으면 빼고 처음 장비로 채운다.
+    public void RefreshEquipped()
+    {
+        if (false == HasWeapon(_basicWeaponId))
+        {
+            _basicWeaponId = null;
+        }
+
+        if (false == HasWeapon(_heavyWeaponId))
+        {
+            _heavyWeaponId = null;
+        }
+
+        if (false == HasUtility(_utility))
+        {
+            _utility = UtilityType.Guard;
+        }
+
+        if (false == string.IsNullOrEmpty(_consumableId) && false == HasConsumable(_consumableId))
+        {
+            _consumableId = null;
+        }
+
+        EquipDefaults();
+        OnChanged?.Invoke();
     }
 
     private void AddStartingItems()
@@ -269,7 +338,7 @@ public class PlayerLoadout
     {
         foreach (WeaponData weapon in _tables.Weapons.All)
         {
-            if (type == weapon.Type && _weaponIds.Contains(weapon.Id))
+            if (type == weapon.Type && HasWeapon(weapon.Id))
             {
                 return weapon.Id;
             }
@@ -280,7 +349,19 @@ public class PlayerLoadout
 
     private bool AddOwned(List<string> owned, string id, bool existsInTable, string kindName)
     {
-        if (string.IsNullOrEmpty(id) || owned.Contains(id))
+        if (false == TryAddId(owned, id, existsInTable, kindName))
+        {
+            return false;
+        }
+
+        OnChanged?.Invoke();
+
+        return true;
+    }
+
+    private static bool TryAddId(List<string> ids, string id, bool existsInTable, string kindName)
+    {
+        if (string.IsNullOrEmpty(id) || ids.Contains(id))
         {
             return false;
         }
@@ -291,8 +372,7 @@ public class PlayerLoadout
             return false;
         }
 
-        owned.Add(id);
-        OnChanged?.Invoke();
+        ids.Add(id);
 
         return true;
     }

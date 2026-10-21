@@ -36,6 +36,14 @@ public class FloatingText : MonoBehaviour
         Pop(color, scale, screenPosition, settings);
     }
 
+    // "+{0}"처럼 숫자 자리가 있는 문구. 피해 숫자처럼 TMP가 숫자를 채워 문자열을 만들지 않는다.
+    public void PlayNumber(string format, int amount, Color color, Vector2 screenPosition, FloatingTextSettings settings)
+    {
+        _text.SetText(format, amount);
+
+        Pop(color, settings.NormalScale, screenPosition, settings);
+    }
+
     public void PlayText(string text, Color color, Vector2 screenPosition, FloatingTextSettings settings)
     {
         _text.SetText(text);

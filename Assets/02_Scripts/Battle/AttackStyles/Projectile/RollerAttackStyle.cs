@@ -54,10 +54,7 @@ public class RollerAttackStyle : AttackStyle
 
         Color color = context.Damage.PickColor();
         SpriteRenderer roller = PooledSprite.Spawn(_rollerPrefab, start, angle, new Vector2(_width, _thickness), color);
-        PaintPalette palette = context.Owner.Data.Palette;
-        bool isInk = null != palette && palette.IsInk;
-
-        PaintStripe carpet = context.PaintCanvas.BeginStripe(start, direction, _carpetWidth, _carpetTexture, _carpetTileLength, color, isInk);
+        PaintStripe carpet = context.PaintCanvas.BeginStripe(start, direction, _carpetWidth, _carpetTexture, _carpetTileLength, color, context.Damage.IsInk);
         float travelled = 0f;
         int hitCount = 0;
         bool wasTouching = false;

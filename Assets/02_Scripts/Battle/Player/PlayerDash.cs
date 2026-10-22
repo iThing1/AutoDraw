@@ -48,6 +48,11 @@ public class PlayerDash : MonoBehaviour
 
         _stats = stats;
         _state = new DashState(_preset, stats);
+
+        if (null != _preset.AfterimagePrefab)
+        {
+            GameManager.Pool.Prewarm(_preset.AfterimagePrefab, Mathf.CeilToInt(_preset.AfterimageFadeDuration / _preset.AfterimageInterval) + 1);
+        }
     }
 
     private void OnEnable()
@@ -100,6 +105,8 @@ public class PlayerDash : MonoBehaviour
         Vector2 start = _rigidbody.position;
         Vector2 end = _mover.ClampPosition(start + direction * _stats.DashDistance);
         float elapsed = 0f;
+        float nextAfterimageTime = 0f;
+        PaintStripe stroke = BeginStroke(start, end);
 
         ImpactPlayer.Play(_preset.StartImpact, _unit.Body.position);
 
@@ -120,7 +127,19 @@ public class PlayerDash : MonoBehaviour
                     elapsed += Time.fixedDeltaTime;
 
                     float progress = DOVirtual.EasedValue(0f, 1f, Mathf.Clamp01(elapsed / _preset.Duration), _preset.Ease);
-                    _rigidbody.MovePosition(Vector2.Lerp(start, end, progress));
+                    Vector2 position = Vector2.Lerp(start, end, progress);
+                    _rigidbody.MovePosition(position);
+
+                    if (null != stroke)
+                    {
+                        stroke.SetLength(Vector2.Distance(start, position));
+                    }
+
+                    if (elapsed >= nextAfterimageTime)
+                    {
+                        SpawnAfterimage(token);
+                        nextAfterimageTime += _preset.AfterimageInterval;
+                    }
                 }
             }
         }
@@ -130,7 +149,56 @@ public class PlayerDash : MonoBehaviour
         }
         finally
         {
+            // 끊겨도 지나간 데까지는 남긴다.
+            if (null != stroke)
+            {
+                stroke.Finish();
+            }
+
             _unit.EndAction();
+        }
+    }
+
+    // 전투가 시작되기 전(다가가는 중)에는 캔버스를 받기 전이라 자국을 남기지 않는다.
+    private PaintStripe BeginStroke(Vector2 start, Vector2 end)
+    {
+        AttackContext context = _unit.Attacker.Context;
+
+        if (null == context || null == _preset.StrokeTexture || start == end)
+        {
+            return null;
+        }
+
+        return context.PaintCanvas.BeginStripe(start, (end - start).normalized, _preset.StrokeWidth, _preset.StrokeTexture, _preset.StrokeTileLength,
+            context.Damage.PickColor(), context.Damage.IsInk);
+    }
+
+    private void SpawnAfterimage(CancellationToken token)
+    {
+        if (null == _preset.AfterimagePrefab)
+        {
+            return;
+        }
+
+        Transform body = _unit.Body;
+        SpriteRenderer afterimage = PooledSprite.Spawn(_preset.AfterimagePrefab, body.position, body.eulerAngles.z, body.lossyScale, _preset.AfterimageColor);
+
+        FadeAfterimageAsync(afterimage, token).Forget();
+    }
+
+    private async UniTaskVoid FadeAfterimageAsync(SpriteRenderer afterimage, CancellationToken token)
+    {
+        try
+        {
+            await afterimage.DOFade(0f, _preset.AfterimageFadeDuration).ToUniTaskKillOnCancel(token);
+        }
+        catch (OperationCanceledException)
+        {
+            // 플레이어가 사라져 끊긴 경우라 따로 처리하지 않는다.
+        }
+        finally
+        {
+            PooledSprite.Despawn(afterimage);
         }
     }
 }

@@ -15,6 +15,8 @@ public abstract class ActionSlotViewModel : ViewModelBase
 
     // 칸을 쓴 순간(스킬 발동, 막기 시작). 한 번 튀는 표시만 하고 끝나는 사건이라 이름 알림 대신 이벤트로 낸다.
     public event Action OnUsed;
+    // 쓸 수 없을 때 눌렀다.
+    public event Action OnRejected;
 
     public string KeyLabel { get { return _keyLabel; } }
     public string DisplayName { get { return _displayName; } }
@@ -73,5 +75,10 @@ public abstract class ActionSlotViewModel : ViewModelBase
     protected void NotifyUsed()
     {
         OnUsed?.Invoke();
+    }
+
+    protected void NotifyRejected()
+    {
+        OnRejected?.Invoke();
     }
 }

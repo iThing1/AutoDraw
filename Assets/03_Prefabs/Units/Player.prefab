@@ -294,6 +294,7 @@ GameObject:
   - component: {fileID: 4719283746501928374}
   - component: {fileID: 4719283746501928375}
   - component: {fileID: 4719283746501928376}
+  - component: {fileID: 4719283746501928377}
   m_Layer: 15
   m_Name: Player
   m_TagString: Player
@@ -516,3 +517,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72a6d7209c49b7106c689b3ff8666e9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSetup
+--- !u!114 &4719283746501928377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9124088967955213027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f82046741171065874c6e86067ae9dba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDash
+  _dashAction: {fileID: 2921190797050176757, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  _preset: {fileID: 11400000, guid: bd0cf556977f284231695eee6c734836, type: 2}

@@ -37,17 +37,17 @@ public class AttackTarget
         return _unit.Mover.PredictPosition(seconds) + (_unit.Body.position - _unit.transform.position);
     }
 
-    // 명중 반경 밖으로 움직였으면 피한 것이다.
+    // 명중 반경 밖으로 움직였거나 대시로 피하는 중이면 피한 것이다.
     public bool IsHit(Vector3 hitPoint)
     {
-        return Vector2.Distance(hitPoint, _unit.Body.position) <= _unit.Stats.HitRadius;
+        return false == _unit.IsDodging && Vector2.Distance(hitPoint, _unit.Body.position) <= _unit.Stats.HitRadius;
     }
 
     // 날아가는 탄이 몸 그림과 겹쳤는지. 넉넉한 도착 판정(명중 반경)과 달리 실제 크기로 봐서,
     // 빠른 탄이 몸을 뚫고 지나가지 않으면서도 허공에서 미리 맞지 않게 한다.
     public bool IsTouching(Vector3 position, float attackRadius)
     {
-        return Vector2.Distance(position, _unit.Body.position) <= _bodyRadius + attackRadius;
+        return false == _unit.IsDodging && Vector2.Distance(position, _unit.Body.position) <= _bodyRadius + attackRadius;
     }
 
     // 움직이는 공격이 지난 길 위에서 몸에 닿았는지. 이전 자리와 지금 자리를 잇는 선분으로 봐, 빠르게 지나가도 건너뛰지 않는다.
@@ -58,7 +58,7 @@ public class AttackTarget
 
     public bool IsInBlast(Vector3 center, float radius)
     {
-        return Vector2.Distance(center, _unit.Body.position) <= radius;
+        return false == _unit.IsDodging && Vector2.Distance(center, _unit.Body.position) <= radius;
     }
 
     // 방패가 떠 있는 동안 방패에 닿은 공격은 막힌다. 투사체는 날아오는 도중에도 이걸로 확인한다.

@@ -7,10 +7,13 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerInputMover : UnitMover
 {
+    private const float MIN_INPUT = 0.01f;
+
     [SerializeField] private InputActionReference _moveAction;
 
     private Rigidbody2D _rigidbody;
     private PlayerStats _stats;
+    private Vector2 _lastDirection = Vector2.right;
 
     protected override void Awake()
     {
@@ -23,6 +26,14 @@ public class PlayerInputMover : UnitMover
     public void Setup(PlayerStats stats)
     {
         _stats = stats;
+    }
+
+    // 지금 누른 방향이고, 누르지 않았으면 마지막으로 움직인 방향이다.
+    public Vector2 GetFacingDirection()
+    {
+        Vector2 input = null != _moveAction ? _moveAction.action.ReadValue<Vector2>() : Vector2.zero;
+
+        return MIN_INPUT < input.sqrMagnitude ? input.normalized : _lastDirection;
     }
 
     protected override void OnRunStarted()
@@ -61,6 +72,12 @@ public class PlayerInputMover : UnitMover
             }
 
             Vector2 input = Vector2.ClampMagnitude(_moveAction.action.ReadValue<Vector2>(), 1f);
+
+            if (MIN_INPUT < input.sqrMagnitude)
+            {
+                _lastDirection = input.normalized;
+            }
+
             Vector2 velocity = (input * _stats.MoveSpeed + ExternalVelocity) * SlowZone.GetMoveScale(_rigidbody.position);
             Vector2 step = velocity * Time.fixedDeltaTime;
 

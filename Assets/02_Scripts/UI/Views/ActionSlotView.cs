@@ -16,6 +16,8 @@ public class ActionSlotView : ViewBase<ActionSlotViewModel>
     [SerializeField, Min(0f)] private float _selectPunch = 0.15f;
     [SerializeField, Min(0f)] private float _punchDuration = 0.2f;
     [SerializeField, Range(0f, 1f)] private float _dimmedAlpha = 0.35f;
+    [SerializeField, Min(0f)] private float _rejectShake = 8f;
+    [SerializeField, Min(0f)] private float _rejectDuration = 0.25f;
 
     private RectTransform _rect;
     private bool _wasReady;
@@ -35,11 +37,13 @@ public class ActionSlotView : ViewBase<ActionSlotViewModel>
     protected override void OnBind()
     {
         ViewModel.OnUsed += Punch;
+        ViewModel.OnRejected += Shake;
     }
 
     protected override void OnUnbind()
     {
         ViewModel.OnUsed -= Punch;
+        ViewModel.OnRejected -= Shake;
     }
 
     protected override void OnPropertyChanged(string propertyName)
@@ -121,5 +125,11 @@ public class ActionSlotView : ViewBase<ActionSlotViewModel>
     {
         _rect.DOComplete();
         _rect.DOPunchScale(Vector3.one * _selectPunch, _punchDuration, PunchTween.VIBRATO, PunchTween.ELASTICITY).SetUpdate(true);
+    }
+
+    private void Shake()
+    {
+        _rect.DOComplete();
+        _rect.DOShakeAnchorPos(_rejectDuration, new Vector2(_rejectShake, 0f)).SetUpdate(true);
     }
 }

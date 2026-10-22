@@ -127,9 +127,9 @@ MonoBehaviour:
   _nodePrefab: {fileID: 7400000000000000006, guid: 6e5cb4ac2333a8765123542ad4f23635, type: 3}
   _linePrefab: {fileID: 7410000000000000004, guid: 9061b3feea39afe84bc3d00a7d9717d4, type: 3}
   _cellSpacing: {x: 96, y: 124}
-  _rootSpacing: 300
+  _treeSpacing: 300
   _lineWidth: 4
-  _rootColors:
+  _treeColors:
   - {r: 0.85, g: 0.4, b: 0.35, a: 1}
   - {r: 0.4, g: 0.65, b: 0.85, a: 1}
   - {r: 0.45, g: 0.75, b: 0.45, a: 1}

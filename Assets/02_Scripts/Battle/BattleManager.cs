@@ -128,6 +128,13 @@ public class BattleManager : MonoBehaviour
             return false;
         }
 
+        // 스탯을 넘겨받지 못하면 플레이어 체력부터 정해지지 않는다.
+        if (null == _playerPrefab.GetComponent<PlayerSetup>())
+        {
+            Debug.LogError("전투 매니저 : 플레이어 프리팹에 PlayerSetup이 붙어 있지 않습니다.");
+            return false;
+        }
+
         // 보스 데이터가 BossData가 아니면 등장 배너가 조용히 빠지므로 알린다. 배너만 없을 뿐이라 전투는 그대로 진행한다.
         if (false == (_bossPrefab.Data is BossData))
         {
@@ -160,14 +167,7 @@ public class BattleManager : MonoBehaviour
         _player.name = _playerPrefab.name;
 
         // 장비와 스탯은 Start 전에 넘겨, 첫 무기 선택과 미리 생성이 끼운 장비를 보고 이뤄지게 한다.
-        if (_player.TryGetComponent(out PlayerSetup playerSetup))
-        {
-            playerSetup.Setup(GameManager.Player, GameManager.Tables, GameManager.Assets);
-        }
-        else
-        {
-            Debug.LogError($"전투 매니저 : {_player.name}에 PlayerSetup이 없어 장비를 넘기지 못했습니다.");
-        }
+        _player.GetComponent<PlayerSetup>().Setup(GameManager.Player, GameManager.Tables, GameManager.Assets);
 
         _boss = Instantiate(_bossPrefab, _bossSpawnPoint.position, Quaternion.identity, transform);
         _boss.name = _bossPrefab.name;

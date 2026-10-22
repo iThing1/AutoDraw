@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 특성 트리 화면의 노드 하나에 보일 값. 자리(루트·행·열)와 이름은 표에서, 상태는 트리 화면 ViewModel이 매번 매겨 준다.
+// 특성 트리 화면의 노드 하나에 보일 값. 자리(트리·행·열)와 이름은 표에서, 상태는 트리 화면 ViewModel이 매번 매겨 준다.
 public class PerkNodeViewModel : ViewModelBase
 {
     private readonly PerkNodeData _data;
@@ -13,7 +13,7 @@ public class PerkNodeViewModel : ViewModelBase
 
     public string Id { get { return _data.Id; } }
     public string Label { get { return _data.Name; } }
-    public PerkRoot Root { get { return _data.Root; } }
+    public PerkTreeType Tree { get { return _data.Tree; } }
     public int Row { get { return _data.Row; } }
     public int Column { get { return _data.Column; } }
     public int Cost { get { return _data.Cost; } }

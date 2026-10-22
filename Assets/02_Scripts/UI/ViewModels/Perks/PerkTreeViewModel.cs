@@ -25,6 +25,7 @@ public class PerkTreeViewModel : GalleryScreenViewModel
     private string _selectedTitle = string.Empty;
     private string _selectedDescription = SELECT_HINT;
 
+    // 특성이 바뀌어 노드 상태를 다시 매기면 이 이름으로 알린다.
     public IReadOnlyList<PerkNodeViewModel> Nodes { get { return _nodes; } }
     public int AvailablePoints { get { return _availablePoints; } }
     public string SelectedTitle { get { return _selectedTitle; } }
@@ -79,6 +80,8 @@ public class PerkTreeViewModel : GalleryScreenViewModel
         {
             _nodes[i].SetState(_player.GetPerkState(_nodes[i].Id));
         }
+
+        NotifyPropertyChanged(nameof(Nodes));
 
         _availablePoints = _player.AvailablePerkPoints;
         NotifyPropertyChanged(nameof(AvailablePoints));

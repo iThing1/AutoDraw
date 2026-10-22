@@ -5,6 +5,6 @@ public enum PerkEffectType
     UnlockWeapon = 1,
     UnlockConsumable = 2,
     ConsumableUpgrade = 3,
-    UnlockAbility = 4,
+    UnlockUtility = 4,
     WeaponDamageAdd = 5,
 }

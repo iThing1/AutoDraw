@@ -4,11 +4,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 갤러리 이젤에서 여는 특성 트리 화면. 연결할 때 노드와 연결선을 표의 자리(루트·행·열)대로 한 번 만들고,
+// 갤러리 이젤에서 여는 특성 트리 화면. 연결할 때 노드와 연결선을 표의 자리(트리·행·열)대로 한 번 만들고,
 // 그 뒤로는 남은 포인트, 고른 노드의 설명, 찍기 버튼, 연결선 색만 다시 그린다.
 public class PerkTreeView : ViewBase<PerkTreeViewModel>
 {
-    private static readonly int ROOT_COUNT = Enum.GetValues(typeof(PerkRoot)).Length;
+    private static readonly int TREE_COUNT = Enum.GetValues(typeof(PerkTreeType)).Length;
     private const int CENTER_COLUMN = 1;
 
     [SerializeField] private TMP_Text _pointsText;
@@ -19,20 +19,20 @@ public class PerkTreeView : ViewBase<PerkTreeViewModel>
     [SerializeField] private Button _closeButton;
 
     [Header("트리")]
-    // 위 가운데를 기준점으로 둔 영역. 노드는 첫 줄이 맨 위, 가운데 루트가 가운데에 온다.
+    // 위 가운데를 기준점으로 둔 영역. 노드는 첫 줄이 맨 위, 가운데 트리가 가운데에 온다.
     [SerializeField] private RectTransform _nodeRoot;
     // 연결선이 노드 밑에 깔리도록 노드 영역보다 앞(형제 순서)에 둔다.
     [SerializeField] private RectTransform _lineRoot;
     [SerializeField] private PerkNodeView _nodePrefab;
     [SerializeField] private Image _linePrefab;
-    // 같은 루트 안에서 열·행 사이 간격.
+    // 같은 트리 안에서 열·행 사이 간격.
     [SerializeField] private Vector2 _cellSpacing = new Vector2(96f, 124f);
-    [SerializeField, Min(0f)] private float _rootSpacing = 300f;
+    [SerializeField, Min(0f)] private float _treeSpacing = 300f;
     [SerializeField, Min(0f)] private float _lineWidth = 4f;
 
     [Header("색")]
-    // PerkRoot 순서(Stat, Equipment, Technique)로 넣는다.
-    [SerializeField] private Color[] _rootColors =
+    // PerkTreeType 순서(Stat, Equipment, Technique)로 넣는다.
+    [SerializeField] private Color[] _treeColors =
     {
         new Color(0.85f, 0.4f, 0.35f, 1f),
         new Color(0.4f, 0.65f, 0.85f, 1f),
@@ -97,9 +97,12 @@ public class PerkTreeView : ViewBase<PerkTreeViewModel>
     {
         switch (propertyName)
         {
+            case nameof(PerkTreeViewModel.Nodes):
+                DrawLines();
+                break;
+
             case nameof(PerkTreeViewModel.AvailablePoints):
                 DrawPoints();
-                DrawLines();
                 break;
 
             case nameof(PerkTreeViewModel.SelectedTitle):
@@ -129,7 +132,7 @@ public class PerkTreeView : ViewBase<PerkTreeViewModel>
     {
         PerkNodeView nodeView = Instantiate(_nodePrefab, _nodeRoot);
         nodeView.Rect.anchoredPosition = GetNodePosition(node);
-        nodeView.SetRootColor(GetRootColor(node.Root));
+        nodeView.SetTreeColor(GetTreeColor(node.Tree));
         nodeView.Bind(node);
 
         _nodeViews.Add(nodeView);
@@ -162,21 +165,21 @@ public class PerkTreeView : ViewBase<PerkTreeViewModel>
         }
     }
 
-    // 루트는 가로로 나란히 가운데 맞추고, 루트 안에서는 열이 가로·행이 세로다. 열은 0~2이고 1이 루트의 가운데다.
+    // 트리는 가로로 나란히 가운데 맞추고, 트리 안에서는 열이 가로·행이 세로다. 열은 0~2이고 1이 트리의 가운데다.
     private Vector2 GetNodePosition(PerkNodeViewModel node)
     {
-        float rootX = ((int)node.Root - (ROOT_COUNT - 1) * 0.5f) * _rootSpacing;
-        float x = rootX + (node.Column - CENTER_COLUMN) * _cellSpacing.x;
+        float treeX = ((int)node.Tree - (TREE_COUNT - 1) * 0.5f) * _treeSpacing;
+        float x = treeX + (node.Column - CENTER_COLUMN) * _cellSpacing.x;
         float y = -(node.Row + 0.5f) * _cellSpacing.y;
 
         return new Vector2(x, y);
     }
 
-    private Color GetRootColor(PerkRoot root)
+    private Color GetTreeColor(PerkTreeType tree)
     {
-        int index = (int)root;
+        int index = (int)tree;
 
-        return 0 <= index && index < _rootColors.Length ? _rootColors[index] : Color.white;
+        return 0 <= index && index < _treeColors.Length ? _treeColors[index] : Color.white;
     }
 
     private void DrawPoints()

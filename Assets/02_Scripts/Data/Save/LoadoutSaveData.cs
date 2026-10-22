@@ -34,27 +34,15 @@ public class LoadoutSaveData
 
     public LoadoutSaveData(PlayerLoadout loadout)
     {
-        _weaponIds = ToArray(loadout.WeaponIds);
-        _skillIds = ToArray(loadout.SkillIds);
-        _consumableIds = ToArray(loadout.ConsumableIds);
-        _utilities = ToArray(loadout.Utilities);
+        _weaponIds = loadout.WeaponIds.ToArray();
+        _skillIds = loadout.SkillIds.ToArray();
+        _consumableIds = loadout.ConsumableIds.ToArray();
+        _utilities = loadout.Utilities.ToArray();
 
         _basicWeaponId = loadout.BasicWeaponId;
         _heavyWeaponId = loadout.HeavyWeaponId;
         _skillId = loadout.SkillId;
         _utility = loadout.Utility;
         _consumableId = loadout.ConsumableId;
-    }
-
-    private static T[] ToArray<T>(IReadOnlyList<T> list)
-    {
-        T[] array = new T[list.Count];
-
-        for (int i = 0; i < list.Count; i++)
-        {
-            array[i] = list[i];
-        }
-
-        return array;
     }
 }

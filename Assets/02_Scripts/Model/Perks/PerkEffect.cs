@@ -29,8 +29,8 @@ public abstract class PerkEffect
             case PerkEffectType.ConsumableUpgrade:
                 return CreateConsumableUpgrade(data);
 
-            case PerkEffectType.UnlockAbility:
-                return TryParseTarget(data, data.Target, out UtilityType utility) ? new UnlockAbilityEffect(utility) : null;
+            case PerkEffectType.UnlockUtility:
+                return TryParseTarget(data, data.Target, out UtilityType utility) ? new UnlockUtilityEffect(utility) : null;
 
             default:
                 Debug.LogError($"특성 효과 : {data.Id}의 효과 종류 {data.EffectType}을(를) 만들 수 없습니다.");

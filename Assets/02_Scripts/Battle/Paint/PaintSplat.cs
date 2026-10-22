@@ -5,11 +5,7 @@ using UnityEngine;
 public class PaintSplat : MonoBehaviour
 {
     private SpriteRenderer _spriteRenderer;
-    private bool _isInk;
     private TweenCallback _returnCallback;
-
-    public bool IsInk { get { return _isInk; } }
-    public SpriteRenderer SpriteRenderer { get { return _spriteRenderer; } }
 
     private void Awake()
     {
@@ -19,10 +15,8 @@ public class PaintSplat : MonoBehaviour
         _returnCallback = ReturnToPool;
     }
 
-    public void Show(Sprite sprite, Color color, bool isInk, int sortingOrder)
+    public void Show(Sprite sprite, Color color, int sortingOrder)
     {
-        _isInk = isInk;
-
         _spriteRenderer.sprite = sprite;
         _spriteRenderer.color = color;
         _spriteRenderer.sortingOrder = sortingOrder;

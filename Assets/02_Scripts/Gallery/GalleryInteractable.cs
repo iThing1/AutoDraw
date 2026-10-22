@@ -24,12 +24,23 @@ public abstract class GalleryInteractable : MonoBehaviour
 
     protected virtual void Awake()
     {
+        if (null == _highlightRenderer)
+        {
+            Debug.LogError($"갤러리 물건 : {name}에 강조할 렌더러가 지정되지 않아 강조하지 않습니다.");
+            return;
+        }
+
         _highlightBlock = new MaterialPropertyBlock();
         _baseColor = _highlightRenderer.sharedMaterial.GetColor(BASE_COLOR_ID);
     }
 
     public void SetHighlighted(bool isHighlighted)
     {
+        if (null == _highlightRenderer)
+        {
+            return;
+        }
+
         _highlightRenderer.GetPropertyBlock(_highlightBlock);
         _highlightBlock.SetColor(BASE_COLOR_ID, isHighlighted ? _highlightColor : _baseColor);
         _highlightRenderer.SetPropertyBlock(_highlightBlock);

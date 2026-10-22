@@ -53,9 +53,7 @@ MonoBehaviour:
       _effectScale: 3
       _effectLifetime: 2
   _inkFadeDuration: 1.5
-  _inkFadeDelay:
-    _min: 0
-    _max: 0.8
+  _inkFadeDelay: 0
   _inkFadeEase: 5
   _resultTitle:
     _text: STAGE CLEAR

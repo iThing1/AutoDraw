@@ -212,8 +212,8 @@ public class PaintCanvas : MonoBehaviour
     }
 
     // 잉크가 위 장에 물감과 함께 구워져 있어 위 장을 통째로 흐린다. 그 아래 장의 물감이 그대로 드러난다.
-    // 한 장이라 자국마다 시차를 줄 수 없어, 지연은 가장 짧은 값 하나만 쓴다.
-    public async UniTask FadeOutInkAsync(float duration, FloatRange startDelay, Ease ease, CancellationToken token)
+    // 한 장을 통째로 흐려 자국마다 시차는 없다.
+    public async UniTask FadeOutInkAsync(float duration, float startDelay, Ease ease, CancellationToken token)
     {
         for (int i = _appearing.Count - 1; i >= 0; i--)
         {
@@ -227,7 +227,7 @@ public class PaintCanvas : MonoBehaviour
         if (null != _topLayer)
         {
             await DOVirtual.Float(1f, 0f, duration, _topLayer.SetAlpha)
-                .SetDelay(startDelay.Min)
+                .SetDelay(startDelay)
                 .SetEase(ease)
                 .SetUpdate(true)
                 .ToUniTaskKillOnCancel(token);
@@ -364,7 +364,7 @@ public class PaintCanvas : MonoBehaviour
         instance.transform.localScale = Vector3.one * mark.Scale;
 
         PaintSplat splat = instance.GetOrAddComponent<PaintSplat>();
-        splat.Show(mark.Sprite, mark.Color, mark.IsInk, LIVE_SPLAT_ORDER);
+        splat.Show(mark.Sprite, mark.Color, LIVE_SPLAT_ORDER);
 
         return splat;
     }

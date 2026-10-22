@@ -16,6 +16,8 @@ public class PlayerModel
     public PlayerProgress Progress { get { return _progress; } }
     public PerkTree PerkTree { get { return _perkTree; } }
     public int AvailablePerkPoints { get { return _perkTree.GetAvailablePoints(_progress); } }
+    public int AvailablePalettes { get { return _progress.AvailablePalettes; } }
+    public bool CanRespec { get { return 0 < _progress.AvailablePalettes && 0 < _progress.PerkIds.Count; } }
 
     private PlayerModel(PlayerStats stats, PlayerLoadout loadout, PlayerProgress progress, DataTableManager tables)
     {
@@ -81,7 +83,27 @@ public class PlayerModel
         return true;
     }
 
-    // 찍은 특성을 모두 되돌려 포인트를 돌려받는다. 팔레트로 다시 찍을 때 쓴다.
+    // 저장은 부르는 쪽이 한다.
+    public bool CollectPalette(string paletteId)
+    {
+        return _progress.TryAddPalette(paletteId);
+    }
+
+    // 저장은 특성이 바뀔 때 함께 된다.
+    public bool TryRespec()
+    {
+        if (false == CanRespec)
+        {
+            return false;
+        }
+
+        _progress.UsePalette();
+        ResetPerks();
+
+        return true;
+    }
+
+    // 팔레트 없이 되돌린다. 시험 메뉴용이다.
     public void ResetPerks()
     {
         _progress.ClearPerks();

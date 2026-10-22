@@ -6,6 +6,7 @@ public static class PerkTestMenu
 {
     private const string MENU_ROOT = "AutoDraw/테스트/";
     private const int TEST_POINTS = 10;
+    private const string TEST_PALETTE_ID = "test_palette_";
 
     [MenuItem(MENU_ROOT + "특성 포인트 +10")]
     private static void AddPoints()
@@ -39,6 +40,14 @@ public static class PerkTestMenu
         Save($"특성 {count}개를 찍었습니다.");
     }
 
+    [MenuItem(MENU_ROOT + "팔레트 +1")]
+    private static void AddPalette()
+    {
+        PlayerModel player = GameManager.Player;
+        player.CollectPalette(TEST_PALETTE_ID + player.Progress.PaletteIds.Count);
+        Save($"팔레트를 하나 더했습니다. 남은 팔레트 {player.AvailablePalettes}개.");
+    }
+
     [MenuItem(MENU_ROOT + "특성 초기화")]
     private static void ResetPerks()
     {
@@ -48,6 +57,7 @@ public static class PerkTestMenu
 
     [MenuItem(MENU_ROOT + "특성 포인트 +10", true)]
     [MenuItem(MENU_ROOT + "찍을 수 있는 특성 모두 찍기", true)]
+    [MenuItem(MENU_ROOT + "팔레트 +1", true)]
     [MenuItem(MENU_ROOT + "특성 초기화", true)]
     private static bool CanUse()
     {

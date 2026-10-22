@@ -21,6 +21,8 @@ public class PerkTreeViewModel : GalleryScreenViewModel
     private readonly Dictionary<string, PerkNodeViewModel> _nodesById = new();
     private readonly StringBuilder _builder = new();
     private int _availablePoints;
+    private int _availablePalettes;
+    private bool _canRespec;
     private PerkNodeViewModel _selected;
     private string _selectedTitle = string.Empty;
     private string _selectedDescription = SELECT_HINT;
@@ -28,6 +30,9 @@ public class PerkTreeViewModel : GalleryScreenViewModel
     // 특성이 바뀌어 노드 상태를 다시 매기면 이 이름으로 알린다.
     public IReadOnlyList<PerkNodeViewModel> Nodes { get { return _nodes; } }
     public int AvailablePoints { get { return _availablePoints; } }
+    // 다시 찍을 수 있는지도 함께 바뀌어, 이 이름 하나로 알린다.
+    public int AvailablePalettes { get { return _availablePalettes; } }
+    public bool CanRespec { get { return _canRespec; } }
     public string SelectedTitle { get { return _selectedTitle; } }
     public string SelectedDescription { get { return _selectedDescription; } }
     public bool CanUnlockSelected { get { return null != _selected && PerkNodeState.Available == _selected.State; } }
@@ -37,6 +42,8 @@ public class PerkTreeViewModel : GalleryScreenViewModel
         _player = player;
         _effects = tables.PerkEffects;
         _availablePoints = player.AvailablePerkPoints;
+        _availablePalettes = player.AvailablePalettes;
+        _canRespec = player.CanRespec;
 
         foreach (PerkNodeData node in player.PerkTree.Nodes)
         {
@@ -73,6 +80,12 @@ public class PerkTreeViewModel : GalleryScreenViewModel
         }
     }
 
+    // 되묻는 것은 화면이 먼저 한다.
+    public void Respec()
+    {
+        _player.TryRespec();
+    }
+
     // 찍으면 자식 노드가 열리고 남은 포인트가 줄어 다른 노드의 상태도 바뀌므로 전부 다시 매긴다.
     private void HandlePerksChanged()
     {
@@ -85,6 +98,10 @@ public class PerkTreeViewModel : GalleryScreenViewModel
 
         _availablePoints = _player.AvailablePerkPoints;
         NotifyPropertyChanged(nameof(AvailablePoints));
+
+        _availablePalettes = _player.AvailablePalettes;
+        _canRespec = _player.CanRespec;
+        NotifyPropertyChanged(nameof(AvailablePalettes));
 
         DescribeSelected();
     }

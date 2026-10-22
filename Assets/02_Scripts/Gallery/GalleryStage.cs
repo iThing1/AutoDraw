@@ -45,6 +45,7 @@ public class GalleryStage : MonoBehaviour
     // 상호작용으로 연 창(장비, 특성 트리). 한 번에 하나만 연다.
     private Component _screen;
     private GalleryScreenViewModel _screenViewModel;
+    private GalleryPalettes _palettes;
     // 돌아왔을 때 이 액자 앞에서 물러나며 시작하려고 기억해 둔다.
     private GalleryFrame _enteredFrame;
 
@@ -60,6 +61,9 @@ public class GalleryStage : MonoBehaviour
         _player.OnFocusChanged += HandleFocusChanged;
         _player.OnInteract += HandleInteract;
         _player.SavePose();
+
+        // 프리팹에 놓기만 하면 되도록 자식에서 찾는다.
+        _palettes = new GalleryPalettes(GetComponentsInChildren<PaletteItem>(true));
 
         if (null == _pauseAction)
         {
@@ -110,6 +114,7 @@ public class GalleryStage : MonoBehaviour
             _frames[i].Refresh();
         }
 
+        _palettes.Refresh(GameManager.Player.Progress);
         _player.RestorePose();
 
         _hud = GameManager.UI.Open(_hudPrefab, UILayer.HUD);
@@ -169,6 +174,21 @@ public class GalleryStage : MonoBehaviour
     public void OpenPerkTree()
     {
         OpenScreen(_perkTreeViewPrefab, new PerkTreeViewModel(GameManager.Player, GameManager.Tables, GameManager.Assets));
+    }
+
+    // 갤러리를 떠나기 전에 게임이 꺼져도 남도록 바로 저장한다.
+    public void CollectPalette(PaletteItem palette)
+    {
+        PlayerModel player = GameManager.Player;
+
+        if (false == player.CollectPalette(palette.PaletteId))
+        {
+            return;
+        }
+
+        palette.gameObject.SetActive(false);
+        GameManager.SavePlayer();
+        _hud.ShowPaletteFound(player.AvailablePalettes);
     }
 
     private void HandleFocusChanged(GalleryInteractable target)

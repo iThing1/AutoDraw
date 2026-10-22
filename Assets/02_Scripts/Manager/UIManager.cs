@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 
-// UI를 언제 열고 닫을지는 각 화면을 가진 쪽(전투 매니저 등)이 정하고, 이 클래스는 생성·레이어 정렬·파괴만 맡는다.
+// UI를 언제 열고 닫을지는 각 화면을 가진 쪽(전투 스테이지 등)이 정하고, 이 클래스는 생성·레이어 정렬·파괴만 맡는다.
 public class UIManager
 {
     private const int LAYER_SORTING_STEP = 10;

@@ -1,9 +1,9 @@
 // 소모품을 장비 화면에서 끼울 수 있게 한다.
-public class UnlockConsumableEffect : PerkEffect
+public class UnlockConsumablePerkEffect : PerkEffect
 {
     private readonly string _consumableId;
 
-    public UnlockConsumableEffect(string consumableId)
+    public UnlockConsumablePerkEffect(string consumableId)
     {
         _consumableId = consumableId;
     }

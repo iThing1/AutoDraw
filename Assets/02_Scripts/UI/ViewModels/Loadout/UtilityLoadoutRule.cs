@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 
 // 유틸리티 칸(막기·대시). 표가 없어 종류 이름을 그대로 보여 준다.
-public class UtilityLoadoutSlot : LoadoutSlot
+public class UtilityLoadoutRule : LoadoutRule
 {
     private readonly Dictionary<LoadoutEntry, UtilityType> _types = new();
 
-    public UtilityLoadoutSlot(PlayerLoadout loadout, AssetManager assets)
+    public UtilityLoadoutRule(PlayerLoadout loadout, AssetManager assets)
         : base("Utility", loadout, assets)
     {
         foreach (UtilityType utility in Enum.GetValues(typeof(UtilityType)))

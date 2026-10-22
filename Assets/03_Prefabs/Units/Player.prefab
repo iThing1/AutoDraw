@@ -458,7 +458,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2e3a4e0c4836d1b44b352f8437f7fe28, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerAttackInput
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAttack
   _weaponActions:
   - {fileID: 7556292513268214159, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   - {fileID: 4842117460415523917, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

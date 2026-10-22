@@ -2,11 +2,11 @@ using System;
 using UnityEngine;
 using UnityEngine.Video;
 
-// 장비 화면 버튼 하나에 보일 값. 그릴 값은 항목(LoadoutEntry)에서, 상태와 끼우기는 그 항목이 속한 칸(LoadoutSlot)에서 받는다.
+// 장비 화면 버튼 하나에 보일 값. 그릴 값은 항목(LoadoutEntry)에서, 상태와 끼우기는 그 항목이 속한 칸의 규칙(LoadoutRule)에서 받는다.
 public class LoadoutItemViewModel : ViewModelBase
 {
     private readonly LoadoutEntry _entry;
-    private readonly LoadoutSlot _slot;
+    private readonly LoadoutRule _rule;
     private readonly Action<LoadoutItemViewModel> _onSelected;
     private LoadoutItemState _state;
 
@@ -17,12 +17,12 @@ public class LoadoutItemViewModel : ViewModelBase
     public VideoClip Preview { get { return _entry.Preview; } }
     public LoadoutItemState State { get { return _state; } }
 
-    public LoadoutItemViewModel(LoadoutEntry entry, LoadoutSlot slot, Action<LoadoutItemViewModel> onSelected)
+    public LoadoutItemViewModel(LoadoutEntry entry, LoadoutRule rule, Action<LoadoutItemViewModel> onSelected)
     {
         _entry = entry;
-        _slot = slot;
+        _rule = rule;
         _onSelected = onSelected;
-        _state = slot.GetState(entry);
+        _state = rule.GetState(entry);
     }
 
     // 모델을 직접 구독하지 않아 풀 것이 없다.
@@ -32,7 +32,7 @@ public class LoadoutItemViewModel : ViewModelBase
 
     public void RefreshState()
     {
-        LoadoutItemState state = _slot.GetState(_entry);
+        LoadoutItemState state = _rule.GetState(_entry);
 
         if (_state == state)
         {
@@ -48,7 +48,7 @@ public class LoadoutItemViewModel : ViewModelBase
     {
         if (LoadoutItemState.Owned == _state)
         {
-            _slot.Equip(_entry);
+            _rule.Equip(_entry);
         }
 
         _onSelected(this);

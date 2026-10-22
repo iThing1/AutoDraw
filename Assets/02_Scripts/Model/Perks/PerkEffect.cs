@@ -15,22 +15,22 @@ public abstract class PerkEffect
         switch (data.EffectType)
         {
             case PerkEffectType.StatAdd:
-                return TryParseTarget(data, data.Target, out StatType stat) ? new StatAddEffect(stat) : null;
+                return TryParseTarget(data, data.Target, out StatType stat) ? new StatAddPerkEffect(stat) : null;
 
             case PerkEffectType.WeaponDamageAdd:
-                return TryParseTarget(data, data.Target, out WeaponType weaponType) ? new WeaponDamageAddEffect(weaponType) : null;
+                return TryParseTarget(data, data.Target, out WeaponType weaponType) ? new WeaponDamageAddPerkEffect(weaponType) : null;
 
             case PerkEffectType.UnlockWeapon:
-                return new UnlockWeaponEffect(data.Target);
+                return new UnlockWeaponPerkEffect(data.Target);
 
             case PerkEffectType.UnlockConsumable:
-                return new UnlockConsumableEffect(data.Target);
+                return new UnlockConsumablePerkEffect(data.Target);
 
             case PerkEffectType.ConsumableUpgrade:
                 return CreateConsumableUpgrade(data);
 
             case PerkEffectType.UnlockUtility:
-                return TryParseTarget(data, data.Target, out UtilityType utility) ? new UnlockUtilityEffect(utility) : null;
+                return TryParseTarget(data, data.Target, out UtilityType utility) ? new UnlockUtilityPerkEffect(utility) : null;
 
             default:
                 Debug.LogError($"특성 효과 : {data.Id}의 효과 종류 {data.EffectType}을(를) 만들 수 없습니다.");
@@ -56,7 +56,7 @@ public abstract class PerkEffect
             return null;
         }
 
-        return new ConsumableUpgradeEffect(consumableId, stat);
+        return new ConsumableUpgradePerkEffect(consumableId, stat);
     }
 
     // Enum.TryParse는 숫자 문자열도 받아들이므로, 이름이 있는지 먼저 본다.

@@ -37,7 +37,7 @@ public class AutoAttacker : MonoBehaviour
     }
 
     // 공격 간격은 게임 시간으로 재서, 히트 스톱 동안에는 다음 공격도 함께 멈춘다.
-    // 물감 캔버스는 전투를 시작하는 쪽이 넘겨줘, 공격 컴포넌트가 전투 매니저를 직접 찾지 않게 한다.
+    // 물감 캔버스는 전투를 시작하는 쪽이 넘겨줘, 공격 컴포넌트가 전투 스테이지를 직접 찾지 않게 한다.
     public async UniTask RunAsync(BattleUnit target, PaintCanvas paintCanvas, CancellationToken token)
     {
         AttackTarget attackTarget = new AttackTarget(target);

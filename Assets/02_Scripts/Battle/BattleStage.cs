@@ -3,7 +3,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-public class BattleManager : MonoBehaviour
+public class BattleStage : MonoBehaviour
 {
     [Header("스폰 위치")]
     [SerializeField] private Transform _playerSpawnPoint;
@@ -98,7 +98,7 @@ public class BattleManager : MonoBehaviour
 
     private bool HasRequiredReferences()
     {
-        // 빠지면 전투를 시작할 수 없는 것만 여기서 묻는다. 빠져도 그 기능만 꺼지는 부품(막기·공격 입력 등)은 스스로 Awake에서 알린다.
+        // 빠지면 전투를 시작할 수 없는 것만 여기서 묻는다. 빠져도 그 기능만 꺼지는 부품(막기·공격 등)은 스스로 Awake에서 알린다.
         // 앞에서부터 확인해 처음 비어 있는 참조에서 멈춘다.
         bool hasAllReferences = IsAssigned(_playerSpawnPoint, nameof(_playerSpawnPoint))
             && IsAssigned(_bossSpawnPoint, nameof(_bossSpawnPoint))
@@ -124,21 +124,21 @@ public class BattleManager : MonoBehaviour
         // 플레이어가 움직여야 등장 트리거에 닿아 다음 단계로 넘어간다.
         if (null == _playerPrefab.GetComponent<UnitMover>())
         {
-            Debug.LogError("전투 매니저 : 플레이어 프리팹에 이동 컴포넌트(UnitMover)가 붙어 있지 않습니다.");
+            Debug.LogError("전투 스테이지 : 플레이어 프리팹에 이동 컴포넌트(UnitMover)가 붙어 있지 않습니다.");
             return false;
         }
 
         // 스탯을 넘겨받지 못하면 플레이어 체력부터 정해지지 않는다.
         if (null == _playerPrefab.GetComponent<PlayerSetup>())
         {
-            Debug.LogError("전투 매니저 : 플레이어 프리팹에 PlayerSetup이 붙어 있지 않습니다.");
+            Debug.LogError("전투 스테이지 : 플레이어 프리팹에 PlayerSetup이 붙어 있지 않습니다.");
             return false;
         }
 
         // 보스 데이터가 BossData가 아니면 등장 배너가 조용히 빠지므로 알린다. 배너만 없을 뿐이라 전투는 그대로 진행한다.
         if (false == (_bossPrefab.Data is BossData))
         {
-            Debug.LogError("전투 매니저 : 보스 프리팹의 데이터가 BossData가 아니라 등장 배너를 띄우지 않습니다.");
+            Debug.LogError("전투 스테이지 : 보스 프리팹의 데이터가 BossData가 아니라 등장 배너를 띄우지 않습니다.");
         }
 
         // 하위 컴포넌트는 빠진 항목을 직접 로그로 남기므로 결과만 확인한다.
@@ -157,7 +157,7 @@ public class BattleManager : MonoBehaviour
             return true;
         }
 
-        Debug.LogError($"전투 매니저 : {label} 참조가 비어 있습니다.");
+        Debug.LogError($"전투 스테이지 : {label} 참조가 비어 있습니다.");
         return false;
     }
 
@@ -218,10 +218,10 @@ public class BattleManager : MonoBehaviour
             data.AttackStyle.Prewarm();
         }
 
-        // 플레이어 공격은 장비 칸에서 고르므로 데이터가 아닌 공격 입력이 들고 있다.
-        if (unit.TryGetComponent(out PlayerAttackInput attackInput))
+        // 플레이어 공격은 장비 칸에서 고르므로 데이터가 아닌 PlayerAttack이 들고 있다.
+        if (unit.TryGetComponent(out PlayerAttack attack))
         {
-            attackInput.Prewarm();
+            attack.Prewarm();
         }
     }
 
@@ -279,7 +279,7 @@ public class BattleManager : MonoBehaviour
 
     private async UniTask<bool> PlayBattleAsync(CancellationToken token)
     {
-        // 전투 HUD는 전투에서만 쓰므로 전투 매니저가 직접 열고, 엔딩이 시작되면 닫는다.
+        // 전투 HUD는 전투에서만 쓰므로 전투 스테이지가 직접 열고, 엔딩이 시작되면 닫는다.
         _hud = GameManager.UI.Open(_hudPrefab, UILayer.HUD);
         _hudViewModel = new BattleHudViewModel(_player, _boss);
         _hud.Bind(_hudViewModel);

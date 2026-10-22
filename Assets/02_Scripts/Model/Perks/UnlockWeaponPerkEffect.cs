@@ -1,9 +1,9 @@
 // 무기를 장비 화면에서 끼울 수 있게 한다.
-public class UnlockWeaponEffect : PerkEffect
+public class UnlockWeaponPerkEffect : PerkEffect
 {
     private readonly string _weaponId;
 
-    public UnlockWeaponEffect(string weaponId)
+    public UnlockWeaponPerkEffect(string weaponId)
     {
         _weaponId = weaponId;
     }

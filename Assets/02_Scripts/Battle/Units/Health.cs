@@ -34,7 +34,7 @@ public class Health : MonoBehaviour
     // 체력을 다시 가득 채웠을 때. 체력바가 차오르는 연출을 따로 보여 준다.
     public event Action OnRefilled;
 
-    // 죽는 순간 완료되는 작업. 전투 매니저가 이것을 await해서 쓰러질 때까지 기다린다.
+    // 죽는 순간 완료되는 작업. 전투 스테이지가 이것을 await해서 쓰러질 때까지 기다린다.
     private UniTaskCompletionSource _deathSource = new();
 
     private int _maxHp;

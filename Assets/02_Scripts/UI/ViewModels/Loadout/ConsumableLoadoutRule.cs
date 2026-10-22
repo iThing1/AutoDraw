@@ -1,12 +1,12 @@
 using UnityEngine;
 
 // 소모품 칸. 맨 앞의 None을 고르면 소모품 없이 들어간다. 설명에는 효과 값과 사용 횟수·쿨타임을 함께 쓴다.
-public class ConsumableLoadoutSlot : LoadoutSlot
+public class ConsumableLoadoutRule : LoadoutRule
 {
     private const string NONE_LABEL = "None";
     private const string USAGE_FORMAT = "Uses: {0} | Cooldown: {1}s";
 
-    public ConsumableLoadoutSlot(PlayerLoadout loadout, PlayerStats stats, DataTableManager tables, AssetManager assets)
+    public ConsumableLoadoutRule(PlayerLoadout loadout, PlayerStats stats, DataTableManager tables, AssetManager assets)
         : base("Item", loadout, assets)
     {
         AddEntry(string.Empty, NONE_LABEL, string.Empty, string.Empty, DEFAULT_ICON_COLOR, string.Empty);

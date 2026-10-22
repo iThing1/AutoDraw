@@ -14,7 +14,7 @@ public class MapSpawner : MonoBehaviour
     [SerializeField] private StageData _testStage;
 
     private GalleryStage _gallery;
-    private BattleManager _battle;
+    private BattleStage _battle;
     private StageData _currentStage;
     // 맵을 바꾸는 동안 들어온 입력(액자 선택·결과 버튼)이 겹쳐 이동을 두 번 시작하지 않게 막는다.
     private bool _isMoving;

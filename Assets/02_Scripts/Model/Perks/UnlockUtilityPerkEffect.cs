@@ -1,9 +1,9 @@
 // 유틸리티 칸에 끼울 능력(대시 등)을 얻는다.
-public class UnlockUtilityEffect : PerkEffect
+public class UnlockUtilityPerkEffect : PerkEffect
 {
     private readonly UtilityType _utility;
 
-    public UnlockUtilityEffect(UtilityType utility)
+    public UnlockUtilityPerkEffect(UtilityType utility)
     {
         _utility = utility;
     }

@@ -77,6 +77,7 @@ public class BattleHudViewModel : ViewModelBase
         _player.Health.OnHealed += HandleHealed;
         _boss.Health.OnDamaged += HandleDamaged;
         _player.OnBlocked += HandleBlocked;
+        _player.OnDodged += HandleDodged;
 
         if (null != _bossPhases)
         {
@@ -121,6 +122,7 @@ public class BattleHudViewModel : ViewModelBase
             _player.Health.OnDamaged -= HandleDamaged;
             _player.Health.OnHealed -= HandleHealed;
             _player.OnBlocked -= HandleBlocked;
+            _player.OnDodged -= HandleDodged;
             _player = null;
         }
 
@@ -151,6 +153,11 @@ public class BattleHudViewModel : ViewModelBase
     private void HandleBlocked(Vector3 hitPoint)
     {
         OnFloatingText?.Invoke(FloatingTextKind.Guard, hitPoint);
+    }
+
+    private void HandleDodged(Vector3 point)
+    {
+        OnFloatingText?.Invoke(FloatingTextKind.Dodge, point);
     }
 
     // 쿨타임은 방패가 회색으로 비치는 것으로 충분해, 게이지가 모자랄 때만 알린다.

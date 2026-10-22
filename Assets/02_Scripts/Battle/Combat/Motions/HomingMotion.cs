@@ -9,7 +9,7 @@ public class HomingMotion : ProjectileMotion
     // 방패나 몸에 닿으면 그 자리에서 멈추고, 수명이 다하면 빗나간 것이다. 꺼내고 돌려주는 일은 부르는 쪽이 한다.
     public async UniTask<FlightResult> FlyAsync(AttackTarget target, HomingFlight flight, CancellationToken token)
     {
-        BeginContact(target, flight.Radius);
+        BeginContact(target, flight.Radius, flight.EndsOnDodge);
 
         Vector3 direction = flight.StartDirection;
         float elapsed = 0f;

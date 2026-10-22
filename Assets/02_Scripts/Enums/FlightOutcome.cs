@@ -5,4 +5,6 @@ public enum FlightOutcome
     Arrived,
     Blocked,
     Missed,
+    // 피하면 멈추도록 한 비행만 낸다(HomingFlight.EndsOnDodge).
+    Dodged,
 }

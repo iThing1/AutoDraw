@@ -56,6 +56,12 @@ public class AttackTarget
         return IsTouching(Geometry2D.GetClosestPointOnSegment(from, to, _unit.Body.position), attackRadius);
     }
 
+    // 대시로 피하는 중에 몸에 닿을 자리까지 왔는지. 막기 기믹에서는 이것도 받아친 것으로 본다(저스트 회피).
+    public bool IsDodgedAt(Vector3 position, float attackRadius)
+    {
+        return _unit.IsDodging && Vector2.Distance(position, _unit.Body.position) <= _bodyRadius + attackRadius;
+    }
+
     public bool IsInBlast(Vector3 center, float radius)
     {
         return false == _unit.IsDodging && Vector2.Distance(center, _unit.Body.position) <= radius;
@@ -87,6 +93,11 @@ public class AttackTarget
     public void NotifyBlocked(Vector3 hitPoint)
     {
         _unit.NotifyBlocked(hitPoint);
+    }
+
+    public void NotifyDodged(Vector3 point)
+    {
+        _unit.NotifyDodged(point);
     }
 
     // 소용돌이처럼 목표를 끌거나 미는 힘(초당 거리). 직접 조작하는 이동에 더해지고, 움직이지 않는 목표에는 아무 일도 없다.

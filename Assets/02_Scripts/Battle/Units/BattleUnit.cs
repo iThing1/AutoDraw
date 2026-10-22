@@ -53,6 +53,7 @@ public class BattleUnit : MonoBehaviour
     public event Action<UnitState> OnStateChanged;
     // 막은 자리를 넘겨, 막은 쪽이 방패 연출과 막기 문구를 띄우게 한다.
     public event Action<Vector3> OnBlocked;
+    public event Action<Vector3> OnDodged;
 
     private Health _health;
     private AutoAttacker _attacker;
@@ -227,6 +228,11 @@ public class BattleUnit : MonoBehaviour
     public void NotifyBlocked(Vector3 hitPoint)
     {
         OnBlocked?.Invoke(hitPoint);
+    }
+
+    public void NotifyDodged(Vector3 point)
+    {
+        OnDodged?.Invoke(point);
     }
 
     public void OverrideAttackStyle(AttackStyle attackStyle)

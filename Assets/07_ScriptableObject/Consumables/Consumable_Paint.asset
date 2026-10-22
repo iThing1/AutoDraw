@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f1049df26cb70a70c0dfdfd1ddafefe6, type: 3}
   m_Name: Consumable_Paint
-  m_EditorClassIdentifier: Assembly-CSharp::HealEffect
+  m_EditorClassIdentifier: Assembly-CSharp::HealConsumableEffect
   _iconColor: {r: 0.55, g: 0.9, b: 0.6, a: 1}
   _splat: {fileID: 11400000, guid: 4027ab0e3c2d21f03e245a9be1fe0a29, type: 2}
   _splatScale: 3

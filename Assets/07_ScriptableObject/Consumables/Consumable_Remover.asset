@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 04f7476f09d63707935c85a6a5791e3c, type: 3}
   m_Name: Consumable_Remover
-  m_EditorClassIdentifier: Assembly-CSharp::RemoveInkEffect
+  m_EditorClassIdentifier: Assembly-CSharp::RemoveInkConsumableEffect
   _iconColor: {r: 0.85, g: 0.92, b: 1, a: 1}
   _impact:
     _shakeForce: 0.4

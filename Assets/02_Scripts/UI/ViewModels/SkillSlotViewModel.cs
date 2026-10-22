@@ -1,26 +1,26 @@
 // 특수 스킬 칸. 스킬 게이지가 다 차면 쓸 수 있고, 발동하면 한 번 튄다.
 public class SkillSlotViewModel : ActionSlotViewModel
 {
-    private PlayerAttackInput _input;
+    private PlayerAttack _attack;
     private SkillGauge _gauge;
 
-    public SkillSlotViewModel(PlayerAttackInput input)
-        : base(input.SkillKeyLabel, input.SkillStyle, true)
+    public SkillSlotViewModel(PlayerAttack attack)
+        : base(attack.SkillKeyLabel, attack.SkillStyle, true)
     {
-        _input = input;
-        _gauge = input.SkillGauge;
+        _attack = attack;
+        _gauge = attack.SkillGauge;
 
-        _input.OnSkillFired += HandleSkillFired;
+        _attack.OnSkillFired += HandleSkillFired;
         _gauge.OnChanged += HandleGaugeChanged;
         HandleGaugeChanged();
     }
 
     public override void UnBind()
     {
-        if (null != _input)
+        if (null != _attack)
         {
-            _input.OnSkillFired -= HandleSkillFired;
-            _input = null;
+            _attack.OnSkillFired -= HandleSkillFired;
+            _attack = null;
         }
 
         if (null != _gauge)

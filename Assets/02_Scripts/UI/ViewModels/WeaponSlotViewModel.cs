@@ -2,27 +2,27 @@
 public class WeaponSlotViewModel : ActionSlotViewModel
 {
     private readonly int _index;
-    private PlayerAttackInput _input;
+    private PlayerAttack _attack;
 
-    public WeaponSlotViewModel(PlayerAttackInput input, int index)
-        : base(input.GetWeaponKeyLabel(index), input.GetSlotStyle(index), false)
+    public WeaponSlotViewModel(PlayerAttack attack, int index)
+        : base(attack.GetWeaponKeyLabel(index), attack.GetSlotStyle(index), false)
     {
-        _input = input;
+        _attack = attack;
         _index = index;
 
-        _input.OnWeaponSelected += HandleWeaponSelected;
-        HandleWeaponSelected(_input.SelectedIndex);
+        _attack.OnWeaponSelected += HandleWeaponSelected;
+        HandleWeaponSelected(_attack.SelectedIndex);
     }
 
     public override void UnBind()
     {
-        if (null == _input)
+        if (null == _attack)
         {
             return;
         }
 
-        _input.OnWeaponSelected -= HandleWeaponSelected;
-        _input = null;
+        _attack.OnWeaponSelected -= HandleWeaponSelected;
+        _attack = null;
     }
 
     private void HandleWeaponSelected(int selectedIndex)

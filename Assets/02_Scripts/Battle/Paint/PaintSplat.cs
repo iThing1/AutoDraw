@@ -5,11 +5,7 @@ using UnityEngine;
 public class PaintSplat : MonoBehaviour
 {
     private SpriteRenderer _spriteRenderer;
-    private bool _isInk;
     private TweenCallback _returnCallback;
-
-    public bool IsInk { get { return _isInk; } }
-    public SpriteRenderer SpriteRenderer { get { return _spriteRenderer; } }
 
     private void Awake()
     {
@@ -19,10 +15,8 @@ public class PaintSplat : MonoBehaviour
         _returnCallback = ReturnToPool;
     }
 
-    public void Show(Sprite sprite, Color color, bool isInk, int sortingOrder)
+    public void Show(Sprite sprite, Color color, int sortingOrder)
     {
-        _isInk = isInk;
-
         _spriteRenderer.sprite = sprite;
         _spriteRenderer.color = color;
         _spriteRenderer.sortingOrder = sortingOrder;
@@ -48,6 +42,17 @@ public class PaintSplat : MonoBehaviour
         _spriteRenderer.DOKill();
         _spriteRenderer.DOFade(0f, duration)
             .SetUpdate(true)
+            .SetLink(gameObject)
+            .OnComplete(_returnCallback);
+    }
+
+    // 한 번 튀었다가 풀로 돌아간다. 구운 자국 위에 잠깐 띄워 꿈틀하는 것처럼 보일 때 쓴다.
+    public void PunchAndDespawn(Vector3 punch, float duration, bool isRealtime)
+    {
+        transform.DOKill();
+        _spriteRenderer.DOKill();
+        transform.DOPunchScale(punch, duration, PunchTween.VIBRATO, PunchTween.ELASTICITY)
+            .SetUpdate(isRealtime)
             .SetLink(gameObject)
             .OnComplete(_returnCallback);
     }

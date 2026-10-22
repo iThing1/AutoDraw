@@ -17,7 +17,7 @@ public class EndingPreset : ScriptableObject
 
     [Header("잉크 걷힘")]
     [SerializeField, Min(0f)] private float _inkFadeDuration = 1.5f;
-    [SerializeField] private FloatRange _inkFadeDelay = new(0f, 0.8f);
+    [SerializeField, Min(0f)] private float _inkFadeDelay;
     [SerializeField] private Ease _inkFadeEase = Ease.InQuad;
 
     [Header("전체 보기")]
@@ -45,7 +45,7 @@ public class EndingPreset : ScriptableObject
     public ShatterSettings Shatter { get { return _shatter; } }
 
     public float InkFadeDuration { get { return _inkFadeDuration; } }
-    public FloatRange InkFadeDelay { get { return _inkFadeDelay; } }
+    public float InkFadeDelay { get { return _inkFadeDelay; } }
     public Ease InkFadeEase { get { return _inkFadeEase; } }
 
     public ResultTitleSettings ResultTitle { get { return _resultTitle; } }

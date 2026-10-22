@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c41fc0067d2ab79e27a5fe568b7630f8, type: 3}
+  m_Script: {fileID: 11500000, guid: 6e67267e720a1a93e8facde41ebf66d0, type: 3}
   m_Name: Player_Heavy
-  m_EditorClassIdentifier: Assembly-CSharp::SingleAttackStyle
+  m_EditorClassIdentifier: Assembly-CSharp::BurstAttackStyle
   _displayName: Heavy
   _iconColor: {r: 1, g: 0.71, b: 0.76, a: 1}
   _attackInterval: 1.6
@@ -49,3 +49,7 @@ MonoBehaviour:
       _criticalMultiplier: 2
       _normalHit: {fileID: 11400000, guid: 615b02abc13dad9449c44a58d6d34261, type: 2}
       _criticalHit: {fileID: 11400000, guid: 21e85312f4db3c644b296857461a544e, type: 2}
+  _shotCount:
+    _min: 1
+    _max: 1
+  _burstInterval: 0

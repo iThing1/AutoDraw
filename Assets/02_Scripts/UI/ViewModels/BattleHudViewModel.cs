@@ -46,14 +46,14 @@ public class BattleHudViewModel : ViewModelBase
         _playerHealth = new HealthBarViewModel(player.Health, null);
         _bossHealth = new HealthBarViewModel(boss.Health, _bossPhases);
 
-        if (player.TryGetComponent(out PlayerAttackInput attackInput))
+        if (player.TryGetComponent(out PlayerAttack attack))
         {
-            for (int i = 0; i < attackInput.SlotCount; i++)
+            for (int i = 0; i < attack.SlotCount; i++)
             {
-                _weaponSlots.Add(new WeaponSlotViewModel(attackInput, i));
+                _weaponSlots.Add(new WeaponSlotViewModel(attack, i));
             }
 
-            _skillSlot = new SkillSlotViewModel(attackInput);
+            _skillSlot = new SkillSlotViewModel(attack);
         }
 
         if (player.TryGetComponent(out PlayerGuard guard) && null != guard.State)

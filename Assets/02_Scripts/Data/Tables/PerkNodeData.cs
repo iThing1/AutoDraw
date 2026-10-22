@@ -7,7 +7,7 @@ using UnityEngine;
 public class PerkNodeData : BaseData
 {
     [SerializeField] private string _name;
-    [SerializeField] private PerkRoot _root;
+    [SerializeField] private PerkTreeType _tree;
     [SerializeField] private int _row;
     [SerializeField] private int _column;
     [SerializeField] private int _cost;
@@ -18,7 +18,7 @@ public class PerkNodeData : BaseData
     [SerializeField] private string _description;
 
     public string Name { get { return _name; } }
-    public PerkRoot Root { get { return _root; } }
+    public PerkTreeType Tree { get { return _tree; } }
     public int Row { get { return _row; } }
     public int Column { get { return _column; } }
     public int Cost { get { return _cost; } }

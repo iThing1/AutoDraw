@@ -1,9 +1,9 @@
 // 기본 무기 칸 또는 화력 무기 칸. 표의 무기 중 칸과 같은 종류만 늘어놓는다.
-public class WeaponLoadoutSlot : LoadoutSlot
+public class WeaponLoadoutRule : LoadoutRule
 {
     private readonly WeaponType _type;
 
-    public WeaponLoadoutSlot(string title, WeaponType type, PlayerLoadout loadout, DataTableManager tables, AssetManager assets)
+    public WeaponLoadoutRule(string title, WeaponType type, PlayerLoadout loadout, DataTableManager tables, AssetManager assets)
         : base(title, loadout, assets)
     {
         _type = type;

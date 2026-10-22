@@ -1,7 +1,7 @@
 // 스킬 칸. 공격 방식이 아직 없는 스킬은 얻었어도 준비 중으로 막는다.
-public class SkillLoadoutSlot : LoadoutSlot
+public class SkillLoadoutRule : LoadoutRule
 {
-    public SkillLoadoutSlot(PlayerLoadout loadout, DataTableManager tables, AssetManager assets)
+    public SkillLoadoutRule(PlayerLoadout loadout, DataTableManager tables, AssetManager assets)
         : base("Skill", loadout, assets)
     {
         foreach (SkillData skill in tables.Skills.All)

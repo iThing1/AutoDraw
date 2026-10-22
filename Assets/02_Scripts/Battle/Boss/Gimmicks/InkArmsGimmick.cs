@@ -61,8 +61,8 @@ public class InkArmsGimmick : BossGimmick
             return true;
         }
 
-        List<PaintSplat> pools = new List<PaintSplat>(_poolCount);
-        List<PaintSplat> sources = new List<PaintSplat>(_armsPerLunge.Max);
+        List<PaintMark> pools = new List<PaintMark>(_poolCount);
+        List<PaintMark> sources = new List<PaintMark>(_armsPerLunge.Max);
         List<UniTask> lunges = new List<UniTask>();
         float elapsed = 0f;
 
@@ -107,14 +107,14 @@ public class InkArmsGimmick : BossGimmick
     }
 
     // 플레이어 둘레 곳곳에 웅덩이를 하나씩 찍는다. 이 웅덩이들이 팔이 나올 자리다.
-    private async UniTask ScatterPoolsAsync(AttackContext context, List<PaintSplat> pools, CancellationToken token)
+    private async UniTask ScatterPoolsAsync(AttackContext context, List<PaintMark> pools, CancellationToken token)
     {
         Vector3 center = context.Target.FollowTransform.position;
 
         for (int i = 0; i < _poolCount; i++)
         {
             Vector3 position = center + (Vector3)(UnityEngine.Random.insideUnitCircle * _poolScatterRadius);
-            PaintSplat pool = context.PaintCanvas.LeaveInkSplat(position, _poolStyle, _arms.InkColor, _poolScale.PickRandom());
+            PaintMark pool = context.PaintCanvas.LeaveInkSplat(position, _poolStyle, _arms.InkColor, _poolScale.PickRandom());
 
             if (null != pool)
             {
@@ -128,14 +128,14 @@ public class InkArmsGimmick : BossGimmick
     }
 
     // 웅덩이가 꿈틀한 뒤 팔이 뻗어 나온다. 다 뻗은 순간 붙잡을 자리에 있으면 붙잡힌다.
-    private async UniTask LungeAsync(AttackContext context, PaintSplat source, CancellationToken token)
+    private async UniTask LungeAsync(AttackContext context, PaintMark source, CancellationToken token)
     {
-        TwitchSource(source.transform);
+        context.PaintCanvas.Twitch(source, _arms.SourceTwitchStrength, _arms.SourceTwitchDuration, false);
 
         await UniTask.Delay(TimeSpan.FromSeconds(_arms.SourceTwitchDuration), cancellationToken: token);
 
         AttackTarget target = context.Target;
-        Vector3 root = source.transform.position;
+        Vector3 root = source.Position;
         Vector3 grabPoint = target.GetPredictedPoint(_leadTime);
 
         InkArm arm = GameManager.Pool.Spawn(_arms.ArmPrefab.gameObject, root, Quaternion.identity).GetComponent<InkArm>();
@@ -178,29 +178,22 @@ public class InkArmsGimmick : BossGimmick
         }
     }
 
-    // 팔이 나오기 직전 웅덩이가 꿈틀해 어디서 나올지 미리 알린다.
-    private void TwitchSource(Transform source)
-    {
-        source.DOComplete();
-        source.DOPunchScale(source.localScale * _arms.SourceTwitchStrength, _arms.SourceTwitchDuration, PunchTween.VIBRATO, PunchTween.ELASTICITY);
-    }
-
     // 덮이거나 지워진 웅덩이는 빼고, 플레이어와 알맞게 떨어진 웅덩이를 무작위 순서로 count개까지 고른다.
     // 없으면 너무 가깝지 않은 것 중 가장 가까운 것을, 그것도 없으면 알맞은 거리에 웅덩이를 새로 찍어 쓴다.
-    private void PickSources(AttackContext context, List<PaintSplat> pools, int count, List<PaintSplat> result)
+    private void PickSources(AttackContext context, List<PaintMark> pools, int count, List<PaintMark> result)
     {
         result.Clear();
         RemoveHiddenPools(context.PaintCanvas, pools);
 
         Vector3 center = context.Target.FollowTransform.position;
         int startIndex = UnityEngine.Random.Range(0, pools.Count);
-        PaintSplat nearest = null;
+        PaintMark nearest = null;
         float nearestDistance = float.MaxValue;
 
         for (int i = 0; i < pools.Count && result.Count < count; i++)
         {
-            PaintSplat pool = pools[(startIndex + i) % pools.Count];
-            float distance = Vector2.Distance(pool.transform.position, center);
+            PaintMark pool = pools[(startIndex + i) % pools.Count];
+            float distance = Vector2.Distance(pool.Position, center);
 
             if (_sourceDistance.Min <= distance && _sourceDistance.Max >= distance)
             {
@@ -220,7 +213,7 @@ public class InkArmsGimmick : BossGimmick
 
         if (0 == result.Count)
         {
-            PaintSplat pool = LeavePoolAround(context, center);
+            PaintMark pool = LeavePoolAround(context, center);
 
             if (null != pool)
             {
@@ -230,7 +223,7 @@ public class InkArmsGimmick : BossGimmick
         }
     }
 
-    private static void RemoveHiddenPools(PaintCanvas canvas, List<PaintSplat> pools)
+    private static void RemoveHiddenPools(PaintCanvas canvas, List<PaintMark> pools)
     {
         for (int i = pools.Count - 1; i >= 0; i--)
         {
@@ -242,7 +235,7 @@ public class InkArmsGimmick : BossGimmick
     }
 
     // 칠해지지 않은 자리를 몇 번 찾아보고, 못 찾으면 마지막에 고른 자리에 찍는다.
-    private PaintSplat LeavePoolAround(AttackContext context, Vector3 center)
+    private PaintMark LeavePoolAround(AttackContext context, Vector3 center)
     {
         Vector3 position = center;
 

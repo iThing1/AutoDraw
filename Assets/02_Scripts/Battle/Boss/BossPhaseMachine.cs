@@ -6,8 +6,8 @@ using UnityEngine;
 
 // 보스의 페이즈를 맡는다. 맞을수록 색이 물들고, 체력 줄에 닿으면 그 줄에서 멈춰 기믹을 쓰며,
 // 마지막이 아닌 페이즈의 바닥에 닿으면 쓰러졌다가 다음 페이즈의 체력으로 다시 일어난다.
-// 진짜로 쓰러지는 것은 마지막 페이즈뿐이라, 전투 매니저는 보스가 죽을 때까지만 기다리면 된다.
-// 색 계산은 BossTint, 쓰러졌다 일어나는 연출은 BossRevival이 맡고, 여기는 언제 무엇을 할지만 정한다.
+// 진짜로 쓰러지는 것은 마지막 페이즈뿐이라, 전투 스테이지는 보스가 죽을 때까지만 기다리면 된다.
+// 색 계산은 BossTint, 쓰러졌다 일어나는 연출은 BossRevivalCutscene이 맡고, 여기는 언제 무엇을 할지만 정한다.
 [RequireComponent(typeof(BattleUnit))]
 public class BossPhaseMachine : MonoBehaviour
 {
@@ -182,7 +182,7 @@ public class BossPhaseMachine : MonoBehaviour
     {
         _state = BossPhaseState.Revival;
 
-        BossRevival revival = new BossRevival(_unit, _hands, _revival);
+        BossRevivalCutscene revival = new BossRevivalCutscene(_unit, _hands, _revival);
 
         try
         {

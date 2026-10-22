@@ -20,20 +20,8 @@ public class ProgressSaveData
 
     public ProgressSaveData(PlayerProgress progress)
     {
-        _clearedStageKeys = ToArray(progress.ClearedStageKeys);
-        _perkIds = ToArray(progress.PerkIds);
+        _clearedStageKeys = progress.ClearedStageKeys.ToArray();
+        _perkIds = progress.PerkIds.ToArray();
         _earnedPoints = progress.EarnedPoints;
-    }
-
-    private static string[] ToArray(IReadOnlyList<string> list)
-    {
-        string[] array = new string[list.Count];
-
-        for (int i = 0; i < list.Count; i++)
-        {
-            array[i] = list[i];
-        }
-
-        return array;
     }
 }

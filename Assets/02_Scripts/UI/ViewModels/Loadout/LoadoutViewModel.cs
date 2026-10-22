@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine.Video;
 
-// 장비 화면에 보일 값. 칸(LoadoutSlot)마다 버튼 ViewModel을 만들어 두고, 장비가 바뀌면 상태만 다시 매긴다.
+// 장비 화면에 보일 값. 칸 규칙(LoadoutRule)마다 버튼 ViewModel을 만들어 두고, 장비가 바뀌면 상태만 다시 매긴다.
 // 화면을 여는 쪽이 만들고, 닫을 때 UnBind로 장비 구독을 푼다.
 public class LoadoutViewModel : GalleryScreenViewModel
 {
@@ -25,18 +25,18 @@ public class LoadoutViewModel : GalleryScreenViewModel
         _loadout = loadout;
 
         // 화면 위에서부터 이 순서로 놓인다. LoadoutView의 칸 키도 같은 순서로 넣는다.
-        LoadoutSlot[] slots =
+        LoadoutRule[] rules =
         {
-            new WeaponLoadoutSlot("Basic", WeaponType.Basic, loadout, tables, assets),
-            new WeaponLoadoutSlot("Heavy", WeaponType.Heavy, loadout, tables, assets),
-            new SkillLoadoutSlot(loadout, tables, assets),
-            new UtilityLoadoutSlot(loadout, assets),
-            new ConsumableLoadoutSlot(loadout, player.Stats, tables, assets),
+            new WeaponLoadoutRule("Basic", WeaponType.Basic, loadout, tables, assets),
+            new WeaponLoadoutRule("Heavy", WeaponType.Heavy, loadout, tables, assets),
+            new SkillLoadoutRule(loadout, tables, assets),
+            new UtilityLoadoutRule(loadout, assets),
+            new ConsumableLoadoutRule(loadout, player.Stats, tables, assets),
         };
 
-        for (int i = 0; i < slots.Length; i++)
+        for (int i = 0; i < rules.Length; i++)
         {
-            _slots.Add(new LoadoutSlotViewModel(slots[i], HandleItemSelected));
+            _slots.Add(new LoadoutSlotViewModel(rules[i], HandleItemSelected));
         }
 
         _loadout.OnChanged += HandleLoadoutChanged;

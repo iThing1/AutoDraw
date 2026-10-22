@@ -5,7 +5,7 @@ using UnityEngine;
 
 // 보스가 페이즈 끝에서 쓰러졌다가 검은 빛기둥을 받아 다시 일어나는 연출. 부활 한 번에 하나씩 만들고, 실제 시간으로 돈다.
 // CollapseAsync와 RiseAsync 사이에 부르는 쪽이 다음 페이즈로 넘긴다.
-public class BossRevival
+public class BossRevivalCutscene
 {
     private readonly BattleUnit _boss;
     private readonly BossHands _hands;
@@ -14,7 +14,7 @@ public class BossRevival
     private SpriteRenderer _beam;
 
     // 손 달린 보스가 아니면 hands는 null이다.
-    public BossRevival(BattleUnit boss, BossHands hands, RevivalSettings settings)
+    public BossRevivalCutscene(BattleUnit boss, BossHands hands, RevivalSettings settings)
     {
         _boss = boss;
         _hands = hands;

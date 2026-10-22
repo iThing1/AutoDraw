@@ -10,13 +10,13 @@ public class LoadoutSlotViewModel : ViewModelBase
     public string Title { get { return _title; } }
     public IReadOnlyList<LoadoutItemViewModel> Items { get { return _items; } }
 
-    public LoadoutSlotViewModel(LoadoutSlot slot, Action<LoadoutItemViewModel> onItemSelected)
+    public LoadoutSlotViewModel(LoadoutRule rule, Action<LoadoutItemViewModel> onItemSelected)
     {
-        _title = slot.Title;
+        _title = rule.Title;
 
-        for (int i = 0; i < slot.Entries.Count; i++)
+        for (int i = 0; i < rule.Entries.Count; i++)
         {
-            _items.Add(new LoadoutItemViewModel(slot.Entries[i], slot, onItemSelected));
+            _items.Add(new LoadoutItemViewModel(rule.Entries[i], rule, onItemSelected));
         }
     }
 

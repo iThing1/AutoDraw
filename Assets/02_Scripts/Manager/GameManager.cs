@@ -109,6 +109,9 @@ public class GameManager : SingletonBehaviour<GameManager>
             ? PlayerModel.FromSave(save, baseStats, _dataTableManager)
             : PlayerModel.CreateNew(baseStats, _dataTableManager);
 
+        // 찍은 특성은 되돌릴 수 없어, 창을 닫기 전에 게임이 꺼져도 남도록 바로 저장한다.
+        _player.OnPerksChanged += SavePlayer;
+
         return true;
     }
 }

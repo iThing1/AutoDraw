@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 특성 트리 화면의 노드 하나. 아이콘 그림이 없으면 루트 색 타일에 이름 첫 글자를 얹는다.
+// 특성 트리 화면의 노드 하나. 아이콘 그림이 없으면 트리 색 타일에 이름 첫 글자를 얹는다.
 public class PerkNodeView : ViewBase<PerkNodeViewModel>
 {
     [SerializeField] private Button _button;
@@ -22,7 +22,7 @@ public class PerkNodeView : ViewBase<PerkNodeViewModel>
     [SerializeField] private Color _shortCostColor = new Color(0.9f, 0.35f, 0.3f, 1f);
     [SerializeField, Range(0f, 1f)] private float _lockedAlpha = 0.35f;
 
-    private Color _rootColor = Color.white;
+    private Color _treeColor = Color.white;
 
     public RectTransform Rect { get { return (RectTransform)transform; } }
 
@@ -31,10 +31,10 @@ public class PerkNodeView : ViewBase<PerkNodeViewModel>
         _button.onClick.AddListener(HandleClicked);
     }
 
-    // 루트 색은 화면에만 쓰는 값이라 트리 화면 View가 Bind 전에 넣어 준다.
-    public void SetRootColor(Color rootColor)
+    // 트리 색은 화면에만 쓰는 값이라 트리 화면 View가 Bind 전에 넣어 준다.
+    public void SetTreeColor(Color treeColor)
     {
-        _rootColor = rootColor;
+        _treeColor = treeColor;
     }
 
     protected override void OnPropertyChanged(string propertyName)
@@ -65,7 +65,7 @@ public class PerkNodeView : ViewBase<PerkNodeViewModel>
         bool hasSprite = null != icon;
 
         _icon.sprite = icon;
-        _icon.color = hasSprite ? Color.white : _rootColor;
+        _icon.color = hasSprite ? Color.white : _treeColor;
 
         _initial.gameObject.SetActive(false == hasSprite);
         _initial.text = 0 < ViewModel.Label.Length ? ViewModel.Label.Substring(0, 1) : string.Empty;

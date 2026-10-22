@@ -38,6 +38,7 @@ public class BattleUnit : MonoBehaviour
     private AutoAttacker _attacker;
     private UnitView _view;
     private UnitMover _mover;
+    private IUnitStats _stats;
 
     private UnitState _state = UnitState.Idle;
     // 전투 밖에서 쓴 스킬이면 Idle로 돌아간다.
@@ -53,7 +54,7 @@ public class BattleUnit : MonoBehaviour
     private WeaponModifier _weaponModifier = WeaponModifier.NONE;
 
     public BattleUnitData Data { get { return _data; } }
-    public IUnitStats Stats { get { return null != _data ? _data.Stats : null; } }
+    public IUnitStats Stats { get { return _stats; } }
     public Health Health { get { return _health; } }
     public AutoAttacker Attacker { get { return _attacker; } }
     public UnitView View { get { return _view; } }
@@ -105,7 +106,11 @@ public class BattleUnit : MonoBehaviour
             return;
         }
 
-        _health.Init(_data.Stats.MaxHp);
+        // 플레이어처럼 데이터에 스탯이 없으면 만든 쪽이 SetStats로 넘긴다.
+        if (null != _data.Stats)
+        {
+            SetStats(_data.Stats);
+        }
     }
 
     private void OnDestroy()
@@ -114,6 +119,13 @@ public class BattleUnit : MonoBehaviour
         {
             _health.OnDied -= HandleDied;
         }
+    }
+
+    // 체력도 이 스탯으로 다시 채운다.
+    public void SetStats(IUnitStats stats)
+    {
+        _stats = stats;
+        _health.Init(stats.MaxHp);
     }
 
     public void ChangeState(UnitState nextState)

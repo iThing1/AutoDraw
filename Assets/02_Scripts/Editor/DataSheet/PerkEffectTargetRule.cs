@@ -52,7 +52,7 @@ public class PerkEffectTargetRule : IDataSheetRule
             case PerkEffectType.ConsumableUpgrade:
                 return CheckConsumableField(consumables, target);
 
-            case PerkEffectType.UnlockAbility:
+            case PerkEffectType.UnlockUtility:
                 return IsName<UtilityType>(target) ? null : $"'{target}'은(는) UtilityType에 없습니다.";
 
             case PerkEffectType.WeaponDamageAdd:

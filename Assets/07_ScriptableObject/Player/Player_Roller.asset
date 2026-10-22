@@ -27,11 +27,9 @@ MonoBehaviour:
   _length: 14
   _rollWobble: 0.15
   _rollWobbleSpeed: 12
-  _stripeStyle: {fileID: 11400000, guid: 775407243f820dd757fd5ca4151a2591, type: 2}
-  _stripeSpacing: 0.8
-  _stripeScale:
-    _min: 0.9
-    _max: 1.2
+  _carpetTexture: {fileID: 2800000, guid: 3792561aad13b70daad187da232ddc5d, type: 3}
+  _carpetTileLength: 8.8
+  _carpetWidth: 2.2
   _maxHits: 2
   _hit:
     _damage:

@@ -27,12 +27,33 @@ public class BattleUnit : MonoBehaviour
         }
     }
 
+    public readonly struct DodgeScope : IDisposable
+    {
+        private readonly BattleUnit _unit;
+
+        internal DodgeScope(BattleUnit unit)
+        {
+            _unit = unit;
+        }
+
+        public void Dispose()
+        {
+            if (null == _unit)
+            {
+                return;
+            }
+
+            _unit.EndDodge();
+        }
+    }
+
     [SerializeField] private BattleUnitData _data;
     [SerializeField] private Transform _body;
 
     public event Action<UnitState> OnStateChanged;
     // 막은 자리를 넘겨, 막은 쪽이 방패 연출과 막기 문구를 띄우게 한다.
     public event Action<Vector3> OnBlocked;
+    public event Action<Vector3> OnDodged;
 
     private Health _health;
     private AutoAttacker _attacker;
@@ -45,6 +66,7 @@ public class BattleUnit : MonoBehaviour
     private UnitState _stateBeforeAction;
 
     private int _guardCount;
+    private int _dodgeCount;
     private float _guardRadius;
     // Action이 끝나기를 기다리는 쪽을 깨우는 신호. 누가 기다릴 때만 만든다.
     private UniTaskCompletionSource _actionEndSource;
@@ -60,6 +82,7 @@ public class BattleUnit : MonoBehaviour
     public UnitView View { get { return _view; } }
     public UnitState State { get { return _state; } }
     public bool IsGuarding { get { return 0 < _guardCount; } }
+    public bool IsDodging { get { return 0 < _dodgeCount; } }
     public float GuardRadius { get { return _guardRadius; } }
 
     // 전투 중 움직이지 않는 유닛은 null이다.
@@ -194,9 +217,22 @@ public class BattleUnit : MonoBehaviour
         return new GuardScope(this);
     }
 
+    // 피하는 동안에는 공격이 몸을 지나간다. 막을 수 없는 공격(기믹 실패)은 피할 수 없다.
+    public DodgeScope BeginDodge()
+    {
+        _dodgeCount++;
+
+        return new DodgeScope(this);
+    }
+
     public void NotifyBlocked(Vector3 hitPoint)
     {
         OnBlocked?.Invoke(hitPoint);
+    }
+
+    public void NotifyDodged(Vector3 point)
+    {
+        OnDodged?.Invoke(point);
     }
 
     public void OverrideAttackStyle(AttackStyle attackStyle)
@@ -213,6 +249,11 @@ public class BattleUnit : MonoBehaviour
     private void EndGuard()
     {
         _guardCount = Mathf.Max(0, _guardCount - 1);
+    }
+
+    private void EndDodge()
+    {
+        _dodgeCount = Mathf.Max(0, _dodgeCount - 1);
     }
 
     private void NotifyActionEnded()

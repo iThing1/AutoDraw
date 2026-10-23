@@ -20,7 +20,7 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
     [Header("하단 칸")]
     [SerializeField] private ActionSlotView[] _weaponSlots;
     [SerializeField] private ActionSlotView _skillSlot;
-    [SerializeField] private ActionSlotView _guardSlot;
+    [SerializeField] private ActionSlotView _utilitySlot;
     [SerializeField] private ActionSlotView _itemSlot;
 
     [Header("떠오르는 문구")]
@@ -61,7 +61,7 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
 
         BindWeaponSlots(viewModel.WeaponSlots);
         BindSlot(_skillSlot, viewModel.SkillSlot);
-        BindSlot(_guardSlot, viewModel.GuardSlot);
+        BindSlot(_utilitySlot, viewModel.UtilitySlot);
         BindSlot(_itemSlot, viewModel.ItemSlot);
 
         viewModel.OnDamageText += SpawnDamageText;
@@ -88,9 +88,9 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
             _skillSlot.UnBind();
         }
 
-        if (null != _guardSlot)
+        if (null != _utilitySlot)
         {
-            _guardSlot.UnBind();
+            _utilitySlot.UnBind();
         }
 
         if (null != _itemSlot)
@@ -134,7 +134,7 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
         }
     }
 
-    // 쓰지 않는 칸(유틸리티가 막기가 아닐 때의 막기 칸 등)은 숨긴다.
+    // 쓰지 않는 칸(소모품을 끼우지 않았을 때 등)은 숨긴다.
     private void BindSlot(ActionSlotView slot, ActionSlotViewModel viewModel)
     {
         if (null == slot)

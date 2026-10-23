@@ -79,7 +79,7 @@ public class HomingMissileAttackStyle : AttackStyle
         try
         {
             FlightResult flight = await missile.GetOrAddComponent<HomingMotion>()
-                .FlyAsync(target, new HomingFlight(direction, _speed, _turnSpeed, _lifetime, _collisionRadius), token);
+                .FlyAsync(target, new HomingFlight(direction, _speed, _turnSpeed, _lifetime, _collisionRadius, false), token);
 
             Explode(context, flight.LandingPoint, gaugeGain);
         }

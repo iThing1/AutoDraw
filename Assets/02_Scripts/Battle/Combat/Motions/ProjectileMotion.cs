@@ -9,6 +9,7 @@ public abstract class ProjectileMotion : MonoBehaviour
 
     private AttackTarget _target;
     private float _radius;
+    private bool _endsOnDodge;
     private Vector3 _lastPosition;
     private Vector3 _lastTargetPosition;
     private FlightOutcome _contactOutcome;
@@ -32,13 +33,14 @@ public abstract class ProjectileMotion : MonoBehaviour
     // 큰 탄은 가장자리가 먼저 방패에 닿으므로, 판정에 탄의 반지름을 더한다. 크기를 맞춘 뒤에 불러야 그림 크기가 맞게 잰다.
     protected void BeginContact(AttackTarget target)
     {
-        BeginContact(target, null != _renderer ? _renderer.bounds.extents.x : 0f);
+        BeginContact(target, null != _renderer ? _renderer.bounds.extents.x : 0f, false);
     }
 
-    protected void BeginContact(AttackTarget target, float radius)
+    protected void BeginContact(AttackTarget target, float radius, bool endsOnDodge)
     {
         _target = target;
         _radius = radius;
+        _endsOnDodge = endsOnDodge;
         _contactOutcome = FlightOutcome.Missed;
         _contactPoint = _transform.position;
 
@@ -79,6 +81,10 @@ public abstract class ProjectileMotion : MonoBehaviour
         else if (_target.IsTouching(contactPoint, _radius))
         {
             _contactOutcome = FlightOutcome.Arrived;
+        }
+        else if (_endsOnDodge && _target.IsDodgedAt(contactPoint, _radius))
+        {
+            _contactOutcome = FlightOutcome.Dodged;
         }
         else
         {

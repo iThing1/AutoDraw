@@ -11,6 +11,16 @@ public class DamageDealer
     private readonly bool _appliesWeaponModifier;
     private int _nextColorIndex;
 
+    public bool IsInk
+    {
+        get
+        {
+            PaintPalette palette = _owner.Data.Palette;
+
+            return null != palette && palette.IsInk;
+        }
+    }
+
     // 게이지는 플레이어만 있어 null일 수 있다.
     private DamageDealer(BattleUnit owner, SkillGauge skillGauge, AttackTarget target, PaintCanvas paintCanvas, bool appliesWeaponModifier)
     {
@@ -98,14 +108,12 @@ public class DamageDealer
             amount = Mathf.RoundToInt(amount * hit.CriticalMultiplier);
         }
 
-        PaintPalette palette = _owner.Data.Palette;
-
         return new DamageInfo
         {
             Amount = amount,
             IsCritical = isCritical,
             PaintColor = PickColor(),
-            IsInk = null != palette && palette.IsInk,
+            IsInk = IsInk,
             Attacker = _owner,
         };
     }

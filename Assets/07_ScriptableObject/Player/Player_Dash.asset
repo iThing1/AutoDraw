@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85b7fdcf949a8d64a30bf40dde8664ae, type: 3}
+  m_Name: Player_Dash
+  m_EditorClassIdentifier: Assembly-CSharp::DashPreset
+  _displayName: Dash
+  _iconColor: {r: 0.55, g: 0.9, b: 0.65, a: 1}
+  _duration: 0.15
+  _ease: 6
+  _startImpact:
+    _shakeForce: 0
+    _sounds:
+    - {fileID: 8300000, guid: 83ac2f856762c82439cd9a4d0b98eb69, type: 3}
+    _pitch:
+      _min: 1.9
+      _max: 2.1
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0.55, g: 0.9, b: 0.65, a: 1}
+    _effectScale: 0.5
+    _effectLifetime: 2
+  _afterimagePrefab: {fileID: 8300000000000000001, guid: 3d14d9f148f5bd9e7b62a86d0e12cb0c, type: 3}
+  _afterimageColor: {r: 0.55, g: 0.9, b: 0.65, a: 0.5}
+  _afterimageInterval: 0.03
+  _afterimageFadeDuration: 0.25
+  _strokeTexture: {fileID: 2800000, guid: 3792561aad13b70daad187da232ddc5d, type: 3}
+  _strokeTileLength: 3.2
+  _strokeWidth: 0.8

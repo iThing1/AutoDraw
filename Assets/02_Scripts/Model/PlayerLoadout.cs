@@ -62,12 +62,6 @@ public class PlayerLoadout
         return _tables.Skills.TryGet(skillId, out SkillData skill) && false == string.IsNullOrEmpty(skill.AttackStyleKey);
     }
 
-    // 대시는 아직 전투에 없어 끼우면 막기만 빠진다. 대시를 만들면 지운다.
-    public bool IsUtilityReady(UtilityType utility)
-    {
-        return UtilityType.Dash != utility;
-    }
-
     private PlayerLoadout(DataTableManager tables)
     {
         _tables = tables;
@@ -188,7 +182,7 @@ public class PlayerLoadout
 
     public bool TryEquipUtility(UtilityType utility)
     {
-        if (false == HasUtility(utility) || false == IsUtilityReady(utility))
+        if (false == HasUtility(utility))
         {
             return false;
         }

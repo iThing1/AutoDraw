@@ -30,9 +30,4 @@ public class UtilityLoadoutRule : LoadoutRule
     {
         return _types[entry] == Loadout.Utility;
     }
-
-    protected override bool IsReady(LoadoutEntry entry)
-    {
-        return Loadout.IsUtilityReady(_types[entry]);
-    }
 }

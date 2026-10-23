@@ -5,7 +5,7 @@ using System.Threading;
 using UnityEngine;
 
 // 카운터. 보스 오른손이 붉게 빛나고 몸 둘레의 붉은 원이 조여 들며, 원이 다 조여 드는 순간 플레이어에게 돌진한다.
-// 부딪히는 순간 막기로 받아치면 보스가 튕겨 나간다. 정해진 횟수만큼 연달아 받아칠 때까지 돌진을 되풀이하고, 다 채우면 그로기에 빠진다.
+// 부딪히는 순간 막기로 받아치거나 대시로 피하면 보스가 튕겨 나간다. 정해진 횟수만큼 연달아 받아칠 때까지 돌진을 되풀이하고, 다 채우면 그로기에 빠진다.
 // 받아치지 못하면 연속 횟수가 처음부터 다시 세어지고, 부딪혔다면 그때마다 피해를 입는다. 실패로 끝나는 일은 없다.
 [CreateAssetMenu(fileName = "CounterGimmick", menuName = "Scriptable Objects/Boss/Gimmick/Counter")]
 public class CounterGimmick : BossGimmick
@@ -96,6 +96,7 @@ public class CounterGimmick : BossGimmick
         Transform bossTransform = context.Owner.transform;
         Vector3 start = bossTransform.position;
         bool isCountered = false;
+        bool isDodged = false;
         bool hasCollided = false;
 
         // 플레이어가 움직여도 따라붙도록 도착 지점을 매 프레임 다시 구하고, 처음 닿는 순간 막았는지로 결과를 정한다.
@@ -115,6 +116,12 @@ public class CounterGimmick : BossGimmick
                     hasCollided = true;
                     isCountered = true;
                 }
+                else if (target.IsDodgedAt(body, bodyRadius))
+                {
+                    hasCollided = true;
+                    isCountered = true;
+                    isDodged = true;
+                }
                 else if (target.IsTouching(body, bodyRadius))
                 {
                     hasCollided = true;
@@ -126,7 +133,7 @@ public class CounterGimmick : BossGimmick
 
         if (isCountered)
         {
-            await bossTransform.DOMove(PlayCounter(context), _knockbackDuration)
+            await bossTransform.DOMove(PlayCounter(context, isDodged), _knockbackDuration)
                 .SetEase(Ease.OutQuad)
                 .ToUniTaskKillOnCancel(token);
         }
@@ -163,12 +170,20 @@ public class CounterGimmick : BossGimmick
     }
 
     // 받아친 순간 크게 멈칫하고, 보스가 플레이어 반대쪽으로 튕겨 나갈 자리를 돌려준다.
-    private Vector3 PlayCounter(AttackContext context)
+    private Vector3 PlayCounter(AttackContext context, bool isDodged)
     {
         AttackTarget target = context.Target;
         Vector3 body = context.Owner.Body.position;
 
-        target.NotifyBlocked(body);
+        if (isDodged)
+        {
+            target.NotifyDodged(body);
+        }
+        else
+        {
+            target.NotifyBlocked(body);
+        }
+
         GameManager.TimeScale.PlayHitStop(_counterHitStopDuration, _counterHitStopTimeScale);
         ImpactPlayer.Play(_counterImpact, body);
 

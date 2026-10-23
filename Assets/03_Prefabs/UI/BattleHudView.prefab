@@ -1168,7 +1168,7 @@ MonoBehaviour:
   - {fileID: 6356057960825916949}
   - {fileID: 1924539115944971099}
   _skillSlot: {fileID: 291768563873768782}
-  _guardSlot: {fileID: 7300000019075025873}
+  _utilitySlot: {fileID: 7300000019075025873}
   _itemSlot: {fileID: 8910882092970834944}
   _floatingTextRoot: {fileID: 7132977060385009204}
   _floatingTextPrefab: {fileID: 5834097133458508562, guid: e04d28214f3b998419414c08f4429418, type: 3}
@@ -3348,7 +3348,7 @@ GameObject:
   - component: {fileID: 7300000018245676922}
   - component: {fileID: 7300000019075025873}
   m_Layer: 0
-  m_Name: GuardSlot
+  m_Name: UtilitySlot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

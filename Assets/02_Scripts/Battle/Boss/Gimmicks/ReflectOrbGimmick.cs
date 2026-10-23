@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-// 구체 되받아치기. 보스가 오른손에 큰 구체를 모아 플레이어에게 던지고, 막기로 받아내면 색이 바뀌어 보스에게 되돌아간다.
+// 구체 되받아치기. 보스가 오른손에 큰 구체를 모아 플레이어에게 던지고, 막기로 받아내거나 닿는 순간 대시로 피하면 색이 바뀌어 보스에게 되돌아간다.
 // 여러 번 던지는 동안 정해진 횟수 이상 되돌려 보내면 깨진다. 남은 시도로 성공·실패가 정해지면 그 자리에서 끝낸다.
 [CreateAssetMenu(fileName = "ReflectOrbGimmick", menuName = "Scriptable Objects/Boss/Gimmick/ReflectOrb")]
 public class ReflectOrbGimmick : PunishingBossGimmick
@@ -113,12 +113,18 @@ public class ReflectOrbGimmick : PunishingBossGimmick
                 return false;
             }
 
-            if (FlightOutcome.Blocked != flight.Outcome)
+            if (FlightOutcome.Blocked == flight.Outcome)
+            {
+                target.NotifyBlocked(flight.LandingPoint);
+            }
+            else if (FlightOutcome.Dodged == flight.Outcome)
+            {
+                target.NotifyDodged(flight.LandingPoint);
+            }
+            else
             {
                 return false;
             }
-
-            target.NotifyBlocked(flight.LandingPoint);
 
             await ProjectileFlight.FlyAsync(_orbPrefab, _reflectShot, flight.LandingPoint, context.Owner.Body.position, _reflectColor, token);
 
@@ -160,7 +166,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
 
         try
         {
-            return await orb.GetOrAddComponent<HomingMotion>().FlyAsync(target, new HomingFlight(direction, speed, _turnSpeed, _lifetime, radius), token);
+            return await orb.GetOrAddComponent<HomingMotion>().FlyAsync(target, new HomingFlight(direction, speed, _turnSpeed, _lifetime, radius, true), token);
         }
         finally
         {

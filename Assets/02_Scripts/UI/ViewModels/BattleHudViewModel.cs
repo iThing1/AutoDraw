@@ -10,7 +10,7 @@ public class BattleHudViewModel : ViewModelBase
     private readonly HealthBarViewModel _bossHealth;
     private readonly List<ActionSlotViewModel> _weaponSlots = new();
     private readonly ActionSlotViewModel _skillSlot;
-    private readonly ActionSlotViewModel _guardSlot;
+    private readonly ActionSlotViewModel _utilitySlot;
     private readonly ActionSlotViewModel _itemSlot;
 
     private BattleUnit _player;
@@ -30,7 +30,7 @@ public class BattleHudViewModel : ViewModelBase
     public IReadOnlyList<ActionSlotViewModel> WeaponSlots { get { return _weaponSlots; } }
     // 해당 컴포넌트가 없는 플레이어면 null이다.
     public ActionSlotViewModel SkillSlot { get { return _skillSlot; } }
-    public ActionSlotViewModel GuardSlot { get { return _guardSlot; } }
+    public ActionSlotViewModel UtilitySlot { get { return _utilitySlot; } }
     public ActionSlotViewModel ItemSlot { get { return _itemSlot; } }
 
     public int RemainingPhaseCount { get { return null != _bossPhases ? _bossPhases.RemainingPhaseCount : 1; } }
@@ -56,11 +56,16 @@ public class BattleHudViewModel : ViewModelBase
             _skillSlot = new SkillSlotViewModel(attack);
         }
 
+        // 유틸리티 칸에는 막기와 대시 중 하나만 끼운다.
         if (player.TryGetComponent(out PlayerGuard guard) && null != guard.State)
         {
             _guard = guard.State;
-            _guardSlot = new GuardSlotViewModel(guard.KeyLabel, _guard);
+            _utilitySlot = new GuardSlotViewModel(guard.KeyLabel, _guard);
             _guard.OnRejected += HandleGuardRejected;
+        }
+        else if (player.TryGetComponent(out PlayerDash dash) && null != dash.State)
+        {
+            _utilitySlot = new DashSlotViewModel(dash.KeyLabel, dash.State);
         }
 
         if (player.TryGetComponent(out PlayerConsumable consumable) && null != consumable.State)
@@ -72,6 +77,7 @@ public class BattleHudViewModel : ViewModelBase
         _player.Health.OnHealed += HandleHealed;
         _boss.Health.OnDamaged += HandleDamaged;
         _player.OnBlocked += HandleBlocked;
+        _player.OnDodged += HandleDodged;
 
         if (null != _bossPhases)
         {
@@ -95,9 +101,9 @@ public class BattleHudViewModel : ViewModelBase
             _skillSlot.UnBind();
         }
 
-        if (null != _guardSlot)
+        if (null != _utilitySlot)
         {
-            _guardSlot.UnBind();
+            _utilitySlot.UnBind();
         }
 
         if (null != _itemSlot)
@@ -116,6 +122,7 @@ public class BattleHudViewModel : ViewModelBase
             _player.Health.OnDamaged -= HandleDamaged;
             _player.Health.OnHealed -= HandleHealed;
             _player.OnBlocked -= HandleBlocked;
+            _player.OnDodged -= HandleDodged;
             _player = null;
         }
 
@@ -146,6 +153,11 @@ public class BattleHudViewModel : ViewModelBase
     private void HandleBlocked(Vector3 hitPoint)
     {
         OnFloatingText?.Invoke(FloatingTextKind.Guard, hitPoint);
+    }
+
+    private void HandleDodged(Vector3 point)
+    {
+        OnFloatingText?.Invoke(FloatingTextKind.Dodge, point);
     }
 
     // 쿨타임은 방패가 회색으로 비치는 것으로 충분해, 게이지가 모자랄 때만 알린다.

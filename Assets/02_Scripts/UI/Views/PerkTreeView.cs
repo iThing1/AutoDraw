@@ -1,5 +1,7 @@
+using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,6 +19,14 @@ public class PerkTreeView : ViewBase<PerkTreeViewModel>
     [SerializeField] private TMP_Text _descriptionText;
     [SerializeField] private Button _unlockButton;
     [SerializeField] private Button _closeButton;
+
+    [Header("다시 찍기")]
+    [SerializeField] private Button _respecButton;
+    [SerializeField] private TMP_Text _respecText;
+    // {0}은 남은 팔레트 수.
+    [SerializeField] private string _respecFormat = "RESET x{0}";
+    [SerializeField] private ConfirmDialogUI _confirmDialogPrefab;
+    [SerializeField, TextArea] private string _respecMessage = "Reset all perks and get your points back?\nThis uses 1 palette.";
 
     [Header("트리")]
     // 위 가운데를 기준점으로 둔 영역. 노드는 첫 줄이 맨 위, 가운데 트리가 가운데에 온다.
@@ -46,11 +56,13 @@ public class PerkTreeView : ViewBase<PerkTreeViewModel>
     private readonly List<Image> _lines = new();
     // 선마다 이어진 자식 노드. 자식을 찍었으면 그 길로 온 것이라 선을 금색으로 칠한다.
     private readonly List<PerkNodeViewModel> _lineChildren = new();
+    private bool _isConfirming;
 
     private void Awake()
     {
         _closeButton.onClick.AddListener(HandleCloseClicked);
         _unlockButton.onClick.AddListener(HandleUnlockClicked);
+        _respecButton.onClick.AddListener(HandleRespecClicked);
     }
 
     protected override void OnBind()
@@ -105,6 +117,10 @@ public class PerkTreeView : ViewBase<PerkTreeViewModel>
                 DrawPoints();
                 break;
 
+            case nameof(PerkTreeViewModel.AvailablePalettes):
+                DrawRespec();
+                break;
+
             case nameof(PerkTreeViewModel.SelectedTitle):
                 _titleText.text = ViewModel.SelectedTitle;
                 break;
@@ -123,6 +139,7 @@ public class PerkTreeView : ViewBase<PerkTreeViewModel>
     {
         DrawPoints();
         DrawLines();
+        DrawRespec();
         _titleText.text = ViewModel.SelectedTitle;
         _descriptionText.text = ViewModel.SelectedDescription;
         _unlockButton.interactable = ViewModel.CanUnlockSelected;
@@ -195,11 +212,59 @@ public class PerkTreeView : ViewBase<PerkTreeViewModel>
         }
     }
 
+    private void DrawRespec()
+    {
+        _respecText.SetText(_respecFormat, ViewModel.AvailablePalettes);
+        _respecButton.interactable = ViewModel.CanRespec;
+    }
+
     private void HandleUnlockClicked()
     {
         if (null != ViewModel)
         {
             ViewModel.UnlockSelected();
+        }
+    }
+
+    private void HandleRespecClicked()
+    {
+        if (null != ViewModel && false == _isConfirming)
+        {
+            ConfirmRespecAsync(destroyCancellationToken).Forget();
+        }
+    }
+
+    private async UniTaskVoid ConfirmRespecAsync(CancellationToken token)
+    {
+        ConfirmDialogUI dialog = GameManager.UI.Open(_confirmDialogPrefab, UILayer.Overlay);
+
+        if (null == dialog)
+        {
+            return;
+        }
+
+        _isConfirming = true;
+
+        try
+        {
+            if (await dialog.AskAsync(_respecMessage, token) && null != ViewModel)
+            {
+                ViewModel.Respec();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // 확인 창이 떠 있는 동안 Esc로 트리 화면이 닫힌 경우라 따로 처리하지 않는다.
+        }
+        finally
+        {
+            _isConfirming = false;
+
+            // 게임을 끌 때는 게임 매니저가 먼저 사라질 수 있다.
+            if (null != GameManager.Instance)
+            {
+                GameManager.UI.Close(dialog);
+            }
         }
     }
 

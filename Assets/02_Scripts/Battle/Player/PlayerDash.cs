@@ -183,8 +183,18 @@ public class PlayerDash : MonoBehaviour
             return;
         }
 
-        Transform body = _unit.Body;
-        SpriteRenderer afterimage = PooledSprite.Spawn(_preset.AfterimagePrefab, body.position, body.eulerAngles.z, body.lossyScale, _preset.AfterimageColor);
+        // 지금 보이는 몸 그림(애니메이션으로 기울고 늘어난 모습 그대로)을 잔상으로 남긴다.
+        SpriteRenderer body = _unit.BodyRenderer;
+
+        if (null == body)
+        {
+            return;
+        }
+
+        Transform visual = body.transform;
+        SpriteRenderer afterimage = PooledSprite.Spawn(_preset.AfterimagePrefab, visual.position, visual.eulerAngles.z, visual.lossyScale, _preset.AfterimageColor);
+        afterimage.sprite = body.sprite;
+        afterimage.flipX = body.flipX;
 
         FadeAfterimageAsync(afterimage, token).Forget();
     }

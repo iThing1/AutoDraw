@@ -48,6 +48,7 @@ public class BarrageAttackStyle : AttackStyle
         GameManager.Sound.PlaySfx(_turretAppearSound);
 
         List<Transform> turrets = SpawnTurrets(context.Owner.transform);
+        AimTurrets(turrets, context.Target);
 
         try
         {
@@ -55,6 +56,8 @@ public class BarrageAttackStyle : AttackStyle
 
             for (int volley = 0; volley < _volleyCount; volley++)
             {
+                AimTurrets(turrets, context.Target);
+
                 for (int i = 0; i < turrets.Count; i++)
                 {
                     context.Launcher.FireShot(_turretShot, turrets[i].position, Vector3.zero, gaugeGain, token);
@@ -91,6 +94,22 @@ public class BarrageAttackStyle : AttackStyle
         }
 
         return turrets;
+    }
+
+    // 포신 그림이 오른쪽(+x)을 향하므로, 쏘기 전에 목표 쪽으로 돌린다.
+    private static void AimTurrets(List<Transform> turrets, AttackTarget target)
+    {
+        if (null == target)
+        {
+            return;
+        }
+
+        Vector3 targetPosition = target.FollowTransform.position;
+
+        for (int i = 0; i < turrets.Count; i++)
+        {
+            turrets[i].rotation = Quaternion.Euler(0f, 0f, Geometry2D.ToAngle(targetPosition - turrets[i].position));
+        }
     }
 
     private void Recoil(Transform turret)

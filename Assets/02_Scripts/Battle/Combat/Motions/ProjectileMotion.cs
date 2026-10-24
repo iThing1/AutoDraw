@@ -31,9 +31,21 @@ public abstract class ProjectileMotion : MonoBehaviour
     }
 
     // 큰 탄은 가장자리가 먼저 방패에 닿으므로, 판정에 탄의 반지름을 더한다. 크기를 맞춘 뒤에 불러야 그림 크기가 맞게 잰다.
+    // 꼬리 달린 탄은 꼬리를 빼고 머리만 재도록 그림의 짧은 쪽 절반을 반지름으로 본다. 회전과도 상관없게 렌더러 bounds 대신 스프라이트 크기를 쓴다.
     protected void BeginContact(AttackTarget target)
     {
-        BeginContact(target, null != _renderer ? _renderer.bounds.extents.x : 0f, false);
+        BeginContact(target, GetSpriteRadius(), false);
+    }
+
+    private float GetSpriteRadius()
+    {
+        if (null == _renderer || null == _renderer.sprite)
+        {
+            return 0f;
+        }
+
+        Vector2 extents = Vector2.Scale(_renderer.sprite.bounds.extents, _transform.lossyScale);
+        return Mathf.Min(Mathf.Abs(extents.x), Mathf.Abs(extents.y));
     }
 
     protected void BeginContact(AttackTarget target, float radius, bool endsOnDodge)

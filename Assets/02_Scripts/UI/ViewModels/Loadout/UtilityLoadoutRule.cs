@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-// 유틸리티 칸(막기·대시). 표가 없어 종류 이름을 그대로 보여 준다.
+// 유틸리티 칸(막기·대시). 표가 없어 종류 이름을 그대로 보여 주고, 아이콘은 종류 이름 키로 찾는다.
 public class UtilityLoadoutRule : LoadoutRule
 {
     private readonly Dictionary<LoadoutEntry, UtilityType> _types = new();
@@ -11,7 +11,7 @@ public class UtilityLoadoutRule : LoadoutRule
     {
         foreach (UtilityType utility in Enum.GetValues(typeof(UtilityType)))
         {
-            LoadoutEntry entry = AddEntry(utility.ToString(), utility.ToString(), string.Empty, string.Empty, DEFAULT_ICON_COLOR, string.Empty);
+            LoadoutEntry entry = AddEntry(utility.ToString(), utility.ToString(), string.Empty, utility.GetIconKey(), DEFAULT_ICON_COLOR, string.Empty);
             _types.Add(entry, utility);
         }
     }

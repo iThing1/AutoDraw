@@ -5,7 +5,7 @@ public class WeaponSlotViewModel : ActionSlotViewModel
     private PlayerAttack _attack;
 
     public WeaponSlotViewModel(PlayerAttack attack, int index)
-        : base(attack.GetWeaponKeyLabel(index), attack.GetSlotStyle(index), false)
+        : base(attack.GetWeaponKeyLabel(index), attack.GetSlotStyle(index), attack.GetSlotIcon(index), false)
     {
         _attack = attack;
         _index = index;

@@ -18,11 +18,13 @@ public class PlayerDash : MonoBehaviour
     private Rigidbody2D _rigidbody;
     private DashState _state;
     private PlayerStats _stats;
+    private Sprite _icon;
 
     // 유틸리티 칸에 대시를 끼우지 않았으면 null이다.
     public DashState State { get { return _state; } }
 
     public string KeyLabel { get { return _dashAction.GetKeyLabel(); } }
+    public Sprite Icon { get { return _icon; } }
 
     private void Awake()
     {
@@ -38,7 +40,7 @@ public class PlayerDash : MonoBehaviour
     }
 
     // 꺼 두면 입력도 받지 않고, State가 null이라 HUD도 대시 칸을 그리지 않는다.
-    public void Setup(UtilityType utility, PlayerStats stats)
+    public void Setup(UtilityType utility, PlayerStats stats, AssetManager assets)
     {
         if (false == enabled || UtilityType.Dash != utility)
         {
@@ -48,6 +50,7 @@ public class PlayerDash : MonoBehaviour
 
         _stats = stats;
         _state = new DashState(_preset, stats);
+        _icon = assets.Get<Sprite>(utility.GetIconKey());
 
         if (null != _preset.AfterimagePrefab)
         {

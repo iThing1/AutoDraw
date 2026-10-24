@@ -10,12 +10,14 @@ public class PlayerConsumable : MonoBehaviour
     private BattleUnit _unit;
     private ConsumableState _state;
     private ConsumableEffect _effect;
+    private Sprite _icon;
 
     // 소모품을 끼우지 않았으면 null이다.
     public ConsumableState State { get { return _state; } }
 
     public string KeyLabel { get { return _itemAction.GetKeyLabel(); } }
     public Color IconColor { get { return _effect.IconColor; } }
+    public Sprite Icon { get { return _icon; } }
 
     private void Awake()
     {
@@ -46,6 +48,7 @@ public class PlayerConsumable : MonoBehaviour
             return;
         }
 
+        _icon = assets.Get<Sprite>(data.IconKey);
         _state = new ConsumableState(data, stats);
     }
 

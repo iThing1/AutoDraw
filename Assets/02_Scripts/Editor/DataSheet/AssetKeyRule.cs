@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Video;
 using Object = UnityEngine.Object;
 
-// 빈 키는 아직 만들지 않은 에셋이라 넘어간다. IconKey는 아이콘을 넣을 때 검사를 더한다.
+// 빈 키는 아직 만들지 않은 에셋이라 넘어간다.
 public class AssetKeyRule : IDataSheetRule
 {
     // 표, 키 열, 그 키가 가리켜야 하는 에셋 형식.
@@ -13,9 +13,13 @@ public class AssetKeyRule : IDataSheetRule
     {
         ("WeaponData", "AttackStyleKey", typeof(AttackStyle)),
         ("WeaponData", "PreviewKey", typeof(VideoClip)),
+        ("WeaponData", "IconKey", typeof(Sprite)),
         ("SkillData", "AttackStyleKey", typeof(AttackStyle)),
         ("SkillData", "PreviewKey", typeof(VideoClip)),
+        ("SkillData", "IconKey", typeof(Sprite)),
         ("ConsumableData", "EffectKey", typeof(ConsumableEffect)),
+        ("ConsumableData", "IconKey", typeof(Sprite)),
+        ("PerkNodeData", "IconKey", typeof(Sprite)),
     };
 
     public void Check(IReadOnlyDictionary<string, DataSheetTable> tables, List<string> errors)

@@ -14,8 +14,8 @@ public class PlayerSetup : MonoBehaviour
 
         GetComponent<BattleUnit>().SetStats(stats);
         GetComponent<PlayerAttack>().Setup(loadout, stats, tables, assets);
-        GetComponent<PlayerGuard>().Setup(loadout.Utility, stats);
-        GetComponent<PlayerDash>().Setup(loadout.Utility, stats);
+        GetComponent<PlayerGuard>().Setup(loadout.Utility, stats, assets);
+        GetComponent<PlayerDash>().Setup(loadout.Utility, stats, assets);
         GetComponent<PlayerConsumable>().Setup(loadout.ConsumableId, stats, tables, assets);
         GetComponent<PlayerInputMover>().Setup(stats);
     }

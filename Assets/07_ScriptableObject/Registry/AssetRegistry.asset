@@ -27,3 +27,53 @@ MonoBehaviour:
     _asset: {fileID: 11400000, guid: 27592a341201b633cf13db793f93ffe4, type: 2}
   - _key: Consumable/Remover
     _asset: {fileID: 11400000, guid: be73f1307aff4592e92859dc131e8a94, type: 2}
+  - _key: Icon/Weapon/LightBrush
+    _asset: {fileID: 21300000, guid: 6371064d99a198c0c6d73a33a5c3f77b, type: 3}
+  - _key: Icon/Weapon/HeavyBrush
+    _asset: {fileID: 21300000, guid: 106eb13d1ac7ad39962a715191e937d6, type: 3}
+  - _key: Icon/Weapon/PaintOrbs
+    _asset: {fileID: 21300000, guid: 6b4d41f8923e7d6ec8e13d488fde9d84, type: 3}
+  - _key: Icon/Weapon/Roller
+    _asset: {fileID: 21300000, guid: 2c2c5952299c9f277613b04f5269e5f8, type: 3}
+  - _key: Icon/Skill/PaintBomb
+    _asset: {fileID: 21300000, guid: 8ce156d5d87680880ac529e6546344d7, type: 3}
+  - _key: Icon/Skill/BlackSquare
+    _asset: {fileID: 21300000, guid: 2182d3766cd5127f6b84f7107538e2da, type: 3}
+  - _key: Icon/Skill/InkHands
+    _asset: {fileID: 21300000, guid: a3b28d5a11668731dd9b8864e4f31bc1, type: 3}
+  - _key: Icon/Item/Paint
+    _asset: {fileID: 21300000, guid: d242c518cd6377c32dce96190860c546, type: 3}
+  - _key: Icon/Item/Remover
+    _asset: {fileID: 21300000, guid: 80c2eeb2f3d762fbd9f1438d3c5eda4c, type: 3}
+  - _key: Icon/Perk/Hp
+    _asset: {fileID: 21300000, guid: a742d6b48e7af392bb651bde6a164209, type: 3}
+  - _key: Icon/Perk/Move
+    _asset: {fileID: 21300000, guid: d6a662b244102fd9cf13931c6688810e, type: 3}
+  - _key: Icon/Perk/BasicDamage
+    _asset: {fileID: 21300000, guid: 60667b710686c3a7ccf9d3b46ce3368b, type: 3}
+  - _key: Icon/Perk/HeavyDamage
+    _asset: {fileID: 21300000, guid: 9a88de892b11ebc89d0eedbf78616e38, type: 3}
+  - _key: Icon/Perk/HitRadius
+    _asset: {fileID: 21300000, guid: f8d8cb6c23240c36afabadcd3c228f1b, type: 3}
+  - _key: Icon/Perk/SkillGauge
+    _asset: {fileID: 21300000, guid: 17549d6b70c8269162eedd64473755b4, type: 3}
+  - _key: Icon/Perk/Guard
+    _asset: {fileID: 21300000, guid: 047567fb275d656d670c3745c0455f6e, type: 3}
+  - _key: Icon/Perk/Dash
+    _asset: {fileID: 21300000, guid: aaeeb2d2fd6bcf34b27a20b674c10cba, type: 3}
+  - _key: Icon/Perk/MasterA
+    _asset: {fileID: 21300000, guid: f1b59167bf9b902f6783f4cdabf74035, type: 3}
+  - _key: Icon/Perk/MasterC
+    _asset: {fileID: 21300000, guid: b914de628912b06a82526c511966b37d, type: 3}
+  - _key: Icon/Perk/PaintOrbs
+    _asset: {fileID: 21300000, guid: 6d68f5dafbc7454b018958efa0096f2d, type: 3}
+  - _key: Icon/Perk/Roller
+    _asset: {fileID: 21300000, guid: 13fea9f629d11f3da1bea238a6410f73, type: 3}
+  - _key: Icon/Perk/Paint
+    _asset: {fileID: 21300000, guid: 33d309efd86ba1740ddb2b5fa1b4cf0d, type: 3}
+  - _key: Icon/Perk/Remover
+    _asset: {fileID: 21300000, guid: 37da7b4720f8921b8798d187e9f45c37, type: 3}
+  - _key: Icon/Utility/Guard
+    _asset: {fileID: 21300000, guid: fa4d0aa02dc51cd4f1ea1e09f4b86a99, type: 3}
+  - _key: Icon/Utility/Dash
+    _asset: {fileID: 21300000, guid: edbcd93a58e316f8c37ac0100e9bbff6, type: 3}

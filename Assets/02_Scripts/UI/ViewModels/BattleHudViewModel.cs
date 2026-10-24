@@ -60,17 +60,17 @@ public class BattleHudViewModel : ViewModelBase
         if (player.TryGetComponent(out PlayerGuard guard) && null != guard.State)
         {
             _guard = guard.State;
-            _utilitySlot = new GuardSlotViewModel(guard.KeyLabel, _guard);
+            _utilitySlot = new GuardSlotViewModel(guard.KeyLabel, _guard, guard.Icon);
             _guard.OnRejected += HandleGuardRejected;
         }
         else if (player.TryGetComponent(out PlayerDash dash) && null != dash.State)
         {
-            _utilitySlot = new DashSlotViewModel(dash.KeyLabel, dash.State);
+            _utilitySlot = new DashSlotViewModel(dash.KeyLabel, dash.State, dash.Icon);
         }
 
         if (player.TryGetComponent(out PlayerConsumable consumable) && null != consumable.State)
         {
-            _itemSlot = new ConsumableSlotViewModel(consumable.KeyLabel, consumable.State, consumable.IconColor);
+            _itemSlot = new ConsumableSlotViewModel(consumable.KeyLabel, consumable.State, consumable.Icon, consumable.IconColor);
         }
 
         _player.Health.OnDamaged += HandleDamaged;

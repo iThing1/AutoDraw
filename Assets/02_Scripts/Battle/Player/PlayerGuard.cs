@@ -19,11 +19,13 @@ public class PlayerGuard : MonoBehaviour
     private PlayerStats _stats;
     private Vector3 _shieldScale;
     private Color _shieldColor;
+    private Sprite _icon;
 
     // 프리셋이나 입력이 비어 있으면 null이다.
     public GuardState State { get { return _state; } }
 
     public string KeyLabel { get { return _guardAction.GetKeyLabel(); } }
+    public Sprite Icon { get { return _icon; } }
 
     private void Awake()
     {
@@ -43,7 +45,7 @@ public class PlayerGuard : MonoBehaviour
 
     // 전투를 시작하는 쪽이 플레이어를 만든 직후 부른다. 유틸리티 칸에 막기를 끼웠을 때만 쓴다.
     // 꺼 두면 입력도 받지 않고, State가 null이라 HUD도 막기 칸을 숨긴다.
-    public void Setup(UtilityType utility, PlayerStats stats)
+    public void Setup(UtilityType utility, PlayerStats stats, AssetManager assets)
     {
         if (false == enabled || UtilityType.Guard != utility)
         {
@@ -53,6 +55,7 @@ public class PlayerGuard : MonoBehaviour
 
         _stats = stats;
         _state = new GuardState(_preset, _stats, GetComponent<SkillGauge>());
+        _icon = assets.Get<Sprite>(utility.GetIconKey());
 
         if (null != _shield && null != _shield.sprite)
         {

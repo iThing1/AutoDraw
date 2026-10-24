@@ -20,10 +20,12 @@ public class PlayerAttack : MonoBehaviour
 
     private readonly AttackStyle[] _slotStyles = new AttackStyle[WEAPON_SLOT_COUNT];
     private readonly WeaponModifier[] _slotModifiers = new WeaponModifier[WEAPON_SLOT_COUNT];
+    private readonly Sprite[] _slotIcons = new Sprite[WEAPON_SLOT_COUNT];
 
     private BattleUnit _unit;
     private SkillGauge _skillGauge;
     private AttackStyle _skillStyle;
+    private Sprite _skillIcon;
     private int _selectedIndex = -1;
 
     public SkillGauge SkillGauge { get { return _skillGauge; } }
@@ -31,6 +33,7 @@ public class PlayerAttack : MonoBehaviour
     public string SkillKeyLabel { get { return _skillAction.GetKeyLabel(); } }
     // 끼운 스킬의 공격 방식이 아직 없으면 null이다.
     public AttackStyle SkillStyle { get { return _skillStyle; } }
+    public Sprite SkillIcon { get { return _skillIcon; } }
 
     // 무기 칸과 입력 중 적은 쪽까지만 쓴다. 키가 없는 칸은 고를 수 없다.
     public int SlotCount { get { return null != _weaponActions ? Mathf.Min(WEAPON_SLOT_COUNT, _weaponActions.Length) : 0; } }
@@ -58,6 +61,7 @@ public class PlayerAttack : MonoBehaviour
         if (tables.Skills.TryGet(loadout.SkillId, out SkillData skill))
         {
             _skillStyle = assets.Get<AttackStyle>(skill.AttackStyleKey);
+            _skillIcon = assets.Get<Sprite>(skill.IconKey);
         }
     }
 
@@ -106,6 +110,11 @@ public class PlayerAttack : MonoBehaviour
         return 0 <= index && index < WEAPON_SLOT_COUNT ? _slotStyles[index] : null;
     }
 
+    public Sprite GetSlotIcon(int index)
+    {
+        return 0 <= index && index < WEAPON_SLOT_COUNT ? _slotIcons[index] : null;
+    }
+
     public string GetWeaponKeyLabel(int index)
     {
         if (null == _weaponActions || index >= _weaponActions.Length)
@@ -125,6 +134,7 @@ public class PlayerAttack : MonoBehaviour
         }
 
         _slotStyles[slot] = assets.Get<AttackStyle>(weapon.AttackStyleKey);
+        _slotIcons[slot] = assets.Get<Sprite>(weapon.IconKey);
         _slotModifiers[slot] = new WeaponModifier(weapon.DamageBonus + stats.GetWeaponDamageBonus(weapon.Type), weapon.IntervalScale);
     }
 

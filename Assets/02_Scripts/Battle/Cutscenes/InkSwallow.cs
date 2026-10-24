@@ -39,7 +39,7 @@ public class InkSwallow
 
     private async UniTask RunAsync(CancellationToken token)
     {
-        SpriteRenderer body = _target.Body.GetComponent<SpriteRenderer>();
+        SpriteRenderer body = _target.BodyRenderer;
 
         if (null == body || null == _paintCanvas || null == _settings.ArmPrefab)
         {

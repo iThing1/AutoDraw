@@ -47,7 +47,7 @@ public static class SpriteShatter
                 Vector3 position = sourceTransform.TransformPoint(cellCenter / sprite.pixelsPerUnit);
 
                 // 원본 렌더러를 복제해 재질·색·정렬 설정을 그대로 물려받고, 스프라이트만 조각으로 바꾼다.
-                // 오브젝트째 복제되므로 원본(보스 Body)에는 SpriteRenderer만 둔다. 자식이나 다른 컴포넌트를 붙이면 조각마다 함께 복제된다.
+                // 오브젝트째 복제되므로 원본(Body 아래 그림 자식 Visual)에는 SpriteRenderer만 둔다. 자식이나 다른 컴포넌트를 붙이면 조각마다 함께 복제된다.
                 SpriteRenderer piece = Object.Instantiate(source, position, sourceTransform.rotation, root.transform);
                 piece.transform.localScale = sourceTransform.lossyScale;
                 piece.sprite = pieceSprite;

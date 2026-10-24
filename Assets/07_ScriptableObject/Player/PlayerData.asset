@@ -27,4 +27,20 @@ MonoBehaviour:
     _chaseStopDistance: 7
   _projectilePrefab: {fileID: 7624588648995017096, guid: dd8bc6d1b75476545ad3bfa488ffd6ee, type: 3}
   _palette: {fileID: 11400000, guid: 073348c3e2bf9df4fa51d06e2836c5e1, type: 2}
+  _animation:
+    _useAnimation: 1
+    _breatheAmount: 0.03
+    _breatheSpeed: 0.6
+    _stepLength: 0.8
+    _bobHeight: 0.06
+    _landSquash: 0.08
+    _leanAngle: 8
+    _fullSpeed: 7
+    _flipByDirection: 0
+    _attackSquash: 0.12
+    _hitSquash: 0.2
+    _guardSquash: 0.1
+    _reactionDuration: 0.25
+    _dashStretch: 0.35
+    _followSharpness: 14
   _framingRadius: 1.5

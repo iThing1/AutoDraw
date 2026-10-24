@@ -30,6 +30,22 @@ MonoBehaviour:
   _attackStyle: {fileID: 11400000, guid: 1c883e95039a14ba65912a3d9c55c72d, type: 2}
   _projectilePrefab: {fileID: 7624588648995017096, guid: de381a618a5797b47a750c0113577fac, type: 3}
   _palette: {fileID: 11400000, guid: ffbed08809908924792318e46513ead8, type: 2}
+  _animation:
+    _useAnimation: 1
+    _breatheAmount: 0.06
+    _breatheSpeed: 0.5
+    _stepLength: 1.4
+    _bobHeight: 0.05
+    _landSquash: 0.1
+    _leanAngle: 6
+    _fullSpeed: 5.5
+    _flipByDirection: 0
+    _attackSquash: 0.18
+    _hitSquash: 0.15
+    _guardSquash: 0
+    _reactionDuration: 0.35
+    _dashStretch: 0
+    _followSharpness: 10
   _framingRadius: 3
   _bannerTitle: Stage 2 - Ink Hands
   _bannerSubtitle: Conductor of the Blank

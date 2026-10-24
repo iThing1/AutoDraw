@@ -1,7 +1,6 @@
 using UnityEngine;
 
-// 잉크에서 기어 나와 대상을 움켜쥐는 그림자 팔 하나. 선 모양(굵기·테두리·재질·정렬)은 프리팹에서 정하고 여기서는 점 위치만 계산한다.
-// 머리는 뿌리에서 붙잡을 자리까지 구불구불한 길을 따라 기어가고, 몸은 머리가 지나간 길을 그대로 밟는다.
+// 잉크에서 기어 나와 대상을 움켜쥐는 그림자 팔 하나. 선 모양은 프리팹에서 정하고 여기서는 점 위치만 계산한다.
 public class InkArm : MonoBehaviour
 {
     private const int FINGER_POINT_COUNT = 3;
@@ -38,7 +37,6 @@ public class InkArm : MonoBehaviour
     private bool _isSinkArm;
     private bool _isVisible;
 
-    // 먼 잉크에서 나온 팔일수록 늦게 닿는다.
     public float ArrivalTime { get { return _startTime + _crawlDuration; } }
 
     private void Awake()
@@ -189,7 +187,6 @@ public class InkArm : MonoBehaviour
         return _fingerOutlines[index];
     }
 
-    // 검은 선과 그 아래 테두리 선은 늘 같은 자리·같은 굵기 비율로 움직인다.
     private static void SetPositions(LineRenderer line, LineRenderer outline, Vector3[] points, float widthScale)
     {
         line.SetPositions(points);

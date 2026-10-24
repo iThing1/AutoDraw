@@ -50,7 +50,6 @@ public class EndingCutscene : MonoBehaviour
         return StageCapture.Capture(GameManager.CameraRig.RenderCamera, stageBounds.bounds, size.x, size.y);
     }
 
-    // 마지막 일격의 여운이 남도록 게임 시간을 늦춘 채로 카메라를 보스에게 옮긴다.
     private async UniTask PlayFinishAsync(Transform focusTarget, CancellationToken token)
     {
         using (GameManager.TimeScale.BeginSlowMotion(_preset.SlowTimeScale))

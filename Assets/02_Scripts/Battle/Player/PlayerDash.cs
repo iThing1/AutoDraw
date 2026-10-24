@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // 유틸리티 키를 누르면 이동 방향으로 짧게 미끄러지고, 그동안 공격이 몸을 지나간다.
-// 쓸 수 있는지(쿨타임)는 DashState가 정하고, 여기는 입력을 받아 움직이는 일만 한다.
 [RequireComponent(typeof(BattleUnit), typeof(PlayerInputMover), typeof(Rigidbody2D))]
 public class PlayerDash : MonoBehaviour
 {
@@ -121,7 +120,6 @@ public class PlayerDash : MonoBehaviour
                 {
                     await UniTask.Yield(PlayerLoopTiming.FixedUpdate, token);
 
-                    // 컷신이 상태를 바꿨으면 그 자리에서 멈춘다.
                     if (UnitState.Action != _unit.State)
                     {
                         break;
@@ -148,7 +146,6 @@ public class PlayerDash : MonoBehaviour
         }
         catch (OperationCanceledException)
         {
-            // 플레이어가 사라져 대시가 끊긴 경우라 따로 처리하지 않는다.
         }
         finally
         {
@@ -207,7 +204,6 @@ public class PlayerDash : MonoBehaviour
         }
         catch (OperationCanceledException)
         {
-            // 플레이어가 사라져 끊긴 경우라 따로 처리하지 않는다.
         }
         finally
         {

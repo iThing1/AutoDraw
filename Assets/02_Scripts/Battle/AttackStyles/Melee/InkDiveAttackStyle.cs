@@ -4,8 +4,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-// 발밑 잉크로 가라앉았다가, 목표가 있던 자리에 잉크가 번지는 예고를 띄우고 그 자리에서 솟아오르며 친다.
-// 가라앉아 있는 동안은 맞지 않는다. 예고를 보고 비켜서거나 막으면 된다.
+// 발밑 잉크로 가라앉았다가 목표가 있던 자리에서 솟아오르며 친다. 가라앉아 있는 동안은 맞지 않는다.
 [CreateAssetMenu(fileName = "InkDiveAttackStyle", menuName = "Scriptable Objects/AttackStyle/InkDive")]
 public class InkDiveAttackStyle : AttackStyle
 {

@@ -3,8 +3,7 @@ using DG.Tweening;
 using System.Threading;
 using UnityEngine;
 
-// 보통 탄의 움직임. 궤적(포물선·직선·물결) 트윈을 따라 날며 움직이는 목표를 조금씩 따라가고, 빗나가면 날아오던 방향으로 조금 더 날다 사라진다.
-// 탄막은 한 번에 수십 발이 날아서, 탄마다 람다(클로저)를 새로 만들지 않도록 매 프레임 콜백은 처음 붙을 때 한 번만 만든다.
+// 보통 탄의 움직임. 탄마다 클로저를 새로 만들지 않도록 매 프레임 콜백은 처음 붙을 때 한 번만 만든다.
 public class TrajectoryMotion : ProjectileMotion
 {
     // 한 프레임에 거의 안 움직이면 방향이 튀므로, 이만큼 움직인 뒤에 돌린다.
@@ -56,7 +55,6 @@ public class TrajectoryMotion : ProjectileMotion
             .SetEase(Ease.Linear)
             .OnUpdate(_updateFlight);
 
-        // 전투가 끝나 토큰이 취소되면 트윈을 멈추고, 예외를 던지는 대신 isCanceled를 true로 돌려받는다.
         bool isCanceled = await _flight.ToUniTaskKillOnCancel(token).SuppressCancellationThrow();
 
         Vector3 landingPoint = FlightOutcome.Missed != ContactOutcome ? ContactPoint : CachedTransform.position;

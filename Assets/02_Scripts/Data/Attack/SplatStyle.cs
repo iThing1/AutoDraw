@@ -1,7 +1,6 @@
 using UnityEngine;
 
-// 물감 자국의 모양. 공격마다 다른 모양을 고를 수 있게 타격 프리셋이 참조한다.
-// 개수·크기·퍼짐은 같은 공격이라도 일반·치명타마다 달라서 타격 프리셋에 남긴다.
+// 물감 자국의 모양. 개수·크기·퍼짐은 일반·치명타마다 달라서 타격 프리셋에 남긴다.
 [CreateAssetMenu(fileName = "SplatStyle", menuName = "Scriptable Objects/SplatStyle")]
 public class SplatStyle : ScriptableObject
 {

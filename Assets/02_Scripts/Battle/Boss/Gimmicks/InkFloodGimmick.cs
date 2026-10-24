@@ -4,8 +4,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-// 먹물 범람. 보스가 두 손을 들면 종이 전체가 점점 먹물로 덮이고, 끝나는 순간 플레이어 물감 위에 서 있어야 버틴다.
-// 칠한 자리가 없어도 해낼 수 있도록, 시작할 때 플레이어 둘레에 물감 섬 몇 개를 깔아 준다.
+// 먹물 범람. 종이 전체가 먹물로 덮이고, 끝나는 순간 플레이어 물감 위에 서 있어야 버틴다.
 [CreateAssetMenu(fileName = "InkFloodGimmick", menuName = "Scriptable Objects/Boss/Gimmick/InkFlood")]
 public class InkFloodGimmick : PunishingBossGimmick
 {
@@ -13,7 +12,6 @@ public class InkFloodGimmick : PunishingBossGimmick
     [SerializeField, Min(0f)] private float _warnDuration = 4f;
     [SerializeField] private GameObject _floodPrefab;
     [SerializeField] private Color _floodColor = new Color(0.06f, 0.06f, 0.08f, 0.55f);
-    // 종이를 다 덮도록 넉넉히 잡는다.
     [SerializeField, Min(1f)] private float _floodSize = 200f;
 
     [Header("물감 섬")]

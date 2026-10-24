@@ -46,7 +46,6 @@ public class GalleryFrame : GalleryInteractable
         ReleaseSavedPainting();
     }
 
-    // 깨기 전에는 빈 도화지를, 깬 뒤에는 마지막으로 깬 판에서 칠해 찍어 둔 그림을 건다. 이름표에도 깼는지 적는다.
     public void Refresh()
     {
         _cloth.SetActive(IsLocked);
@@ -69,7 +68,6 @@ public class GalleryFrame : GalleryInteractable
         _nameplate.text = isCleared ? string.Format(_clearedNameplateFormat, _stage.DisplayName) : _stage.DisplayName;
     }
 
-    // 새로 깨 그림 파일이 바뀌었으니 다음 Refresh에서 다시 읽게 한다.
     public void MarkPaintingChanged()
     {
         _isPaintingLoaded = false;

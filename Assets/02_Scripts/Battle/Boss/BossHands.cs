@@ -3,11 +3,9 @@ using DG.Tweening;
 using System.Threading;
 using UnityEngine;
 
-// o0o 보스의 두 손. 평소에는 몸통 옆에 떠 있고, 패턴 직전에는 정해진 손동작으로 무엇이 올지 알린다.
-// 손 위치는 보스 기준 로컬 좌표로 움직이며, 게임 시간으로 돌아 히트 스톱 동안에는 함께 멈춘다.
+// 보스의 두 손. 평소에는 몸통 옆에 떠 있고, 패턴 직전에는 손동작으로 무엇이 올지 알린다.
 public class BossHands : MonoBehaviour
 {
-    // 원을 그리는 손동작이 지나는 점 수. 많을수록 둥글다.
     private const int CIRCLE_POINT_COUNT = 8;
 
     [SerializeField] private Transform _leftHand;
@@ -18,7 +16,6 @@ public class BossHands : MonoBehaviour
     [SerializeField, Min(0f)] private float _bobSpeed = 2.5f;
 
     [Header("자세")]
-    // 손을 뻗거나 젖힐 때 쉬는 자리에서 벗어나는 거리.
     [SerializeField, Min(0f)] private float _reachDistance = 2.2f;
     [SerializeField, Min(0f)] private float _raiseHeight = 2.2f;
     [SerializeField, Min(0f)] private float _circleRadius = 0.6f;
@@ -38,8 +35,7 @@ public class BossHands : MonoBehaviour
     [SerializeField, Min(0f)] private float _groggyDuration = 0.4f;
 
     [Header("예고 빛")]
-    // 예고하는 손 뒤에 깔리는 빛. 흰 종이 위에서도 보이게 손마다 색을 정한다(왼손 설치형, 오른손 공격형).
-    // 손 그림의 자식이면 엔딩에서 손이 조각날 때 함께 복제되므로, 보스 바로 아래에 두고 Position Constraint(소스 = 손)로 따라가게 한다.
+    // 손 그림의 자식이면 엔딩에서 손이 조각날 때 함께 복제되므로, 보스 바로 아래에 두고 Position Constraint로 따라가게 한다.
     [SerializeField] private SpriteRenderer _leftGlow;
     [SerializeField] private SpriteRenderer _rightGlow;
     [SerializeField] private Color _leftTellColor = new Color(0.2f, 0.45f, 0.95f, 0.85f);
@@ -170,7 +166,6 @@ public class BossHands : MonoBehaviour
         return pose;
     }
 
-    // 패턴을 쓰는 동안 잡고 있던 자세를 풀고 쉬는 자리로 돌아간다. 돌아간 뒤에 다시 떠 있기 시작한다.
     public void ReturnToRest()
     {
         KillTweens();

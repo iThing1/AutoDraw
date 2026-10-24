@@ -16,7 +16,6 @@ public class UnitAnimationSettings
     // 이만큼 움직일 때마다 한 번 통통 튄다.
     [SerializeField, Min(0.1f)] private float _stepLength = 0.8f;
     [SerializeField, Min(0f)] private float _bobHeight = 0.06f;
-    // 발이 닿을 때 눌리는 정도.
     [SerializeField, Min(0f)] private float _landSquash = 0.08f;
     [SerializeField, Range(0f, 45f)] private float _leanAngle = 8f;
     // 이 속도에서 걸음·기울기가 가장 커진다.
@@ -25,12 +24,10 @@ public class UnitAnimationSettings
     [SerializeField] private bool _flipByDirection;
 
     [Header("반응")]
-    // 공격 때 움츠렸다 늘어나는 정도.
     [SerializeField, Min(0f)] private float _attackSquash = 0.12f;
     [SerializeField, Min(0f)] private float _hitSquash = 0.2f;
     [SerializeField, Min(0f)] private float _guardSquash = 0.1f;
     [SerializeField, Min(0.01f)] private float _reactionDuration = 0.25f;
-    // 대시 동안 가는 쪽으로 늘어나는 정도.
     [SerializeField, Min(0f)] private float _dashStretch = 0.35f;
 
     // 속도·기울기가 바뀌는 빠르기. 클수록 바로 따라간다.

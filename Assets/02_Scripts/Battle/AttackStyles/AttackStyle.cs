@@ -2,8 +2,7 @@ using Cysharp.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
 
-// 공격 하나의 공통 정보(표시, 간격, 게이지). 어떻게 쏘는지는 하위 클래스가 정해,
-// 새 공격 방식은 기존 코드를 고치지 않고 하위 클래스 하나만 추가하면 된다.
+// 공격 하나의 공통 정보(표시, 간격, 게이지). 어떻게 쏘는지는 하위 클래스가 정한다.
 public abstract class AttackStyle : ScriptableObject
 {
     [Header("표시")]

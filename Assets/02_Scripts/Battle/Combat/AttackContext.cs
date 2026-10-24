@@ -1,5 +1,4 @@
-// 공격 패턴·환경 탄막·기믹이 쓰는 전투 정보. 누가 누구를 노리는지, 손과 물감 캔버스, 피해 처리와 발사를 담는다.
-// 언제 쏠지(공격 루프·끊기·쿨타임)는 AutoAttacker가 정하고, 패턴은 이 맥락만 받아 어떻게 쏠지만 정한다. 전투마다 새로 만든다.
+// 공격 패턴·환경 탄막·기믹이 쓰는 전투 정보. 언제 쏠지는 AutoAttacker가 정하고, 패턴은 이 맥락만 받아 어떻게 쏠지만 정한다.
 public class AttackContext
 {
     private readonly BattleUnit _owner;

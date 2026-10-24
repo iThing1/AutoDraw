@@ -21,7 +21,6 @@ public class PauseMenuUI : MonoBehaviour
         OnResume?.Invoke();
     }
 
-    // 에디터에서는 Application.Quit이 동작하지 않아 플레이 모드를 끈다.
     private void HandleQuitClicked()
     {
 #if UNITY_EDITOR

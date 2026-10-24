@@ -6,7 +6,6 @@ using System.Threading;
 using UnityEngine;
 
 // 플레이어 둘레를 격자로 나눠 한 칸씩 걸러 먹물을 떨어뜨리고, 다음에는 반대 칸에 떨어뜨린다.
-// 탄을 쏘지 않고 칸 단위로 판정해, 안전한 칸으로 옮겨 다니게 한다. 격자는 시작할 때 플레이어 자리에 맞춰 고정된다.
 [CreateAssetMenu(fileName = "CheckerHazardPattern", menuName = "Scriptable Objects/Hazard/Checker")]
 public class CheckerHazardPattern : HazardPattern
 {
@@ -91,7 +90,6 @@ public class CheckerHazardPattern : HazardPattern
         }
     }
 
-    // 떨어진 칸이 진하게 번쩍였다가 사라진다. 판정은 이미 끝나 기다리지 않는다.
     private async UniTaskVoid FlashCellAsync(Vector3 center, float size)
     {
         SpriteRenderer cell = PooledSprite.Spawn(_cellPrefab, center, 0f, new Vector2(size, size), _impactColor);

@@ -2,8 +2,7 @@ using DG.Tweening;
 using System;
 using UnityEngine;
 
-// 쓰러진 자리 주변에 칠해진 잉크 자국들에서 그림자 팔이 기어 나와 대상을 움켜쥐고,
-// 가장 많이 붙잡은 잉크 쪽으로 끌고 가 가라앉히는 연출의 값. 팔의 모양(굵기·테두리·손가락)은 팔 프리팹에서 정한다.
+// 먹물 삼킴 연출의 값. 팔의 모양(굵기·테두리·손가락)은 팔 프리팹에서 정한다.
 [Serializable]
 public class InkSwallowSettings
 {
@@ -29,7 +28,6 @@ public class InkSwallowSettings
     // 붙잡을 자리를 대상 중심에서 흩어 놓는 거리. 여러 손이 몸 곳곳을 쥔 것처럼 보이게 한다.
     [SerializeField, Min(0f)] private float _grabSpread = 0.35f;
     [SerializeField] private FloatRange _armStartDelay = new(0f, 0.25f);
-    // 기어 오는 빠르기(초당 거리).
     [SerializeField, Min(0.1f)] private float _crawlSpeed = 9f;
     // 머리가 좌우로 구불거리는 폭과 한 줄에 생기는 굽이 수.
     [SerializeField, Min(0f)] private float _slitherAmplitude = 0.6f;

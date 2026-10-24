@@ -4,8 +4,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-// 몸 둘레에 범위를 예고한 뒤 오른손으로 한 바퀴 크게 휩쓸고, 휩쓴 자리에서 속이 빈 고리가 생겨 종이 끝까지 퍼져 나간다.
-// 가까이 있으면 휩쓸기에, 멀리 있으면 퍼지는 고리에 걸린다. 고리는 피할 틈이 없어 지나가는 순간에 막아야 한다.
+// 몸 둘레를 크게 휩쓸고, 휩쓴 자리에서 속이 빈 고리가 종이 끝까지 퍼져 나간다.
 [CreateAssetMenu(fileName = "BrushSweepAttackStyle", menuName = "Scriptable Objects/AttackStyle/BrushSweep")]
 public class BrushSweepAttackStyle : AttackStyle
 {
@@ -19,24 +18,19 @@ public class BrushSweepAttackStyle : AttackStyle
     [SerializeField, Range(0f, 720f)] private float _sweepAngle = 360f;
     [SerializeField, Min(0.01f)] private float _sweepDuration = 0.35f;
     [SerializeField] private Ease _sweepEase = Ease.OutCubic;
-    // 휩쓰는 시간 중 이 비율에 맞힌다.
     [SerializeField, Range(0f, 1f)] private float _hitTiming = 0.5f;
-    // 칼끝처럼 꼬리를 남기는 프리팹. 돌진 베기의 칼끝을 같이 쓴다.
     [SerializeField] private GameObject _trailPrefab;
     [SerializeField, Min(0f)] private float _trailLingerTime = 0.25f;
 
     [SerializeField] private HitSettings _hit = new();
 
     [Header("퍼지는 고리")]
-    // 속이 빈 고리 선. 프리팹에 반지름 1짜리 원 점이 로컬 좌표로 들어 있어, 크기를 반지름만큼 키워 퍼뜨린다.
-    // 선 굵기는 크기의 영향을 받지 않아 퍼져도 같은 굵기다.
+    // 프리팹에 반지름 1짜리 원 점이 로컬 좌표로 들어 있어, 크기를 반지름만큼 키워 퍼뜨린다.
     [SerializeField] private LineRenderer _ringPrefab;
     [SerializeField] private Color _ringColor = new Color(0.08f, 0.08f, 0.1f, 0.9f);
     [SerializeField, Min(0.05f)] private float _ringWidth = 0.6f;
     [SerializeField, Min(0f)] private float _ringSpeed = 12f;
-    // 종이 끝까지 닿도록 넉넉히 잡는다.
     [SerializeField, Min(0f)] private float _ringMaxRadius = 60f;
-    // 끝으로 갈수록 옅어져, 이 비율부터 사라지기 시작한다.
     [SerializeField, Range(0f, 1f)] private float _ringFadeStart = 0.7f;
     // 고리를 여러 겹 연달아 퍼뜨릴 때의 겹 수와 간격. 막기를 다시 쓸 수 있을 만큼 띄운다.
     [SerializeField, Min(1)] private int _ringCount = 1;
@@ -132,7 +126,6 @@ public class BrushSweepAttackStyle : AttackStyle
         }
     }
 
-    // 게임 시간으로 퍼져 히트 스톱 동안에는 함께 멈춘다. 지나가는 순간 한 번만 맞히고, 방패를 들고 있으면 막힌다.
     private async UniTask ExpandRingAsync(AttackContext context, Vector3 center, float gaugeGain, CancellationToken token)
     {
         if (null == _ringPrefab)

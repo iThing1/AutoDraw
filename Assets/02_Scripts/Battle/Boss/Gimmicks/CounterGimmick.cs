@@ -4,9 +4,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-// 카운터. 보스 오른손이 붉게 빛나고 몸 둘레의 붉은 원이 조여 들며, 원이 다 조여 드는 순간 플레이어에게 돌진한다.
-// 부딪히는 순간 막기로 받아치거나 대시로 피하면 보스가 튕겨 나간다. 정해진 횟수만큼 연달아 받아칠 때까지 돌진을 되풀이하고, 다 채우면 그로기에 빠진다.
-// 받아치지 못하면 연속 횟수가 처음부터 다시 세어지고, 부딪혔다면 그때마다 피해를 입는다. 실패로 끝나는 일은 없다.
+// 카운터. 원이 다 조여 드는 순간 보스가 돌진하고, 정해진 횟수만큼 연달아 받아치면 그로기에 빠진다. 실패로 끝나는 일은 없다.
 [CreateAssetMenu(fileName = "CounterGimmick", menuName = "Scriptable Objects/Boss/Gimmick/Counter")]
 public class CounterGimmick : BossGimmick
 {
@@ -145,7 +143,6 @@ public class CounterGimmick : BossGimmick
         return isCountered;
     }
 
-    // 몸 둘레의 붉은 원이 몸 크기까지 조여 든다. 다 조여 드는 순간 돌진하므로, 원을 보고 막기 타이밍을 잡는다.
     private async UniTask PlayWarnAsync(AttackContext context, CancellationToken token)
     {
         if (null == _warnPrefab)

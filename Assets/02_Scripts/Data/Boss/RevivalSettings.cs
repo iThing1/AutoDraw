@@ -20,7 +20,6 @@ public class RevivalSettings
     [SerializeField] private GameObject _beamPrefab;
     [SerializeField] private Color _beamColor = new Color(0.04f, 0.04f, 0.06f, 0.75f);
     [SerializeField, Min(0f)] private float _beamWidth = 3.2f;
-    // 화면 위 끝에서 내려오도록 넉넉히 잡는다.
     [SerializeField, Min(0f)] private float _beamHeight = 40f;
     [SerializeField, Min(0f)] private float _beamDropDuration = 0.35f;
     [SerializeField, Min(0f)] private float _beamHoldDuration = 0.8f;

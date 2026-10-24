@@ -16,7 +16,7 @@ using UnityEngine;
 // 4. Time.timeScale은 이 클래스 밖에서 바꾸지 않는다.
 public class TimeScaleManager
 {
-    // using 블록이 끝나면 Dispose가 불려 슬로 모션을 푼다. 푸는 길을 이것 하나로 두려고 ClearSlowMotion은 private이다.
+    // 푸는 길을 using 하나로 두려고 ClearSlowMotion은 private이다.
     public readonly struct SlowMotionScope : IDisposable
     {
         private readonly TimeScaleManager _manager;

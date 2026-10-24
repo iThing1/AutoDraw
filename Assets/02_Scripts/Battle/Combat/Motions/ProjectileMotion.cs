@@ -1,7 +1,6 @@
 using UnityEngine;
 
 // 날아가는 투사체의 움직임 하나. 방패·몸에 닿았는지 보는 판정은 여기서 함께 쓰고, 어떻게 움직이는지는 하위 클래스가 정한다.
-// 풀에서 꺼낸 투사체에 붙어 비행 한 번 동안의 상태를 필드로 들어, 탄마다 새로 할당하지 않는다. 새 움직임은 하위 클래스 하나만 추가하면 된다.
 public abstract class ProjectileMotion : MonoBehaviour
 {
     private Transform _transform;

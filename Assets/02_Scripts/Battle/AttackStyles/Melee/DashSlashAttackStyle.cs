@@ -23,7 +23,6 @@ public class DashSlashAttackStyle : AttackStyle
     [SerializeField, Min(0f)] private float _swingRadius = 2.2f;
     [SerializeField, Min(0.01f)] private float _swingDuration = 0.3f;
     [SerializeField] private Ease _swingEase = Ease.OutCubic;
-    // 휘두르는 시간 중 이 비율에 맞힌다. 0.5면 칼이 반쯤 지나갔을 때다.
     [SerializeField, Range(0f, 1f)] private float _hitTiming = 0.5f;
     [SerializeField, Min(0f)] private float _trailLingerTime = 0.3f;
 

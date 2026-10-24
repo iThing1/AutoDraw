@@ -4,13 +4,11 @@ using System.Threading;
 using UnityEngine;
 
 // 보스 공격과 따로, 전투 중 일정 주기로 환경 탄막을 일으킨다.
-// 탄은 보스 자리에서 나오지만 보스 패턴 순서와 상관없이 돌아, 보스의 다른 공격과 겹쳐 나올 수 있다.
 public class EnvironmentHazard : MonoBehaviour
 {
     [SerializeField] private HazardPattern[] _patterns;
     // 전투가 시작되자마자 겹치면 보스 공격을 익힐 틈이 없어, 처음 한 번은 늦게 시작한다.
     [SerializeField, Min(0f)] private float _firstDelay = 8f;
-    // 한 패턴이 끝난 뒤 다음 패턴까지의 간격.
     [SerializeField] private FloatRange _interval = new FloatRange(12f, 18f);
 
     private int _lastPatternIndex = -1;
@@ -32,7 +30,6 @@ public class EnvironmentHazard : MonoBehaviour
         }
     }
 
-    // 게임 시간으로 기다려, 히트 스톱과 슬로 모션 동안에는 다음 패턴도 함께 늦춘다.
     public async UniTask RunAsync(AutoAttacker attacker, CancellationToken token)
     {
         if (null == _patterns || 0 == _patterns.Length)

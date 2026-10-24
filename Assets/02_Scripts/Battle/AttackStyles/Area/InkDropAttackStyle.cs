@@ -5,9 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-// 먹물 방울을 연달아 떨어뜨려 플레이어를 쫓는다. 처음에는 예고가 길고 띄엄띄엄 떨어지다가 갈수록 짧고 촘촘해진다.
-// 떨어질 때까지 플레이어가 움직일 자리를 앞질러 노려, 한 방향으로 계속 달리기만 해서는 피할 수 없다.
-// 떨어진 자리에는 잠깐 웅덩이가 남아 밟으면 느려진다.
+// 먹물 방울을 연달아 떨어뜨려, 플레이어가 움직일 자리를 앞질러 노린다. 떨어진 자리에는 밟으면 느려지는 웅덩이가 남는다.
 [CreateAssetMenu(fileName = "InkDropAttackStyle", menuName = "Scriptable Objects/AttackStyle/InkDrop")]
 public class InkDropAttackStyle : AttackStyle
 {

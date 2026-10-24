@@ -88,7 +88,6 @@ public abstract class UnitMover : MonoBehaviour
         }
         catch (OperationCanceledException)
         {
-            // 전투가 끝나 이동이 멈춘 경우라 따로 처리하지 않는다.
         }
     }
 

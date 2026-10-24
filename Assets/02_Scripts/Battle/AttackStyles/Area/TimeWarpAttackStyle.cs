@@ -2,9 +2,7 @@ using Cysharp.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
 
-// 목표 자리에 회백색 원을 펼쳐, 안에 든 플레이어와 탄을 모두 느리게 한다. 보스는 느려지지 않는다.
-// 원 안으로 쏜 탄은 거의 멈춘 채 쌓였다가, 원이 깨지는 순간 한꺼번에 원래 속도로 날아온다.
-// 원은 스스로 수명을 다하므로 패턴은 펼치기만 하고 바로 끝나, 그동안 보스는 다른 패턴을 이어 쓴다.
+// 목표 자리에 원을 펼쳐 안에 든 플레이어와 탄을 느리게 한다. 원은 스스로 수명을 다하므로 패턴은 펼치기만 하고 바로 끝난다.
 [CreateAssetMenu(fileName = "TimeWarpAttackStyle", menuName = "Scriptable Objects/AttackStyle/TimeWarp")]
 public class TimeWarpAttackStyle : AttackStyle
 {

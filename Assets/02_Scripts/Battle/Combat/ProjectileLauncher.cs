@@ -3,7 +3,6 @@ using System.Threading;
 using UnityEngine;
 
 // 투사체를 쏘고, 날아간 결과(막힘·명중)를 피해 처리로 넘긴다. 패턴은 어디서 어디로 쏠지만 정한다.
-// 전투마다 목표와 피해 처리를 받아 새로 만든다.
 public class ProjectileLauncher
 {
     private readonly BattleUnit _owner;
@@ -18,7 +17,6 @@ public class ProjectileLauncher
         _damage = damage;
     }
 
-    // 목표를 겨눠 쏜다. 맞으면 피해, 타격 연출, 물감 자국, 게이지까지 처리한다.
     public void FireShot(ShotSettings shot, Vector3 start, Vector3 landingOffset, float gaugeGain, CancellationToken token)
     {
         if (false == HasProjectilePrefab())

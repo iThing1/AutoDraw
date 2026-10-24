@@ -2,8 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// 무기 칸 키로 공격을 고르고, 게이지가 가득 차면 스킬 키로 특수 스킬을 발동한다. 키 배치는 입력 에셋에서 바꾼다.
-// 끼운 장비는 전투를 시작할 때 PlayerSetup이 넘겨준다. 바꾼 장비는 다음 전투부터 쓴다.
+// 무기 칸 키로 공격을 고르고, 게이지가 가득 차면 스킬 키로 특수 스킬을 발동한다.
 [RequireComponent(typeof(BattleUnit), typeof(SkillGauge))]
 public class PlayerAttack : MonoBehaviour
 {
@@ -50,7 +49,6 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
-    // 전투를 시작하는 쪽이 플레이어를 만든 직후(Start 전에) 부른다. 첫 무기 선택과 미리 생성이 끼운 장비를 보고 이뤄진다.
     public void Setup(PlayerLoadout loadout, PlayerStats stats, DataTableManager tables, AssetManager assets)
     {
         _skillGauge.Init(stats.SkillGaugeMax);
@@ -138,7 +136,6 @@ public class PlayerAttack : MonoBehaviour
         _slotModifiers[slot] = new WeaponModifier(weapon.DamageBonus + stats.GetWeaponDamageBonus(weapon.Type), weapon.IntervalScale);
     }
 
-    // 끼운 무기와 스킬의 공격을 미리 만든다. 전투 스테이지가 다른 유닛과 함께 부른다.
     public void Prewarm()
     {
         for (int i = 0; i < WEAPON_SLOT_COUNT; i++)

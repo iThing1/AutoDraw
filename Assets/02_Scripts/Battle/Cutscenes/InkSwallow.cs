@@ -4,8 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-// 쓰러진 자리 주변 잉크에서 그림자 팔이 기어 나와 대상을 움켜쥐고, 가장 많이 붙잡은 잉크로 끌고 가 가라앉힌다.
-// 연출 한 번에 하나씩 만들어 상태를 필드로 들고, 팔의 움직임은 InkArm이 맡는다. 슬로 모션 중에도 정해진 시간에 끝나도록 실제 시간으로 돈다.
+// 쓰러진 자리 주변 잉크에서 그림자 팔이 기어 나와 대상을 잉크로 끌고 가 가라앉힌다. 슬로 모션 중에도 정해진 시간에 끝나도록 실제 시간으로 돈다.
 public class InkSwallow
 {
     // 대상 바로 밑 잉크는 팔이 뻗을 거리가 없어 고르지 않고, 서로 너무 가까운 잉크는 같은 방향이라 하나만 고른다.
@@ -172,7 +171,6 @@ public class InkSwallow
         }
     }
 
-    // 팔이 나오기 직전 잉크 자국이 꿈틀해 어디서 나올지 미리 알린다.
     private void TwitchSources()
     {
         for (int i = 0; i < _sources.Count; i++)

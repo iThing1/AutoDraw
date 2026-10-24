@@ -77,7 +77,6 @@ public class BarrageAttackStyle : AttackStyle
         }
     }
 
-    // 포대는 보스를 따라다니도록 보스 아래에 붙이고, 크기 0에서 튀어나오게 한다.
     private List<Transform> SpawnTurrets(Transform owner)
     {
         List<Transform> turrets = new List<Transform>(_turretOffsets.Length);
@@ -126,7 +125,7 @@ public class BarrageAttackStyle : AttackStyle
         }
     }
 
-    // 끝까지 줄어든 뒤 풀로 돌려준다. 보스와 함께 파괴돼 트윈이 끊겨도 여기로 오므로, 남아 있을 때만 돌려준다.
+    // 보스와 함께 파괴돼 트윈이 끊겨도 여기로 오므로, 남아 있을 때만 풀로 돌려준다.
     private async UniTaskVoid HideAndDespawnAsync(Transform turret)
     {
         turret.DOComplete();

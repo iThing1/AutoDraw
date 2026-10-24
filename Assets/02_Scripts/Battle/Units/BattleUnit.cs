@@ -97,9 +97,7 @@ public class BattleUnit : MonoBehaviour
     public AttackStyle AttackStyle { get { return null != _attackStyleOverride ? _attackStyleOverride : GetDataAttackStyle(); } }
     public WeaponModifier WeaponModifier { get { return _weaponModifier; } }
 
-    // 몸 그림의 가로·세로 절반 크기(월드). 렌더러의 bounds는 꺼진 오브젝트나 프리팹에서 0이 되므로, 스프라이트 크기에 스케일을 곱해 읽는다.
-    // 등장 전이라 꺼져 있는 보스와 씬 뷰 기즈모(프리팹)에서도 같은 값이 나온다. 몸 그림이 없으면 0이다.
-    // 그림 자식의 크기는 애니메이션이 늘였다 줄이므로 빼고 Body 크기만 곱해, 판정 범위가 출렁이지 않게 한다.
+    // 렌더러의 bounds는 꺼진 오브젝트나 프리팹에서 0이 되므로 스프라이트 크기에 스케일을 곱해 읽는다. 애니메이션이 늘이는 그림 자식의 크기는 빼, 판정 범위가 출렁이지 않게 한다.
     public Vector2 GetBodyExtents()
     {
         if (null == _bodyRenderer || null == _bodyRenderer.sprite)

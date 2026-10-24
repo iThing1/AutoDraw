@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine.Video;
 
 // 장비 화면에 보일 값. 칸 규칙(LoadoutRule)마다 버튼 ViewModel을 만들어 두고, 장비가 바뀌면 상태만 다시 매긴다.
-// 화면을 여는 쪽이 만들고, 닫을 때 UnBind로 장비 구독을 푼다.
 public class LoadoutViewModel : GalleryScreenViewModel
 {
     private const string LOCKED_NOTE = "Locked.";
@@ -14,7 +13,6 @@ public class LoadoutViewModel : GalleryScreenViewModel
     private VideoClip _preview;
 
     public IReadOnlyList<LoadoutSlotViewModel> Slots { get { return _slots; } }
-    // 마지막으로 고른 장비의 설명.
     public string Description { get { return _description; } }
     // 마지막으로 고른 장비의 공격 예시 영상. 없으면 null이다.
     public VideoClip Preview { get { return _preview; } }

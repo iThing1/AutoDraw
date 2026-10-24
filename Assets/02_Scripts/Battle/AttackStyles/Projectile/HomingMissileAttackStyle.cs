@@ -54,7 +54,7 @@ public class HomingMissileAttackStyle : AttackStyle
         }
     }
 
-    // 게임 시간으로 날아 히트 스톱 동안에는 함께 멈춘다. 전투가 끝나 취소되면 터지지 않고 사라진다.
+    // 전투가 끝나 취소되면 터지지 않고 사라진다.
     private async UniTaskVoid FlyMissileAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         AttackTarget target = context.Target;
@@ -85,7 +85,6 @@ public class HomingMissileAttackStyle : AttackStyle
         }
         catch (OperationCanceledException)
         {
-            // 전투가 끝나 날던 미사일이 취소된 경우라 터뜨리지 않는다.
         }
         finally
         {

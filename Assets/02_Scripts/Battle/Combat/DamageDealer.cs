@@ -1,7 +1,6 @@
 using UnityEngine;
 
-// 공격이 목표에 닿았을 때의 처리를 맡는다. 피해를 굴리고, 명중 반경·방패로 맞았는지 가린 뒤, 체력·타격 연출·물감 자국·게이지까지 한 번에 처리한다.
-// 언제 쏠지는 AutoAttacker가 정하고, 맞히는 규칙을 바꿀 때는 여기만 고친다. 전투마다 목표와 캔버스를 받아 새로 만든다.
+// 공격이 목표에 닿았을 때의 처리. 맞히는 규칙을 바꿀 때는 여기만 고친다.
 public class DamageDealer
 {
     private readonly BattleUnit _owner;
@@ -36,7 +35,6 @@ public class DamageDealer
         return new DamageDealer(owner, skillGauge, target, paintCanvas, true);
     }
 
-    // 스킬은 무기 보정을 받지 않는다.
     public static DamageDealer ForSkill(BattleUnit owner, SkillGauge skillGauge, AttackTarget target, PaintCanvas paintCanvas)
     {
         return new DamageDealer(owner, skillGauge, target, paintCanvas, false);
@@ -64,7 +62,6 @@ public class DamageDealer
         HitFeedbackPlayer.Play(hit.GetHitFeedback(damage.IsCritical), _target.Unit, damage, _paintCanvas);
     }
 
-    // 범위 공격. 폭발 반경 안에 목표가 있으면 목표 자리에 맞고, 방패를 들고 있으면 막힌다.
     public void Blast(HitSettings hit, Vector3 center, float radius, float gaugeGain)
     {
         if (false == _target.IsInBlast(center, radius))

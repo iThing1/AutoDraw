@@ -14,7 +14,7 @@ public class BattleStage : MonoBehaviour
     [SerializeField] private BattleUnit _bossPrefab;
 
     [Header("스테이지 영역")]
-    // 바닥 종이 영역. 비워 두면 카메라와 유닛 이동을 제한하지 않는다.
+    // 비워 두면 카메라와 유닛 이동을 제한하지 않는다.
     [SerializeField] private StageArea _stageArea;
 
     [Header("접근")]
@@ -37,12 +37,10 @@ public class BattleStage : MonoBehaviour
     [SerializeField] private ResultUI _resultPrefab;
 
     [Header("사운드")]
-    // 보스가 나올 때 틀고, 승패가 나면 줄여 끈다.
     [SerializeField] private AudioClip _bgm;
     [SerializeField, Min(0f)] private float _bgmFadeDuration = 1f;
 
     [Header("풀")]
-    // 첫 공격 때 투사체가 한꺼번에 생성되며 끊기지 않도록 유닛마다 미리 만들어 둘 개수.
     [SerializeField, Min(0)] private int _projectilePrewarmCount = 20;
 
     private BattleUnit _player;
@@ -98,8 +96,7 @@ public class BattleStage : MonoBehaviour
 
     private bool HasRequiredReferences()
     {
-        // 빠지면 전투를 시작할 수 없는 것만 여기서 묻는다. 빠져도 그 기능만 꺼지는 부품(막기·공격 등)은 스스로 Awake에서 알린다.
-        // 앞에서부터 확인해 처음 비어 있는 참조에서 멈춘다.
+        // 빠지면 전투를 시작할 수 없는 것만 여기서 묻는다. 나머지 부품은 스스로 Awake에서 알린다.
         bool hasAllReferences = IsAssigned(_playerSpawnPoint, nameof(_playerSpawnPoint))
             && IsAssigned(_bossSpawnPoint, nameof(_bossSpawnPoint))
             && IsAssigned(_playerPrefab, nameof(_playerPrefab))
@@ -254,7 +251,6 @@ public class BattleStage : MonoBehaviour
         }
         catch (OperationCanceledException)
         {
-            // 씬을 벗어나 연출이 중간에 끊긴 경우라 따로 처리하지 않는다.
         }
     }
 
@@ -279,7 +275,6 @@ public class BattleStage : MonoBehaviour
 
     private async UniTask<bool> PlayBattleAsync(CancellationToken token)
     {
-        // 전투 HUD는 전투에서만 쓰므로 전투 스테이지가 직접 열고, 엔딩이 시작되면 닫는다.
         _hud = GameManager.UI.Open(_hudPrefab, UILayer.HUD);
         _hudViewModel = new BattleHudViewModel(_player, _boss);
         _hud.Bind(_hudViewModel);
@@ -394,7 +389,6 @@ public class BattleStage : MonoBehaviour
         }
     }
 
-    // 승리·패배 결과 흐름을 직접 깨거나 져 보지 않고, 플레이 중 컴포넌트 우클릭 메뉴로 바로 확인한다.
     [ContextMenu("테스트/플레이어 처치")]
     private void KillPlayerForTest()
     {
@@ -417,7 +411,7 @@ public class BattleStage : MonoBehaviour
         unit.Health.TakeDamage(new DamageInfo { Amount = unit.Health.CurrentHp, HitPoint = unit.Body.position });
     }
 
-    // 여백을 바꿀 때 유닛별 이동 범위를 씬 뷰에서 바로 확인하기 위해 그린다. 하늘색은 플레이어, 빨간색은 보스다.
+    // 하늘색은 플레이어, 빨간색은 보스의 이동 범위다.
     private void OnDrawGizmosSelected()
     {
         if (null != _stageArea)

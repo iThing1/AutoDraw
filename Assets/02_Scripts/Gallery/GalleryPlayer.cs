@@ -39,7 +39,6 @@ public class GalleryPlayer : MonoBehaviour
     public event Action<GalleryInteractable> OnFocusChanged;
     public event Action<GalleryInteractable> OnInteract;
 
-    // HUD에 보여 줄 상호작용 키 이름. 입력 에셋에서 키를 바꾸면 따라 바뀐다.
     public string InteractKeyLabel { get { return _interactAction.GetKeyLabel(); } }
     public bool IsControlEnabled { get { return _isControlEnabled; } }
 
@@ -165,7 +164,6 @@ public class GalleryPlayer : MonoBehaviour
         Vector2 input = Vector2.ClampMagnitude(_moveAction.action.ReadValue<Vector2>(), 1f);
         Vector3 direction = transform.right * input.x + transform.forward * input.y;
 
-        // SimpleMove는 초당 속도를 받아 중력까지 알아서 더해 준다.
         _controller.SimpleMove(direction * _moveSpeed);
     }
 
@@ -182,7 +180,6 @@ public class GalleryPlayer : MonoBehaviour
         SetFocus(target);
     }
 
-    // 바라보던 물건의 강조를 끄고 새로 바라보는 물건을 강조한다.
     private void SetFocus(GalleryInteractable target)
     {
         if (target == _focused)

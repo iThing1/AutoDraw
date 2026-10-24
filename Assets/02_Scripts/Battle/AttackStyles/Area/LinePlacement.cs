@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// 목표 옆을 조금 비켜 지나는 무작위 직선. 선 공격(먹선 긋기, 그림자 돌진)이 함께 쓴다.
+// 목표 옆을 조금 비켜 지나는 무작위 직선.
 public readonly struct LinePlacement
 {
     public readonly Vector3 Center;

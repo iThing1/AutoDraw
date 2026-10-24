@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 전투 HUD 전체에 보일 값. 체력바·하단 칸의 ViewModel을 만들어 품고, 남은 페이즈 수와 떠오르는 문구를 맡는다.
-// 전투를 시작하는 쪽이 플레이어와 보스를 넘겨 만들고, HUD를 닫을 때 UnBind로 하위 ViewModel까지 함께 푼다.
+// 전투 HUD 전체에 보일 값. 체력바·하단 칸의 ViewModel을 만들어 품고, UnBind로 함께 푼다.
 public class BattleHudViewModel : ViewModelBase
 {
     private readonly HealthBarViewModel _playerHealth;
@@ -18,7 +17,6 @@ public class BattleHudViewModel : ViewModelBase
     private GuardState _guard;
     private BossPhaseMachine _bossPhases;
 
-    // 맞을 때마다 피해 숫자를 띄운다.
     public event Action<DamageInfo> OnDamageText;
     // 막기·게이지 부족·기믹 결과 문구를 월드 위치에 띄운다.
     public event Action<FloatingTextKind, Vector3> OnFloatingText;

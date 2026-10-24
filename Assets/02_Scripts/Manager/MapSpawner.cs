@@ -102,7 +102,6 @@ public class MapSpawner : MonoBehaviour
         await FinishMoveAsync(token);
     }
 
-    // 스테이지를 통째로 새로 만들어 지난 판의 상태가 남지 않게 한다.
     private async UniTaskVoid RestartStageAsync(CancellationToken token)
     {
         _isMoving = true;

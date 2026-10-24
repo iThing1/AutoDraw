@@ -4,9 +4,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-// 암흑. 먹물이 화면을 뒤덮어 플레이어 둘레만 동그랗게 보이고, 보스가 어둠 속에서 자리를 옮겨 가며 탄막을 쏟아붓는다.
-// 보스는 쏠 때마다 플레이어 둘레 아무 데로나 옮겨, 사방으로 퍼지는 탄과 플레이어를 노리는 탄을 함께 쏜다. 쏘기 직전 그 자리가 번쩍여 방향을 알린다.
-// 시간이 갈수록 보이는 구멍이 좁아지고 쏘는 간격이 짧아진다. 따로 실패는 없고 끝까지 버티면 어둠이 걷히며 그로기로 이어진다.
+// 암흑. 화면이 먹물로 덮여 플레이어 둘레만 보이고, 보스가 어둠 속에서 자리를 옮겨 가며 탄막을 쏜다. 끝까지 버티면 그로기로 이어진다.
 [CreateAssetMenu(fileName = "DarknessGimmick", menuName = "Scriptable Objects/Boss/Gimmick/Darkness")]
 public class DarknessGimmick : BossGimmick
 {
@@ -24,7 +22,6 @@ public class DarknessGimmick : BossGimmick
     [SerializeField, Range(0.1f, 1f)] private float _endScale = 0.6f;
 
     [Header("숨어서 쏘기")]
-    // 쏠 때마다 보스가 플레이어 둘레 이 거리 안 아무 데로나 옮긴다.
     [SerializeField] private FloatRange _repositionDistance = new FloatRange(7f, 11f);
     // 옮긴 자리가 번쩍이고 이만큼 뒤에 쏜다. 이펙트 층이라 어둠 위로 보인다.
     [SerializeField, Min(0f)] private float _cueDuration = 0.35f;
@@ -38,7 +35,6 @@ public class DarknessGimmick : BossGimmick
     [SerializeField] private ShotSettings _shot = new();
 
     [Header("조준탄")]
-    // 사방 탄과 함께 플레이어를 노리는 빠른 부채꼴.
     [SerializeField, Min(0)] private int _aimedShotCount = 5;
     [SerializeField, Range(0f, 180f)] private float _aimedSpread = 30f;
     [SerializeField] private ShotSettings _aimedShot = new();
@@ -79,7 +75,6 @@ public class DarknessGimmick : BossGimmick
             float nextBurst = 0f;
             bool isCueing = false;
 
-            // 게임 시간으로 돌아 히트 스톱 동안에는 함께 멈춘다. 구멍은 매 프레임 플레이어를 따라가며 점점 좁아진다.
             while (elapsed < _duration && false == context.Target.IsDefeated)
             {
                 float progress = elapsed / _duration;
@@ -126,7 +121,6 @@ public class DarknessGimmick : BossGimmick
         }
     }
 
-    // 어둠 속에서 보스가 플레이어 둘레 아무 데로나 옮긴다. 어둠이 유닛을 덮어 옮기는 모습은 보이지 않는다.
     // 플레이어가 구석에 있으면 바깥쪽 자리가 이동 범위로 잘려 코앞이 되므로, 잘린 뒤에도 최소 거리가 남는 방향을 다시 뽑는다.
     private void Reposition(AttackContext context)
     {
@@ -173,7 +167,6 @@ public class DarknessGimmick : BossGimmick
         darkness.DOFade(alpha, _fadeDuration);
     }
 
-    // 보스 자리에서 사방으로 한 바퀴 퍼뜨리고, 플레이어 쪽으로 빠른 부채꼴을 함께 쏜다.
     private void FireBurst(AttackContext context, CancellationToken token)
     {
         Vector3 origin = context.Owner.Body.position;

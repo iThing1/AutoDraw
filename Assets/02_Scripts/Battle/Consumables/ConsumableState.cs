@@ -1,7 +1,6 @@
 using System;
 
-// 끼운 소모품 하나의 남은 횟수와 쿨타임. 전투를 시작할 때 표 값에 특성 보너스를 더해 만든다.
-// 입력과 효과는 PlayerConsumable이 맡고, 화면은 이 상태만 보고 소모품 칸을 그린다. 시간은 부르는 쪽이 넘긴다(게임 시간).
+// 끼운 소모품 하나의 남은 횟수와 쿨타임. 시간은 부르는 쪽이 넘긴다(게임 시간).
 public class ConsumableState
 {
     private readonly ConsumableData _data;
@@ -12,7 +11,6 @@ public class ConsumableState
     private float _cooldownRatio = 1f;
 
     public event Action OnUsed;
-    // 남은 횟수나 쿨타임 비율이 바뀌었다.
     public event Action OnChanged;
 
     public ConsumableData Data { get { return _data; } }
@@ -46,7 +44,6 @@ public class ConsumableState
         OnChanged?.Invoke();
     }
 
-    // 매 프레임 불러도 쿨타임이 다 찼으면 아무 일도 하지 않는다.
     public void Tick(float now)
     {
         if (1f <= _cooldownRatio)

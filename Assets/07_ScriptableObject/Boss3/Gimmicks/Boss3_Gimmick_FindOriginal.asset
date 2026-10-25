@@ -1,0 +1,100 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73d2b9fac53a40129f3c9ff120b871ea, type: 3}
+  m_Name: Boss3_Gimmick_FindOriginal
+  m_EditorClassIdentifier: Assembly-CSharp::FindOriginalGimmick
+  _failHit:
+    _projectileScale: 1
+    _trajectories:
+    - _type: 1
+      _weight: 1
+      _height:
+        _min: 0
+        _max: 0
+      _duration:
+        _min: 0.3
+        _max: 0.35
+      _useSpeed: 0
+      _speed:
+        _min: 10
+        _max: 10
+    _homing: 0
+    _missTravelTime: 0
+    _trailTime: 0
+    _trailWidth: 0.1
+    _useTrailColor: 1
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
+    _damage:
+      _min: 30
+      _max: 36
+    _criticalChance: 0
+    _criticalMultiplier: 2
+    _normalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+    _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+  _framePrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
+  _frameSize: {x: 3, y: 3.8}
+  _edgeWidth: 0.25
+  _slotOffset: {x: 5, y: 3.5}
+  _edgeColor: {r: 0.1, g: 0.1, b: 0.12, a: 1}
+  _fillColor: {r: 0.1, g: 0.1, b: 0.12, a: 0.18}
+  _appearDuration: 0.4
+  _hideDuration: 0.8
+  _shuffleDelay: 0.6
+  _swapCount: 6
+  _firstSwapDuration: 0.55
+  _lastSwapDuration: 0.3
+  _doubleSwapFrom: 3
+  _swapArc: 1.5
+  _swapImpact:
+    _shakeForce: 0.2
+    _sounds:
+    - {fileID: 8300000, guid: bc241be328531014fa49af9c462337f0, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 0}
+    _effectColor: {r: 0, g: 0, b: 0, a: 1}
+    _effectScale: 1
+    _effectLifetime: 2
+  _glintPrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
+  _glintColor: {r: 1, g: 0.82, b: 0.3, a: 1}
+  _glintSize: 0.4
+  _glintInset: 0.5
+  _glintInterval: 1.2
+  _glintDuration: 0.25
+  _chooseDuration: 3
+  _selectColor: {r: 0.95, g: 0.72, b: 0.2, a: 1}
+  _revealDuration: 0.35
+  _revealImpact:
+    _shakeForce: 1
+    _sounds:
+    - {fileID: 8300000, guid: 50fd2ff187c1bb349a27ed90afbb8560, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0, g: 0, b: 0, a: 1}
+    _effectScale: 2
+    _effectLifetime: 2
+  _counterImpact:
+    _shakeForce: 1.2
+    _sounds:
+    - {fileID: 8300000, guid: 1daae339c06742e4c8074055986fb3f8, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0, g: 0, b: 0, a: 1}
+    _effectScale: 2
+    _effectLifetime: 2
+  _resultHold: 0.6
+  _fadeDuration: 0.4

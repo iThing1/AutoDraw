@@ -47,6 +47,8 @@ public class BossPhaseMachine : MonoBehaviour
     public event Action<bool> OnGimmickFinished;
     // 부활 연출이 시작되면 true, 끝나면 false. 그동안 플레이어를 멈추는 일은 전투를 맡은 쪽이 한다.
     public event Action<bool> OnRevivalChanged;
+    // 플레이어 공격을 멈추는 기믹(PausesTargetAttack)이 시작되면 true, 끝나면 false. 멈추는 일은 전투를 맡은 쪽이 한다.
+    public event Action<bool> OnTargetAttackPauseChanged;
 
     public BossPhaseState State { get { return _state; } }
     public int RemainingPhaseCount { get { return _phases.Length - _phaseIndex; } }
@@ -164,9 +166,27 @@ public class BossPhaseMachine : MonoBehaviour
             return false;
         }
 
-        using (_unit.Health.BeginInvulnerable())
+        bool pausesTarget = gimmick.PausesTargetAttack;
+
+        if (pausesTarget)
         {
-            return await gimmick.PlayAsync(_unit.Attacker.Context, token);
+            OnTargetAttackPauseChanged?.Invoke(true);
+        }
+
+        try
+        {
+            using (_unit.Health.BeginInvulnerable())
+            {
+                return await gimmick.PlayAsync(_unit.Attacker.Context, token);
+            }
+        }
+        finally
+        {
+            // 기믹이 끊겨도 멈춘 공격을 다시 켠다.
+            if (pausesTarget)
+            {
+                OnTargetAttackPauseChanged?.Invoke(false);
+            }
         }
     }
 

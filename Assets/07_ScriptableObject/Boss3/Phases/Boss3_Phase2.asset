@@ -16,7 +16,11 @@ MonoBehaviour:
   _attackStyle: {fileID: 11400000, guid: c5471f3cb4e8494bbd809b5652aa1cf6, type: 2}
   _colorSegments:
   - _from: {r: 0.06, g: 0.06, b: 0.06, a: 1}
+    _to: {r: 0.035, g: 0.035, b: 0.035, a: 1}
+  - _from: {r: 0.025, g: 0.025, b: 0.025, a: 1}
     _to: {r: 0, g: 0, b: 0, a: 1}
-  _gimmickLines: []
+  _gimmickLines:
+  - _hpRatio: 0.66
+    _gimmick: {fileID: 11400000, guid: 3b328b87fd6e46e2a6ba6a2609cd7392, type: 2}
   _bannerTitle: FORGERY COMPLETE
   _bannerSubtitle: The original fades

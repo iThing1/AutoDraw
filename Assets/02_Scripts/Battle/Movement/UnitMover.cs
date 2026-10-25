@@ -67,6 +67,14 @@ public abstract class UnitMover : MonoBehaviour
         _hasMoveArea = true;
     }
 
+    // 범위를 지정하지 않았으면 false다.
+    public bool TryGetMoveArea(out Rect area)
+    {
+        area = _moveArea;
+
+        return _hasMoveArea;
+    }
+
     public async UniTask RunAsync(CancellationToken token)
     {
         OnRunStarted();

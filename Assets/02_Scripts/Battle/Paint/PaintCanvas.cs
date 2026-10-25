@@ -6,7 +6,8 @@ using UnityEngine;
 
 // 맞은 자리 주변에 물감 자국을 찍어 전장을 점점 칠한다. 자국은 텍스처 두 장에 구워 개수 상한 없이 남는다.
 // 아래 장에는 플레이어 물감만, 위 장에는 잉크와 물감을 찍힌 순서대로 그려 나중에 칠한 물감이 잉크를 덮어 보인다.
-// 위 장만 흐리거나 다시 그리면 물감은 남기고 잉크만 지울 수 있다. 판정은 텍스처를 읽지 않고 기록(PaintMark)으로 한다.
+// 위 장만 흐리거나 다시 그리면 물감은 남기고 잉크만 지울 수 있다. 물감을 지울 때는 두 장을 모두 다시 그린다.
+// 판정은 텍스처를 읽지 않고 기록(PaintMark)으로 한다.
 public class PaintCanvas : MonoBehaviour
 {
     private const string BAKE_SHADER = "Sprites/Default";
@@ -282,6 +283,41 @@ public class PaintCanvas : MonoBehaviour
         }
     }
 
+    // 원 안에 걸친 플레이어 물감을 지우고, 지운 자국을 removed에 담는다(자리·색은 지운 뒤에도 남아 있다).
+    // 잉크는 그대로 두고, 두 장을 지운 물감 없이 다시 그린다. 지운 물감은 클리어 그림에서도 사라진다.
+    public void RemovePaintAround(Vector3 center, float radius, List<PaintMark> removed)
+    {
+        bool hasRemoved = false;
+
+        for (int i = 0; i < _marks.Count; i++)
+        {
+            PaintMark paint = _marks[i];
+
+            if (paint.IsInk || false == paint.Overlaps(center, radius))
+            {
+                continue;
+            }
+
+            paint.MarkRemoved();
+            removed.Add(paint);
+            hasRemoved = true;
+
+            // 롤러 띠는 다시 띄울 그림이 없어 흐려지지 않고 바로 사라진다.
+            if (false == TryStopAppearing(paint, _removeFadeDuration) && null != paint.Sprite)
+            {
+                SpawnLiveSplat(paint).FadeOutAndDespawn(_removeFadeDuration);
+            }
+        }
+
+        // 지울 때마다 목록 중간에서 빼면 뒤쪽을 매번 당겨야 해, 표시만 해 두고 한 번에 뺀다.
+        if (hasRemoved)
+        {
+            _marks.RemoveAll(IS_REMOVED);
+            RedrawPaintLayer();
+            RedrawTopLayer();
+        }
+    }
+
     // 잉크 웅덩이가 꿈틀하는 연출. 구운 그림은 움직일 수 없어 같은 모양을 위에 잠깐 띄워 흔든다.
     // 물감에 덮인 잉크는 띄우면 물감 위로 튀어 보이므로 흔들지 않는다.
     public void Twitch(PaintMark mark, float strength, float duration, bool isRealtime)
@@ -399,6 +435,25 @@ public class PaintCanvas : MonoBehaviour
 
         _topLayer.Draw(mark);
         mark.MarkBaked();
+    }
+
+    // 지운 물감을 뺀 남은 물감을 다시 그린다. 아래 장에는 물감만 있어 순서는 상관없다.
+    private void RedrawPaintLayer()
+    {
+        if (null == _paintLayer)
+        {
+            return;
+        }
+
+        _paintLayer.Clear();
+
+        for (int i = 0; i < _marks.Count; i++)
+        {
+            if (_marks[i].IsBaked && false == _marks[i].IsInk)
+            {
+                _paintLayer.Draw(_marks[i]);
+            }
+        }
     }
 
     // 지운 잉크를 뺀 남은 자국을 찍힌 순서대로 다시 그린다. 아직 커지는 중인 자국은 다 커지면 따로 굽는다.

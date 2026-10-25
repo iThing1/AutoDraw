@@ -24,7 +24,18 @@ public class ProjectileLauncher
             return;
         }
 
-        FireShotAsync(_owner.Data.ProjectilePrefab, shot, start, _target.GetAimPoint(landingOffset), gaugeGain, token).Forget();
+        FireShotAsync(_owner.Data.ProjectilePrefab, shot, start, _target.GetAimPoint(landingOffset), null, gaugeGain, token).Forget();
+    }
+
+    // 탄을 물감 색 대신 tint로 칠해 쏜다. 빼앗은 플레이어 물감을 되쏘는 것처럼 겉모습만 바꿀 때 쓰고, 맞은 자리에 남는 자국은 그대로다.
+    public void FireShot(ShotSettings shot, Vector3 start, Vector3 landingOffset, Color tint, float gaugeGain, CancellationToken token)
+    {
+        if (false == HasProjectilePrefab())
+        {
+            return;
+        }
+
+        FireShotAsync(_owner.Data.ProjectilePrefab, shot, start, _target.GetAimPoint(landingOffset), tint, gaugeGain, token).Forget();
     }
 
     // 목표를 겨누지 않고 정해진 방향으로 사거리만큼 날린다. 날아가는 길에 목표가 닿으면 맞는다.
@@ -45,7 +56,7 @@ public class ProjectileLauncher
 
         Vector3 end = start + (Vector3)(direction.normalized * range);
 
-        FireShotAsync(projectilePrefab, shot, start, end, gaugeGain, token).Forget();
+        FireShotAsync(projectilePrefab, shot, start, end, null, gaugeGain, token).Forget();
     }
 
     // 목표가 아닌 고정된 지점으로 날린다. 파편이 갈라지는 공중 지점처럼 맞히지 않는 비행에 쓴다.
@@ -61,12 +72,13 @@ public class ProjectileLauncher
         return FlightOutcome.Arrived == flight.Outcome;
     }
 
-    private async UniTaskVoid FireShotAsync(GameObject projectilePrefab, ShotSettings shot, Vector3 start, Vector3 end, float gaugeGain,
+    // tint가 없으면 탄을 맞은 자리에 남을 물감 색으로 칠한다.
+    private async UniTaskVoid FireShotAsync(GameObject projectilePrefab, ShotSettings shot, Vector3 start, Vector3 end, Color? tint, float gaugeGain,
         CancellationToken token)
     {
         DamageInfo damage = _damage.RollDamage(shot.Hit);
 
-        FlightResult flight = await ProjectileFlight.FlyAsync(projectilePrefab, shot, start, end, _target, damage.PaintColor, token);
+        FlightResult flight = await ProjectileFlight.FlyAsync(projectilePrefab, shot, start, end, _target, tint ?? damage.PaintColor, token);
 
         if (FlightOutcome.Blocked == flight.Outcome)
         {

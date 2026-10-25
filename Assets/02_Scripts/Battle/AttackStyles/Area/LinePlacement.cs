@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 // 목표 옆을 조금 비켜 지나는 무작위 직선.
@@ -23,5 +24,13 @@ public readonly struct LinePlacement
         Vector3 center = target + side * Random.Range(-offsetRange, offsetRange);
 
         return new LinePlacement(center, angle, along);
+    }
+
+    // 가운데에서 양쪽으로 절반씩 뻗은 길. 뒤집으면 반대쪽 끝에서 출발한다.
+    public Polyline ToPath(float length, bool isReversed)
+    {
+        Vector3 half = Along * (length * 0.5f * (isReversed ? -1f : 1f));
+
+        return new Polyline(new List<Vector3> { Center - half, Center + half });
     }
 }

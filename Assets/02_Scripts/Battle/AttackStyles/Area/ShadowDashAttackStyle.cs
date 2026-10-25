@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -21,12 +20,8 @@ public class ShadowDashAttackStyle : AttackStyle
     [SerializeField, Min(0f)] private float _warnDuration = 0.8f;
 
     [Header("돌진")]
-    [SerializeField] private GameObject _shadowPrefab;
-    [SerializeField] private Color _shadowColor = new Color(0.02f, 0.02f, 0.03f, 1f);
-    [SerializeField, Min(0.1f)] private float _shadowDiameter = 2.2f;
-    [SerializeField, Min(0.1f)] private float _dashSpeed = 45f;
+    [SerializeField] private ShadowRunSettings _shadow = new();
     [SerializeField, Min(0f)] private float _dashInterval = 0.35f;
-    [SerializeField] private HitSettings _hit = new();
 
     public override void Prewarm()
     {
@@ -35,9 +30,9 @@ public class ShadowDashAttackStyle : AttackStyle
             GameManager.Pool.Prewarm(_telegraphPrefab, _dashCount * 2);
         }
 
-        if (null != _shadowPrefab)
+        if (null != _shadow.Prefab)
         {
-            GameManager.Pool.Prewarm(_shadowPrefab, _dashCount);
+            GameManager.Pool.Prewarm(_shadow.Prefab, _dashCount);
         }
     }
 
@@ -58,45 +53,10 @@ public class ShadowDashAttackStyle : AttackStyle
 
     private async UniTask DashAsync(AttackContext context, LinePlacement line, float warnDuration, float gaugeGain, CancellationToken token)
     {
-        await Telegraph.PlayLineAsync(_telegraphPrefab, line.Center, line.Angle, _length, _shadowDiameter, _telegraphColor, warnDuration, token);
+        await Telegraph.PlayLineAsync(_telegraphPrefab, line.Center, line.Angle, _length, _shadow.Diameter, _telegraphColor, warnDuration, token);
 
-        if (null == _shadowPrefab)
-        {
-            return;
-        }
+        Polyline path = line.ToPath(_length, 0.5f > Random.value);
 
-        float direction = 0.5f > UnityEngine.Random.value ? -1f : 1f;
-        Vector3 start = line.Center - line.Along * (_length * 0.5f * direction);
-        Vector3 velocity = line.Along * (_dashSpeed * direction);
-        float radius = _shadowDiameter * 0.5f;
-
-        SpriteRenderer shadow = PooledSprite.Spawn(_shadowPrefab, start, 0f, new Vector2(_shadowDiameter, _shadowDiameter), _shadowColor);
-        AttackTarget target = context.Target;
-        float travelled = 0f;
-        bool hasStruck = false;
-
-        try
-        {
-            while (travelled < _length)
-            {
-                Vector3 previous = shadow.transform.position;
-                Vector3 step = velocity * Time.deltaTime;
-
-                shadow.transform.position = previous + step;
-                travelled += step.magnitude;
-
-                if (false == hasStruck && target.IsTouchingSegment(previous, shadow.transform.position, radius))
-                {
-                    hasStruck = true;
-                    context.Damage.Strike(_hit, target.GetAimPoint(Vector3.zero), gaugeGain);
-                }
-
-                await UniTask.Yield(PlayerLoopTiming.Update, token);
-            }
-        }
-        finally
-        {
-            PooledSprite.Despawn(shadow);
-        }
+        await ShadowRun.RunAsync(context, _shadow, path, gaugeGain, token);
     }
 }

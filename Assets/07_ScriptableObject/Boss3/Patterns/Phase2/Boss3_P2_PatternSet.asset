@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fd1951a92c4fc9b2296841c8dcf5cca, type: 3}
+  m_Name: Boss3_P2_PatternSet
+  m_EditorClassIdentifier: Assembly-CSharp::AttackStyleSet
+  _displayName: Boss3 Phase2
+  _iconColor: {r: 0.08, g: 0.08, b: 0.1, a: 1}
+  _attackInterval: 1
+  _gaugeGainPerHit: 0
+  _waitUntilFinished: 0
+  _stopsMovement: 0
+  _tell: 0
+  _tellDuration: 0.5
+  _entries:
+  - _style: {fileID: 11400000, guid: 273e4ce25933826c582def6a6f3a0753, type: 2}
+    _weight: 22
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 0
+  - _style: {fileID: 11400000, guid: 6b42841850cfe2572dd857de6b22ad1f, type: 2}
+    _weight: 16
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 6
+  - _style: {fileID: 11400000, guid: 43f3940e71f82f665f2be711eef0da34, type: 2}
+    _weight: 16
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 8
+  - _style: {fileID: 11400000, guid: 67422b6e5b81b7b252ce3a82db964b85, type: 2}
+    _weight: 14
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 8
+  - _style: {fileID: 11400000, guid: 53ba763e827cb9127c9fd7dc7bf0fc26, type: 2}
+    _weight: 12
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 10
+  - _style: {fileID: 11400000, guid: ad9e53fa647cfd6befbf1381ee7f0295, type: 2}
+    _weight: 12
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 8
+  - _style: {fileID: 11400000, guid: e3b9d9e6c307a417669e789f9f69e13a, type: 2}
+    _weight: 200
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 10
+  - _style: {fileID: 11400000, guid: 905327189d4be36fe0813eb57cfef1d9, type: 2}
+    _weight: 200
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 10

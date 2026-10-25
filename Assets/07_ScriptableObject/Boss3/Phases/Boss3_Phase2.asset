@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfe8f9cbb80f4d0fb428f2681541854d, type: 3}
+  m_Name: Boss3_Phase2
+  m_EditorClassIdentifier: Assembly-CSharp::BossPhaseData
+  _hpRatio: 0.9
+  _attackStyle: {fileID: 11400000, guid: c5471f3cb4e8494bbd809b5652aa1cf6, type: 2}
+  _colorSegments:
+  - _from: {r: 0.06, g: 0.06, b: 0.06, a: 1}
+    _to: {r: 0, g: 0, b: 0, a: 1}
+  _gimmickLines: []
+  _bannerTitle: FORGERY COMPLETE
+  _bannerSubtitle: The original fades

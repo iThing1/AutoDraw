@@ -3,8 +3,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-// 여러 공격 스타일을 가중치로 섞어 쓰는 묶음. 보스처럼 패턴을 번갈아 쓰는 유닛에 연결한다.
-// 묶음 안에 묶음을 넣을 수 있다. 서로를 넣어 끝없이 도는 구성은 에디터에서 바로 알리고, 실행 중에는 깊이로 끊는다.
+// 여러 공격 스타일을 가중치로 섞어 쓰는 묶음. 묶음 안에 묶음을 넣을 수 있고, 순환 구성은 깊이로 끊는다.
 [CreateAssetMenu(fileName = "AttackStyleSet", menuName = "Scriptable Objects/AttackStyle/Set")]
 public class AttackStyleSet : AttackStyle
 {
@@ -19,7 +18,6 @@ public class AttackStyleSet : AttackStyle
         // 목표와의 거리가 이 범위 안일 때만 고른다. 최대 0은 제한 없음이다.
         [SerializeField, Min(0f)] private float _minDistance;
         [SerializeField, Min(0f)] private float _maxDistance;
-        // 한 번 쓰면 이 시간(초) 동안은 다시 고르지 않는다.
         [SerializeField, Min(0f)] private float _cooldown;
 
         public AttackStyle Style { get { return _style; } }
@@ -50,8 +48,7 @@ public class AttackStyleSet : AttackStyle
     [Header("패턴")]
     [SerializeField] private Entry[] _entries;
 
-    // 안쪽 묶음을 따라 내려가며 실제 공격 하나를 고른다. 재귀 대신 반복문이라 순환이 있어도 깊이 제한에서 멈춘다.
-    // 거리·쿨타임 조건에 맞는 항목이 하나도 없으면 조건 없이 골라, 보스가 공격을 멈추지 않게 한다.
+    // 재귀 대신 반복문이라 순환이 있어도 깊이 제한에서 멈춘다. 조건에 맞는 항목이 없으면 조건 없이 골라, 보스가 공격을 멈추지 않게 한다.
     public override AttackStyle PickStyle(AutoAttacker picker)
     {
         AttackStyleSet currentSet = this;
@@ -86,7 +83,6 @@ public class AttackStyleSet : AttackStyle
     }
 
     // 자동 공격은 PickStyle로 고른 스타일을 직접 쏘므로, 이 묶음이 그대로 넘어온 경우에만 여기서 하나를 골라 쏜다.
-    // 쿨타임을 아는 쏘는 쪽이 없으므로 거리·쿨타임 조건 없이 고른다.
     public override UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         AttackStyle style = PickStyle(null);
@@ -104,7 +100,6 @@ public class AttackStyleSet : AttackStyle
         PrewarmEntries(0);
     }
 
-    // 인스펙터에서 값을 바꿀 때마다 불려, 순환 구성을 실행하기 전에 바로 알려 준다.
     private void OnValidate()
     {
         if (ContainsSet(this, 0))
@@ -140,7 +135,7 @@ public class AttackStyleSet : AttackStyle
         }
     }
 
-    // target이 이 묶음 아래 어딘가에 다시 나타나는지 찾는다. 깊이 제한을 넘으면 순환으로 본다.
+    // 깊이 제한을 넘으면 순환으로 본다.
     private bool ContainsSet(AttackStyleSet target, int depth)
     {
         if (null == _entries)

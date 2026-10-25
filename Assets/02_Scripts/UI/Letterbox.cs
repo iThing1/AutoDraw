@@ -31,7 +31,6 @@ public class Letterbox : MonoBehaviour
     }
 
     // 띠의 높이를 앵커 비율로 조절해 해상도와 관계없이 화면 대비 같은 두께가 되게 한다.
-    // 히트 스톱이나 슬로 모션 중에도 UI 연출 속도는 그대로 유지한다.
     private UniTask TweenHeightRatioAsync(float ratio, float duration, Ease ease, CancellationToken token)
     {
         Sequence sequence = DOTween.Sequence()

@@ -1,7 +1,6 @@
 using UnityEngine;
 
 // 프리셋 하나로 히트 스톱, 플래시, 넉백, 임팩트, 물감 자국을 한 번에 재생한다.
-// 일반 타격, 치명타, 플레이어 피격이 같은 코드를 쓰고 프리셋만 다르다.
 public static class HitFeedbackPlayer
 {
     public static void Play(HitFeedbackPreset preset, BattleUnit target, DamageInfo damage, PaintCanvas canvas)

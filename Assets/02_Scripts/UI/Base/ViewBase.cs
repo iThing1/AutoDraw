@@ -1,7 +1,6 @@
 using UnityEngine;
 
 // ViewModel을 받아 그리기만 하는 화면 부품의 공통 틀. 이름 알림 구독·해제는 여기서 하고, 하위 View는 무엇을 다시 그릴지만 정한다.
-// 사건 이벤트나 하위 View 연결이 더 있으면 OnBind·OnUnbind에서 함께 처리한다.
 public abstract class ViewBase<TViewModel> : MonoBehaviour where TViewModel : ViewModelBase
 {
     private TViewModel _viewModel;

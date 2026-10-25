@@ -20,11 +20,13 @@ public class ActionSlotView : ViewBase<ActionSlotViewModel>
     [SerializeField, Min(0f)] private float _rejectDuration = 0.25f;
 
     private RectTransform _rect;
+    private Sprite _fallbackIcon;
     private bool _wasReady;
 
     private void Awake()
     {
         _rect = GetComponent<RectTransform>();
+        _fallbackIcon = _icon.sprite;
     }
 
     protected override void OnDestroy()
@@ -72,11 +74,21 @@ public class ActionSlotView : ViewBase<ActionSlotViewModel>
     {
         _keyText.text = ViewModel.KeyLabel;
         _nameText.text = ViewModel.DisplayName;
-        _icon.color = ViewModel.IconColor;
+        DrawIcon();
         _wasReady = false;
 
         DrawSelected();
         DrawGauge();
+    }
+
+    // 아이콘 그림은 제 색 그대로 두고, 그림이 없으면 프리팹의 물감 자국을 칸 색으로 칠한다.
+    private void DrawIcon()
+    {
+        Sprite icon = ViewModel.Icon;
+        bool hasIcon = null != icon;
+
+        _icon.sprite = hasIcon ? icon : _fallbackIcon;
+        _icon.color = hasIcon ? Color.white : ViewModel.IconColor;
     }
 
     private void DrawSelected()

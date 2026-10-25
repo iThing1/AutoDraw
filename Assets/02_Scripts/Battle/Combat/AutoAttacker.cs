@@ -50,7 +50,6 @@ public class AutoAttacker : MonoBehaviour
         {
             while (false == _owner.Health.IsDead && false == _context.Target.IsDefeated)
             {
-                // 기믹·부활로 끊긴 동안에는 다시 이어질 때까지 새 공격을 고르지 않는다.
                 await WaitUntilResumedAsync(token);
 
                 try
@@ -236,7 +235,6 @@ public class AutoAttacker : MonoBehaviour
                 }
             }
 
-            // 손 달린 보스는 패턴마다 정해진 손동작을 먼저 보여 줘, 무엇이 올지 읽고 대비할 틈을 준다.
             if (null != _hands && HandGesture.None != style.Tell)
             {
                 hasPosed = true;
@@ -247,7 +245,6 @@ public class AutoAttacker : MonoBehaviour
         }
         catch (OperationCanceledException)
         {
-            // 전투가 끝나 남은 발사가 취소된 경우라 따로 처리하지 않는다.
         }
         finally
         {

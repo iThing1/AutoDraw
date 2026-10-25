@@ -62,7 +62,6 @@ public class PaintMark
         return new PaintMark(mesh, texture, Matrix4x4.identity, color, isInk, start, end, width * 0.5f, null, Quaternion.identity, 1f);
     }
 
-    // 이 원이 자국과 겹치는지.
     public bool Overlaps(Vector3 point, float radius)
     {
         return Vector2.Distance(point, Geometry2D.GetClosestPointOnSegment(_start, _end, point)) <= _radius + radius;

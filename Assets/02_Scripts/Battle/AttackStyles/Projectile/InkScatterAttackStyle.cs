@@ -3,8 +3,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-// 붓을 털듯 목표 쪽 부채꼴로 먹물 방울을 뿌린다. 추적하지 않아 부채꼴 밖으로 비켜서면 피한다.
-// 여러 번 뿌릴 때 회전을 주면 부채꼴이 돌아가며 빈자리가 옮겨 간다.
+// 붓을 털듯 목표 쪽 부채꼴로 먹물 방울을 뿌린다.
 [CreateAssetMenu(fileName = "InkScatterAttackStyle", menuName = "Scriptable Objects/AttackStyle/InkScatter")]
 public class InkScatterAttackStyle : AttackStyle
 {

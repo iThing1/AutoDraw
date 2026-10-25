@@ -9,6 +9,9 @@ public abstract class BattleUnitData : ScriptableObject
     [SerializeField] private GameObject _projectilePrefab;
     [SerializeField] private PaintPalette _palette;
 
+    [Header("애니메이션")]
+    [SerializeField] private UnitAnimationSettings _animation = new();
+
     [Header("카메라")]
     // 전투 카메라가 이 유닛을 화면에 담을 때 확보하는 반경. 몸집이 큰 유닛일수록 크게 준다.
     [SerializeField, Min(0f)] private float _framingRadius = 1.5f;
@@ -21,6 +24,7 @@ public abstract class BattleUnitData : ScriptableObject
 
     public GameObject ProjectilePrefab { get { return _projectilePrefab; } }
     public PaintPalette Palette { get { return _palette; } }
+    public UnitAnimationSettings Animation { get { return _animation; } }
 
     public float FramingRadius { get { return _framingRadius; } }
 }

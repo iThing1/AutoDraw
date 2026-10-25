@@ -3,8 +3,7 @@ using DG.Tweening;
 using System.Threading;
 using UnityEngine;
 
-// 보스가 페이즈 끝에서 쓰러졌다가 검은 빛기둥을 받아 다시 일어나는 연출. 부활 한 번에 하나씩 만들고, 실제 시간으로 돈다.
-// CollapseAsync와 RiseAsync 사이에 부르는 쪽이 다음 페이즈로 넘긴다.
+// 보스가 페이즈 끝에서 쓰러졌다가 다시 일어나는 연출. CollapseAsync와 RiseAsync 사이에 부르는 쪽이 다음 페이즈로 넘긴다.
 public class BossRevivalCutscene
 {
     private readonly BattleUnit _boss;
@@ -78,7 +77,6 @@ public class BossRevivalCutscene
         _beam = null;
     }
 
-    // 위에서 내려올 검은 빛기둥. 처음에는 높이 0으로 숨겨 둔다.
     private SpriteRenderer SpawnBeam()
     {
         if (null == _settings.BeamPrefab)

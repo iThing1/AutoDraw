@@ -5,9 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-// 잉크 팔에서 버티기. 보스가 먼저 종이 곳곳에 먹물 웅덩이를 흩뿌리고, 정해진 시간 동안 웅덩이에서 그림자 팔이 한두 개씩 뻗어 나온다.
-// 팔은 플레이어가 갈 자리를 앞질러 노리고 기어 오는 동안에도 따라와, 한 방향으로 달리기만 해서는 피할 수 없다.
-// 붙잡히면 그때마다 피해를 입을 뿐 따로 실패는 없고, 끝까지 버티면 그로기로 이어진다. 팔 모양은 패배 연출의 팔을 같이 쓴다.
+// 잉크 팔에서 버티기. 종이 곳곳의 먹물 웅덩이에서 그림자 팔이 플레이어를 앞질러 노리며 뻗어 나온다. 끝까지 버티면 그로기로 이어진다.
 [CreateAssetMenu(fileName = "InkArmsGimmick", menuName = "Scriptable Objects/Boss/Gimmick/InkArms")]
 public class InkArmsGimmick : BossGimmick
 {
@@ -25,11 +23,9 @@ public class InkArmsGimmick : BossGimmick
     [Header("시간")]
     [SerializeField, Min(0f)] private float _duration = 8f;
     [SerializeField, Min(0.05f)] private float _lungeInterval = 0.7f;
-    // 팔이 닿은 뒤 다시 잉크로 되감기는 시간.
     [SerializeField, Min(0f)] private float _retractDuration = 0.35f;
 
     [Header("노리기")]
-    // 이 거리 범위의 웅덩이에서 팔이 나온다.
     [SerializeField] private FloatRange _sourceDistance = new FloatRange(3f, 12f);
     // 팔이 다 뻗을 때 플레이어가 있을 자리를 이 시간(초)만큼 앞질러 노린다.
     [SerializeField, Min(0f)] private float _leadTime = 0.35f;
@@ -37,7 +33,6 @@ public class InkArmsGimmick : BossGimmick
     [SerializeField, Min(0f)] private float _homingSpeed = 4.5f;
 
     [Header("팔")]
-    // 한 번에 서로 다른 웅덩이에서 나오는 팔 수.
     [SerializeField] private IntRange _armsPerLunge = new IntRange(1, 2);
     // 팔의 모양·기어 오는 빠르기·꿈틀거림은 먹물 삼킴 연출의 값을 같이 쓴다.
     [SerializeField] private InkSwallowSettings _arms = new();
@@ -106,7 +101,6 @@ public class InkArmsGimmick : BossGimmick
         return true;
     }
 
-    // 플레이어 둘레 곳곳에 웅덩이를 하나씩 찍는다. 이 웅덩이들이 팔이 나올 자리다.
     private async UniTask ScatterPoolsAsync(AttackContext context, List<PaintMark> pools, CancellationToken token)
     {
         Vector3 center = context.Target.FollowTransform.position;
@@ -127,7 +121,6 @@ public class InkArmsGimmick : BossGimmick
         await UniTask.Delay(TimeSpan.FromSeconds(_poolSettleDuration), cancellationToken: token);
     }
 
-    // 웅덩이가 꿈틀한 뒤 팔이 뻗어 나온다. 다 뻗은 순간 붙잡을 자리에 있으면 붙잡힌다.
     private async UniTask LungeAsync(AttackContext context, PaintMark source, CancellationToken token)
     {
         context.PaintCanvas.Twitch(source, _arms.SourceTwitchStrength, _arms.SourceTwitchDuration, false);
@@ -148,7 +141,6 @@ public class InkArmsGimmick : BossGimmick
 
         try
         {
-            // 게임 시간으로 돌아 히트 스톱 동안에는 팔도 함께 멈춘다.
             while (frame.Elapsed < endTime)
             {
                 frame.Elapsed += Time.deltaTime;
@@ -162,7 +154,6 @@ public class InkArmsGimmick : BossGimmick
                 }
                 else if (false == hasStruck)
                 {
-                    // 명중 반경 밖으로 비켜섰으면 빗나가고, 방패를 들고 있으면 막힌다.
                     hasStruck = true;
                     context.Damage.Strike(_grabHit, grabPoint, 0f);
                 }

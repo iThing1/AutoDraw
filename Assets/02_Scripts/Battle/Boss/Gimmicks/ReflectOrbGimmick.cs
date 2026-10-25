@@ -4,15 +4,13 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-// 구체 되받아치기. 보스가 오른손에 큰 구체를 모아 플레이어에게 던지고, 막기로 받아내거나 닿는 순간 대시로 피하면 색이 바뀌어 보스에게 되돌아간다.
-// 여러 번 던지는 동안 정해진 횟수 이상 되돌려 보내면 깨진다. 남은 시도로 성공·실패가 정해지면 그 자리에서 끝낸다.
+// 구체 되받아치기. 보스가 던진 구체를 막기나 대시로 되돌려, 정해진 횟수 이상 보스에게 맞히면 깨진다.
 [CreateAssetMenu(fileName = "ReflectOrbGimmick", menuName = "Scriptable Objects/Boss/Gimmick/ReflectOrb")]
 public class ReflectOrbGimmick : PunishingBossGimmick
 {
     [Header("횟수")]
     [SerializeField, Min(1)] private int _castCount = 5;
     [SerializeField, Min(1)] private int _requiredReflects = 3;
-    // 한 번 던진 구체가 끝난 뒤 다음을 모으기 시작할 때까지.
     [SerializeField, Min(0f)] private float _castInterval = 0.8f;
 
     [Header("모으기")]
@@ -141,7 +139,6 @@ public class ReflectOrbGimmick : PunishingBossGimmick
         }
     }
 
-    // 크게 키운 보스 탄을 유도 비행으로 날린다. 수명이 다하면 빗나간 것이다.
     private async UniTask<FlightResult> FlyOrbAsync(AttackTarget target, Vector3 start, CancellationToken token)
     {
         GameObject orb = GameManager.Pool.Spawn(_orbPrefab, start, Quaternion.identity);
@@ -174,7 +171,6 @@ public class ReflectOrbGimmick : PunishingBossGimmick
         }
     }
 
-    // 손에 붙은 채로 구체가 커져, 던질 때까지 손을 따라다닌다.
     private async UniTask ChargeAsync(Transform hand, CancellationToken token)
     {
         SpriteRenderer charge = PooledSprite.Spawn(_chargePrefab, hand.position, 0f, Vector2.zero, _orbColor);

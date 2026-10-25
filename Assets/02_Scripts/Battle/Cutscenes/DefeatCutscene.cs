@@ -30,7 +30,7 @@ public class DefeatCutscene : MonoBehaviour
         }
     }
 
-    // 게임 시간을 늦춘 채 카메라를 플레이어에게 옮기며 먹물이 플레이어를 삼킨다. 레터박스는 결과 화면 뒤에 그대로 둔다.
+    // 레터박스는 결과 화면 뒤에 그대로 둔다.
     public async UniTask PlayAsync(BattleUnit player, PaintCanvas paintCanvas, CancellationToken token)
     {
         using (GameManager.TimeScale.BeginSlowMotion(_preset.SlowTimeScale))

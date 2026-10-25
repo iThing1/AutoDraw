@@ -3,8 +3,7 @@ using DG.Tweening;
 using System.Threading;
 using UnityEngine;
 
-// 맞을수록 물드는 보스 몸 색. 기믹 뒤나 부활 때는 한 단계 크게 물든다.
-// 어느 구간인지는 페이즈를 아는 BossPhaseMachine이 넘긴다.
+// 맞을수록 물드는 보스 몸 색. 어느 구간인지는 BossPhaseMachine이 넘긴다.
 public class BossTint
 {
     private readonly UnitView _view;

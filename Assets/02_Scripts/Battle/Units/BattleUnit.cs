@@ -49,6 +49,8 @@ public class BattleUnit : MonoBehaviour
 
     [SerializeField] private BattleUnitData _data;
     [SerializeField] private Transform _body;
+    // Body 아래 그림만 담은 자식. 애니메이션은 이 자식만 움직이고, 판정·넉백·조준은 Body가 맡는다.
+    [SerializeField] private SpriteRenderer _bodyRenderer;
 
     public event Action<UnitState> OnStateChanged;
     // 막은 자리를 넘겨, 막은 쪽이 방패 연출과 막기 문구를 띄우게 한다.
@@ -90,22 +92,20 @@ public class BattleUnit : MonoBehaviour
 
     // 넉백·플래시·투사체 조준의 기준점. 따로 지정하지 않으면 자기 자신을 쓴다.
     public Transform Body { get { return null != _body ? _body : transform; } }
+    public SpriteRenderer BodyRenderer { get { return _bodyRenderer; } }
 
     public AttackStyle AttackStyle { get { return null != _attackStyleOverride ? _attackStyleOverride : GetDataAttackStyle(); } }
     public WeaponModifier WeaponModifier { get { return _weaponModifier; } }
 
-    // 몸 그림의 가로·세로 절반 크기(월드). 렌더러의 bounds는 꺼진 오브젝트나 프리팹에서 0이 되므로, 스프라이트 크기에 스케일을 곱해 읽는다.
-    // 등장 전이라 꺼져 있는 보스와 씬 뷰 기즈모(프리팹)에서도 같은 값이 나온다. 몸 그림이 없으면 0이다.
+    // 렌더러의 bounds는 꺼진 오브젝트나 프리팹에서 0이 되므로 스프라이트 크기에 스케일을 곱해 읽는다. 애니메이션이 늘이는 그림 자식의 크기는 빼, 판정 범위가 출렁이지 않게 한다.
     public Vector2 GetBodyExtents()
     {
-        SpriteRenderer bodyRenderer = Body.GetComponent<SpriteRenderer>();
-
-        if (null == bodyRenderer || null == bodyRenderer.sprite)
+        if (null == _bodyRenderer || null == _bodyRenderer.sprite)
         {
             return Vector2.zero;
         }
 
-        return Vector2.Scale(bodyRenderer.sprite.bounds.extents, Body.lossyScale);
+        return Vector2.Scale(_bodyRenderer.sprite.bounds.extents, Body.lossyScale);
     }
 
     // 판정에 쓰는 몸 반지름. 몸 그림을 원으로 보고 가로 절반을 쓴다.
@@ -122,6 +122,11 @@ public class BattleUnit : MonoBehaviour
         TryGetComponent(out _mover);
 
         _health.OnDied += HandleDied;
+
+        if (null == _bodyRenderer)
+        {
+            Debug.LogError($"전투 유닛 : {name}에 몸 그림(Visual)이 지정되지 않았습니다. 몸 크기 판정이 0이 됩니다.");
+        }
 
         if (null == _data)
         {

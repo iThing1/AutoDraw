@@ -33,8 +33,8 @@ MonoBehaviour:
   _maxHits: 2
   _hit:
     _damage:
-      _min: 25
-      _max: 35
+      _min: 21
+      _max: 27
     _criticalChance: 0.3
     _criticalMultiplier: 2
     _normalHit: {fileID: 11400000, guid: e9c3f1b326a44c298886b834f11749f9, type: 2}

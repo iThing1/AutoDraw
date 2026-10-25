@@ -2,7 +2,7 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 
-// HUD에 잠깐 떠올랐다 사라지는 글자 하나. 피해 숫자와 짧은 문구(GUARD·NO INK·BREAK)를 같은 연출로 띄우고 풀로 돌아간다.
+// HUD에 잠깐 떠올랐다 사라지는 글자 하나. 피해 숫자와 짧은 문구를 같은 연출로 띄운다.
 public class FloatingText : MonoBehaviour
 {
     [SerializeField] private TMP_Text _text;
@@ -36,7 +36,7 @@ public class FloatingText : MonoBehaviour
         Pop(color, scale, screenPosition, settings);
     }
 
-    // "+{0}"처럼 숫자 자리가 있는 문구. 피해 숫자처럼 TMP가 숫자를 채워 문자열을 만들지 않는다.
+    // "+{0}"처럼 숫자 자리가 있는 문구.
     public void PlayNumber(string format, int amount, Color color, Vector2 screenPosition, FloatingTextSettings settings)
     {
         _text.SetText(format, amount);
@@ -59,7 +59,6 @@ public class FloatingText : MonoBehaviour
         _rect.position = screenPosition;
         _rect.localScale = Vector3.one * scale * settings.PopScale;
 
-        // 크게 튀어나왔다가 제 크기로 줄고(Append), 동시에 위로 떠오르며(Join), 끝나기 직전부터 흐려진다(Insert).
         _sequence = DOTween.Sequence()
             .Append(_rect.DOScale(scale, settings.PopDuration).SetEase(settings.PopEase))
             .Join(_rect.DOMoveY(screenPosition.y + settings.RiseDistance, settings.Duration).SetEase(settings.RiseEase))

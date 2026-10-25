@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.Video;
 
 // 장비 화면 칸 하나의 규칙. 늘어놓을 항목을 만들고, 항목마다 가졌는지·끼웠는지·쓸 수 있는지와 끼우기를 PlayerLoadout에 물어 답한다.
-// 칸 종류마다 읽는 표와 끼우는 규칙이 달라 하위 클래스로 나눈다. 새 칸은 규칙 하위 클래스 하나를 더하면 된다.
 public abstract class LoadoutRule
 {
     // 공격 방식·효과 색이 없는 항목의 임시 아이콘 색.

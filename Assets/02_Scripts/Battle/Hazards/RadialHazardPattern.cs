@@ -3,8 +3,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-// 쏘는 자리에서 사방으로 탄을 퍼뜨린다. 추적하지 않아 플레이어가 빈 곳을 찾아 움직여야 한다.
-// 빈틈을 두고 발사마다 옮기면 '빈틈 링', 빈틈 없이 몇 갈래를 조금씩 돌려 쏘면 '회전 나선'이 된다.
+// 쏘는 자리에서 사방으로 탄을 퍼뜨린다. 빈틈을 두고 발사마다 옮기면 '빈틈 링', 빈틈 없이 조금씩 돌려 쏘면 '회전 나선'이 된다.
 [CreateAssetMenu(fileName = "RadialHazardPattern", menuName = "Scriptable Objects/Hazard/Radial")]
 public class RadialHazardPattern : HazardPattern
 {
@@ -68,7 +67,6 @@ public class RadialHazardPattern : HazardPattern
         }
     }
 
-    // 쏘는 쪽이 움직이는 중이어도 발사마다 그 자리에서 퍼진다.
     private void FireWave(AttackContext context, float startAngle, float angleBetweenShots, float gapCenter, CancellationToken token)
     {
         Vector3 origin = context.Owner.Body.position;

@@ -6,8 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 갤러리 이젤에서 여는 특성 트리 화면. 연결할 때 노드와 연결선을 표의 자리(트리·행·열)대로 한 번 만들고,
-// 그 뒤로는 남은 포인트, 고른 노드의 설명, 찍기 버튼, 연결선 색만 다시 그린다.
+// 갤러리 이젤에서 여는 특성 트리 화면. 연결할 때 노드와 연결선을 한 번 만들고, 그 뒤로는 바뀐 것만 다시 그린다.
 public class PerkTreeView : ViewBase<PerkTreeViewModel>
 {
     private static readonly int TREE_COUNT = Enum.GetValues(typeof(PerkTreeType)).Length;
@@ -35,7 +34,6 @@ public class PerkTreeView : ViewBase<PerkTreeViewModel>
     [SerializeField] private RectTransform _lineRoot;
     [SerializeField] private PerkNodeView _nodePrefab;
     [SerializeField] private Image _linePrefab;
-    // 같은 트리 안에서 열·행 사이 간격.
     [SerializeField] private Vector2 _cellSpacing = new Vector2(96f, 124f);
     [SerializeField, Min(0f)] private float _treeSpacing = 300f;
     [SerializeField, Min(0f)] private float _lineWidth = 4f;
@@ -254,7 +252,6 @@ public class PerkTreeView : ViewBase<PerkTreeViewModel>
         }
         catch (OperationCanceledException)
         {
-            // 확인 창이 떠 있는 동안 Esc로 트리 화면이 닫힌 경우라 따로 처리하지 않는다.
         }
         finally
         {

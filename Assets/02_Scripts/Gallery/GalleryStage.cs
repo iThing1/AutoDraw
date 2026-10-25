@@ -5,8 +5,7 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// 갤러리 맵. 1인칭으로 걸어 다니다 액자를 골라 그 그림 속 스테이지로 들어간다.
-// 맵 사이 이동(암전·생성)은 MapSpawner가 맡고, 여기는 갤러리 안의 일만 한다.
+// 갤러리 맵. 맵 사이 이동(암전·생성)은 MapSpawner가 맡고, 여기는 갤러리 안의 일만 한다.
 public class GalleryStage : MonoBehaviour
 {
     [Header("플레이어")]
@@ -62,7 +61,6 @@ public class GalleryStage : MonoBehaviour
         _player.OnInteract += HandleInteract;
         _player.SavePose();
 
-        // 프리팹에 놓기만 하면 되도록 자식에서 찾는다.
         _palettes = new GalleryPalettes(GetComponentsInChildren<PaletteItem>(true));
 
         if (null == _pauseAction)
@@ -104,7 +102,6 @@ public class GalleryStage : MonoBehaviour
         }
     }
 
-    // 마지막으로 서 있던 자리에서 다시 걸어 다닌다. 마우스로 둘러보도록 커서를 숨겨 잠근다.
     public void Show()
     {
         gameObject.SetActive(true);
@@ -148,7 +145,6 @@ public class GalleryStage : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    // 방금 깬 스테이지의 액자만 다음 Show에서 그림을 다시 읽게 한다.
     public void MarkPaintingChanged(StageData stage)
     {
         for (int i = 0; i < _frames.Length; i++)
@@ -204,7 +200,6 @@ public class GalleryStage : MonoBehaviour
         target.Interact(this);
     }
 
-    // 돌아왔을 때 그 자리에서 다시 걷도록, 다가가기 전에 서 있던 자리를 기억해 둔다.
     private async UniTaskVoid EnterFrameAsync(GalleryFrame frame, CancellationToken token)
     {
         _enteredFrame = frame;
@@ -217,7 +212,6 @@ public class GalleryStage : MonoBehaviour
         OnStageChosen?.Invoke(frame.Stage);
     }
 
-    // 들어갔던 그림 앞에서 시작해, 걸린 그림을 보며 서 있던 자리로 물러난다.
     private async UniTaskVoid ReturnFromFrameAsync(GalleryFrame frame, CancellationToken token)
     {
         SetControlEnabled(false);

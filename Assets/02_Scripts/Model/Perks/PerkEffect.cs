@@ -2,7 +2,6 @@ using System;
 using UnityEngine;
 
 // 특성 노드 하나가 주는 효과. 세기는 노드마다 달라 Apply에서 받는다(PerkNodeData.EffectValues).
-// 효과 표의 Target은 만들 때 한 번만 읽는다. 새 효과 종류는 하위 클래스 하나와 Create의 갈래 하나를 더한다.
 public abstract class PerkEffect
 {
     private const char FIELD_SEPARATOR = '.';

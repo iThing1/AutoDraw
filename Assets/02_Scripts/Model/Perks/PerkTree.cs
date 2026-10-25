@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // 특성 표를 읽어 해금 규칙과 효과를 들고 있다. 찍은 기록은 PlayerProgress에 있고, 여기는 그것을 보고 답하기만 한다.
-// 부모가 연결된 노드는 부모를 모두 찍어야 찍을 수 있다.
 public class PerkTree
 {
     private readonly DataTable<PerkNodeData> _nodes;

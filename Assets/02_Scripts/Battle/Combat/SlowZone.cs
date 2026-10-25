@@ -4,8 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-// 들어온 플레이어와 탄을 느리게 하는 원형 구역. 풀에서 꺼내 한 번 재생하고 스스로 돌아간다.
-// 켜진 구역 목록도 여기서 들고, 어떤 자리가 얼마나 느려지는지 답한다. 보스는 묻지 않아 영향을 받지 않는다.
+// 들어온 플레이어와 탄을 느리게 하는 원형 구역. 보스는 묻지 않아 영향을 받지 않는다.
 [RequireComponent(typeof(SpriteRenderer))]
 public class SlowZone : MonoBehaviour
 {
@@ -79,7 +78,6 @@ public class SlowZone : MonoBehaviour
         _renderer = GetComponent<SpriteRenderer>();
     }
 
-    // 풀로 돌아가거나 스테이지와 함께 사라질 때 더 이상 느리게 하지 않는다.
     private void OnDisable()
     {
         ACTIVE_ZONES.Remove(this);
@@ -90,7 +88,6 @@ public class SlowZone : MonoBehaviour
         return Vector2.Distance(position, transform.position) <= _radius;
     }
 
-    // 게임 시간으로 돌아 히트 스톱 동안에는 구역도 함께 멈춘다.
     public async UniTask PlayAsync(SlowZoneSettings settings, CancellationToken token)
     {
         _settings = settings;

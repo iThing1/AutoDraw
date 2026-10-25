@@ -3,10 +3,12 @@ using DG.Tweening;
 using System.Threading;
 using UnityEngine;
 
-// 보통 탄의 움직임. 궤적(포물선·직선·물결) 트윈을 따라 날며 움직이는 목표를 조금씩 따라가고, 빗나가면 날아오던 방향으로 조금 더 날다 사라진다.
-// 탄막은 한 번에 수십 발이 날아서, 탄마다 람다(클로저)를 새로 만들지 않도록 매 프레임 콜백은 처음 붙을 때 한 번만 만든다.
+// 보통 탄의 움직임. 탄마다 클로저를 새로 만들지 않도록 매 프레임 콜백은 처음 붙을 때 한 번만 만든다.
 public class TrajectoryMotion : ProjectileMotion
 {
+    // 한 프레임에 거의 안 움직이면 방향이 튀므로, 이만큼 움직인 뒤에 돌린다.
+    private const float MIN_FACING_DISTANCE = 0.01f;
+
     private TweenCallback _updateFlight;
     private TweenCallback _updatePass;
 
@@ -17,6 +19,7 @@ public class TrajectoryMotion : ProjectileMotion
     private Vector3 _targetStartPosition;
     private Vector3 _homingOffset;
     private Vector3 _velocity;
+    private Vector3 _facingFrom;
 
     protected override void Awake()
     {
@@ -40,6 +43,8 @@ public class TrajectoryMotion : ProjectileMotion
         _maxHomingSpeed = flightSpeed * _homing;
         _homingOffset = Vector3.zero;
         _velocity = 0f < flightSpeed ? (end - start).normalized * flightSpeed : Vector3.zero;
+        _facingFrom = start;
+        Face(end - start);
 
         if (null != target)
         {
@@ -50,7 +55,6 @@ public class TrajectoryMotion : ProjectileMotion
             .SetEase(Ease.Linear)
             .OnUpdate(_updateFlight);
 
-        // 전투가 끝나 토큰이 취소되면 트윈을 멈추고, 예외를 던지는 대신 isCanceled를 true로 돌려받는다.
         bool isCanceled = await _flight.ToUniTaskKillOnCancel(token).SuppressCancellationThrow();
 
         Vector3 landingPoint = FlightOutcome.Missed != ContactOutcome ? ContactPoint : CachedTransform.position;
@@ -84,6 +88,7 @@ public class TrajectoryMotion : ProjectileMotion
 
         if (null == Target)
         {
+            FaceMovement();
             return;
         }
 
@@ -97,6 +102,8 @@ public class TrajectoryMotion : ProjectileMotion
         {
             _velocity = (CachedTransform.position - LastPosition) / (Time.deltaTime * slowScale);
         }
+
+        FaceMovement();
 
         if (CheckContact())
         {
@@ -138,6 +145,29 @@ public class TrajectoryMotion : ProjectileMotion
         if (CheckContact())
         {
             _pass.Kill();
+        }
+    }
+
+    // 꼬리 달린 탄이 날아가는 쪽(+x)을 보게 한다. 포물선·물결처럼 꺾이는 궤적도 따라 돌도록 매 프레임 지난 자리와 비교한다.
+    private void FaceMovement()
+    {
+        Vector3 position = CachedTransform.position;
+        Vector3 delta = position - _facingFrom;
+
+        if (MIN_FACING_DISTANCE * MIN_FACING_DISTANCE > delta.sqrMagnitude)
+        {
+            return;
+        }
+
+        _facingFrom = position;
+        Face(delta);
+    }
+
+    private void Face(Vector3 direction)
+    {
+        if (0f < direction.sqrMagnitude)
+        {
+            CachedTransform.rotation = Quaternion.Euler(0f, 0f, Geometry2D.ToAngle(direction));
         }
     }
 

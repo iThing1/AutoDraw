@@ -85,7 +85,6 @@ public class LoadoutView : ViewBase<LoadoutViewModel>
         _description.text = ViewModel.Description;
     }
 
-    // 영상이 없는 장비는 미리보기 칸을 숨긴다.
     private void DrawPreview()
     {
         VideoClip clip = ViewModel.Preview;

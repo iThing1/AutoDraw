@@ -20,7 +20,6 @@ public class OrbitAttackStyle : AttackStyle
     [SerializeField, Min(0.1f)] private float _orbDiameter = 0.7f;
     [SerializeField, Min(0.1f)] private float _orbitRadius = 1.6f;
     [SerializeField, Min(0.1f)] private float _orbitPeriod = 1.2f;
-    // 몸에서 나오고 몸으로 들어가는 시간.
     [SerializeField, Min(0.01f)] private float _transitionDuration = 0.25f;
 
     [Header("날리기")]

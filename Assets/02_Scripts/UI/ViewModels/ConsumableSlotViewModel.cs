@@ -8,8 +8,8 @@ public class ConsumableSlotViewModel : ActionSlotViewModel
     private ConsumableState _state;
     private int _shownCharges;
 
-    public ConsumableSlotViewModel(string keyLabel, ConsumableState state, Color iconColor)
-        : base(keyLabel, FormatName(state), iconColor, true)
+    public ConsumableSlotViewModel(string keyLabel, ConsumableState state, Sprite icon, Color iconColor)
+        : base(keyLabel, FormatName(state), icon, iconColor, true)
     {
         _state = state;
         _shownCharges = state.Charges;

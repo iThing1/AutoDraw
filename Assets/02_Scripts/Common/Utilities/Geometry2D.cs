@@ -1,7 +1,6 @@
 using UnityEngine;
 
-// 2D 평면 계산을 모은 곳. 각도(도, 오른쪽이 0이고 반시계로 커짐)와 방향을 서로 바꾸고, 선분 위 가장 가까운 점을 구한다.
-// 원·부채꼴로 쏘거나 도는 패턴, 선 모양 공격의 판정, 빠른 탄의 관통 방지가 함께 쓴다.
+// 2D 평면 계산을 모은 곳. 각도는 도 단위로, 오른쪽이 0이고 반시계로 커진다.
 public static class Geometry2D
 {
     public static Vector3 ToDirection(float degrees)

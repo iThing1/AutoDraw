@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // 유틸리티 키를 누르면 이동 방향으로 짧게 미끄러지고, 그동안 공격이 몸을 지나간다.
-// 쓸 수 있는지(쿨타임)는 DashState가 정하고, 여기는 입력을 받아 움직이는 일만 한다.
 [RequireComponent(typeof(BattleUnit), typeof(PlayerInputMover), typeof(Rigidbody2D))]
 public class PlayerDash : MonoBehaviour
 {
@@ -18,11 +17,13 @@ public class PlayerDash : MonoBehaviour
     private Rigidbody2D _rigidbody;
     private DashState _state;
     private PlayerStats _stats;
+    private Sprite _icon;
 
     // 유틸리티 칸에 대시를 끼우지 않았으면 null이다.
     public DashState State { get { return _state; } }
 
     public string KeyLabel { get { return _dashAction.GetKeyLabel(); } }
+    public Sprite Icon { get { return _icon; } }
 
     private void Awake()
     {
@@ -38,7 +39,7 @@ public class PlayerDash : MonoBehaviour
     }
 
     // 꺼 두면 입력도 받지 않고, State가 null이라 HUD도 대시 칸을 그리지 않는다.
-    public void Setup(UtilityType utility, PlayerStats stats)
+    public void Setup(UtilityType utility, PlayerStats stats, AssetManager assets)
     {
         if (false == enabled || UtilityType.Dash != utility)
         {
@@ -48,6 +49,7 @@ public class PlayerDash : MonoBehaviour
 
         _stats = stats;
         _state = new DashState(_preset, stats);
+        _icon = assets.Get<Sprite>(utility.GetIconKey());
 
         if (null != _preset.AfterimagePrefab)
         {
@@ -118,7 +120,6 @@ public class PlayerDash : MonoBehaviour
                 {
                     await UniTask.Yield(PlayerLoopTiming.FixedUpdate, token);
 
-                    // 컷신이 상태를 바꿨으면 그 자리에서 멈춘다.
                     if (UnitState.Action != _unit.State)
                     {
                         break;
@@ -145,7 +146,6 @@ public class PlayerDash : MonoBehaviour
         }
         catch (OperationCanceledException)
         {
-            // 플레이어가 사라져 대시가 끊긴 경우라 따로 처리하지 않는다.
         }
         finally
         {
@@ -180,8 +180,18 @@ public class PlayerDash : MonoBehaviour
             return;
         }
 
-        Transform body = _unit.Body;
-        SpriteRenderer afterimage = PooledSprite.Spawn(_preset.AfterimagePrefab, body.position, body.eulerAngles.z, body.lossyScale, _preset.AfterimageColor);
+        // 지금 보이는 몸 그림(애니메이션으로 기울고 늘어난 모습 그대로)을 잔상으로 남긴다.
+        SpriteRenderer body = _unit.BodyRenderer;
+
+        if (null == body)
+        {
+            return;
+        }
+
+        Transform visual = body.transform;
+        SpriteRenderer afterimage = PooledSprite.Spawn(_preset.AfterimagePrefab, visual.position, visual.eulerAngles.z, visual.lossyScale, _preset.AfterimageColor);
+        afterimage.sprite = body.sprite;
+        afterimage.flipX = body.flipX;
 
         FadeAfterimageAsync(afterimage, token).Forget();
     }
@@ -194,7 +204,6 @@ public class PlayerDash : MonoBehaviour
         }
         catch (OperationCanceledException)
         {
-            // 플레이어가 사라져 끊긴 경우라 따로 처리하지 않는다.
         }
         finally
         {

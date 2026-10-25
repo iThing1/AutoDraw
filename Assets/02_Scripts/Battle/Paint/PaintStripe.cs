@@ -1,7 +1,6 @@
 using UnityEngine;
 
 // 롤러처럼 이어서 깔리는 물감 띠 하나. 깔리는 동안은 메시만 늘리고, 끝나면 그 메시 그대로 캔버스에 기록해 굽는다.
-// 띠 그림은 가로로 반복해 붙여, 길이가 늘어도 늘어나 보이지 않는다.
 public class PaintStripe
 {
     private readonly PaintCanvas _canvas;
@@ -49,7 +48,6 @@ public class PaintStripe
         _mesh.triangles = new[] { 0, 2, 1, 2, 3, 1 };
     }
 
-    // 시작점에서 굴러간 거리까지 띠를 늘린다.
     public void SetLength(float length)
     {
         if (_isFinished)

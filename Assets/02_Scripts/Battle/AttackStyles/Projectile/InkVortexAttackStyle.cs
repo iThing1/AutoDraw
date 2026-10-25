@@ -2,8 +2,7 @@ using Cysharp.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
 
-// 먹물 소용돌이. 보스가 그 자리에서 두 손을 돌리며 나선으로 먹물 방울을 뿌리고, 그동안 플레이어를 보스 쪽으로 끌어당긴다.
-// 멀리 도망가 있으면 끌려 들어오며 나선 사이 빈틈을 찾아야 하고, 가까이 있으면 방울이 촘촘해 더 위험하다.
+// 보스가 제자리에서 나선으로 먹물 방울을 뿌리며 플레이어를 보스 쪽으로 끌어당긴다.
 [CreateAssetMenu(fileName = "InkVortexAttackStyle", menuName = "Scriptable Objects/AttackStyle/InkVortex")]
 public class InkVortexAttackStyle : AttackStyle
 {
@@ -35,7 +34,6 @@ public class InkVortexAttackStyle : AttackStyle
 
         try
         {
-            // 게임 시간으로 돌아 히트 스톱 동안에는 함께 멈춘다.
             while (elapsed < _duration)
             {
                 if (elapsed >= nextWave)

@@ -74,7 +74,6 @@ public class GameManager : SingletonBehaviour<GameManager>
     // 맵이 만들어지자마자 스탯을 읽으므로 플레이어를 만든 뒤에 맵을 만든다.
     private async UniTaskVoid InitAsync(CancellationToken token)
     {
-        // 표를 읽는 동안 빈 씬이 비치지 않게 먼저 가린다.
         _uiManager.Cinematic.ScreenFader.ShowImmediately();
 
         await UniTask.WhenAll(

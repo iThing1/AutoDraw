@@ -5,7 +5,6 @@ using System.Threading;
 using UnityEngine;
 
 // 처음 자리 주변을 배회하다가, 목표가 너무 멀어지면 다가가 그 자리를 새 중심으로 삼는다.
-// 게임 시간으로 움직여 히트 스톱 동안 함께 멈춘다.
 public class WanderMover : UnitMover
 {
     // 범위가 최소 이동 거리보다 좁을 때 끝없이 다시 고르지 않도록 시도 횟수를 제한한다.

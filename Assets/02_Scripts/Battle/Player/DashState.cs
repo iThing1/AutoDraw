@@ -1,6 +1,6 @@
 using System;
 
-// 대시의 쿨타임. 입력과 움직임은 PlayerDash가 맡고, 화면은 이 상태만 보고 대시 칸을 그린다. 시간은 부르는 쪽이 넘긴다(게임 시간).
+// 대시의 쿨타임. 시간은 부르는 쪽이 넘긴다(게임 시간).
 public class DashState
 {
     private readonly DashPreset _preset;

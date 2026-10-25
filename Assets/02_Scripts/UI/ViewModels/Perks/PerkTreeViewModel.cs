@@ -119,7 +119,6 @@ public class PerkTreeViewModel : GalleryScreenViewModel
         DescribeSelected();
     }
 
-    // 고른 노드의 이름, 비용, 효과 줄, 찍을 수 없는 이유를 쓴다. 찍기 버튼도 이때 함께 다시 그린다.
     private void DescribeSelected()
     {
         if (null == _selected || false == _player.PerkTree.TryGetNode(_selected.Id, out PerkNodeData node))

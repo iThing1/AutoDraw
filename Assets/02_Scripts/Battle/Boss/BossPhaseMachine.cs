@@ -4,10 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-// 보스의 페이즈를 맡는다. 맞을수록 색이 물들고, 체력 줄에 닿으면 그 줄에서 멈춰 기믹을 쓰며,
-// 마지막이 아닌 페이즈의 바닥에 닿으면 쓰러졌다가 다음 페이즈의 체력으로 다시 일어난다.
-// 진짜로 쓰러지는 것은 마지막 페이즈뿐이라, 전투 스테이지는 보스가 죽을 때까지만 기다리면 된다.
-// 색 계산은 BossTint, 쓰러졌다 일어나는 연출은 BossRevivalCutscene이 맡고, 여기는 언제 무엇을 할지만 정한다.
+// 보스의 페이즈를 맡는다. 체력 줄에서 기믹을 쓰고, 마지막이 아닌 페이즈의 바닥에서는 쓰러졌다가 다음 페이즈로 일어난다.
 [RequireComponent(typeof(BattleUnit))]
 public class BossPhaseMachine : MonoBehaviour
 {
@@ -44,9 +41,7 @@ public class BossPhaseMachine : MonoBehaviour
     // 기믹·부활을 끊는 소스. 보스가 사라지거나 전투가 끝나면(플레이어가 쓰러짐) 함께 끊겨, 패배 연출 위로 기믹이 계속 돌지 않는다.
     private CancellationTokenSource _flowSource;
 
-    // 페이즈가 바뀌면 알려, 체력바가 기믹 눈금과 남은 페이즈 수를 다시 그리게 한다.
     public event Action OnPhaseChanged;
-    // 기믹이 시작하고 끝날 때 알려, 체력바 색으로 지금은 체력이 줄지 않는 시간임을 보여 주게 한다.
     public event Action<bool> OnGimmickActiveChanged;
     // 기믹 결과(해냈으면 true)를 알려, 화면에 성공·실패를 띄우게 한다.
     public event Action<bool> OnGimmickFinished;
@@ -121,7 +116,6 @@ public class BossPhaseMachine : MonoBehaviour
         }
     }
 
-    // 줄에서 멈춰 기믹을 쓰고, 한 단계 물든 뒤 다음 줄까지 체력을 연다. 성공했으면 그로기 동안 더 아프게 맞는다.
     private async UniTaskVoid PlayGimmickAsync(BossPhaseData.GimmickLine line, CancellationToken token)
     {
         _state = BossPhaseState.Gimmick;
@@ -141,7 +135,6 @@ public class BossPhaseMachine : MonoBehaviour
             UpdateGimmickRatios();
             OnPhaseChanged?.Invoke();
 
-            // 기믹이 끝나면 잉크가 번지듯 한 단계 크게 물든다.
             ImpactPlayer.Play(_toneShiftImpact, _unit.Body.position);
             await _tint.ShiftAsync(_tint.Current, _tint.GetSegmentStart(_phases[_phaseIndex], _nextLineIndex), _toneShiftDuration, false, token);
 
@@ -156,7 +149,6 @@ public class BossPhaseMachine : MonoBehaviour
         }
         catch (OperationCanceledException)
         {
-            // 스테이지가 사라져 기믹이 끊긴 경우라 따로 처리하지 않는다.
         }
         finally
         {
@@ -193,7 +185,6 @@ public class BossPhaseMachine : MonoBehaviour
 
                 await revival.CollapseAsync(token);
 
-                // 빛기둥 안에서 다음 페이즈로 넘어가며, 체력은 다시 차고 몸은 지금 색에서 다음 페이즈 색으로 물든다.
                 Color before = _tint.Current;
 
                 _phaseIndex++;
@@ -212,7 +203,6 @@ public class BossPhaseMachine : MonoBehaviour
         }
         catch (OperationCanceledException)
         {
-            // 스테이지가 사라져 연출이 끊긴 경우라 따로 처리하지 않는다.
         }
         finally
         {
@@ -221,7 +211,6 @@ public class BossPhaseMachine : MonoBehaviour
         }
     }
 
-    // 그로기 동안은 공격도 이동도 하지 않고, 받는 피해가 늘어난다.
     private async UniTask PlayGroggyAsync(CancellationToken token)
     {
         _state = BossPhaseState.Groggy;

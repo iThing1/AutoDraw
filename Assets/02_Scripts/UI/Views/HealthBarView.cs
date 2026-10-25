@@ -14,7 +14,6 @@ public class HealthBarView : ViewBase<HealthBarViewModel>
     [SerializeField, Min(0f)] private float _trailDelay = 0.25f;
     [SerializeField, Min(0f)] private float _trailDuration = 0.4f;
     [SerializeField] private Ease _trailEase = Ease.OutQuad;
-    // 보스가 다시 일어나 체력이 처음부터 차오르는 시간.
     [SerializeField, Min(0f)] private float _refillDuration = 1f;
 
     [Header("기믹 눈금")]
@@ -84,7 +83,6 @@ public class HealthBarView : ViewBase<HealthBarViewModel>
 
         switch (change)
         {
-            // 깎인 만큼 흰 잔상이 잠깐 남았다가 따라 줄어들어, 얼마나 맞았는지 눈에 보이게 한다.
             case HealthBarChange.Damaged:
                 TweenFill(ratio);
                 _trail.DOKill();
@@ -100,7 +98,6 @@ public class HealthBarView : ViewBase<HealthBarViewModel>
                 _trail.anchorMax = new Vector2(ratio, 1f);
                 break;
 
-            // 빈 막대에서 가득 찰 때까지 천천히 차올라, 보스가 다시 일어났음을 보여 준다.
             case HealthBarChange.Refilled:
                 SetRatioImmediately(0f);
                 _fill.DOAnchorMax(Vector2.one, _refillDuration).SetEase(Ease.OutQuad).SetUpdate(true);

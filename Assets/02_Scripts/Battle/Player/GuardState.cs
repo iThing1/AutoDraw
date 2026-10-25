@@ -1,8 +1,7 @@
 using System;
 using UnityEngine;
 
-// 막기의 상태와 규칙. 쿨타임, 게이지 비용, 지금 막기를 쓸 수 있는지를 정한다.
-// 입력과 방패 연출은 PlayerGuard가 맡고, 화면은 이 상태만 보고 막기 칸을 그린다. 시간은 부르는 쪽이 넘긴다(게임 시간).
+// 막기의 상태와 규칙. 쿨타임, 게이지 비용, 지금 막기를 쓸 수 있는지를 정한다. 시간은 부르는 쪽이 넘긴다(게임 시간).
 public class GuardState : IDisposable
 {
     private readonly GuardPreset _preset;

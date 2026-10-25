@@ -11,7 +11,6 @@ public class SoundManager
 
     private AudioSource _bgmSource;
     private float _bgmVolume;
-    // 지금 곡을 줄인 뒤 바꿔 틀 곡.
     private AudioClip _nextBgm;
 
     public void Init(GameObject owner, float bgmVolume)

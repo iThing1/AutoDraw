@@ -5,9 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-// 화면을 가로지르는 예고선을 긋고, 다 차면 굵은 붓 획이 그어진다. 몇 줄씩 한꺼번에 묶어 차례로 그어 공간을 가른다.
-// 한 묶음은 같은 순간에 그어져 막기 한 번으로 막을 수 있고, 묶음 사이는 막기를 다시 쓸 수 있을 만큼 띄운다.
-// 줄은 목표 근처를 지나도록 긋고, 방향은 무작위라 선과 선 사이 빈자리를 찾아 움직이게 한다.
+// 예고선을 긋고 다 차면 붓 획이 그어진다. 한 묶음은 같은 순간에 그어져 막기 한 번으로 막을 수 있다.
 [CreateAssetMenu(fileName = "InkLineAttackStyle", menuName = "Scriptable Objects/AttackStyle/InkLine")]
 public class InkLineAttackStyle : AttackStyle
 {
@@ -15,7 +13,6 @@ public class InkLineAttackStyle : AttackStyle
     [SerializeField, Min(1)] private int _volleyCount = 3;
     [SerializeField] private IntRange _linesPerVolley = new IntRange(2, 3);
     [SerializeField, Min(0f)] private float _volleyInterval = 0.75f;
-    // 종이 끝까지 닿도록 넉넉히 잡는다.
     [SerializeField, Min(1f)] private float _length = 120f;
     [SerializeField, Min(0.1f)] private float _width = 1.6f;
     // 줄이 목표 자리에서 옆으로 비켜 지나는 거리. 0이면 늘 목표를 정확히 지난다.
@@ -93,7 +90,6 @@ public class InkLineAttackStyle : AttackStyle
         }
     }
 
-    // 획의 굵기 안에 몸이 걸쳐 있으면 맞는다. 방패를 들고 있으면 막힌다.
     private void StrikeIfTouching(AttackContext context, Vector3 center, Vector3 along, float gaugeGain)
     {
         Vector3 targetPoint = context.Target.GetAimPoint(Vector3.zero);

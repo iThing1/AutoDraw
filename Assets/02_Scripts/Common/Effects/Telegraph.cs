@@ -5,14 +5,12 @@ using System.Threading;
 using UnityEngine;
 
 // 공격이 떨어질 자리를 미리 보여 주는 표시. 옅은 테두리 영역 안을 진한 면이 채워 가고, 다 차는 순간 공격이 온다.
-// 원은 가운데에서 바깥으로, 선은 가는 줄에서 굵기 방향으로 채워진다. 그림(원·네모)은 프리팹으로 정한다.
 public static class Telegraph
 {
     // 테두리 영역은 채움 색의 이 비율만큼만 진하게 깐다.
     private const float AREA_ALPHA_RATIO = 0.45f;
     private const float AREA_FADE_DURATION = 0.15f;
 
-    // 게임 시간으로 채워 히트 스톱 동안에는 함께 멈춘다. 끝나면 표시를 바로 돌려준다.
     public static async UniTask PlayAsync(GameObject prefab, Vector3 position, float angle, Vector2 size, Vector2 startFillSize, Color color,
         float duration, CancellationToken token)
     {

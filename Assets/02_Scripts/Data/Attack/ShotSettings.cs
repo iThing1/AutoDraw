@@ -1,8 +1,7 @@
 using System;
 using UnityEngine;
 
-// 투사체 한 발의 성질. 날아가는 값(크기·궤적·추적·꼬리)과 맞았을 때의 타격 값(HitSettings)으로 나뉜다.
-// 단발·연사·파편 조각이 모두 이 설정을 재사용한다.
+// 투사체 한 발의 성질. 단발·연사·파편 조각이 모두 이 설정을 재사용한다.
 [Serializable]
 public class ShotSettings
 {

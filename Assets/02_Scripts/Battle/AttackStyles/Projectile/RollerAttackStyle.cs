@@ -2,14 +2,12 @@ using Cysharp.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
 
-// 쏜 순간 목표가 있던 쪽으로 원통이 느리게 굴러간다. 유도가 없어 목표가 비켜서면 빗나가고, 지나간 길에는 카펫처럼 이어진 물감 띠가 깔린다.
-// 몸을 빠져나갔다가 다시 닿으면 또 맞히고, 횟수를 다 채우면 그 자리에서 터진다.
+// 쏜 순간 목표가 있던 쪽으로 원통이 굴러가며 지나간 길에 물감 띠를 깐다. 횟수를 다 채우면 그 자리에서 터진다.
 [CreateAssetMenu(fileName = "RollerAttackStyle", menuName = "Scriptable Objects/AttackStyle/Roller")]
 public class RollerAttackStyle : AttackStyle
 {
     [Header("원통")]
     [SerializeField] private GameObject _rollerPrefab;
-    // 굴러가는 방향에 수직인 길이.
     [SerializeField, Min(0.1f)] private float _width = 2.4f;
     [SerializeField, Min(0.1f)] private float _thickness = 0.7f;
     [SerializeField, Min(0.1f)] private float _speed = 4f;
@@ -20,7 +18,6 @@ public class RollerAttackStyle : AttackStyle
     [Header("물감 띠")]
     // 가로로 이어 붙여도 이음매가 없는 띠 그림. 깔린 길이만큼 반복한다.
     [SerializeField] private Texture2D _carpetTexture;
-    // 띠 그림 한 장이 덮는 길이.
     [SerializeField, Min(0.1f)] private float _carpetTileLength = 8.8f;
     [SerializeField, Min(0.1f)] private float _carpetWidth = 2.2f;
 

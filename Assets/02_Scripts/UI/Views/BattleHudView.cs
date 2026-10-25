@@ -13,7 +13,6 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
     [SerializeField] private HealthBarView _bossHealthBar;
 
     [Header("보스 페이즈")]
-    // 남은 페이즈 수. 페이즈가 하나뿐인 보스나 마지막 페이즈에서는 숨긴다.
     [SerializeField] private TMP_Text _bossPhaseText;
     [SerializeField] private string _bossPhaseFormat = "x{0}";
 
@@ -118,7 +117,6 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
         DrawPhaseCount();
     }
 
-    // 쓰는 무기 칸 수만큼만 칸을 켠다.
     private void BindWeaponSlots(IReadOnlyList<ActionSlotViewModel> slots)
     {
         for (int i = 0; i < _weaponSlots.Length; i++)
@@ -183,7 +181,6 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
         SpawnPhrase(phrase.Text, phrase.Color, worldPosition);
     }
 
-    // 회복 문구는 "+{0}"처럼 회복량 자리를 둔다.
     private void SpawnHealText(int amount, Vector3 worldPosition)
     {
         FloatingTextSettings.Phrase phrase = _floatingText.GetPhrase(FloatingTextKind.Heal);

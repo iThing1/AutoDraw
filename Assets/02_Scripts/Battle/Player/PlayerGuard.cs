@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // 막기 키를 누르는 순간 짧게 방패를 세운다. 그동안 닿은 공격은 피해 없이 막히고, 스킬 게이지를 조금 쓴다.
-// 쓸 수 있는지(쿨타임·게이지)는 GuardState가 정하고, 여기는 입력을 받고 방패를 보여 주는 일만 한다.
 [RequireComponent(typeof(BattleUnit), typeof(SkillGauge))]
 public class PlayerGuard : MonoBehaviour
 {
@@ -19,11 +18,13 @@ public class PlayerGuard : MonoBehaviour
     private PlayerStats _stats;
     private Vector3 _shieldScale;
     private Color _shieldColor;
+    private Sprite _icon;
 
     // 프리셋이나 입력이 비어 있으면 null이다.
     public GuardState State { get { return _state; } }
 
     public string KeyLabel { get { return _guardAction.GetKeyLabel(); } }
+    public Sprite Icon { get { return _icon; } }
 
     private void Awake()
     {
@@ -41,9 +42,8 @@ public class PlayerGuard : MonoBehaviour
         }
     }
 
-    // 전투를 시작하는 쪽이 플레이어를 만든 직후 부른다. 유틸리티 칸에 막기를 끼웠을 때만 쓴다.
-    // 꺼 두면 입력도 받지 않고, State가 null이라 HUD도 막기 칸을 숨긴다.
-    public void Setup(UtilityType utility, PlayerStats stats)
+    // 유틸리티 칸에 막기를 끼웠을 때만 쓴다. 꺼 두면 입력도 받지 않고, State가 null이라 HUD도 막기 칸을 숨긴다.
+    public void Setup(UtilityType utility, PlayerStats stats, AssetManager assets)
     {
         if (false == enabled || UtilityType.Guard != utility)
         {
@@ -53,6 +53,7 @@ public class PlayerGuard : MonoBehaviour
 
         _stats = stats;
         _state = new GuardState(_preset, _stats, GetComponent<SkillGauge>());
+        _icon = assets.Get<Sprite>(utility.GetIconKey());
 
         if (null != _shield && null != _shield.sprite)
         {
@@ -130,7 +131,6 @@ public class PlayerGuard : MonoBehaviour
         GuardAsync(destroyCancellationToken).Forget();
     }
 
-    // 게임 시간으로 재서, 히트 스톱으로 공격이 멈춘 동안에는 방패도 함께 기다린다.
     private async UniTaskVoid GuardAsync(CancellationToken token)
     {
         ShowShield();
@@ -144,7 +144,6 @@ public class PlayerGuard : MonoBehaviour
         }
         catch (OperationCanceledException)
         {
-            // 플레이어가 사라져 막기가 끊긴 경우라 따로 처리하지 않는다.
         }
         finally
         {
@@ -169,7 +168,6 @@ public class PlayerGuard : MonoBehaviour
         _shield.DOFade(0f, _preset.RejectFlashDuration).OnComplete(HideShield);
     }
 
-    // 짧은 히트 스톱으로 막는 순간의 손맛을 준다.
     private void HandleBlocked(Vector3 hitPoint)
     {
         _state.ResetCooldown();

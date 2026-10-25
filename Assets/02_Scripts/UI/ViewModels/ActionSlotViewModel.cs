@@ -1,12 +1,12 @@
 using System;
 using UnityEngine;
 
-// 하단 HUD 칸 하나(공격·스킬·막기·소모품)에 보일 값. 키 이름·아이콘 색은 처음에 정해지고, 선택 여부·게이지·이름은 하위 클래스가 모델을 보고 바꾼다.
-// 칸마다 데이터를 주는 곳(무기 선택, 스킬 게이지, 막기 비용, 소모품 횟수)이 달라 하위 클래스로 나누고, 그리는 View는 하나를 같이 쓴다.
+// 하단 HUD 칸 하나(공격·스킬·막기·소모품)에 보일 값. 칸마다 데이터를 주는 곳이 달라 하위 클래스로 나누고, 그리는 View는 하나를 같이 쓴다.
 public abstract class ActionSlotViewModel : ViewModelBase
 {
     private readonly string _keyLabel;
     private string _displayName;
+    private readonly Sprite _icon;
     private readonly Color _iconColor;
     private readonly bool _usesGauge;
     private bool _isSelected;
@@ -20,6 +20,8 @@ public abstract class ActionSlotViewModel : ViewModelBase
 
     public string KeyLabel { get { return _keyLabel; } }
     public string DisplayName { get { return _displayName; } }
+    // 아이콘 그림이 없으면 null이고, View는 대신 IconColor로 칠한다.
+    public Sprite Icon { get { return _icon; } }
     public Color IconColor { get { return _iconColor; } }
     // 게이지를 쓰는 칸(스킬·막기)만 채움과 흐림을 보인다.
     public bool UsesGauge { get { return _usesGauge; } }
@@ -28,15 +30,16 @@ public abstract class ActionSlotViewModel : ViewModelBase
     // 게이지가 다 차 지금 쓸 수 있는지.
     public bool IsReady { get { return _isReady; } }
 
-    protected ActionSlotViewModel(string keyLabel, AttackStyle style, bool usesGauge)
-        : this(keyLabel, null != style ? style.DisplayName : string.Empty, null != style ? style.IconColor : Color.white, usesGauge)
+    protected ActionSlotViewModel(string keyLabel, AttackStyle style, Sprite icon, bool usesGauge)
+        : this(keyLabel, null != style ? style.DisplayName : string.Empty, icon, null != style ? style.IconColor : Color.white, usesGauge)
     {
     }
 
-    protected ActionSlotViewModel(string keyLabel, string displayName, Color iconColor, bool usesGauge)
+    protected ActionSlotViewModel(string keyLabel, string displayName, Sprite icon, Color iconColor, bool usesGauge)
     {
         _keyLabel = keyLabel;
         _displayName = displayName;
+        _icon = icon;
         _iconColor = iconColor;
         _usesGauge = usesGauge;
     }

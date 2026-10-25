@@ -26,7 +26,6 @@ public class DashPreset : ScriptableObject
     [Header("붓 자국")]
     // 가로로 이어 붙여도 이음매가 없는 띠 그림. 비우면 자국을 남기지 않는다.
     [SerializeField] private Texture2D _strokeTexture;
-    // 띠 그림 한 장이 덮는 길이.
     [SerializeField, Min(0.1f)] private float _strokeTileLength = 3.2f;
     [SerializeField, Min(0.1f)] private float _strokeWidth = 0.8f;
 

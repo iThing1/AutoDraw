@@ -31,6 +31,6 @@ MonoBehaviour:
   _afterimageColor: {r: 0.55, g: 0.9, b: 0.65, a: 0.5}
   _afterimageInterval: 0.03
   _afterimageFadeDuration: 0.25
-  _strokeTexture: {fileID: 2800000, guid: 3792561aad13b70daad187da232ddc5d, type: 3}
+  _strokeTexture: {fileID: 2800000, guid: 03109aa72c85ef62c914547517bc7d14, type: 3}
   _strokeTileLength: 3.2
   _strokeWidth: 0.8

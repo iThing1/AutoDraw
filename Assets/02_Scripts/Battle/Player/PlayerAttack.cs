@@ -2,8 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// 무기 칸 키로 공격을 고르고, 게이지가 가득 차면 스킬 키로 특수 스킬을 발동한다. 키 배치는 입력 에셋에서 바꾼다.
-// 끼운 장비는 전투를 시작할 때 PlayerSetup이 넘겨준다. 바꾼 장비는 다음 전투부터 쓴다.
+// 무기 칸 키로 공격을 고르고, 게이지가 가득 차면 스킬 키로 특수 스킬을 발동한다.
 [RequireComponent(typeof(BattleUnit), typeof(SkillGauge))]
 public class PlayerAttack : MonoBehaviour
 {
@@ -20,10 +19,12 @@ public class PlayerAttack : MonoBehaviour
 
     private readonly AttackStyle[] _slotStyles = new AttackStyle[WEAPON_SLOT_COUNT];
     private readonly WeaponModifier[] _slotModifiers = new WeaponModifier[WEAPON_SLOT_COUNT];
+    private readonly Sprite[] _slotIcons = new Sprite[WEAPON_SLOT_COUNT];
 
     private BattleUnit _unit;
     private SkillGauge _skillGauge;
     private AttackStyle _skillStyle;
+    private Sprite _skillIcon;
     private int _selectedIndex = -1;
 
     public SkillGauge SkillGauge { get { return _skillGauge; } }
@@ -31,6 +32,7 @@ public class PlayerAttack : MonoBehaviour
     public string SkillKeyLabel { get { return _skillAction.GetKeyLabel(); } }
     // 끼운 스킬의 공격 방식이 아직 없으면 null이다.
     public AttackStyle SkillStyle { get { return _skillStyle; } }
+    public Sprite SkillIcon { get { return _skillIcon; } }
 
     // 무기 칸과 입력 중 적은 쪽까지만 쓴다. 키가 없는 칸은 고를 수 없다.
     public int SlotCount { get { return null != _weaponActions ? Mathf.Min(WEAPON_SLOT_COUNT, _weaponActions.Length) : 0; } }
@@ -47,7 +49,6 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
-    // 전투를 시작하는 쪽이 플레이어를 만든 직후(Start 전에) 부른다. 첫 무기 선택과 미리 생성이 끼운 장비를 보고 이뤄진다.
     public void Setup(PlayerLoadout loadout, PlayerStats stats, DataTableManager tables, AssetManager assets)
     {
         _skillGauge.Init(stats.SkillGaugeMax);
@@ -58,6 +59,7 @@ public class PlayerAttack : MonoBehaviour
         if (tables.Skills.TryGet(loadout.SkillId, out SkillData skill))
         {
             _skillStyle = assets.Get<AttackStyle>(skill.AttackStyleKey);
+            _skillIcon = assets.Get<Sprite>(skill.IconKey);
         }
     }
 
@@ -106,6 +108,11 @@ public class PlayerAttack : MonoBehaviour
         return 0 <= index && index < WEAPON_SLOT_COUNT ? _slotStyles[index] : null;
     }
 
+    public Sprite GetSlotIcon(int index)
+    {
+        return 0 <= index && index < WEAPON_SLOT_COUNT ? _slotIcons[index] : null;
+    }
+
     public string GetWeaponKeyLabel(int index)
     {
         if (null == _weaponActions || index >= _weaponActions.Length)
@@ -125,10 +132,10 @@ public class PlayerAttack : MonoBehaviour
         }
 
         _slotStyles[slot] = assets.Get<AttackStyle>(weapon.AttackStyleKey);
+        _slotIcons[slot] = assets.Get<Sprite>(weapon.IconKey);
         _slotModifiers[slot] = new WeaponModifier(weapon.DamageBonus + stats.GetWeaponDamageBonus(weapon.Type), weapon.IntervalScale);
     }
 
-    // 끼운 무기와 스킬의 공격을 미리 만든다. 전투 스테이지가 다른 유닛과 함께 부른다.
     public void Prewarm()
     {
         for (int i = 0; i < WEAPON_SLOT_COUNT; i++)

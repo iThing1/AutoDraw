@@ -80,7 +80,6 @@ public class BattleCameraRig : MonoBehaviour
         return true;
     }
 
-    // 경계는 스테이지마다 달라 스테이지가 넘겨준다. 모든 카메라가 이 영역 밖을 비추지 않는다.
     public void SetCameraBounds(Collider2D bounds)
     {
         _cameraBounds = bounds;
@@ -99,7 +98,6 @@ public class BattleCameraRig : MonoBehaviour
         }
     }
 
-    // 다음 스테이지에 이전 경계가 남지 않게 끈다.
     public void ClearCameraBounds()
     {
         if (null != _confiners)

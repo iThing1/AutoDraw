@@ -41,7 +41,7 @@ public class AttackStyleSet : AttackStyle
                 return false;
             }
 
-            return false == picker.IsOnCooldown(_style, _cooldown);
+            return false == picker.IsOnCooldown(_style, _cooldown) && _style.CanFire(context);
         }
     }
 

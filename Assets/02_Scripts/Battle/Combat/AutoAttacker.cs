@@ -41,8 +41,9 @@ public class AutoAttacker : MonoBehaviour
     public async UniTask RunAsync(BattleUnit target, PaintCanvas paintCanvas, CancellationToken token)
     {
         AttackTarget attackTarget = new AttackTarget(target);
-        _context = CreateContext(attackTarget, paintCanvas, DamageDealer.ForWeapon(_owner, _skillGauge, attackTarget, paintCanvas));
-        _skillContext = CreateContext(attackTarget, paintCanvas, DamageDealer.ForSkill(_owner, _skillGauge, attackTarget, paintCanvas));
+        TargetObserver observer = new TargetObserver(target);
+        _context = CreateContext(attackTarget, observer, paintCanvas, DamageDealer.ForWeapon(_owner, _skillGauge, attackTarget, paintCanvas));
+        _skillContext = CreateContext(attackTarget, observer, paintCanvas, DamageDealer.ForSkill(_owner, _skillGauge, attackTarget, paintCanvas));
         _battleToken = token;
         _isRunning = true;
 
@@ -151,9 +152,16 @@ public class AutoAttacker : MonoBehaviour
         }
 
         // 기다리는 동안 키로 공격을 바꿨거나 페이즈가 바뀌었으면 다음 공격부터가 아니라 바로 새 공격을 쏜다.
-        if (selectedStyle != _owner.AttackStyle)
+        // 고른 패턴을 그사이 쏠 수 없게 됐어도 다시 고른다.
+        if (selectedStyle != _owner.AttackStyle || false == style.CanFire(_context))
         {
             style = _owner.AttackStyle.PickStyle(this);
+        }
+
+        // 묶음 없이 바로 건 패턴은 다시 골라도 같아, 쏠 수 없으면 이번 공격을 건너뛴다.
+        if (false == style.CanFire(_context))
+        {
+            return true;
         }
 
         if (style.WaitUntilFinished)
@@ -262,11 +270,11 @@ public class AutoAttacker : MonoBehaviour
     }
 
     // 무기 공격과 스킬은 피해 처리를 따로 써, 무기 보정이 스킬에 붙지 않게 한다.
-    private AttackContext CreateContext(AttackTarget attackTarget, PaintCanvas paintCanvas, DamageDealer damage)
+    private AttackContext CreateContext(AttackTarget attackTarget, TargetObserver observer, PaintCanvas paintCanvas, DamageDealer damage)
     {
         ProjectileLauncher launcher = new ProjectileLauncher(_owner, attackTarget, damage);
 
-        return new AttackContext(_owner, attackTarget, _hands, paintCanvas, damage, launcher);
+        return new AttackContext(_owner, attackTarget, observer, _hands, paintCanvas, damage, launcher);
     }
 
     private async UniTask<bool> WaitAndBeginActionAsync(CancellationToken token)

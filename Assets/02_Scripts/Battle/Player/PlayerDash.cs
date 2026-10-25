@@ -18,9 +18,12 @@ public class PlayerDash : MonoBehaviour
     private DashState _state;
     private PlayerStats _stats;
     private Sprite _icon;
+    // 이 전투에서 실제로 대시한 횟수. 보스가 대시를 자주 쓰는 플레이어에게 반응하는 데 쓴다.
+    private int _useCount;
 
     // 유틸리티 칸에 대시를 끼우지 않았으면 null이다.
     public DashState State { get { return _state; } }
+    public int UseCount { get { return _useCount; } }
 
     public string KeyLabel { get { return _dashAction.GetKeyLabel(); } }
     public Sprite Icon { get { return _icon; } }
@@ -96,6 +99,7 @@ public class PlayerDash : MonoBehaviour
         }
 
         _state.Begin(Time.time);
+        _useCount++;
 
         DashAsync(_mover.GetFacingDirection(), destroyCancellationToken).Forget();
     }

@@ -51,6 +51,16 @@ MonoBehaviour:
     _minDistance: 0
     _maxDistance: 0
     _cooldown: 8
+  - _style: {fileID: 11400000, guid: d94fb11d408440f782a244b2782f49a0, type: 2}
+    _weight: 12
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 10
+  - _style: {fileID: 11400000, guid: add70c1964804b3caeeda7ab032794ec, type: 2}
+    _weight: 8
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 12
   - _style: {fileID: 11400000, guid: e3b9d9e6c307a417669e789f9f69e13a, type: 2}
     _weight: 200
     _minDistance: 0

@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22cc108996e8484bb53c636feae3ec95, type: 3}
+  m_Name: Boss3_P2_Rewind
+  m_EditorClassIdentifier: Assembly-CSharp::RewindAttackStyle
+  _displayName: Rewind
+  _iconColor: {r: 0.08, g: 0.08, b: 0.1, a: 1}
+  _attackInterval: 0.7
+  _gaugeGainPerHit: 0
+  _waitUntilFinished: 1
+  _stopsMovement: 1
+  _tell: 0
+  _tellDuration: 0.5
+  _replayCount: 2
+  _tintColor: {r: 0.25, g: 0.55, b: 1, a: 1}
+  _tintStrength: 0.5
+  _introDuration: 0.7
+  _introImpact:
+    _shakeForce: 0.3
+    _sounds: []
+    _pitch:
+      _min: 1
+      _max: 1
+    _effectPrefab: {fileID: 0}
+    _effectColor: {r: 0, g: 0, b: 0, a: 1}
+    _effectScale: 1
+    _effectLifetime: 3
+  _ripplePrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
+  _rippleCount: 3
+  _rippleDiameter: 12
+  _rippleAlpha: 0.3
+  _rippleDuration: 0.45
+  _rippleInterval: 0.12
+  _handPrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
+  _handLength: 2.5
+  _handWidth: 0.2
+  _handTurns: 2

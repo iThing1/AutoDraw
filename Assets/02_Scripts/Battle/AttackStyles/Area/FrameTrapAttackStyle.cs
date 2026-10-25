@@ -31,6 +31,26 @@ public class FrameTrapAttackStyle : AttackStyle
         public float Angle { get { return Geometry2D.ToAngle(To - From); } }
     }
 
+    // 되감기용 기록. 액자 가운데와 틈을 낸 변을 쥐고 있다.
+    private sealed class Record : RewindRecord
+    {
+        private readonly FrameTrapAttackStyle _style;
+        private readonly Vector3 _center;
+        private readonly int _gapSide;
+
+        public Record(FrameTrapAttackStyle style, Vector3 center, int gapSide)
+        {
+            _style = style;
+            _center = center;
+            _gapSide = gapSide;
+        }
+
+        public override UniTask ReplayAsync(AttackContext context, InkTint tint, float gaugeGain, CancellationToken token)
+        {
+            return _style.PlayAsync(context, _center, _gapSide, true, tint, gaugeGain, token);
+        }
+    }
+
     [Header("액자")]
     [SerializeField, Min(0.1f)] private float _startSize = 7f;
     [SerializeField, Min(0f)] private float _endSize = 3f;
@@ -68,28 +88,49 @@ public class FrameTrapAttackStyle : AttackStyle
         }
     }
 
-    public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
+    public override UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         Vector3 center = context.Target.GetAimPoint(Vector3.zero);
         int gapSide = PickGapSide(center - context.Owner.Body.position);
+
+        context.RewindLog.Add(new Record(this, center, gapSide));
+
+        return PlayAsync(context, center, gapSide, false, default, gaugeGain, token);
+    }
+
+    // 되감으면(isReversed) 다 조인 크기로 예고한 뒤 안쪽이 먼저 터지고, 테두리가 조이던 길을 거꾸로 밟아 바깥으로 풀려 나간다.
+    // 풀려 나가는 테두리는 틈 앞에 서 있거나 대시로 뚫어 피한다.
+    private async UniTask PlayAsync(AttackContext context, Vector3 center, int gapSide, bool isReversed, InkTint tint, float gaugeGain,
+        CancellationToken token)
+    {
         List<Edge> edges = new List<Edge>(MAX_EDGE_COUNT);
 
-        BuildEdges(center, _startSize, gapSide, edges);
-        await PlayTelegraphAsync(edges, token);
+        BuildEdges(center, isReversed ? _endSize : _startSize, gapSide, edges);
+        await PlayTelegraphAsync(edges, tint.Apply(_telegraphColor), token);
 
         List<SpriteRenderer> sprites = new List<SpriteRenderer>(MAX_EDGE_COUNT);
 
         try
         {
+            // 작은 액자는 틈 변이 사라져 조각이 적을 수 있어, 그림은 가장 큰 액자의 조각 수만큼 꺼내 둔다.
+            BuildEdges(center, Mathf.Max(_startSize, _endSize), gapSide, edges);
+
             for (int i = 0; i < edges.Count; i++)
             {
-                sprites.Add(PooledSprite.Spawn(_edgePrefab, edges[i].Center, edges[i].Angle, new Vector2(edges[i].Length, _edgeWidth), _edgeColor));
+                sprites.Add(PooledSprite.Spawn(_edgePrefab, edges[i].Center, edges[i].Angle, new Vector2(edges[i].Length, _edgeWidth), tint.Apply(_edgeColor)));
             }
 
-            await ShrinkAsync(context, center, gapSide, edges, sprites, gaugeGain, token);
+            if (isReversed)
+            {
+                Burst(context, center, tint, gaugeGain);
+            }
 
-            ImpactPlayer.Play(_burstImpact, center);
-            context.Damage.Blast(_burstHit, center, _endSize * 0.5f, gaugeGain);
+            await ShrinkAsync(context, center, gapSide, isReversed, edges, sprites, gaugeGain, token);
+
+            if (false == isReversed)
+            {
+                Burst(context, center, tint, gaugeGain);
+            }
 
             await FadeEdgesAsync(sprites, token);
         }
@@ -117,33 +158,38 @@ public class FrameTrapAttackStyle : AttackStyle
         await UniTask.WhenAll(fades);
     }
 
-    private async UniTask PlayTelegraphAsync(List<Edge> edges, CancellationToken token)
+    private async UniTask PlayTelegraphAsync(List<Edge> edges, Color telegraphColor, CancellationToken token)
     {
         List<UniTask> telegraphs = new List<UniTask>(edges.Count);
 
         for (int i = 0; i < edges.Count; i++)
         {
-            telegraphs.Add(Telegraph.PlayLineAsync(_telegraphPrefab, edges[i].Center, edges[i].Angle, edges[i].Length, _edgeWidth, _telegraphColor,
+            telegraphs.Add(Telegraph.PlayLineAsync(_telegraphPrefab, edges[i].Center, edges[i].Angle, edges[i].Length, _edgeWidth, telegraphColor,
                 _warnDuration, token));
         }
 
         await UniTask.WhenAll(telegraphs);
     }
 
+    private void Burst(AttackContext context, Vector3 center, InkTint tint, float gaugeGain)
+    {
+        ImpactPlayer.Play(_burstImpact, center, tint.Apply(_burstImpact.EffectColor));
+        context.Damage.Blast(_burstHit, center, _endSize * 0.5f, gaugeGain);
+    }
+
     // 틈이 있는 변이 조여 들며 틈이 사라질 수 있어, 조각 수가 줄면 남는 그림은 숨긴다.
-    private async UniTask ShrinkAsync(AttackContext context, Vector3 center, int gapSide, List<Edge> edges, List<SpriteRenderer> sprites,
-        float gaugeGain, CancellationToken token)
+    // 되감으면 같은 크기 변화를 시간만 거꾸로 밟는다. 꺼내 둔 그림이 한 프레임도 다른 크기로 보이지 않게, 기다리기 전에 먼저 놓는다.
+    private async UniTask ShrinkAsync(AttackContext context, Vector3 center, int gapSide, bool isReversed, List<Edge> edges,
+        List<SpriteRenderer> sprites, float gaugeGain, CancellationToken token)
     {
         AttackTarget target = context.Target;
         float elapsed = 0f;
         bool hasStruck = false;
 
-        while (elapsed < _shrinkDuration)
+        while (true)
         {
-            await UniTask.Yield(PlayerLoopTiming.Update, token);
-            elapsed = Mathf.Min(elapsed + Time.deltaTime, _shrinkDuration);
-
-            float size = DOVirtual.EasedValue(_startSize, _endSize, elapsed / _shrinkDuration, _shrinkEase);
+            float progress = elapsed / _shrinkDuration;
+            float size = DOVirtual.EasedValue(_startSize, _endSize, isReversed ? 1f - progress : progress, _shrinkEase);
             BuildEdges(center, size, gapSide, edges);
 
             for (int i = 0; i < sprites.Count; i++)
@@ -162,6 +208,14 @@ public class FrameTrapAttackStyle : AttackStyle
                 hasStruck = true;
                 context.Damage.Strike(_edgeHit, target.GetAimPoint(Vector3.zero), gaugeGain);
             }
+
+            if (elapsed >= _shrinkDuration)
+            {
+                break;
+            }
+
+            await UniTask.Yield(PlayerLoopTiming.Update, token);
+            elapsed = Mathf.Min(elapsed + Time.deltaTime, _shrinkDuration);
         }
     }
 

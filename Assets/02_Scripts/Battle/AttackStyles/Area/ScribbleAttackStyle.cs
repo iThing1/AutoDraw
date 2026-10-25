@@ -11,6 +11,24 @@ public class ScribbleAttackStyle : AttackStyle
 {
     private const float FULL_TURN = Mathf.PI * 2f;
 
+    // 되감기용 기록. 그은 획을 그대로 쥐고 있다.
+    private sealed class Record : RewindRecord
+    {
+        private readonly ScribbleAttackStyle _style;
+        private readonly Polyline _path;
+
+        public Record(ScribbleAttackStyle style, Polyline path)
+        {
+            _style = style;
+            _path = path;
+        }
+
+        public override UniTask ReplayAsync(AttackContext context, InkTint tint, float gaugeGain, CancellationToken token)
+        {
+            return _style.RewindAsync(context, _path, tint, gaugeGain, token);
+        }
+    }
+
     [Header("획")]
     [SerializeField, Min(1f)] private float _length = 26f;
     // 획의 가운데 줄이 목표 자리에서 옆으로 비켜 지나는 거리.
@@ -61,26 +79,43 @@ public class ScribbleAttackStyle : AttackStyle
     }
 
     // 획은 쏘는 순간에 정한다. 예고를 본 뒤 획에서 벗어나면 피한다.
-    public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
+    public override UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         Polyline path = BuildPath(context.Target.GetAimPoint(Vector3.zero));
 
-        await Telegraph.PlayPathAsync(_telegraphPrefab, path, _strokeWidth, _telegraphColor, _sketchDuration, _warnDuration, token);
+        context.RewindLog.Add(new Record(this, path));
+
+        return PlayAsync(context, path, default, gaugeGain, token);
+    }
+
+    // 되감으면 같은 자리의 획을 끝에서 처음 쪽으로 다시 긋는다.
+    private UniTask RewindAsync(AttackContext context, Polyline path, InkTint tint, float gaugeGain, CancellationToken token)
+    {
+        List<Vector3> points = new List<Vector3>(path.Points);
+        points.Reverse();
+
+        return PlayAsync(context, new Polyline(points), tint, gaugeGain, token);
+    }
+
+    private async UniTask PlayAsync(AttackContext context, Polyline path, InkTint tint, float gaugeGain, CancellationToken token)
+    {
+        await Telegraph.PlayPathAsync(_telegraphPrefab, path, _strokeWidth, tint.Apply(_telegraphColor), _sketchDuration, _warnDuration, token);
 
         if (null == _strokePrefab)
         {
             return;
         }
 
-        LineRenderer stroke = PathLine.Spawn(_strokePrefab, _strokeWidth, _strokeColor);
+        Color strokeColor = tint.Apply(_strokeColor);
+        LineRenderer stroke = PathLine.Spawn(_strokePrefab, _strokeWidth, strokeColor);
 
         try
         {
-            bool hasStruck = await DrawAsync(context, path, stroke, gaugeGain, token);
+            bool hasStruck = await DrawAsync(context, path, stroke, tint.Apply(_penColor), gaugeGain, token);
 
             await LingerAsync(context, path, hasStruck, gaugeGain, token);
 
-            await DOVirtual.Float(_strokeColor.a, 0f, _fadeDuration, alpha => PathLine.SetColor(stroke, new Color(_strokeColor.r, _strokeColor.g, _strokeColor.b, alpha)))
+            await DOVirtual.Float(strokeColor.a, 0f, _fadeDuration, alpha => PathLine.SetColor(stroke, new Color(strokeColor.r, strokeColor.g, strokeColor.b, alpha)))
                 .SetTarget(stroke)
                 .ToUniTaskKillOnCancel(token);
         }
@@ -112,10 +147,11 @@ public class ScribbleAttackStyle : AttackStyle
     }
 
     // 펜 끝이 처음엔 천천히, 뒤로 갈수록 빠르게 획을 따라가며 먹 선을 그어 나간다. 펜 끝에 닿았으면 true를 돌려준다.
-    private async UniTask<bool> DrawAsync(AttackContext context, Polyline path, LineRenderer stroke, float gaugeGain, CancellationToken token)
+    private async UniTask<bool> DrawAsync(AttackContext context, Polyline path, LineRenderer stroke, Color penColor, float gaugeGain,
+        CancellationToken token)
     {
         AttackTarget target = context.Target;
-        SpriteRenderer pen = null != _penPrefab ? PooledSprite.Spawn(_penPrefab, path.Points[0], 0f, new Vector2(_penDiameter, _penDiameter), _penColor) : null;
+        SpriteRenderer pen = null != _penPrefab ? PooledSprite.Spawn(_penPrefab, path.Points[0], 0f, new Vector2(_penDiameter, _penDiameter), penColor) : null;
         float radius = Mathf.Max(_penDiameter, _strokeWidth) * 0.5f;
         Vector3 previous = path.Points[0];
         float elapsed = 0f;

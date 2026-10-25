@@ -42,8 +42,9 @@ public class AutoAttacker : MonoBehaviour
     {
         AttackTarget attackTarget = new AttackTarget(target);
         TargetObserver observer = new TargetObserver(target);
-        _context = CreateContext(attackTarget, observer, paintCanvas, DamageDealer.ForWeapon(_owner, _skillGauge, attackTarget, paintCanvas));
-        _skillContext = CreateContext(attackTarget, observer, paintCanvas, DamageDealer.ForSkill(_owner, _skillGauge, attackTarget, paintCanvas));
+        RewindLog rewindLog = new RewindLog();
+        _context = CreateContext(attackTarget, observer, rewindLog, paintCanvas, DamageDealer.ForWeapon(_owner, _skillGauge, attackTarget, paintCanvas));
+        _skillContext = CreateContext(attackTarget, observer, rewindLog, paintCanvas, DamageDealer.ForSkill(_owner, _skillGauge, attackTarget, paintCanvas));
         _battleToken = token;
         _isRunning = true;
 
@@ -270,11 +271,12 @@ public class AutoAttacker : MonoBehaviour
     }
 
     // 무기 공격과 스킬은 피해 처리를 따로 써, 무기 보정이 스킬에 붙지 않게 한다.
-    private AttackContext CreateContext(AttackTarget attackTarget, TargetObserver observer, PaintCanvas paintCanvas, DamageDealer damage)
+    private AttackContext CreateContext(AttackTarget attackTarget, TargetObserver observer, RewindLog rewindLog, PaintCanvas paintCanvas,
+        DamageDealer damage)
     {
         ProjectileLauncher launcher = new ProjectileLauncher(_owner, attackTarget, damage);
 
-        return new AttackContext(_owner, attackTarget, observer, _hands, paintCanvas, damage, launcher);
+        return new AttackContext(_owner, attackTarget, observer, _hands, paintCanvas, damage, launcher, rewindLog);
     }
 
     private async UniTask<bool> WaitAndBeginActionAsync(CancellationToken token)

@@ -109,11 +109,14 @@ public class RewindAttackStyle : AttackStyle
 
         try
         {
-            ripple.DOFade(_rippleAlpha, _rippleDuration * 0.5f);
+            UniTask fade = ripple.DOFade(_rippleAlpha, _rippleDuration * 0.5f)
+                .ToUniTaskKillOnCancel(token);
 
-            await ripple.transform.DOScale(Vector3.zero, _rippleDuration)
+            UniTask shrink = ripple.transform.DOScale(Vector3.zero, _rippleDuration)
                 .SetEase(Ease.InQuad)
                 .ToUniTaskKillOnCancel(token);
+
+            await UniTask.WhenAll(fade, shrink);
         }
         finally
         {

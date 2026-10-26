@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -88,7 +89,7 @@ public class ScribbleAttackStyle : AttackStyle
     public override UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         Vector3 target = context.Target.GetAimPoint(Vector3.zero);
-        float angle = Random.Range(0f, 180f);
+        float angle = UnityEngine.Random.Range(0f, 180f);
         List<Polyline> paths = new List<Polyline>(_strokeCount);
 
         for (int i = 0; i < _strokeCount; i++)
@@ -133,7 +134,7 @@ public class ScribbleAttackStyle : AttackStyle
     {
         if (0f < delay)
         {
-            await UniTask.Delay(System.TimeSpan.FromSeconds(delay), cancellationToken: token);
+            await UniTask.Delay(TimeSpan.FromSeconds(delay), cancellationToken: token);
         }
 
         await Telegraph.PlayPathAsync(_telegraphPrefab, path, _strokeWidth, tint.Apply(_telegraphColor), _sketchDuration, _warnDuration, token);
@@ -167,8 +168,8 @@ public class ScribbleAttackStyle : AttackStyle
     {
         LinePlacement line = LinePlacement.PickNear(target, _offsetRange, angle);
         Vector3 side = new Vector3(-line.Along.y, line.Along.x, 0f);
-        float phase = Random.Range(0f, FULL_TURN);
-        float direction = 0.5f > Random.value ? -1f : 1f;
+        float phase = UnityEngine.Random.Range(0f, FULL_TURN);
+        float direction = 0.5f > UnityEngine.Random.value ? -1f : 1f;
         List<Vector3> points = new List<Vector3>(_pointCount);
 
         for (int i = 0; i < _pointCount; i++)

@@ -33,6 +33,7 @@ MonoBehaviour:
   _rushEase: 5
   _minBlockSize: 0.3
   _rushInterval: 0.15
+  _fadeDuration: 0.25
   _hit:
     _projectileScale: 1
     _trajectories:

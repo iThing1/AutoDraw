@@ -11,8 +11,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "PuppetGimmick", menuName = "Scriptable Objects/Boss/Gimmick/Puppet")]
 public class PuppetGimmick : PunishingBossGimmick
 {
-    private const int FRAME_PLACE_TRY_COUNT = 16;
-
     [Header("실")]
     // 월드 좌표를 쓰는 LineRenderer 프리팹(03_Prefabs/Effects/InkPath).
     [SerializeField] private LineRenderer _threadPrefab;
@@ -215,37 +213,38 @@ public class PuppetGimmick : PunishingBossGimmick
     }
 
     // 보스를 보낼 자리와, 그만큼 플레이어가 움직일 자리가 둘 다 각자의 이동 범위 안인 곳을 고른다.
-    // 처음 보고 그대로 가도 닿을 수 있게 하고, 벽을 써서 간격을 바꾸는 요령은 더 빨리 깨는 길로 남긴다. 못 찾으면 보스 이동 범위 안으로 당긴다.
+    // 두 몸이 함께 움직일 수 있는 거리는 두 이동 범위를 각자 자리만큼 옮겨 겹친 네모라, 고른 거리를 그 안으로 당겨 처음 보고 그대로 가도 늘 닿게 한다.
+    // 판 구석에서는 정한 거리보다 가까워질 수 있다. 벽을 써서 간격을 바꾸는 요령은 더 빨리 깨는 길로 남는다.
     private Vector3 PickFramePoint(AttackContext context)
     {
         Vector3 boss = context.Owner.transform.position;
         Vector3 player = context.Target.Unit.transform.position;
-        UnitMover bossMover = context.Owner.Mover;
-        UnitMover playerMover = context.Target.Unit.Mover;
-        Vector3 offset = Vector3.zero;
+        Vector2 min = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+        Vector2 max = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
 
-        for (int i = 0; i < FRAME_PLACE_TRY_COUNT; i++)
-        {
-            offset = Geometry2D.ToDirection(UnityEngine.Random.Range(0f, 360f)) * _frameDistance.PickRandom();
+        NarrowReach(context.Owner.Mover, boss, ref min, ref max);
+        NarrowReach(context.Target.Unit.Mover, player, ref min, ref max);
 
-            if (IsInside(bossMover, boss + offset) && IsInside(playerMover, player + offset))
-            {
-                break;
-            }
-        }
+        Vector3 offset = Geometry2D.ToDirection(UnityEngine.Random.Range(0f, 360f)) * _frameDistance.PickRandom();
 
-        Vector3 point = boss + offset;
-        Vector3 bodyOffset = context.Owner.Body.position - boss;
-
-        point = null != bossMover ? bossMover.ClampPosition(point) : point;
+        // 몸이 범위 끝에 살짝 걸쳐 있어도 제자리(0)는 늘 고를 수 있게 둔다.
+        offset.x = Mathf.Clamp(offset.x, Mathf.Min(min.x, 0f), Mathf.Max(max.x, 0f));
+        offset.y = Mathf.Clamp(offset.y, Mathf.Min(min.y, 0f), Mathf.Max(max.y, 0f));
 
         // 액자는 보스 몸이 들어갈 자리에 건다. 몸은 루트에서 조금 떨어져 있을 수 있다.
-        return point + bodyOffset;
+        return boss + offset + (context.Owner.Body.position - boss);
     }
 
-    private static bool IsInside(UnitMover mover, Vector3 position)
+    // 이 몸이 from에서 이동 범위를 벗어나지 않고 움직일 수 있는 거리로 min~max를 좁힌다. 범위가 없으면 그대로 둔다.
+    private static void NarrowReach(UnitMover mover, Vector3 from, ref Vector2 min, ref Vector2 max)
     {
-        return null == mover || false == mover.TryGetMoveArea(out Rect area) || area.Contains(position);
+        if (null == mover || false == mover.TryGetMoveArea(out Rect area))
+        {
+            return;
+        }
+
+        min = Vector2.Max(min, area.min - (Vector2)from);
+        max = Vector2.Min(max, area.max - (Vector2)from);
     }
 
     private async UniTaskVoid DropAsync(AttackContext context, CancellationToken token)

@@ -33,6 +33,8 @@ public class VanishingPointAttackStyle : AttackStyle
     [SerializeField, Min(0f)] private float _minBlockSize = 0.3f;
     // 앞 돌진이 튀어나오고 다음 쐐기를 긋기 시작하기까지. 앞 덩어리가 날아가는 동안 다음 쐐기를 긋는다.
     [SerializeField, Min(0f)] private float _rushInterval = 0.15f;
+    // 쐐기 끝에 닿은 덩어리가 옅어지며 사라지는 시간. 그동안은 맞지 않는다.
+    [SerializeField, Min(0f)] private float _fadeDuration = 0.25f;
     [SerializeField] private HitSettings _hit = new();
     [SerializeField] private ImpactSettings _impact = new();
 
@@ -129,6 +131,9 @@ public class VanishingPointAttackStyle : AttackStyle
 
                 previous = center;
             }
+
+            await block.DOFade(0f, _fadeDuration)
+                .ToUniTaskKillOnCancel(token);
         }
         finally
         {

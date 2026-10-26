@@ -28,7 +28,7 @@ public class LoadoutViewModel : GalleryScreenViewModel
             new WeaponLoadoutRule("Basic", WeaponType.Basic, loadout, tables, assets),
             new WeaponLoadoutRule("Heavy", WeaponType.Heavy, loadout, tables, assets),
             new SkillLoadoutRule(loadout, tables, assets),
-            new UtilityLoadoutRule(loadout, assets),
+            new UtilityLoadoutRule(loadout, player.Stats, assets),
             new ConsumableLoadoutRule(loadout, player.Stats, tables, assets),
         };
 

@@ -5,31 +5,37 @@ using System.Threading;
 using UnityEngine;
 
 // 위작에 서명하듯 목표 근처를 가로지르는 구불구불한 획을 연필로 먼저 그어 보이고, 펜 끝이 그 획을 따라 먹 선을 남긴다.
-// 남은 먹 선은 잠시 동안 닿으면 맞아 판을 갈라 놓는다. 펜 끝과 남은 선을 합쳐 한 번만 맞는다.
+// 남은 먹 선은 잠시 동안 닿으면 맞아 판을 갈라 놓는다. 펜 끝과 남은 선을 합쳐 획마다 한 번만 맞는다.
+// 획을 여럿 그으면 앞 획과 엇갈린 방향으로 조금씩 늦게 그어, 목표 자리에서 X자로 겹친다.
 [CreateAssetMenu(fileName = "ScribbleAttackStyle", menuName = "Scriptable Objects/AttackStyle/Scribble")]
 public class ScribbleAttackStyle : AttackStyle
 {
     private const float FULL_TURN = Mathf.PI * 2f;
 
-    // 되감기용 기록. 그은 획을 그대로 쥐고 있다.
+    // 되감기용 기록. 그은 획들을 긋은 차례대로 쥐고 있다.
     private sealed class Record : RewindRecord
     {
         private readonly ScribbleAttackStyle _style;
-        private readonly Polyline _path;
+        private readonly List<Polyline> _paths;
 
-        public Record(ScribbleAttackStyle style, Polyline path)
+        public Record(ScribbleAttackStyle style, List<Polyline> paths)
         {
             _style = style;
-            _path = path;
+            _paths = paths;
         }
 
         public override UniTask ReplayAsync(AttackContext context, InkTint tint, float gaugeGain, CancellationToken token)
         {
-            return _style.RewindAsync(context, _path, tint, gaugeGain, token);
+            return _style.RewindAsync(context, _paths, tint, gaugeGain, token);
         }
     }
 
     [Header("획")]
+    [SerializeField, Min(1)] private int _strokeCount = 1;
+    // 두 번째 획부터 앞 획에서 이만큼 돌린 방향으로 긋는다(도).
+    [SerializeField] private FloatRange _crossAngle = new FloatRange(60f, 120f);
+    // 다음 획은 앞 획보다 이만큼 늦게 그어, 어느 획이 먼저 오는지 보이게 한다.
+    [SerializeField, Min(0f)] private float _strokeDelay = 0.25f;
     [SerializeField, Min(1f)] private float _length = 26f;
     // 획의 가운데 줄이 목표 자리에서 옆으로 비켜 지나는 거리.
     [SerializeField, Min(0f)] private float _offsetRange = 2f;
@@ -64,41 +70,72 @@ public class ScribbleAttackStyle : AttackStyle
     {
         if (null != _telegraphPrefab)
         {
-            GameManager.Pool.Prewarm(_telegraphPrefab.gameObject, 2);
+            GameManager.Pool.Prewarm(_telegraphPrefab.gameObject, _strokeCount * 2);
         }
 
         if (null != _strokePrefab)
         {
-            GameManager.Pool.Prewarm(_strokePrefab.gameObject, 1);
+            GameManager.Pool.Prewarm(_strokePrefab.gameObject, _strokeCount);
         }
 
         if (null != _penPrefab)
         {
-            GameManager.Pool.Prewarm(_penPrefab, 1);
+            GameManager.Pool.Prewarm(_penPrefab, _strokeCount);
         }
     }
 
     // 획은 쏘는 순간에 정한다. 예고를 본 뒤 획에서 벗어나면 피한다.
     public override UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        Polyline path = BuildPath(context.Target.GetAimPoint(Vector3.zero));
+        Vector3 target = context.Target.GetAimPoint(Vector3.zero);
+        float angle = Random.Range(0f, 180f);
+        List<Polyline> paths = new List<Polyline>(_strokeCount);
 
-        context.RewindLog.Add(new Record(this, path));
+        for (int i = 0; i < _strokeCount; i++)
+        {
+            paths.Add(BuildPath(target, angle));
+            angle += _crossAngle.PickRandom();
+        }
 
-        return PlayAsync(context, path, default, gaugeGain, token);
+        context.RewindLog.Add(new Record(this, paths));
+
+        return PlayAllAsync(context, paths, default, gaugeGain, token);
     }
 
-    // 되감으면 같은 자리의 획을 끝에서 처음 쪽으로 다시 긋는다.
-    private UniTask RewindAsync(AttackContext context, Polyline path, InkTint tint, float gaugeGain, CancellationToken token)
+    // 되감으면 같은 자리의 획들을 마지막 획부터, 끝에서 처음 쪽으로 다시 긋는다.
+    private UniTask RewindAsync(AttackContext context, List<Polyline> paths, InkTint tint, float gaugeGain, CancellationToken token)
     {
-        List<Vector3> points = new List<Vector3>(path.Points);
-        points.Reverse();
+        List<Polyline> reversed = new List<Polyline>(paths.Count);
 
-        return PlayAsync(context, new Polyline(points), tint, gaugeGain, token);
+        for (int i = paths.Count - 1; i >= 0; i--)
+        {
+            List<Vector3> points = new List<Vector3>(paths[i].Points);
+            points.Reverse();
+            reversed.Add(new Polyline(points));
+        }
+
+        return PlayAllAsync(context, reversed, tint, gaugeGain, token);
     }
 
-    private async UniTask PlayAsync(AttackContext context, Polyline path, InkTint tint, float gaugeGain, CancellationToken token)
+    private async UniTask PlayAllAsync(AttackContext context, List<Polyline> paths, InkTint tint, float gaugeGain, CancellationToken token)
     {
+        List<UniTask> strokes = new List<UniTask>(paths.Count);
+
+        for (int i = 0; i < paths.Count; i++)
+        {
+            strokes.Add(PlayAsync(context, paths[i], _strokeDelay * i, tint, gaugeGain, token));
+        }
+
+        await UniTask.WhenAll(strokes);
+    }
+
+    private async UniTask PlayAsync(AttackContext context, Polyline path, float delay, InkTint tint, float gaugeGain, CancellationToken token)
+    {
+        if (0f < delay)
+        {
+            await UniTask.Delay(System.TimeSpan.FromSeconds(delay), cancellationToken: token);
+        }
+
         await Telegraph.PlayPathAsync(_telegraphPrefab, path, _strokeWidth, tint.Apply(_telegraphColor), _sketchDuration, _warnDuration, token);
 
         if (null == _strokePrefab)
@@ -126,9 +163,9 @@ public class ScribbleAttackStyle : AttackStyle
     }
 
     // 가운데 줄을 따라 사인 곡선으로 구불거리는 꺾은선. 양 끝 중 어느 쪽에서 긋기 시작할지는 무작위다.
-    private Polyline BuildPath(Vector3 target)
+    private Polyline BuildPath(Vector3 target, float angle)
     {
-        LinePlacement line = LinePlacement.PickNear(target, _offsetRange);
+        LinePlacement line = LinePlacement.PickNear(target, _offsetRange, angle);
         Vector3 side = new Vector3(-line.Along.y, line.Along.x, 0f);
         float phase = Random.Range(0f, FULL_TURN);
         float direction = 0.5f > Random.value ? -1f : 1f;

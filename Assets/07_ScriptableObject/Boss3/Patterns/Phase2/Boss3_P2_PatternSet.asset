@@ -21,32 +21,32 @@ MonoBehaviour:
   _tell: 0
   _tellDuration: 0.5
   _entries:
-  - _style: {fileID: 11400000, guid: 273e4ce25933826c582def6a6f3a0753, type: 2}
+  - _style: {fileID: 11400000, guid: 76d2f2aa9a5a4abbb12dc5c781041e2e, type: 2}
     _weight: 22
     _minDistance: 0
     _maxDistance: 0
     _cooldown: 0
-  - _style: {fileID: 11400000, guid: 6b42841850cfe2572dd857de6b22ad1f, type: 2}
+  - _style: {fileID: 11400000, guid: 123b006059c04babb3255ae6890aebb1, type: 2}
     _weight: 16
     _minDistance: 0
     _maxDistance: 0
     _cooldown: 6
-  - _style: {fileID: 11400000, guid: 43f3940e71f82f665f2be711eef0da34, type: 2}
+  - _style: {fileID: 11400000, guid: 4bf916e644184d3ca166da0440ba7afd, type: 2}
     _weight: 16
     _minDistance: 0
     _maxDistance: 0
     _cooldown: 8
-  - _style: {fileID: 11400000, guid: 67422b6e5b81b7b252ce3a82db964b85, type: 2}
+  - _style: {fileID: 11400000, guid: 7be3fe5f91e84f468aef00995342dfe6, type: 2}
     _weight: 14
     _minDistance: 0
     _maxDistance: 0
     _cooldown: 8
-  - _style: {fileID: 11400000, guid: 53ba763e827cb9127c9fd7dc7bf0fc26, type: 2}
+  - _style: {fileID: 11400000, guid: 603767f6c97f4857932138f6bf811965, type: 2}
     _weight: 12
     _minDistance: 0
     _maxDistance: 0
     _cooldown: 10
-  - _style: {fileID: 11400000, guid: ad9e53fa647cfd6befbf1381ee7f0295, type: 2}
+  - _style: {fileID: 11400000, guid: 10929da2b3d84b06b496ec35ae9f4083, type: 2}
     _weight: 12
     _minDistance: 0
     _maxDistance: 0

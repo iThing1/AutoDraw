@@ -31,23 +31,36 @@ public class FrameTrapAttackStyle : AttackStyle
         public float Angle { get { return Geometry2D.ToAngle(To - From); } }
     }
 
-    // 되감기용 기록. 액자 가운데와 틈을 낸 변을 쥐고 있다.
+    // 쏘는 순간 정해지는 액자 하나의 자리. 가운데, 틈을 낸 변, 조이는 동안 도는 전체 각도(부호가 방향).
+    private readonly struct Layout
+    {
+        public readonly Vector3 Center;
+        public readonly int GapSide;
+        public readonly float Spin;
+
+        public Layout(Vector3 center, int gapSide, float spin)
+        {
+            Center = center;
+            GapSide = gapSide;
+            Spin = spin;
+        }
+    }
+
+    // 되감기용 기록. 쏜 액자의 자리를 그대로 쥐고 있다.
     private sealed class Record : RewindRecord
     {
         private readonly FrameTrapAttackStyle _style;
-        private readonly Vector3 _center;
-        private readonly int _gapSide;
+        private readonly Layout _layout;
 
-        public Record(FrameTrapAttackStyle style, Vector3 center, int gapSide)
+        public Record(FrameTrapAttackStyle style, Layout layout)
         {
             _style = style;
-            _center = center;
-            _gapSide = gapSide;
+            _layout = layout;
         }
 
         public override UniTask ReplayAsync(AttackContext context, InkTint tint, float gaugeGain, CancellationToken token)
         {
-            return _style.PlayAsync(context, _center, _gapSide, true, tint, gaugeGain, token);
+            return _style.PlayAsync(context, _layout, true, tint, gaugeGain, token);
         }
     }
 
@@ -68,6 +81,8 @@ public class FrameTrapAttackStyle : AttackStyle
     [SerializeField] private Color _edgeColor = new Color(0.02f, 0.02f, 0.03f, 1f);
     [SerializeField, Min(0.01f)] private float _shrinkDuration = 1.6f;
     [SerializeField] private Ease _shrinkEase = Ease.InQuad;
+    // 조이는 동안 액자가 도는 전체 각도(도). 방향은 무작위이고, 틈도 함께 돌아 빠져나갈 자리가 움직인다. 0이면 돌지 않는다.
+    [SerializeField, Min(0f)] private float _spinAngle;
     [SerializeField] private HitSettings _edgeHit = new();
 
     [Header("터짐")]
@@ -92,20 +107,22 @@ public class FrameTrapAttackStyle : AttackStyle
     {
         Vector3 center = context.Target.GetAimPoint(Vector3.zero);
         int gapSide = PickGapSide(center - context.Owner.Body.position);
+        float spin = (0.5f > Random.value ? -1f : 1f) * _spinAngle;
+        Layout layout = new Layout(center, gapSide, spin);
 
-        context.RewindLog.Add(new Record(this, center, gapSide));
+        context.RewindLog.Add(new Record(this, layout));
 
-        return PlayAsync(context, center, gapSide, false, default, gaugeGain, token);
+        return PlayAsync(context, layout, false, default, gaugeGain, token);
     }
 
-    // 되감으면(isReversed) 다 조인 크기로 예고한 뒤 안쪽이 먼저 터지고, 테두리가 조이던 길을 거꾸로 밟아 바깥으로 풀려 나간다.
+    // 되감으면(isReversed) 다 조인 크기·각도로 예고한 뒤 안쪽이 먼저 터지고, 테두리가 조이던 길을 거꾸로 밟아 바깥으로 풀려 나간다.
     // 풀려 나가는 테두리는 틈 앞에 서 있거나 대시로 뚫어 피한다.
-    private async UniTask PlayAsync(AttackContext context, Vector3 center, int gapSide, bool isReversed, InkTint tint, float gaugeGain,
-        CancellationToken token)
+    private async UniTask PlayAsync(AttackContext context, Layout layout, bool isReversed, InkTint tint, float gaugeGain, CancellationToken token)
     {
+        Vector3 center = layout.Center;
         List<Edge> edges = new List<Edge>(MAX_EDGE_COUNT);
 
-        BuildEdges(center, isReversed ? _endSize : _startSize, gapSide, edges);
+        BuildEdges(center, isReversed ? _endSize : _startSize, layout.GapSide, isReversed ? layout.Spin : 0f, edges);
         await PlayTelegraphAsync(edges, tint.Apply(_telegraphColor), token);
 
         List<SpriteRenderer> sprites = new List<SpriteRenderer>(MAX_EDGE_COUNT);
@@ -113,7 +130,7 @@ public class FrameTrapAttackStyle : AttackStyle
         try
         {
             // 작은 액자는 틈 변이 사라져 조각이 적을 수 있어, 그림은 가장 큰 액자의 조각 수만큼 꺼내 둔다.
-            BuildEdges(center, Mathf.Max(_startSize, _endSize), gapSide, edges);
+            BuildEdges(center, Mathf.Max(_startSize, _endSize), layout.GapSide, 0f, edges);
 
             for (int i = 0; i < edges.Count; i++)
             {
@@ -125,7 +142,7 @@ public class FrameTrapAttackStyle : AttackStyle
                 Burst(context, center, tint, gaugeGain);
             }
 
-            await ShrinkAsync(context, center, gapSide, isReversed, edges, sprites, gaugeGain, token);
+            await ShrinkAsync(context, layout, isReversed, edges, sprites, gaugeGain, token);
 
             if (false == isReversed)
             {
@@ -178,9 +195,10 @@ public class FrameTrapAttackStyle : AttackStyle
     }
 
     // 틈이 있는 변이 조여 들며 틈이 사라질 수 있어, 조각 수가 줄면 남는 그림은 숨긴다.
-    // 되감으면 같은 크기 변화를 시간만 거꾸로 밟는다. 꺼내 둔 그림이 한 프레임도 다른 크기로 보이지 않게, 기다리기 전에 먼저 놓는다.
-    private async UniTask ShrinkAsync(AttackContext context, Vector3 center, int gapSide, bool isReversed, List<Edge> edges,
-        List<SpriteRenderer> sprites, float gaugeGain, CancellationToken token)
+    // 되감으면 같은 크기·각도 변화를 시간만 거꾸로 밟는다. 꺼내 둔 그림이 한 프레임도 다른 크기로 보이지 않게, 기다리기 전에 먼저 놓는다.
+    // 도는 각도는 시간에 고르게 나눠, 조여 드는 빠르기와 상관없이 틈이 일정하게 움직인다.
+    private async UniTask ShrinkAsync(AttackContext context, Layout layout, bool isReversed, List<Edge> edges, List<SpriteRenderer> sprites,
+        float gaugeGain, CancellationToken token)
     {
         AttackTarget target = context.Target;
         float elapsed = 0f;
@@ -189,8 +207,9 @@ public class FrameTrapAttackStyle : AttackStyle
         while (true)
         {
             float progress = elapsed / _shrinkDuration;
-            float size = DOVirtual.EasedValue(_startSize, _endSize, isReversed ? 1f - progress : progress, _shrinkEase);
-            BuildEdges(center, size, gapSide, edges);
+            float timeline = isReversed ? 1f - progress : progress;
+            float size = DOVirtual.EasedValue(_startSize, _endSize, timeline, _shrinkEase);
+            BuildEdges(layout.Center, size, layout.GapSide, layout.Spin * timeline, edges);
 
             for (int i = 0; i < sprites.Count; i++)
             {
@@ -241,17 +260,19 @@ public class FrameTrapAttackStyle : AttackStyle
     }
 
     // 변 길이를 테두리 굵기만큼 늘려 모서리가 비지 않게 한다. 틈 변은 틈 양쪽 두 조각이고, 틈보다 좁아지면 없어진다.
-    private void BuildEdges(Vector3 center, float size, int gapSide, List<Edge> edges)
+    // rotation(도)만큼 액자 전체를 가운데를 축으로 돌린다.
+    private void BuildEdges(Vector3 center, float size, int gapSide, float rotation, List<Edge> edges)
     {
         edges.Clear();
 
         float half = size * 0.5f;
         float reach = half + _edgeWidth * 0.5f;
         float gapHalf = _gapWidth * 0.5f;
+        Quaternion turn = Quaternion.Euler(0f, 0f, rotation);
 
         for (int side = 0; side < SIDE_NORMALS.Length; side++)
         {
-            Vector3 normal = SIDE_NORMALS[side];
+            Vector3 normal = turn * SIDE_NORMALS[side];
             Vector3 tangent = new Vector3(-normal.y, normal.x, 0f);
             Vector3 sideCenter = center + normal * half;
 

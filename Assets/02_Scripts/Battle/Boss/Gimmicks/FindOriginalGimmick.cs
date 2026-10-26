@@ -13,103 +13,6 @@ using UnityEngine;
 public class FindOriginalGimmick : PunishingBossGimmick
 {
     private const int FRAME_COUNT = 4;
-    private const int EDGE_COUNT = 4;
-    private const float VERTICAL_ANGLE = 90f;
-
-    // 액자 하나의 그림. 테두리 네 변과, 고르는 시간을 아래부터 차오르며 보여 주는 안쪽 면.
-    private sealed class FrameView
-    {
-        private readonly SpriteRenderer[] _edges = new SpriteRenderer[EDGE_COUNT];
-        private readonly SpriteRenderer _fill;
-        private readonly Vector2 _size;
-        private readonly float _edgeWidth;
-        private Vector3 _center;
-
-        public FrameView(GameObject prefab, Vector2 size, float edgeWidth, Color edgeColor, Color fillColor)
-        {
-            _size = size;
-            _edgeWidth = edgeWidth;
-
-            for (int i = 0; i < EDGE_COUNT; i++)
-            {
-                _edges[i] = PooledSprite.Spawn(prefab, Vector3.zero, 0f, Vector2.zero, edgeColor);
-            }
-
-            _fill = PooledSprite.Spawn(prefab, Vector3.zero, 0f, Vector2.zero, fillColor);
-        }
-
-        public Vector3 Center { get { return _center; } }
-
-        // 위·아래 변은 굵기만큼 길게 그어 모서리가 비지 않게 한다.
-        public void Place(Vector3 center)
-        {
-            _center = center;
-
-            Vector3 halfWidth = new Vector3(_size.x * 0.5f, 0f, 0f);
-            Vector3 halfHeight = new Vector3(0f, _size.y * 0.5f, 0f);
-            Vector3 horizontal = new Vector3(_size.x + _edgeWidth, _edgeWidth, 1f);
-            Vector3 vertical = new Vector3(_size.y, _edgeWidth, 1f);
-
-            PlaceEdge(_edges[0], center + halfHeight, 0f, horizontal);
-            PlaceEdge(_edges[1], center - halfHeight, 0f, horizontal);
-            PlaceEdge(_edges[2], center + halfWidth, VERTICAL_ANGLE, vertical);
-            PlaceEdge(_edges[3], center - halfWidth, VERTICAL_ANGLE, vertical);
-        }
-
-        public bool Contains(Vector3 position)
-        {
-            return Mathf.Abs(position.x - _center.x) <= _size.x * 0.5f && Mathf.Abs(position.y - _center.y) <= _size.y * 0.5f;
-        }
-
-        // 액자 오른쪽 아래, 서명이 들어갈 자리.
-        public Vector3 GetSignaturePoint(float inset)
-        {
-            return _center + new Vector3(_size.x * 0.5f - inset, -_size.y * 0.5f + inset, 0f);
-        }
-
-        public void SetEdgeColor(Color color)
-        {
-            for (int i = 0; i < EDGE_COUNT; i++)
-            {
-                _edges[i].color = color;
-            }
-        }
-
-        // 0이면 비어 있고 1이면 안쪽이 다 찬다. 아래 변에서부터 차오른다.
-        public void SetFill(float progress)
-        {
-            float height = _size.y * Mathf.Clamp01(progress);
-
-            _fill.transform.position = _center + new Vector3(0f, (height - _size.y) * 0.5f, 0f);
-            _fill.transform.localScale = new Vector3(_size.x, height, 1f);
-        }
-
-        public void AddFades(float edgeAlpha, float fillAlpha, float duration, List<UniTask> fades, CancellationToken token)
-        {
-            for (int i = 0; i < EDGE_COUNT; i++)
-            {
-                fades.Add(_edges[i].DOFade(edgeAlpha, duration).ToUniTaskKillOnCancel(token));
-            }
-
-            fades.Add(_fill.DOFade(fillAlpha, duration).ToUniTaskKillOnCancel(token));
-        }
-
-        public void Despawn()
-        {
-            for (int i = 0; i < EDGE_COUNT; i++)
-            {
-                PooledSprite.Despawn(_edges[i]);
-            }
-
-            PooledSprite.Despawn(_fill);
-        }
-
-        private static void PlaceEdge(SpriteRenderer edge, Vector3 position, float angle, Vector3 scale)
-        {
-            edge.transform.SetPositionAndRotation(position, Quaternion.Euler(0f, 0f, angle));
-            edge.transform.localScale = scale;
-        }
-    }
 
     [Header("액자")]
     // 테두리와 안쪽 면 그림. 1x1 네모 그림을 늘려 쓴다.
@@ -164,7 +67,7 @@ public class FindOriginalGimmick : PunishingBossGimmick
     {
         if (null != _framePrefab)
         {
-            GameManager.Pool.Prewarm(_framePrefab, FRAME_COUNT * (EDGE_COUNT + 1));
+            GameManager.Pool.Prewarm(_framePrefab, FRAME_COUNT * GimmickFrame.SPRITE_COUNT);
         }
 
         if (null != _glintPrefab)
@@ -184,7 +87,7 @@ public class FindOriginalGimmick : PunishingBossGimmick
         Transform root = context.Owner.transform;
         Transform body = context.Owner.Body;
         Vector3 bodyScale = body.localScale;
-        List<FrameView> frames = new List<FrameView>(FRAME_COUNT);
+        List<GimmickFrame> frames = new List<GimmickFrame>(FRAME_COUNT);
         SpriteRenderer glint = null;
 
         try
@@ -194,13 +97,13 @@ public class FindOriginalGimmick : PunishingBossGimmick
 
             for (int i = 0; i < FRAME_COUNT; i++)
             {
-                FrameView frame = new FrameView(_framePrefab, _frameSize, _edgeWidth, hidden, _fillColor);
+                GimmickFrame frame = new GimmickFrame(_framePrefab, _frameSize, _edgeWidth, hidden, _fillColor);
                 frame.Place(slots[i]);
                 frame.SetFill(0f);
                 frames.Add(frame);
             }
 
-            List<UniTask> fades = new List<UniTask>(FRAME_COUNT * (EDGE_COUNT + 1));
+            List<UniTask> fades = new List<UniTask>(FRAME_COUNT * GimmickFrame.SPRITE_COUNT);
 
             for (int i = 0; i < frames.Count; i++)
             {
@@ -276,7 +179,7 @@ public class FindOriginalGimmick : PunishingBossGimmick
         return slots;
     }
 
-    private async UniTask HideBossAsync(Transform root, Transform body, FrameView frame, CancellationToken token)
+    private async UniTask HideBossAsync(Transform root, Transform body, GimmickFrame frame, CancellationToken token)
     {
         Vector3 target = new Vector3(frame.Center.x, frame.Center.y, root.position.z);
 
@@ -294,7 +197,7 @@ public class FindOriginalGimmick : PunishingBossGimmick
     // 매번 겹치지 않는 액자 쌍을 골라 자리를 바꾼다. 갈수록 빨라지고, 정해진 차례부터는 두 쌍을 한꺼번에 바꾼다.
     // 보이지 않는 보스도 진짜 액자를 따라 옮겨, 끝난 자리에서 다시 나타나게 한다. 섞은 시간을 돌려줘 반짝임 박자를 이어 가게 한다.
     // 바꿀 때마다 나는 소리·흔들림은 네 자리의 가운데에서 내, 진짜 액자 자리를 알려 주지 않는다.
-    private async UniTask<float> ShuffleAsync(BattleUnit owner, List<FrameView> frames, List<Vector3> slots, int real, SpriteRenderer glint,
+    private async UniTask<float> ShuffleAsync(BattleUnit owner, List<GimmickFrame> frames, List<Vector3> slots, int real, SpriteRenderer glint,
         CancellationToken token)
     {
         int[] slotOfFrame = { 0, 1, 2, 3 };
@@ -362,7 +265,7 @@ public class FindOriginalGimmick : PunishingBossGimmick
 
     // 액자 안쪽이 다 차는 순간 플레이어가 서 있는 액자 번호를 돌려준다. 어느 액자에도 없으면 -1이다.
     // 지금 서 있는 액자의 테두리는 다른 색으로 칠해, 어느 액자를 고른 셈인지 보이게 한다.
-    private async UniTask<int> ChooseAsync(AttackTarget target, List<FrameView> frames, int real, SpriteRenderer glint, float clock,
+    private async UniTask<int> ChooseAsync(AttackTarget target, List<GimmickFrame> frames, int real, SpriteRenderer glint, float clock,
         CancellationToken token)
     {
         float elapsed = 0f;
@@ -392,7 +295,7 @@ public class FindOriginalGimmick : PunishingBossGimmick
     }
 
     // 진짜 액자에서 보스가 다시 커져 나온다. 가짜를 골랐으면 가짜 액자들이 터지며 반격한다.
-    private async UniTask RevealAsync(AttackContext context, Transform root, Transform body, Vector3 bodyScale, List<FrameView> frames, int real,
+    private async UniTask RevealAsync(AttackContext context, Transform root, Transform body, Vector3 bodyScale, List<GimmickFrame> frames, int real,
         bool isFound, CancellationToken token)
     {
         FollowFrame(root, frames[real]);
@@ -416,12 +319,12 @@ public class FindOriginalGimmick : PunishingBossGimmick
             .ToUniTaskKillOnCancel(token);
     }
 
-    private static void FollowFrame(Transform root, FrameView frame)
+    private static void FollowFrame(Transform root, GimmickFrame frame)
     {
         root.position = new Vector3(frame.Center.x, frame.Center.y, root.position.z);
     }
 
-    private static int FindFrame(List<FrameView> frames, Vector3 position)
+    private static int FindFrame(List<GimmickFrame> frames, Vector3 position)
     {
         for (int i = 0; i < frames.Count; i++)
         {
@@ -435,7 +338,7 @@ public class FindOriginalGimmick : PunishingBossGimmick
     }
 
     // 정해진 간격마다 잠깐 커졌다 작아지며 반짝인다.
-    private void UpdateGlint(SpriteRenderer glint, FrameView frame, float clock)
+    private void UpdateGlint(SpriteRenderer glint, GimmickFrame frame, float clock)
     {
         if (null == glint)
         {

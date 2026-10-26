@@ -23,6 +23,8 @@ public class AutoAttacker : MonoBehaviour
     private UniTaskCompletionSource _resumeSource;
     // 쿨타임 조건을 보려고 패턴마다 마지막으로 쏜 시간을 기억한다. 에셋(SO)에 두면 다른 유닛과 섞여 여기 둔다.
     private readonly Dictionary<AttackStyle, float> _lastFireTimes = new();
+    // 아직 끝나지 않은 스킬. 복제체처럼 오래 남는 스킬을 게이지가 다시 차는 대로 겹쳐 써서 쌓이지 않게, 끝나야 다시 쓸 수 있다.
+    private readonly HashSet<AttackStyle> _runningSkills = new();
 
     // 전투를 시작하기 전에는 null이다.
     public AttackContext Context { get { return _context; } }
@@ -214,7 +216,7 @@ public class AutoAttacker : MonoBehaviour
         return _interruptSource.Token;
     }
 
-    // 특수 스킬은 공격 주기와 상관없이 즉시 발동하고, 게이지를 쌓지 않는다.
+    // 특수 스킬은 공격 주기와 상관없이 즉시 발동하고, 게이지를 쌓지 않는다. 같은 스킬이 아직 끝나지 않았으면 쓰지 않는다.
     public bool TryFireSkill(AttackStyle skill)
     {
         if (false == _isRunning || _isInterrupted || null == skill || null == _context || _context.Target.IsDefeated)
@@ -222,8 +224,29 @@ public class AutoAttacker : MonoBehaviour
             return false;
         }
 
-        FireAsync(skill.PickStyle(this), _skillContext, false, _battleToken).Forget();
+        AttackStyle style = skill.PickStyle(this);
+
+        if (_runningSkills.Contains(style))
+        {
+            return false;
+        }
+
+        FireSkillAsync(style).Forget();
         return true;
+    }
+
+    private async UniTaskVoid FireSkillAsync(AttackStyle style)
+    {
+        _runningSkills.Add(style);
+
+        try
+        {
+            await FireAsync(style, _skillContext, false, _battleToken);
+        }
+        finally
+        {
+            _runningSkills.Remove(style);
+        }
     }
 
     private async UniTask FireAsync(AttackStyle style, AttackContext context, bool gainsGauge, CancellationToken token)

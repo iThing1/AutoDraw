@@ -21,7 +21,7 @@ MonoBehaviour:
   _tell: 0
   _tellDuration: 0.5
   _clonePrefab: {fileID: 5628677625872867307, guid: bf11325fa92e4e6f868f98aba4460a88, type: 3}
-  _duration: 10
+  _duration: 5
   _followOffset: {x: -1.4, y: 0.8}
   _followSharpness: 10
   _tint: {r: 0.75, g: 0.85, b: 1, a: 0.7}

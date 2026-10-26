@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DashPreset
   _displayName: Dash
   _iconColor: {r: 0.55, g: 0.9, b: 0.65, a: 1}
-  _duration: 0.15
+  _duration: 0.25
   _ease: 6
   _startImpact:
     _shakeForce: 0

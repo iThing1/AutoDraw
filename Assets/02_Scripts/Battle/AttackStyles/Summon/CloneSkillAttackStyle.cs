@@ -11,7 +11,7 @@ public class CloneSkillAttackStyle : AttackStyle
     [Header("복제체")]
     // BattleUnit · Health · AutoAttacker · UnitView만 가진 플레이어 모양 유닛(03_Prefabs/Units/PlayerClone). 데이터는 플레이어 데이터를 쓴다.
     [SerializeField] private BattleUnit _clonePrefab;
-    [SerializeField, Min(0.1f)] private float _duration = 10f;
+    [SerializeField, Min(0.1f)] private float _duration = 5f;
     // 플레이어 자리에서 이만큼 떨어진 곳을 따라다닌다.
     [SerializeField] private Vector2 _followOffset = new Vector2(-1.4f, 0.8f);
     // 클수록 플레이어를 빨리 따라붙는다.

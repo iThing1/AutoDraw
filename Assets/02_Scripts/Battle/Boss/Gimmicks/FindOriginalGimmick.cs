@@ -122,7 +122,7 @@ public class FindOriginalGimmick : PunishingBossGimmick
             await HideBossAsync(root, body, frames[real], token);
             await UniTask.Delay(TimeSpan.FromSeconds(_shuffleDelay), cancellationToken: token);
 
-            float clock = await ShuffleAsync(context.Owner, frames, slots, real, glint, token);
+            float clock = await ShuffleAsync(frames, slots, real, glint, token);
 
             int chosen = await ChooseAsync(context.Target, frames, real, glint, clock, token);
             bool isFound = chosen == real;
@@ -195,10 +195,11 @@ public class FindOriginalGimmick : PunishingBossGimmick
     }
 
     // 매번 겹치지 않는 액자 쌍을 골라 자리를 바꾼다. 갈수록 빨라지고, 정해진 차례부터는 두 쌍을 한꺼번에 바꾼다.
-    // 보이지 않는 보스도 진짜 액자를 따라 옮겨, 끝난 자리에서 다시 나타나게 한다. 섞은 시간을 돌려줘 반짝임 박자를 이어 가게 한다.
+    // 섞은 시간을 돌려줘 반짝임 박자를 이어 가게 한다.
     // 바꿀 때마다 나는 소리·흔들림은 네 자리의 가운데에서 내, 진짜 액자 자리를 알려 주지 않는다.
-    private async UniTask<float> ShuffleAsync(BattleUnit owner, List<GimmickFrame> frames, List<Vector3> slots, int real, SpriteRenderer glint,
-        CancellationToken token)
+    // 숨은 보스는 진짜 액자를 따라 옮기지 않는다. 전투 카메라가 보스를 함께 담으려고 따라 움직여 답을 알려 주기 때문이다.
+    // 보스는 숨은 자리에 그대로 있다가 결과를 보여 줄 때 진짜 액자로 옮긴다.
+    private async UniTask<float> ShuffleAsync(List<GimmickFrame> frames, List<Vector3> slots, int real, SpriteRenderer glint, CancellationToken token)
     {
         int[] slotOfFrame = { 0, 1, 2, 3 };
         int[] order = { 0, 1, 2, 3 };
@@ -246,7 +247,6 @@ public class FindOriginalGimmick : PunishingBossGimmick
                     frames[index].Place(Vector3.Lerp(from[index], to, t) + bend);
                 }
 
-                FollowFrame(owner.transform, frames[real]);
                 UpdateGlint(glint, frames[real], clock);
 
                 if (elapsed >= duration)

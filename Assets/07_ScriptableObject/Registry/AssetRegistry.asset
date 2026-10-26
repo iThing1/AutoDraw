@@ -19,6 +19,8 @@ MonoBehaviour:
     _asset: {fileID: 11400000, guid: 8e7b710ab1b638d4cbe68466fed7d176, type: 2}
   - _key: AttackStyle/PaintBomb
     _asset: {fileID: 11400000, guid: 77e7ea21886d3fe4e9a50423d310c85e, type: 2}
+  - _key: AttackStyle/Clone
+    _asset: {fileID: 11400000, guid: f038adbe82ef4f1bb1f1021f195adab2, type: 2}
   - _key: AttackStyle/PaintOrbs
     _asset: {fileID: 11400000, guid: 5f40d1d0f2d14a6f96592aa38e548ef6, type: 2}
   - _key: AttackStyle/Roller
@@ -41,6 +43,8 @@ MonoBehaviour:
     _asset: {fileID: 21300000, guid: 2182d3766cd5127f6b84f7107538e2da, type: 3}
   - _key: Icon/Skill/InkHands
     _asset: {fileID: 21300000, guid: a3b28d5a11668731dd9b8864e4f31bc1, type: 3}
+  - _key: Icon/Skill/Clone
+    _asset: {fileID: 21300000, guid: 8ce156d5d87680880ac529e6546344d7, type: 3}
   - _key: Icon/Item/Paint
     _asset: {fileID: 21300000, guid: d242c518cd6377c32dce96190860c546, type: 3}
   - _key: Icon/Item/Remover

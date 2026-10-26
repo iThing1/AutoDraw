@@ -28,6 +28,8 @@ public class AutoAttacker : MonoBehaviour
     public AttackContext Context { get { return _context; } }
     // 전투가 끝나면(누군가 쓰러지면) 끊기는 토큰. 공격 루프 밖에서 도는 보스 연출도 전투와 함께 끝내는 데 쓴다.
     public CancellationToken BattleToken { get { return _battleToken; } }
+    // 연출·기믹이 공격을 멈춰 둔 동안 true다. 이 유닛을 따라 쏘는 복제체도 함께 멈춘다.
+    public bool IsInterrupted { get { return _isInterrupted; } }
 
     private void Awake()
     {

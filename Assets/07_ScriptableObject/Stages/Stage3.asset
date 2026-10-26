@@ -17,4 +17,4 @@ MonoBehaviour:
   _blankCanvas: {fileID: 2800000, guid: 3f7b792a8ea0e4245ba9a0ff5c380267, type: 3}
   _saveKey: Stage3
   _rewardPoints: 3
-  _clearSkillId: 
+  _clearSkillId: clone

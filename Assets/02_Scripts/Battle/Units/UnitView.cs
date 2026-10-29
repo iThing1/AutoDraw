@@ -76,6 +76,15 @@ public class UnitView : MonoBehaviour
         }
     }
 
+    // 움직이면서 쏘는 공격은 Action 상태를 거치지 않아, 쏘는 쪽이 직접 공격 반응을 부른다.
+    public void PlayAttack()
+    {
+        if (null != _animation)
+        {
+            _animation.PlayAttack();
+        }
+    }
+
     // 히트 스톱으로 게임 시간이 멈춘 동안에도 보여야 하므로 실제 시간으로 재생한다.
     public void Flash(Color flashColor, float duration)
     {

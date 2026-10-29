@@ -36,3 +36,16 @@ MonoBehaviour:
     _criticalMultiplier: 2
     _normalHit: {fileID: 11400000, guid: 16470e74d27d413ead6a23e374f8bd94, type: 2}
     _criticalHit: {fileID: 11400000, guid: 8dc8f65ac81b49f3ba97f1cc64f11254, type: 2}
+  _fireFeedback:
+    _enabled: 1
+    _recoils: 1
+    _impact:
+      _shakeForce: 0
+      _sounds: []
+      _pitch:
+        _min: 1
+        _max: 1.15
+      _effectPrefab: {fileID: 0}
+      _effectColor: {r: 0, g: 0, b: 0, a: 1}
+      _effectScale: 1
+      _effectLifetime: 2

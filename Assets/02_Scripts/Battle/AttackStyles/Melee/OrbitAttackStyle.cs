@@ -26,6 +26,7 @@ public class OrbitAttackStyle : AttackStyle
     [SerializeField, Min(0.05f)] private float _launchInterval = 0.3f;
     [SerializeField, Min(0.1f)] private float _flySpeed = 10f;
     [SerializeField] private HitSettings _hit = new();
+    [SerializeField] private FireFeedbackSettings _fireFeedback = new();
 
     public override void Prewarm()
     {
@@ -74,6 +75,7 @@ public class OrbitAttackStyle : AttackStyle
                 if (Time.time >= nextLaunchTime && 0 <= index)
                 {
                     orbs[index].Launch(context.Damage.RollDamage(_hit));
+                    FireFeedbackPlayer.Play(_fireFeedback, context.Owner, orbs[index].Position, orbs[index].Sprite.color);
                     launchIndex = index + 1;
                     nextLaunchTime = Time.time + _launchInterval * context.Owner.WeaponModifier.IntervalScale;
                 }

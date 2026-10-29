@@ -44,7 +44,8 @@ public class UnitView : MonoBehaviour
     {
         if (null != _animation)
         {
-            _animation.Tick(Time.deltaTime, _unit.IsDodging);
+            // 대시 뒤 유예 동안에는 걸어도 늘어나 보이지 않게, 대시 동작 중일 때만 늘인다.
+            _animation.Tick(Time.deltaTime, _unit.IsDodging && UnitState.Action == _unit.State);
         }
     }
 

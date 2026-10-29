@@ -116,8 +116,11 @@ public class PlayerDash : MonoBehaviour
 
         ImpactPlayer.Play(_preset.StartImpact, _unit.Body.position);
 
+        bool hasEnded = false;
+
         try
         {
+            // 유예까지 한 번의 회피로 묶어, 회피 문구가 대시 한 번에 한 번만 뜨게 한다.
             using (_unit.BeginDodge())
             {
                 while (elapsed < _preset.Duration)
@@ -146,6 +149,15 @@ public class PlayerDash : MonoBehaviour
                         nextAfterimageTime += _preset.AfterimageInterval;
                     }
                 }
+
+                EndDash(stroke);
+                hasEnded = true;
+
+                // 움직임은 먼저 돌려주고 잠깐 더 피하는 상태로 두어, 끝나는 순간 닿은 공격에 맞지 않게 한다.
+                if (0f < _preset.DodgeGrace)
+                {
+                    await UniTask.Delay(TimeSpan.FromSeconds(_preset.DodgeGrace), cancellationToken: token);
+                }
             }
         }
         catch (OperationCanceledException)
@@ -153,14 +165,22 @@ public class PlayerDash : MonoBehaviour
         }
         finally
         {
-            // 끊겨도 지나간 데까지는 남긴다.
-            if (null != stroke)
+            if (false == hasEnded)
             {
-                stroke.Finish();
+                EndDash(stroke);
             }
-
-            _unit.EndAction();
         }
+    }
+
+    // 끊겨도 지나간 데까지는 남긴다.
+    private void EndDash(PaintStripe stroke)
+    {
+        if (null != stroke)
+        {
+            stroke.Finish();
+        }
+
+        _unit.EndAction();
     }
 
     // 전투가 시작되기 전(다가가는 중)에는 캔버스를 받기 전이라 자국을 남기지 않는다.

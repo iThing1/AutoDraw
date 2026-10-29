@@ -238,17 +238,20 @@ public class DecalcomanieCloneGimmick : BossGimmick
     // 분신도 플레이어와 같은 규칙으로 맞는다. 플레이어가 대시로 피하는 중이면 분신도 함께 피한다.
     private bool IsCloneHit(AttackTarget target, Vector3 clone, List<Vector3> drops)
     {
-        if (target.Unit.IsDodging)
-        {
-            return false;
-        }
-
         for (int i = 0; i < drops.Count; i++)
         {
-            if (Vector2.Distance(drops[i], clone) <= _dropRadius)
+            if (Vector2.Distance(drops[i], clone) > _dropRadius)
             {
-                return true;
+                continue;
             }
+
+            if (target.Unit.IsDodging)
+            {
+                target.NotifyDodged(clone);
+                return false;
+            }
+
+            return true;
         }
 
         return false;

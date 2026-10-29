@@ -55,6 +55,7 @@ public class BattleUnit : MonoBehaviour
     public event Action<UnitState> OnStateChanged;
     // 막은 자리를 넘겨, 막은 쪽이 방패 연출과 막기 문구를 띄우게 한다.
     public event Action<Vector3> OnBlocked;
+    // 피한 자리를 넘겨 회피 문구를 띄우게 한다. 한 번 피하는 동안 여러 공격을 지나쳐도 한 번만 알린다.
     public event Action<Vector3> OnDodged;
 
     private Health _health;
@@ -69,6 +70,8 @@ public class BattleUnit : MonoBehaviour
 
     private int _guardCount;
     private int _dodgeCount;
+    // 매 프레임 닿았는지 보는 공격(남는 선, 지나가는 탄)이 회피 문구를 프레임마다 띄우지 않게 한다.
+    private bool _hasNotifiedDodge;
     private float _guardRadius;
     // Action이 끝나기를 기다리는 쪽을 깨우는 신호. 누가 기다릴 때만 만든다.
     private UniTaskCompletionSource _actionEndSource;
@@ -225,6 +228,11 @@ public class BattleUnit : MonoBehaviour
     // 피하는 동안에는 공격이 몸을 지나간다. 막을 수 없는 공격(기믹 실패)은 피할 수 없다.
     public DodgeScope BeginDodge()
     {
+        if (0 == _dodgeCount)
+        {
+            _hasNotifiedDodge = false;
+        }
+
         _dodgeCount++;
 
         return new DodgeScope(this);
@@ -237,6 +245,12 @@ public class BattleUnit : MonoBehaviour
 
     public void NotifyDodged(Vector3 point)
     {
+        if (_hasNotifiedDodge)
+        {
+            return;
+        }
+
+        _hasNotifiedDodge = true;
         OnDodged?.Invoke(point);
     }
 

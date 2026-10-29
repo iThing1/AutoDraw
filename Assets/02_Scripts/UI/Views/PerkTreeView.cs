@@ -218,8 +218,10 @@ public class PerkTreeView : ViewBase<PerkTreeViewModel>
 
     private void HandleUnlockClicked()
     {
+        // 찍을 수 있을 때만 버튼이 눌리므로 누르면 찍힌다.
         if (null != ViewModel)
         {
+            GameManager.Sound.PlayUi(UISoundKind.Unlock);
             ViewModel.UnlockSelected();
         }
     }
@@ -228,6 +230,7 @@ public class PerkTreeView : ViewBase<PerkTreeViewModel>
     {
         if (null != ViewModel && false == _isConfirming)
         {
+            GameManager.Sound.PlayUi(UISoundKind.Click);
             ConfirmRespecAsync(destroyCancellationToken).Forget();
         }
     }

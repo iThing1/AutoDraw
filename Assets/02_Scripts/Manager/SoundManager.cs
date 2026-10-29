@@ -12,9 +12,12 @@ public class SoundManager
     private AudioSource _bgmSource;
     private float _bgmVolume;
     private AudioClip _nextBgm;
+    private UISoundSettings _uiSounds;
 
-    public void Init(GameObject owner, float bgmVolume)
+    public void Init(GameObject owner, float bgmVolume, UISoundSettings uiSounds)
     {
+        _uiSounds = uiSounds;
+
         _sfxSources = new AudioSource[SFX_SOURCE_COUNT];
 
         for (int i = 0; i < SFX_SOURCE_COUNT; i++)
@@ -50,6 +53,16 @@ public class SoundManager
         source.clip = clip;
         source.pitch = pitch;
         source.Play();
+    }
+
+    public void PlayUi(UISoundKind kind)
+    {
+        if (UISoundKind.None == kind || null == _uiSounds || false == _uiSounds.TryGetCue(kind, out UISoundSettings.Cue cue))
+        {
+            return;
+        }
+
+        PlaySfx(cue.Clip, cue.Pitch);
     }
 
     // 히트 스톱·슬로 모션 중에도 정해진 시간에 바뀌도록 시간 배율을 무시한다.

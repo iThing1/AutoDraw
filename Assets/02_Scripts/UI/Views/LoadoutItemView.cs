@@ -72,9 +72,28 @@ public class LoadoutItemView : ViewBase<LoadoutItemViewModel>
 
     private void HandleClicked()
     {
-        if (null != ViewModel)
+        if (null == ViewModel)
         {
-            ViewModel.Select();
+            return;
+        }
+
+        GameManager.Sound.PlayUi(GetClickSound(ViewModel.State));
+        ViewModel.Select();
+    }
+
+    // 끼우는 장비는 장착음, 이미 낀 장비는 고르기만, 못 쓰는 장비는 설명만 보이므로 막힌 소리를 낸다.
+    private static UISoundKind GetClickSound(LoadoutItemState state)
+    {
+        switch (state)
+        {
+            case LoadoutItemState.Owned:
+                return UISoundKind.Equip;
+
+            case LoadoutItemState.Equipped:
+                return UISoundKind.Click;
+
+            default:
+                return UISoundKind.Error;
         }
     }
 }

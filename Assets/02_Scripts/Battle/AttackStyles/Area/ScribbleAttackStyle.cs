@@ -13,7 +13,7 @@ public class ScribbleAttackStyle : AttackStyle
 {
     private const float FULL_TURN = Mathf.PI * 2f;
 
-    // 되감기용 기록. 그은 획들을 긋은 차례대로 쥐고 있다.
+    // 되감기용 기록. 그은 획들을 그은 차례대로 쥐고 있다.
     private sealed class Record : RewindRecord
     {
         private readonly ScribbleAttackStyle _style;

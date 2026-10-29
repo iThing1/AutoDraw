@@ -16,8 +16,7 @@ public static class PathLine
         return line;
     }
 
-    // 길 처음부터 segment 구간 안의 tip까지만 보이게 한다. 이미 지난 꺾인 점은 그대로 두고, 새로 지난 점과 끝점만 넣는다.
-    // 점 수를 늘려도 앞쪽 점은 남으므로, 지난번 끝점 자리부터 다시 채운다.
+    // 길 처음부터 segment 구간 안의 tip까지만 보이게 한다. 이미 지난 꺾인 점은 그대로 두고, 지난번 끝점 자리부터 다시 채운다.
     public static void Reveal(LineRenderer line, Polyline path, int segment, Vector3 tip)
     {
         int count = segment + 2;

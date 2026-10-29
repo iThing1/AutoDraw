@@ -182,7 +182,6 @@ public class BossPhaseMachine : MonoBehaviour
         }
         finally
         {
-            // 기믹이 끊겨도 멈춘 공격을 다시 켠다.
             if (pausesTarget)
             {
                 OnTargetAttackPauseChanged?.Invoke(false);

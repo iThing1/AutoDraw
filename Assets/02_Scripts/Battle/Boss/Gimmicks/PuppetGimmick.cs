@@ -214,7 +214,7 @@ public class PuppetGimmick : PunishingBossGimmick
 
     // 보스를 보낼 자리와, 그만큼 플레이어가 움직일 자리가 둘 다 각자의 이동 범위 안인 곳을 고른다.
     // 두 몸이 함께 움직일 수 있는 거리는 두 이동 범위를 각자 자리만큼 옮겨 겹친 네모라, 고른 거리를 그 안으로 당겨 처음 보고 그대로 가도 늘 닿게 한다.
-    // 판 구석에서는 정한 거리보다 가까워질 수 있다. 벽을 써서 간격을 바꾸는 요령은 더 빨리 깨는 길로 남는다.
+    // 판 구석에서는 정한 거리보다 가까워질 수 있다.
     private Vector3 PickFramePoint(AttackContext context)
     {
         Vector3 boss = context.Owner.transform.position;

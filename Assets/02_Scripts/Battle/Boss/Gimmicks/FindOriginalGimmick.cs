@@ -195,10 +195,8 @@ public class FindOriginalGimmick : PunishingBossGimmick
     }
 
     // 매번 겹치지 않는 액자 쌍을 골라 자리를 바꾼다. 갈수록 빨라지고, 정해진 차례부터는 두 쌍을 한꺼번에 바꾼다.
-    // 섞은 시간을 돌려줘 반짝임 박자를 이어 가게 한다.
-    // 바꿀 때마다 나는 소리·흔들림은 네 자리의 가운데에서 내, 진짜 액자 자리를 알려 주지 않는다.
-    // 숨은 보스는 진짜 액자를 따라 옮기지 않는다. 전투 카메라가 보스를 함께 담으려고 따라 움직여 답을 알려 주기 때문이다.
-    // 보스는 숨은 자리에 그대로 있다가 결과를 보여 줄 때 진짜 액자로 옮긴다.
+    // 섞은 시간을 돌려줘 반짝임 박자를 이어 가게 한다. 소리·흔들림은 네 자리의 가운데에서 내 진짜 자리를 알려 주지 않는다.
+    // 숨은 보스는 진짜 액자를 따라 옮기지 않는다. 전투 카메라가 보스를 따라 움직여 답을 알려 주기 때문이다.
     private async UniTask<float> ShuffleAsync(List<GimmickFrame> frames, List<Vector3> slots, int real, SpriteRenderer glint, CancellationToken token)
     {
         int[] slotOfFrame = { 0, 1, 2, 3 };

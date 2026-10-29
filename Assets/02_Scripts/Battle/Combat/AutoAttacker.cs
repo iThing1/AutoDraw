@@ -163,7 +163,7 @@ public class AutoAttacker : MonoBehaviour
             style = _owner.AttackStyle.PickStyle(this);
         }
 
-        // 묶음 없이 바로 건 패턴은 다시 골라도 같아, 쏠 수 없으면 이번 공격을 건너뛴다.
+        // 다시 골라도 쏠 수 없으면(묶음 없이 바로 건 패턴 등) 이번 공격을 건너뛴다.
         if (false == style.CanFire(_context))
         {
             return true;

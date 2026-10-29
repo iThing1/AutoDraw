@@ -101,7 +101,6 @@ public class DecalcomanieAttackStyle : AttackStyle
         return PlayAsync(context, foldCenter, Mirror(foldCenter.x, drops), tint, gaugeGain, token);
     }
 
-    // drops는 기록에도 쓰이므로 고치지 않고, 거울 자리는 새 목록에 담는다.
     private async UniTask PlayAsync(AttackContext context, Vector3 foldCenter, List<Vector3> drops, InkTint tint, float gaugeGain,
         CancellationToken token)
     {
@@ -113,6 +112,7 @@ public class DecalcomanieAttackStyle : AttackStyle
         await DropAllAsync(context, Mirror(foldCenter.x, drops), _stampWarnDuration, tint, gaugeGain, token);
     }
 
+    // 넘긴 목록은 기록에도 쓰이므로 고치지 않고 새 목록에 담는다.
     private static List<Vector3> Mirror(float foldX, List<Vector3> points)
     {
         List<Vector3> mirrored = new List<Vector3>(points.Count);

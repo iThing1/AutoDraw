@@ -9,7 +9,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "FrameTrapAttackStyle", menuName = "Scriptable Objects/AttackStyle/FrameTrap")]
 public class FrameTrapAttackStyle : AttackStyle
 {
-    // 오른쪽, 위, 왼쪽, 아래 순서의 바깥 방향.
     private static readonly Vector3[] SIDE_NORMALS = { Vector3.right, Vector3.up, Vector3.left, Vector3.down };
     // 틈이 있는 변은 둘로 나뉘어 테두리 조각은 최대 다섯 개다.
     private const int MAX_EDGE_COUNT = 5;
@@ -162,7 +161,7 @@ public class FrameTrapAttackStyle : AttackStyle
         }
     }
 
-    // 터진 뒤 남은 테두리는 바로 없애지 않고 옅어지게 한다. 숨긴 조각도 함께 옅어져 다시 보일 일은 없다.
+    // 숨긴 조각도 함께 옅어져 다시 보일 일은 없다.
     private async UniTask FadeEdgesAsync(List<SpriteRenderer> sprites, CancellationToken token)
     {
         List<UniTask> fades = new List<UniTask>(sprites.Count);

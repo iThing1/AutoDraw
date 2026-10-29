@@ -41,7 +41,7 @@ MonoBehaviour:
     _normalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
     _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
   _poolCount: 16
-  _poolScatterRadius: 18
+  _poolScatterRadius: 12
   _poolStyle: {fileID: 11400000, guid: 07afd730bfaf7e554f9e63f67499d5a9, type: 2}
   _poolScale:
     _min: 1.6

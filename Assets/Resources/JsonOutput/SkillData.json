@@ -1,6 +1,6 @@
 {"_items":[
 {"_id":"paint_bomb","_name":"Paint Bomb","_attackStyleKey":"AttackStyle/PaintBomb","_isStarting":true,"_iconKey":"Icon/Skill/PaintBomb","_description":"Bursts paint all around you.","_previewKey":""},
-{"_id":"black_square","_name":"Black Square","_attackStyleKey":"","_isStarting":false,"_iconKey":"Icon/Skill/BlackSquare","_description":"(WIP) Power of the Stage 1 boss.","_previewKey":""},
-{"_id":"ink_hands","_name":"Ink Hands","_attackStyleKey":"","_isStarting":false,"_iconKey":"Icon/Skill/InkHands","_description":"(WIP) Power of the Stage 2 boss.","_previewKey":""},
+{"_id":"black_square","_name":"Black Square","_attackStyleKey":"AttackStyle/BlackSquare","_isStarting":false,"_iconKey":"Icon/Skill/BlackSquare","_description":"Summons two black turrets beside you that fire a volley, then a heavy final shot.","_previewKey":""},
+{"_id":"ink_hands","_name":"Ink Hands","_attackStyleKey":"AttackStyle/InkHands","_isStarting":false,"_iconKey":"Icon/Skill/InkHands","_description":"Spills ink around the boss. Shadow hands reach out of it and strike for 4 seconds.","_previewKey":""},
 {"_id":"clone","_name":"Clone","_attackStyleKey":"AttackStyle/Clone","_isStarting":false,"_iconKey":"Icon/Skill/Clone","_description":"Summons a copy of you that fires your current weapon for 5 seconds.","_previewKey":""}
 ]}

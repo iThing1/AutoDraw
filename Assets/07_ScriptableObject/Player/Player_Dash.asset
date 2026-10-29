@@ -17,6 +17,7 @@ MonoBehaviour:
   _duration: 0.25
   _ease: 6
   _dodgeGrace: 0.12
+  _dodgeGaugeGain: 15
   _startImpact:
     _shakeForce: 0
     _sounds:

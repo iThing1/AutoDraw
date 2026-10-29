@@ -30,3 +30,4 @@ MonoBehaviour:
     _effectColor: {r: 0.55, g: 0.75, b: 1, a: 1}
     _effectScale: 0.8
     _effectLifetime: 2
+  _blockGaugeGain: 10

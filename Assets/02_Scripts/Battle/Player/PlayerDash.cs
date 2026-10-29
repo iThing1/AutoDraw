@@ -15,6 +15,8 @@ public class PlayerDash : MonoBehaviour
     private BattleUnit _unit;
     private PlayerInputMover _mover;
     private Rigidbody2D _rigidbody;
+    // 피했을 때 채울 게이지. 게이지가 없는 유닛이면 null이다.
+    private SkillGauge _skillGauge;
     private DashState _state;
     private PlayerStats _stats;
     private Sprite _icon;
@@ -33,6 +35,7 @@ public class PlayerDash : MonoBehaviour
         _unit = GetComponent<BattleUnit>();
         _mover = GetComponent<PlayerInputMover>();
         _rigidbody = GetComponent<Rigidbody2D>();
+        TryGetComponent(out _skillGauge);
 
         if (null == _dashAction || null == _preset)
         {
@@ -62,7 +65,14 @@ public class PlayerDash : MonoBehaviour
 
     private void OnEnable()
     {
+        _unit.OnDodged += HandleDodged;
+
         _dashAction.Enable();
+    }
+
+    private void OnDisable()
+    {
+        _unit.OnDodged -= HandleDodged;
     }
 
     private void Update()
@@ -169,6 +179,15 @@ public class PlayerDash : MonoBehaviour
             {
                 EndDash(stroke);
             }
+        }
+    }
+
+    // 회피 알림은 대시 한 번에 한 번만 오므로, 여러 공격을 한꺼번에 피해도 한 번만 채운다.
+    private void HandleDodged(Vector3 point)
+    {
+        if (null != _skillGauge)
+        {
+            _skillGauge.Add(_preset.DodgeGaugeGain);
         }
     }
 

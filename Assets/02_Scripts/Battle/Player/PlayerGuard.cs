@@ -14,6 +14,7 @@ public class PlayerGuard : MonoBehaviour
     [SerializeField] private SpriteRenderer _shield;
 
     private BattleUnit _unit;
+    private SkillGauge _skillGauge;
     private GuardState _state;
     private PlayerStats _stats;
     private Vector3 _shieldScale;
@@ -21,6 +22,8 @@ public class PlayerGuard : MonoBehaviour
     private Sprite _icon;
     // 이 전투에서 실제로 방패를 세운 횟수. 보스가 막기를 자주 쓰는 플레이어에게 반응하는 데 쓴다.
     private int _useCount;
+    // 방패 한 번에 여러 공격을 막아도 게이지는 한 번만 되돌려 준다.
+    private bool _hasRefundedGauge;
 
     // 프리셋이나 입력이 비어 있으면 null이다.
     public GuardState State { get { return _state; } }
@@ -32,6 +35,7 @@ public class PlayerGuard : MonoBehaviour
     private void Awake()
     {
         _unit = GetComponent<BattleUnit>();
+        _skillGauge = GetComponent<SkillGauge>();
 
         if (null != _shield)
         {
@@ -55,7 +59,7 @@ public class PlayerGuard : MonoBehaviour
         }
 
         _stats = stats;
-        _state = new GuardState(_preset, _stats, GetComponent<SkillGauge>());
+        _state = new GuardState(_preset, _stats, _skillGauge);
         _icon = assets.Get<Sprite>(utility.GetIconKey());
 
         if (null != _shield && null != _shield.sprite)
@@ -131,6 +135,7 @@ public class PlayerGuard : MonoBehaviour
 
         _state.Begin(Time.time);
         _useCount++;
+        _hasRefundedGauge = false;
 
         GuardAsync(destroyCancellationToken).Forget();
     }
@@ -175,6 +180,12 @@ public class PlayerGuard : MonoBehaviour
     private void HandleBlocked(Vector3 hitPoint)
     {
         _state.ResetCooldown();
+
+        if (false == _hasRefundedGauge)
+        {
+            _hasRefundedGauge = true;
+            _skillGauge.Add(_preset.BlockGaugeGain);
+        }
 
         GameManager.TimeScale.PlayHitStop(_preset.BlockHitStopDuration, _preset.BlockHitStopTimeScale);
         ImpactPlayer.Play(_preset.BlockImpact, hitPoint);

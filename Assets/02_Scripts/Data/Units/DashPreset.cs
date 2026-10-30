@@ -12,6 +12,10 @@ public class DashPreset : ScriptableObject
     [Header("움직임")]
     [SerializeField, Min(0.01f)] private float _duration = 0.15f;
     [SerializeField] private Ease _ease = Ease.OutQuad;
+    // 미끄러짐이 끝난 뒤에도 공격이 몸을 지나가는 시간. 그동안 움직임은 평소대로 돌려준다.
+    [SerializeField, Min(0f)] private float _dodgeGrace = 0.12f;
+    // 공격을 피해 내면 대시 한 번에 한 번 스킬 게이지를 채운다.
+    [SerializeField, Min(0f)] private float _dodgeGaugeGain = 15f;
 
     [Header("연출")]
     [SerializeField] private ImpactSettings _startImpact = new();
@@ -34,6 +38,8 @@ public class DashPreset : ScriptableObject
 
     public float Duration { get { return _duration; } }
     public Ease Ease { get { return _ease; } }
+    public float DodgeGrace { get { return _dodgeGrace; } }
+    public float DodgeGaugeGain { get { return _dodgeGaugeGain; } }
 
     public ImpactSettings StartImpact { get { return _startImpact; } }
 

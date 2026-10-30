@@ -59,4 +59,50 @@ public static class Telegraph
     {
         return PlayAsync(prefab, center, angle, new Vector2(length, width), new Vector2(length, 0f), color, duration, token);
     }
+
+    // 꺾인 길을 따라가는 선. 연필로 긋듯 sketchDuration 동안 처음부터 끝까지 그어 나가고, 굵기는 duration 동안 차오른다.
+    // 프리팹은 월드 좌표를 쓰는 LineRenderer여야 한다.
+    public static async UniTask PlayPathAsync(LineRenderer prefab, Polyline path, float width, Color color, float sketchDuration, float duration,
+        CancellationToken token)
+    {
+        if (null == prefab)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(duration), cancellationToken: token);
+            return;
+        }
+
+        Color areaColor = new Color(color.r, color.g, color.b, color.a * AREA_ALPHA_RATIO);
+        LineRenderer area = PathLine.Spawn(prefab, width, areaColor);
+        LineRenderer fill = PathLine.Spawn(prefab, 0f, color);
+        // 다 긋기 전에 공격이 오지 않도록, 긋는 시간은 예고 시간을 넘지 않게 한다.
+        sketchDuration = Mathf.Min(sketchDuration, duration);
+        float elapsed = 0f;
+        int segment = 0;
+
+        try
+        {
+            while (true)
+            {
+                float sketch = 0f < sketchDuration ? Mathf.Clamp01(elapsed / sketchDuration) : 1f;
+                Vector3 tip = path.GetPointAt(path.Length * sketch, ref segment);
+
+                PathLine.Reveal(area, path, segment, tip);
+                PathLine.Reveal(fill, path, segment, tip);
+                fill.widthMultiplier = 0f < duration ? width * Mathf.Clamp01(elapsed / duration) : width;
+
+                if (elapsed >= duration)
+                {
+                    break;
+                }
+
+                await UniTask.Yield(PlayerLoopTiming.Update, token);
+                elapsed += Time.deltaTime;
+            }
+        }
+        finally
+        {
+            PathLine.Despawn(area);
+            PathLine.Despawn(fill);
+        }
+    }
 }

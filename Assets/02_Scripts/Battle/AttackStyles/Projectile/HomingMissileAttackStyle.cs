@@ -17,6 +17,8 @@ public class HomingMissileAttackStyle : AttackStyle
 
     [Header("비행")]
     [SerializeField, Min(0f)] private float _speed = 6f;
+    // 발마다 빠르기를 _speed를 가운데 두고 이 폭만큼 고르게 나눈다. 먼저 쏜 것이 가장 느려, 뒤에 쏜 것이 따라잡으며 시간차로 들어온다. 0이면 모두 같다.
+    [SerializeField, Min(0f)] private float _speedSpread;
     // 초당 꺾을 수 있는 각도. 작을수록 크게 돌아 들어와 피하기 쉽다.
     [SerializeField, Min(0f)] private float _turnSpeed = 120f;
     [SerializeField, Min(0f)] private float _lifetime = 5f;
@@ -47,15 +49,18 @@ public class HomingMissileAttackStyle : AttackStyle
 
         for (int i = 0; i < _missileCount; i++)
         {
+            float speedRatio = 1 < _missileCount ? i / (float)(_missileCount - 1) : 0.5f;
+            float speed = Mathf.Max(0f, Mathf.Lerp(_speed - _speedSpread, _speed + _speedSpread, speedRatio));
+
             GameManager.Sound.PlaySfx(_launchSound);
-            FlyMissileAsync(context, gaugeGain, token).Forget();
+            FlyMissileAsync(context, speed, gaugeGain, token).Forget();
 
             await UniTask.Delay(TimeSpan.FromSeconds(_launchInterval), cancellationToken: token);
         }
     }
 
     // 전투가 끝나 취소되면 터지지 않고 사라진다.
-    private async UniTaskVoid FlyMissileAsync(AttackContext context, float gaugeGain, CancellationToken token)
+    private async UniTaskVoid FlyMissileAsync(AttackContext context, float speed, float gaugeGain, CancellationToken token)
     {
         AttackTarget target = context.Target;
         Vector3 start = context.Owner.Body.position;
@@ -79,7 +84,7 @@ public class HomingMissileAttackStyle : AttackStyle
         try
         {
             FlightResult flight = await missile.GetOrAddComponent<HomingMotion>()
-                .FlyAsync(target, new HomingFlight(direction, _speed, _turnSpeed, _lifetime, _collisionRadius, false), token);
+                .FlyAsync(target, new HomingFlight(direction, speed, _turnSpeed, _lifetime, _collisionRadius, false), token);
 
             Explode(context, flight.LandingPoint, gaugeGain);
         }

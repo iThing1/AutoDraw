@@ -31,8 +31,9 @@ public class BattleCameraRig : MonoBehaviour
     private CinemachineConfiner2D[] _confiners;
     private float[] _lastOrthoSizes;
 
-    // 엔딩에서만 쓰여 씬에 두지 않고 처음 쓸 때 만든다.
-    private CinemachineCamera _overviewCamera;
+    // 판 전체(엔딩)나 일부 영역(기믹)을 고정해 비추는 카메라. 가끔만 쓰여 씬에 두지 않고 처음 쓸 때 만든다.
+    private CinemachineCamera _fixedCamera;
+    private CinemachineCamera _activeCamera;
 
     public Camera OutputCamera { get { return _brain.OutputCamera; } }
     // 브레인을 거치지 않고 직접 켜고 끄거나 그림을 찍을 때 쓰는 카메라.
@@ -126,27 +127,36 @@ public class BattleCameraRig : MonoBehaviour
             return false;
         }
 
-        if (null == _overviewCamera)
-        {
-            _overviewCamera = CreateOverviewCamera();
-        }
-
         Bounds bounds = _cameraBounds.bounds;
-        float halfHeight = bounds.extents.y + padding;
-        float halfWidth = bounds.extents.x + padding;
-
-        // 직교 크기는 화면 높이의 절반이라, 가로는 화면 비율로 나눠 높이 기준으로 바꾼다.
-        LensSettings lens = _battleCamera.Lens;
-        lens.OrthographicSize = Mathf.Max(halfHeight, halfWidth / OutputCamera.aspect);
-        _overviewCamera.Lens = lens;
-
-        float cameraZ = _battleCamera.transform.position.z;
-        _overviewCamera.transform.position = new Vector3(bounds.center.x, bounds.center.y, cameraZ);
 
         _brain.IgnoreTimeScale = true;
-        SetActiveCamera(_overviewCamera, blendDuration);
+        ShowFixedView(bounds.center, GetOrthoSizeToFit(bounds, padding), blendDuration);
 
         return true;
+    }
+
+    // 기믹이 판의 한 영역을 다 보여 줘야 할 때 그 가운데에 카메라를 고정한다. 화면이 카메라 경계 밖을 비추지 않게 가운데를 안쪽으로 당긴다.
+    public void ShowArea(Bounds area, float padding, float blendDuration)
+    {
+        float orthoSize = GetOrthoSizeToFit(area, padding);
+        Vector3 center = area.center;
+
+        if (null != _cameraBounds)
+        {
+            center = ClampViewCenter(center, orthoSize, _cameraBounds.bounds);
+        }
+
+        _brain.IgnoreTimeScale = false;
+        ShowFixedView(center, orthoSize, blendDuration);
+    }
+
+    // ShowArea로 비추는 중일 때만 전투 카메라로 돌아간다. 그사이 다른 연출이 카메라를 가져갔으면 그대로 둔다.
+    public void EndShowArea(float blendDuration)
+    {
+        if (null != _fixedCamera && _fixedCamera == _activeCamera)
+        {
+            ReturnToGameplay(blendDuration);
+        }
     }
 
     public void FollowPlayer(Transform player)
@@ -222,24 +232,67 @@ public class BattleCameraRig : MonoBehaviour
             ? new CinemachineBlendDefinition(CinemachineBlendDefinition.Styles.EaseInOut, blendDuration)
             : new CinemachineBlendDefinition(CinemachineBlendDefinition.Styles.Cut, 0f);
 
+        _activeCamera = target;
         _playerCamera.Priority = target == _playerCamera ? ACTIVE_PRIORITY : INACTIVE_PRIORITY;
         _cinematicCamera.Priority = target == _cinematicCamera ? ACTIVE_PRIORITY : INACTIVE_PRIORITY;
         _battleCamera.Priority = target == _battleCamera ? ACTIVE_PRIORITY : INACTIVE_PRIORITY;
 
-        if (null != _overviewCamera)
+        if (null != _fixedCamera)
         {
-            _overviewCamera.Priority = target == _overviewCamera ? ACTIVE_PRIORITY : INACTIVE_PRIORITY;
+            _fixedCamera.Priority = target == _fixedCamera ? ACTIVE_PRIORITY : INACTIVE_PRIORITY;
         }
     }
 
-    private CinemachineCamera CreateOverviewCamera()
+    private void ShowFixedView(Vector3 center, float orthoSize, float blendDuration)
     {
-        GameObject cameraObject = new GameObject("OverviewCamera");
+        if (null == _fixedCamera)
+        {
+            _fixedCamera = CreateFixedCamera();
+        }
+
+        LensSettings lens = _battleCamera.Lens;
+        lens.OrthographicSize = orthoSize;
+        _fixedCamera.Lens = lens;
+
+        float cameraZ = _battleCamera.transform.position.z;
+        _fixedCamera.transform.position = new Vector3(center.x, center.y, cameraZ);
+
+        SetActiveCamera(_fixedCamera, blendDuration);
+    }
+
+    // 직교 크기는 화면 높이의 절반이라, 가로는 화면 비율로 나눠 높이 기준으로 바꾼다.
+    private float GetOrthoSizeToFit(Bounds area, float padding)
+    {
+        return Mathf.Max(area.extents.y + padding, (area.extents.x + padding) / OutputCamera.aspect);
+    }
+
+    private Vector3 ClampViewCenter(Vector3 center, float orthoSize, Bounds bounds)
+    {
+        center.x = ClampViewAxis(center.x, orthoSize * OutputCamera.aspect, bounds.min.x, bounds.max.x);
+        center.y = ClampViewAxis(center.y, orthoSize, bounds.min.y, bounds.max.y);
+
+        return center;
+    }
+
+    // 화면이 경계보다 넓으면 경계 가운데에 둔다.
+    private static float ClampViewAxis(float value, float halfView, float min, float max)
+    {
+        if (max - min <= halfView * 2f)
+        {
+            return (min + max) * 0.5f;
+        }
+
+        return Mathf.Clamp(value, min + halfView, max - halfView);
+    }
+
+    private CinemachineCamera CreateFixedCamera()
+    {
+        GameObject cameraObject = new GameObject("FixedCamera");
         cameraObject.transform.SetParent(transform, false);
 
-        CinemachineCamera overviewCamera = cameraObject.AddComponent<CinemachineCamera>();
-        overviewCamera.Priority = INACTIVE_PRIORITY;
+        CinemachineCamera fixedCamera = cameraObject.AddComponent<CinemachineCamera>();
+        fixedCamera.Priority = INACTIVE_PRIORITY;
 
-        return overviewCamera;
+        return fixedCamera;
     }
 }

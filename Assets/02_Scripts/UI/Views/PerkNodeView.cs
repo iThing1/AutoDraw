@@ -86,6 +86,7 @@ public class PerkNodeView : ViewBase<PerkNodeViewModel>
     {
         if (null != ViewModel)
         {
+            GameManager.Sound.PlayUi(UISoundKind.Click);
             ViewModel.Select();
         }
     }

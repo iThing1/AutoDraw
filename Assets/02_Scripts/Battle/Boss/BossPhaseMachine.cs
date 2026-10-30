@@ -47,6 +47,8 @@ public class BossPhaseMachine : MonoBehaviour
     public event Action<bool> OnGimmickFinished;
     // 부활 연출이 시작되면 true, 끝나면 false. 그동안 플레이어를 멈추는 일은 전투를 맡은 쪽이 한다.
     public event Action<bool> OnRevivalChanged;
+    // 플레이어 공격을 멈추는 기믹(PausesTargetAttack)이 시작되면 true, 끝나면 false. 멈추는 일은 전투를 맡은 쪽이 한다.
+    public event Action<bool> OnTargetAttackPauseChanged;
 
     public BossPhaseState State { get { return _state; } }
     public int RemainingPhaseCount { get { return _phases.Length - _phaseIndex; } }
@@ -164,9 +166,26 @@ public class BossPhaseMachine : MonoBehaviour
             return false;
         }
 
-        using (_unit.Health.BeginInvulnerable())
+        bool pausesTarget = gimmick.PausesTargetAttack;
+
+        if (pausesTarget)
         {
-            return await gimmick.PlayAsync(_unit.Attacker.Context, token);
+            OnTargetAttackPauseChanged?.Invoke(true);
+        }
+
+        try
+        {
+            using (_unit.Health.BeginInvulnerable())
+            {
+                return await gimmick.PlayAsync(_unit.Attacker.Context, token);
+            }
+        }
+        finally
+        {
+            if (pausesTarget)
+            {
+                OnTargetAttackPauseChanged?.Invoke(false);
+            }
         }
     }
 
@@ -215,7 +234,7 @@ public class BossPhaseMachine : MonoBehaviour
     {
         _state = BossPhaseState.Groggy;
 
-        SetHandsGroggy(true);
+        SetGroggy(true);
         _unit.Health.SetDamageMultiplier(_groggyDamageMultiplier);
 
         try
@@ -225,7 +244,7 @@ public class BossPhaseMachine : MonoBehaviour
         finally
         {
             _unit.Health.SetDamageMultiplier(1f);
-            SetHandsGroggy(false);
+            SetGroggy(false);
         }
     }
 
@@ -332,8 +351,11 @@ public class BossPhaseMachine : MonoBehaviour
         return _tint.Evaluate(_phases[_phaseIndex], _nextLineIndex, _unit.Health.Ratio);
     }
 
-    private void SetHandsGroggy(bool isGroggy)
+    // 몸은 어느 보스든 휘청이고, 손 달린 보스는 손도 떨군다. 손 없는 보스도 그로기인 걸 알아볼 수 있게 한다.
+    private void SetGroggy(bool isGroggy)
     {
+        _unit.View.SetDazed(isGroggy);
+
         if (null != _hands)
         {
             _hands.SetGroggy(isGroggy);

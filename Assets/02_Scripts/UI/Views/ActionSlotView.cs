@@ -52,8 +52,14 @@ public class ActionSlotView : ViewBase<ActionSlotViewModel>
     {
         switch (propertyName)
         {
+            // 처음 그릴 때(RefreshAll)는 소리 없이, 전투 중에 바뀔 때만 소리를 낸다.
             case nameof(ActionSlotViewModel.IsSelected):
                 DrawSelected();
+
+                if (ViewModel.IsSelected)
+                {
+                    GameManager.Sound.PlayUi(UISoundKind.WeaponSwitch);
+                }
                 break;
 
             case nameof(ActionSlotViewModel.DisplayName):
@@ -61,7 +67,7 @@ public class ActionSlotView : ViewBase<ActionSlotViewModel>
                 break;
 
             case nameof(ActionSlotViewModel.GaugeRatio):
-                DrawGauge();
+                DrawGauge(true);
                 break;
 
             default:
@@ -78,7 +84,7 @@ public class ActionSlotView : ViewBase<ActionSlotViewModel>
         _wasReady = false;
 
         DrawSelected();
-        DrawGauge();
+        DrawGauge(false);
     }
 
     // 아이콘 그림은 제 색 그대로 두고, 그림이 없으면 프리팹의 물감 자국을 칸 색으로 칠한다.
@@ -107,7 +113,7 @@ public class ActionSlotView : ViewBase<ActionSlotViewModel>
     }
 
     // 게이지가 차는 동안은 아이콘을 흐리게 두고, 가득 차는 순간 밝아지며 튀어 올라 사용할 수 있음을 알린다.
-    private void DrawGauge()
+    private void DrawGauge(bool playsSound)
     {
         if (false == ViewModel.UsesGauge)
         {
@@ -128,6 +134,11 @@ public class ActionSlotView : ViewBase<ActionSlotViewModel>
         if (isReady && false == _wasReady)
         {
             Punch();
+
+            if (playsSound)
+            {
+                GameManager.Sound.PlayUi(ViewModel.ReadySound);
+            }
         }
 
         _wasReady = isReady;
@@ -141,6 +152,8 @@ public class ActionSlotView : ViewBase<ActionSlotViewModel>
 
     private void Shake()
     {
+        GameManager.Sound.PlayUi(UISoundKind.Error);
+
         _rect.DOComplete();
         _rect.DOShakeAnchorPos(_rejectDuration, new Vector2(_rejectShake, 0f)).SetUpdate(true);
     }

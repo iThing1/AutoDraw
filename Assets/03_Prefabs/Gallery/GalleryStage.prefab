@@ -1690,7 +1690,7 @@ GameObject:
   - component: {fileID: 5810000000000000080}
   - component: {fileID: 5810000000000000081}
   m_Layer: 0
-  m_Name: Frame_Locked_West
+  m_Name: Frame_Stage3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1728,7 +1728,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cd52e4144f048ceaa65347693509622, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GalleryFrame
-  _stage: {fileID: 0}
+  _stage: {fileID: 11400000, guid: 323a235e3b9642b6a8612ccacb89fa9b, type: 2}
   _painting: {fileID: 5810000000000000089}
   _cloth: {fileID: 5810000000000000092}
   _highlightRenderer: {fileID: 5810000000000000085}

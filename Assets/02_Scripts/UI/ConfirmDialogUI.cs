@@ -17,7 +17,10 @@ public class ConfirmDialogUI : MonoBehaviour
 
         // 먼저 눌린 버튼의 순서 번호다. 0은 확인, 1은 취소다.
         int choiceIndex = await UniTask.WhenAny(_confirmButton.OnClickAsync(token), _cancelButton.OnClickAsync(token));
+        bool isConfirmed = 0 == choiceIndex;
 
-        return 0 == choiceIndex;
+        GameManager.Sound.PlayUi(isConfirmed ? UISoundKind.Confirm : UISoundKind.Close);
+
+        return isConfirmed;
     }
 }

@@ -34,6 +34,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     [Header("사운드")]
     // 효과음(1)보다 낮게 깔아 타격음·경고음이 묻히지 않게 한다.
     [SerializeField, Range(0f, 1f)] private float _bgmVolume = 0.5f;
+    [SerializeField] private UISoundSettings _uiSounds = new();
 
     private SoundManager _soundManager = new();
     private UIManager _uiManager = new();
@@ -55,7 +56,7 @@ public class GameManager : SingletonBehaviour<GameManager>
 
         DOTween.SetTweensCapacity(TWEENERS_CAPACITY, SEQUENCES_CAPACITY);
 
-        _soundManager.Init(gameObject, _bgmVolume);
+        _soundManager.Init(gameObject, _bgmVolume, _uiSounds);
         _poolManager.Init();
         _timeScaleManager.Init(destroyCancellationToken);
 

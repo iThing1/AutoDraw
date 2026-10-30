@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 315f0024cde94ff9b6def0dfb53bf02c, type: 3}
+  m_Name: Boss3_Gimmick_DecalcomanieClone
+  m_EditorClassIdentifier: Assembly-CSharp::DecalcomanieCloneGimmick
+  _foldPrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
+  _foldColor: {r: 0.35, g: 0.35, b: 0.38, a: 0.6}
+  _foldWidth: 0.25
+  _foldLength: 60
+  _foldDuration: 0.6
+  _clonePrefab: {fileID: 8300000000000000001, guid: 3d14d9f148f5bd9e7b62a86d0e12cb0c, type: 3}
+  _cloneColor: {r: 0.04, g: 0.04, b: 0.06, a: 0.85}
+  _cloneFadeDuration: 0.5
+  _cloneImpact:
+    _shakeForce: 0.6
+    _sounds:
+    - {fileID: 8300000, guid: 50fd2ff187c1bb349a27ed90afbb8560, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0, g: 0, b: 0, a: 1}
+    _effectScale: 1.5
+    _effectLifetime: 2
+  _roundCount: 6
+  _dropsPerBody: 3
+  _dropRadius: 1.6
+  _spreadRadius: 5
+  _dropPrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
+  _telegraphColor: {r: 0.1, g: 0.1, b: 0.12, a: 0.35}
+  _warnDuration: 0.9
+  _roundInterval: 0.35
+  _hit:
+    _projectileScale: 1
+    _trajectories:
+    - _type: 1
+      _weight: 1
+      _height:
+        _min: 0
+        _max: 0
+      _duration:
+        _min: 0.3
+        _max: 0.35
+      _useSpeed: 0
+      _speed:
+        _min: 10
+        _max: 10
+    _homing: 0
+    _missTravelTime: 0
+    _trailTime: 0
+    _trailWidth: 0.1
+    _useTrailColor: 1
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
+    _damage:
+      _min: 11
+      _max: 14
+    _criticalChance: 0.1
+    _criticalMultiplier: 2
+    _normalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}
+    _criticalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}
+  _impact:
+    _shakeForce: 0.6
+    _sounds:
+    - {fileID: 8300000, guid: bc241be328531014fa49af9c462337f0, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0, g: 0, b: 0, a: 1}
+    _effectScale: 1.5
+    _effectLifetime: 2
+  _groundSplat: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}

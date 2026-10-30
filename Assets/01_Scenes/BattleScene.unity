@@ -1007,6 +1007,35 @@ MonoBehaviour:
   _cinematicUIPrefab: {fileID: 6658607233805704159, guid: 2b193404ac6794343b9d5fa875708906, type: 3}
   _mapSpawner: {fileID: 2132573753}
   _assetRegistry: {fileID: 11400000, guid: 3c1bc77973cc41fb847ede61fa60f94b, type: 2}
+  _uiSounds:
+    _cues:
+    - _kind: 1
+      _clip: {fileID: 8300000, guid: f6abb264e6544cc3ab5c32813549058d, type: 3}
+      _pitch: 1
+    - _kind: 2
+      _clip: {fileID: 8300000, guid: 87cb7094da7c58242ae135ea864c6eeb, type: 3}
+      _pitch: 1
+    - _kind: 3
+      _clip: {fileID: 8300000, guid: 87cb7094da7c58242ae135ea864c6eeb, type: 3}
+      _pitch: 0.85
+    - _kind: 4
+      _clip: {fileID: 8300000, guid: 89436b639db10d84a8def586d4ed09a7, type: 3}
+      _pitch: 1
+    - _kind: 5
+      _clip: {fileID: 8300000, guid: 3ce00e2f7e07f3041adeb539d4c942c8, type: 3}
+      _pitch: 1
+    - _kind: 6
+      _clip: {fileID: 8300000, guid: 41f051dd0e8c411fa102be21fd458553, type: 3}
+      _pitch: 1
+    - _kind: 7
+      _clip: {fileID: 8300000, guid: 66d5a9ad741918a469a5d0e852a96e55, type: 3}
+      _pitch: 1
+    - _kind: 8
+      _clip: {fileID: 8300000, guid: f6abb264e6544cc3ab5c32813549058d, type: 3}
+      _pitch: 1.3
+    - _kind: 9
+      _clip: {fileID: 8300000, guid: 6c59daa7c3264782b3e72988eb127a3e, type: 3}
+      _pitch: 1
 --- !u!114 &2132573753
 MonoBehaviour:
   m_ObjectHideFlags: 0

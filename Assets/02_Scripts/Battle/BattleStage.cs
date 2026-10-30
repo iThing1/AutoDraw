@@ -289,6 +289,7 @@ public class BattleStage : MonoBehaviour
             if (_boss.TryGetComponent(out _bossPhases))
             {
                 _bossPhases.OnRevivalChanged += HandleBossRevivalChanged;
+                _bossPhases.OnTargetAttackPauseChanged += HandleTargetAttackPauseChanged;
             }
 
             if (null != _boss.Mover)
@@ -312,6 +313,7 @@ public class BattleStage : MonoBehaviour
             if (null != _bossPhases)
             {
                 _bossPhases.OnRevivalChanged -= HandleBossRevivalChanged;
+                _bossPhases.OnTargetAttackPauseChanged -= HandleTargetAttackPauseChanged;
             }
 
             // 쓰러진 쪽은 Dead라 그대로 남는다.
@@ -344,6 +346,24 @@ public class BattleStage : MonoBehaviour
         else
         {
             _player.ChangeState(UnitState.Move);
+            _player.Attacker.Resume();
+        }
+    }
+
+    // 원본 찾기처럼 쏘는 탄이 답을 알려 주는 기믹 동안에는 공격만 멈춘다. 이동·막기·대시는 그대로 쓴다.
+    private void HandleTargetAttackPauseChanged(bool isPaused)
+    {
+        if (_player.Health.IsDead)
+        {
+            return;
+        }
+
+        if (isPaused)
+        {
+            _player.Attacker.Interrupt();
+        }
+        else
+        {
             _player.Attacker.Resume();
         }
     }

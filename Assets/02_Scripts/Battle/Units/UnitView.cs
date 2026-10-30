@@ -44,7 +44,8 @@ public class UnitView : MonoBehaviour
     {
         if (null != _animation)
         {
-            _animation.Tick(Time.deltaTime, _unit.IsDodging);
+            // 대시 뒤 유예 동안에는 걸어도 늘어나 보이지 않게, 대시 동작 중일 때만 늘인다.
+            _animation.Tick(Time.deltaTime, _unit.IsDodging && UnitState.Action == _unit.State);
         }
     }
 
@@ -72,6 +73,23 @@ public class UnitView : MonoBehaviour
             {
                 _renderers[i].color = color;
             }
+        }
+    }
+
+    // 움직이면서 쏘는 공격은 Action 상태를 거치지 않아, 쏘는 쪽이 직접 공격 반응을 부른다.
+    public void PlayAttack()
+    {
+        if (null != _animation)
+        {
+            _animation.PlayAttack();
+        }
+    }
+
+    public void SetDazed(bool isDazed)
+    {
+        if (null != _animation)
+        {
+            _animation.SetDazed(isDazed);
         }
     }
 

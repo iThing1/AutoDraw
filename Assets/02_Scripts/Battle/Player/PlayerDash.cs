@@ -15,12 +15,17 @@ public class PlayerDash : MonoBehaviour
     private BattleUnit _unit;
     private PlayerInputMover _mover;
     private Rigidbody2D _rigidbody;
+    // 피했을 때 채울 게이지. 게이지가 없는 유닛이면 null이다.
+    private SkillGauge _skillGauge;
     private DashState _state;
     private PlayerStats _stats;
     private Sprite _icon;
+    // 이 전투에서 실제로 대시한 횟수. 보스가 대시를 자주 쓰는 플레이어에게 반응하는 데 쓴다.
+    private int _useCount;
 
     // 유틸리티 칸에 대시를 끼우지 않았으면 null이다.
     public DashState State { get { return _state; } }
+    public int UseCount { get { return _useCount; } }
 
     public string KeyLabel { get { return _dashAction.GetKeyLabel(); } }
     public Sprite Icon { get { return _icon; } }
@@ -30,6 +35,7 @@ public class PlayerDash : MonoBehaviour
         _unit = GetComponent<BattleUnit>();
         _mover = GetComponent<PlayerInputMover>();
         _rigidbody = GetComponent<Rigidbody2D>();
+        TryGetComponent(out _skillGauge);
 
         if (null == _dashAction || null == _preset)
         {
@@ -59,7 +65,14 @@ public class PlayerDash : MonoBehaviour
 
     private void OnEnable()
     {
+        _unit.OnDodged += HandleDodged;
+
         _dashAction.Enable();
+    }
+
+    private void OnDisable()
+    {
+        _unit.OnDodged -= HandleDodged;
     }
 
     private void Update()
@@ -96,6 +109,7 @@ public class PlayerDash : MonoBehaviour
         }
 
         _state.Begin(Time.time);
+        _useCount++;
 
         DashAsync(_mover.GetFacingDirection(), destroyCancellationToken).Forget();
     }
@@ -112,8 +126,11 @@ public class PlayerDash : MonoBehaviour
 
         ImpactPlayer.Play(_preset.StartImpact, _unit.Body.position);
 
+        bool hasEnded = false;
+
         try
         {
+            // 유예까지 한 번의 회피로 묶어, 회피 문구가 대시 한 번에 한 번만 뜨게 한다.
             using (_unit.BeginDodge())
             {
                 while (elapsed < _preset.Duration)
@@ -142,6 +159,15 @@ public class PlayerDash : MonoBehaviour
                         nextAfterimageTime += _preset.AfterimageInterval;
                     }
                 }
+
+                EndDash(stroke);
+                hasEnded = true;
+
+                // 움직임은 먼저 돌려주고 잠깐 더 피하는 상태로 두어, 끝나는 순간 닿은 공격에 맞지 않게 한다.
+                if (0f < _preset.DodgeGrace)
+                {
+                    await UniTask.Delay(TimeSpan.FromSeconds(_preset.DodgeGrace), cancellationToken: token);
+                }
             }
         }
         catch (OperationCanceledException)
@@ -149,14 +175,31 @@ public class PlayerDash : MonoBehaviour
         }
         finally
         {
-            // 끊겨도 지나간 데까지는 남긴다.
-            if (null != stroke)
+            if (false == hasEnded)
             {
-                stroke.Finish();
+                EndDash(stroke);
             }
-
-            _unit.EndAction();
         }
+    }
+
+    // 회피 알림은 대시 한 번에 한 번만 오므로, 여러 공격을 한꺼번에 피해도 한 번만 채운다.
+    private void HandleDodged(Vector3 point)
+    {
+        if (null != _skillGauge)
+        {
+            _skillGauge.Add(_preset.DodgeGaugeGain);
+        }
+    }
+
+    // 끊겨도 지나간 데까지는 남긴다.
+    private void EndDash(PaintStripe stroke)
+    {
+        if (null != stroke)
+        {
+            stroke.Finish();
+        }
+
+        _unit.EndAction();
     }
 
     // 전투가 시작되기 전(다가가는 중)에는 캔버스를 받기 전이라 자국을 남기지 않는다.

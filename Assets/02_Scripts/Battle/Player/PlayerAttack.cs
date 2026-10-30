@@ -103,6 +103,14 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
+    // 지금 고른 무기 칸의 종류. 아직 고르지 않았으면 false다.
+    public bool TryGetSelectedWeaponType(out WeaponType type)
+    {
+        type = HEAVY_SLOT == _selectedIndex ? WeaponType.Heavy : WeaponType.Basic;
+
+        return 0 <= _selectedIndex;
+    }
+
     public AttackStyle GetSlotStyle(int index)
     {
         return 0 <= index && index < WEAPON_SLOT_COUNT ? _slotStyles[index] : null;

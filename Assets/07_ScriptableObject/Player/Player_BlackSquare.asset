@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5275d96d0c7ffc5d771a360c8fdec5a7, type: 3}
+  m_Name: Player_BlackSquare
+  m_EditorClassIdentifier: Assembly-CSharp::BarrageAttackStyle
+  _displayName: Black Square
+  _iconColor: {r: 0.1, g: 0.1, b: 0.12, a: 1}
+  _attackInterval: 1
+  _gaugeGainPerHit: 0
+  _waitUntilFinished: 0
+  _stopsMovement: 0
+  _tell: 0
+  _tellDuration: 0.5
+  _turretPrefab: {fileID: 8198192859227697926, guid: f2ebcc9399ee7ec40ac4dcc712499f2e, type: 3}
+  _turretOffsets:
+  - {x: -1.6, y: 0.9}
+  - {x: 1.6, y: 0.9}
+  _turretAppearDuration: 0.25
+  _turretAppearEase: 27
+  _turretDisappearDuration: 0.2
+  _turretDisappearEase: 26
+  _turretRecoil: 0.25
+  _turretAppearSound: {fileID: 8300000, guid: 5358f49ed93744188f2e65f788cb1e34, type: 3}
+  _volleyCount: 7
+  _volleyInterval: 0.15
+  _turretShot:
+    _projectileScale: 0.6
+    _trajectories:
+    - _type: 1
+      _weight: 1
+      _height:
+        _min: 0
+        _max: 0
+      _duration:
+        _min: 0.3
+        _max: 0.4
+      _useSpeed: 0
+      _speed:
+        _min: 8
+        _max: 10
+    _homing: 1
+    _missTravelTime: 0.3
+    _trailTime: 0.15
+    _trailWidth: 0.08
+    _useTrailColor: 0
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
+    _hit:
+      _damage:
+        _min: 4
+        _max: 6
+      _criticalChance: 0.1
+      _criticalMultiplier: 2
+      _normalHit: {fileID: 11400000, guid: a1472993146643b4caf6ff2f32ea6da5, type: 2}
+      _criticalHit: {fileID: 11400000, guid: 153bdefa60cf5ff4da3be8afa326f656, type: 2}
+  _finaleDelay: 0.35
+  _finaleShot:
+    _projectileScale: 2
+    _trajectories:
+    - _type: 0
+      _weight: 1
+      _height:
+        _min: 3
+        _max: 4
+      _duration:
+        _min: 0.6
+        _max: 0.7
+      _useSpeed: 0
+      _speed:
+        _min: 8
+        _max: 10
+    _homing: 1
+    _missTravelTime: 0.3
+    _trailTime: 0.35
+    _trailWidth: 0.3
+    _useTrailColor: 0
+    _trailColor: {r: 0, g: 0, b: 0, a: 1}
+    _hit:
+      _damage:
+        _min: 24
+        _max: 30
+      _criticalChance: 0.3
+      _criticalMultiplier: 2
+      _normalHit: {fileID: 11400000, guid: 615b02abc13dad9449c44a58d6d34261, type: 2}
+      _criticalHit: {fileID: 11400000, guid: 21e85312f4db3c644b296857461a544e, type: 2}

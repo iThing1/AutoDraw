@@ -26,36 +26,37 @@ MonoBehaviour:
   _telegraphPrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
   _telegraphColor: {r: 0.1, g: 0.1, b: 0.12, a: 0.3}
   _warnDuration: 0.8
-  _shadowPrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
-  _shadowColor: {r: 0.02, g: 0.02, b: 0.03, a: 1}
-  _shadowDiameter: 2.2
-  _dashSpeed: 45
   _dashInterval: 0.35
-  _hit:
-    _projectileScale: 1
-    _trajectories:
-    - _type: 1
-      _weight: 1
-      _height:
-        _min: 0
-        _max: 0
-      _duration:
-        _min: 0.3
-        _max: 0.35
-      _useSpeed: 0
-      _speed:
-        _min: 10
-        _max: 10
-    _homing: 0
-    _missTravelTime: 0
-    _trailTime: 0
-    _trailWidth: 0.1
-    _useTrailColor: 1
-    _trailColor: {r: 0, g: 0, b: 0, a: 1}
-    _damage:
-      _min: 12
-      _max: 16
-    _criticalChance: 0.1
-    _criticalMultiplier: 2
-    _normalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}
-    _criticalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}
+  _shadow:
+    _prefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
+    _color: {r: 0.02, g: 0.02, b: 0.03, a: 1}
+    _diameter: 2.2
+    _speed: 45
+    _hit:
+      _projectileScale: 1
+      _trajectories:
+      - _type: 1
+        _weight: 1
+        _height:
+          _min: 0
+          _max: 0
+        _duration:
+          _min: 0.3
+          _max: 0.35
+        _useSpeed: 0
+        _speed:
+          _min: 10
+          _max: 10
+      _homing: 0
+      _missTravelTime: 0
+      _trailTime: 0
+      _trailWidth: 0.1
+      _useTrailColor: 1
+      _trailColor: {r: 0, g: 0, b: 0, a: 1}
+      _damage:
+        _min: 12
+        _max: 16
+      _criticalChance: 0.1
+      _criticalMultiplier: 2
+      _normalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}
+      _criticalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}

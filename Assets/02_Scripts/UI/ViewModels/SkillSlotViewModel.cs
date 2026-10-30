@@ -4,6 +4,8 @@ public class SkillSlotViewModel : ActionSlotViewModel
     private PlayerAttack _attack;
     private SkillGauge _gauge;
 
+    public override UISoundKind ReadySound { get { return UISoundKind.SkillReady; } }
+
     public SkillSlotViewModel(PlayerAttack attack)
         : base(attack.SkillKeyLabel, attack.SkillStyle, attack.SkillIcon, true)
     {

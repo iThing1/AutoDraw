@@ -30,6 +30,15 @@ public class UnitAnimationSettings
     [SerializeField, Min(0.01f)] private float _reactionDuration = 0.25f;
     [SerializeField, Min(0f)] private float _dashStretch = 0.35f;
 
+    [Header("그로기")]
+    // 그로기 동안 주저앉듯 납작해지는 정도.
+    [SerializeField, Min(0f)] private float _dazedSag = 0.1f;
+    // 그로기 동안 좌우로 휘청이는 최대 각도와, 1초에 몇 번 휘청이는지.
+    [SerializeField, Range(0f, 45f)] private float _dazedSwayAngle = 12f;
+    [SerializeField, Min(0f)] private float _dazedSwaySpeed = 0.7f;
+    // 그로기 자세로 들어가고 풀리는 데 걸리는 시간.
+    [SerializeField, Min(0.01f)] private float _dazedBlendDuration = 0.3f;
+
     // 속도·기울기가 바뀌는 빠르기. 클수록 바로 따라간다.
     [SerializeField, Min(0.1f)] private float _followSharpness = 14f;
 
@@ -47,5 +56,9 @@ public class UnitAnimationSettings
     public float GuardSquash { get { return _guardSquash; } }
     public float ReactionDuration { get { return _reactionDuration; } }
     public float DashStretch { get { return _dashStretch; } }
+    public float DazedSag { get { return _dazedSag; } }
+    public float DazedSwayAngle { get { return _dazedSwayAngle; } }
+    public float DazedSwaySpeed { get { return _dazedSwaySpeed; } }
+    public float DazedBlendDuration { get { return _dazedBlendDuration; } }
     public float FollowSharpness { get { return _followSharpness; } }
 }

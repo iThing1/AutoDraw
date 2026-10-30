@@ -234,12 +234,14 @@ public class GalleryStage : MonoBehaviour
 
         _pauseMenu.OnResume += Resume;
 
+        GameManager.Sound.PlayUi(UISoundKind.Open);
         SetControlEnabled(false);
         SetCursorLocked(false);
     }
 
     private void Resume()
     {
+        GameManager.Sound.PlayUi(UISoundKind.Close);
         ClosePauseMenu();
 
         SetControlEnabled(true);
@@ -282,12 +284,15 @@ public class GalleryStage : MonoBehaviour
         _screenViewModel.OnCloseRequested += HandleScreenClosed;
         view.Bind(viewModel);
 
+        GameManager.Sound.PlayUi(UISoundKind.Open);
         SetControlEnabled(false);
         SetCursorLocked(false);
     }
 
+    // 닫기 버튼과 Esc가 모두 여기로 와서, 닫는 소리도 여기서 낸다.
     private void HandleScreenClosed()
     {
+        GameManager.Sound.PlayUi(UISoundKind.Close);
         CloseScreen();
 
         SetControlEnabled(true);

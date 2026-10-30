@@ -23,6 +23,11 @@ public class UnitAnimation
     private float _reactionTime;
     private bool _isAttackReaction;
 
+    private bool _isDazed;
+    // 그로기 자세가 얼마나 들어갔는지(0~1). 켜고 끌 때 그림이 튀지 않게 천천히 바꾼다.
+    private float _dazedBlend;
+    private float _dazedPhase;
+
     public UnitAnimation(UnitAnimationSettings settings, Transform root, SpriteRenderer renderer)
     {
         _settings = settings;
@@ -48,6 +53,17 @@ public class UnitAnimation
     public void PlayGuard()
     {
         StartReaction(_settings.GuardSquash, false);
+    }
+
+    // 그로기 동안 주저앉아 좌우로 휘청인다.
+    public void SetDazed(bool isDazed)
+    {
+        if (isDazed && false == _isDazed)
+        {
+            _dazedPhase = 0f;
+        }
+
+        _isDazed = isDazed;
     }
 
     // 죽음처럼 컷신이 그림을 넘겨받을 때 처음 모습으로 돌려놓는다.
@@ -84,9 +100,9 @@ public class UnitAnimation
         float land = (1f - lift) * _settings.LandSquash * moveRatio;
 
         // 양수면 납작하게, 음수면 길쭉하게.
-        float squash = land - breathe + TickReaction(deltaTime);
+        float squash = land - breathe + TickReaction(deltaTime) + TickDazedSag(deltaTime);
         Vector2 stretch = new Vector2(1f + squash, 1f - squash);
-        float angle = -Mathf.Clamp(_velocity.x / _settings.FullSpeed, -1f, 1f) * _settings.LeanAngle;
+        float angle = -Mathf.Clamp(_velocity.x / _settings.FullSpeed, -1f, 1f) * _settings.LeanAngle + GetDazedSway();
 
         // 대시는 가는 방향으로 길게 늘인다. 왼쪽으로 갈 때 그림이 뒤집혀 보이지 않게 각도를 -90~90도 안에 둔다.
         if (isDashing && MIN_DASH_SPEED < speed)
@@ -111,6 +127,25 @@ public class UnitAnimation
         _reactionAmount = amount;
         _reactionTime = 0f;
         _isAttackReaction = isAttack;
+    }
+
+    private float TickDazedSag(float deltaTime)
+    {
+        _dazedBlend = Mathf.MoveTowards(_dazedBlend, _isDazed ? 1f : 0f, deltaTime / _settings.DazedBlendDuration);
+
+        if (0f >= _dazedBlend)
+        {
+            return 0f;
+        }
+
+        _dazedPhase = Mathf.Repeat(_dazedPhase + deltaTime * _settings.DazedSwaySpeed, 1f);
+
+        return _settings.DazedSag * _dazedBlend;
+    }
+
+    private float GetDazedSway()
+    {
+        return Mathf.Sin(_dazedPhase * Mathf.PI * 2f) * _settings.DazedSwayAngle * _dazedBlend;
     }
 
     // 피격·막기는 맞는 순간 가장 납작했다가 풀리고, 공격은 움츠렸다(납작) 튀어 나간다(길쭉).

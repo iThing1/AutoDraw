@@ -39,6 +39,13 @@ public abstract class AttackStyle : ScriptableObject
         return this;
     }
 
+    // 지금 쏠 수 있는지. 쏠 조건(플레이어가 막기를 여러 번 쓴 뒤 등)이 갖춰지지 않은 패턴은 묶음이 고르지 않고,
+    // 자동 공격도 간격을 기다린 뒤 쏘기 직전에 한 번 더 본다.
+    public virtual bool CanFire(AttackContext context)
+    {
+        return true;
+    }
+
     // 첫 공격 때 한꺼번에 생성되며 끊기지 않도록, 이 공격만 쓰는 프리팹(포대, 칼끝 등)을 풀에 미리 만들어 둔다.
     public virtual void Prewarm()
     {

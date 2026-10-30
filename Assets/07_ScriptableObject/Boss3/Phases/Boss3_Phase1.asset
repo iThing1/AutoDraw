@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfe8f9cbb80f4d0fb428f2681541854d, type: 3}
+  m_Name: Boss3_Phase1
+  m_EditorClassIdentifier: Assembly-CSharp::BossPhaseData
+  _hpRatio: 1
+  _attackStyle: {fileID: 11400000, guid: 36ba582dd4b14d3dbe7a6d6647df9a18, type: 2}
+  _colorSegments:
+  - _from: {r: 0.78, g: 0.78, b: 0.78, a: 1}
+    _to: {r: 0.64, g: 0.64, b: 0.64, a: 1}
+  - _from: {r: 0.56, g: 0.56, b: 0.56, a: 1}
+    _to: {r: 0.44, g: 0.44, b: 0.44, a: 1}
+  - _from: {r: 0.38, g: 0.38, b: 0.38, a: 1}
+    _to: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+  _gimmickLines:
+  - _hpRatio: 0.66
+    _gimmick: {fileID: 11400000, guid: e79a885b5843434e8d90860885f73051, type: 2}
+  - _hpRatio: 0.33
+    _gimmick: {fileID: 11400000, guid: b3ed229ba5b044a38bc8b52522e6282a, type: 2}
+  _bannerTitle: 
+  _bannerSubtitle: 

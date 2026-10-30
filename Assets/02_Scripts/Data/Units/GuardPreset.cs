@@ -18,6 +18,8 @@ public class GuardPreset : ScriptableObject
     [SerializeField] private ImpactSettings _blockImpact = new();
     [SerializeField, Min(0f)] private float _blockHitStopDuration = 0.05f;
     [SerializeField, Range(0f, 1f)] private float _blockHitStopTimeScale = 0.1f;
+    // 막아 내면 방패 한 번에 한 번 스킬 게이지를 되돌려 받아, 잘 막을수록 막기 비용이 줄어든다.
+    [SerializeField, Min(0f)] private float _blockGaugeGain = 10f;
 
     [Header("막기가 안 나갈 때")]
     // 쿨타임이나 게이지가 모자라 막기가 안 나가면 방패를 이 색으로 잠깐 비춰, 왜 안 막혔는지 알 수 있게 한다.
@@ -35,6 +37,7 @@ public class GuardPreset : ScriptableObject
     public ImpactSettings BlockImpact { get { return _blockImpact; } }
     public float BlockHitStopDuration { get { return _blockHitStopDuration; } }
     public float BlockHitStopTimeScale { get { return _blockHitStopTimeScale; } }
+    public float BlockGaugeGain { get { return _blockGaugeGain; } }
 
     public Color RejectColor { get { return _rejectColor; } }
     public float RejectFlashDuration { get { return _rejectFlashDuration; } }

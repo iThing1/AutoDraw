@@ -17,8 +17,10 @@ public class LoadoutItemView : ViewBase<LoadoutItemViewModel>
     [SerializeField] private TMP_Text _overlayText;
 
     [Header("상태")]
-    [SerializeField] private Color _normalColor = new Color(0.15f, 0.15f, 0.17f, 0.92f);
+    // 끼운 것, 가진 것, 아직 못 쓰는 것(잠김·준비 중)을 바탕색으로 세 단계로 나눈다. 못 쓰는 것은 창 바탕에 가까운 옅은 칸으로 둔다.
+    [SerializeField] private Color _normalColor = new Color(0.24f, 0.24f, 0.28f, 1f);
     [SerializeField] private Color _equippedColor = new Color(0.85f, 0.65f, 0.3f, 1f);
+    [SerializeField] private Color _unavailableColor = new Color(0.1f, 0.1f, 0.12f, 0.6f);
     [SerializeField, Range(0f, 1f)] private float _dimmedAlpha = 0.4f;
     [SerializeField] private string _lockedText = "LOCKED";
     [SerializeField] private string _notReadyText = "SOON";
@@ -61,7 +63,7 @@ public class LoadoutItemView : ViewBase<LoadoutItemViewModel>
         bool isLocked = LoadoutItemState.Locked == state;
         bool isUnavailable = isLocked || LoadoutItemState.NotReady == state;
 
-        _background.color = LoadoutItemState.Equipped == state ? _equippedColor : _normalColor;
+        _background.color = LoadoutItemState.Equipped == state ? _equippedColor : isUnavailable ? _unavailableColor : _normalColor;
         _canvasGroup.alpha = isUnavailable ? _dimmedAlpha : 1f;
 
         _overlay.SetActive(isUnavailable);
@@ -70,9 +72,28 @@ public class LoadoutItemView : ViewBase<LoadoutItemViewModel>
 
     private void HandleClicked()
     {
-        if (null != ViewModel)
+        if (null == ViewModel)
         {
-            ViewModel.Select();
+            return;
+        }
+
+        GameManager.Sound.PlayUi(GetClickSound(ViewModel.State));
+        ViewModel.Select();
+    }
+
+    // 끼우는 장비는 장착음, 이미 낀 장비는 고르기만, 못 쓰는 장비는 설명만 보이므로 막힌 소리를 낸다.
+    private static UISoundKind GetClickSound(LoadoutItemState state)
+    {
+        switch (state)
+        {
+            case LoadoutItemState.Owned:
+                return UISoundKind.Equip;
+
+            case LoadoutItemState.Equipped:
+                return UISoundKind.Click;
+
+            default:
+                return UISoundKind.Error;
         }
     }
 }

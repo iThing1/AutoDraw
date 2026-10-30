@@ -234,7 +234,7 @@ public class BossPhaseMachine : MonoBehaviour
     {
         _state = BossPhaseState.Groggy;
 
-        SetHandsGroggy(true);
+        SetGroggy(true);
         _unit.Health.SetDamageMultiplier(_groggyDamageMultiplier);
 
         try
@@ -244,7 +244,7 @@ public class BossPhaseMachine : MonoBehaviour
         finally
         {
             _unit.Health.SetDamageMultiplier(1f);
-            SetHandsGroggy(false);
+            SetGroggy(false);
         }
     }
 
@@ -351,8 +351,11 @@ public class BossPhaseMachine : MonoBehaviour
         return _tint.Evaluate(_phases[_phaseIndex], _nextLineIndex, _unit.Health.Ratio);
     }
 
-    private void SetHandsGroggy(bool isGroggy)
+    // 몸은 어느 보스든 휘청이고, 손 달린 보스는 손도 떨군다. 손 없는 보스도 그로기인 걸 알아볼 수 있게 한다.
+    private void SetGroggy(bool isGroggy)
     {
+        _unit.View.SetDazed(isGroggy);
+
         if (null != _hands)
         {
             _hands.SetGroggy(isGroggy);

@@ -9,6 +9,7 @@ using UnityEngine;
 // 섞인 뒤 정해진 시간 안에 보스가 든 액자 안에 서 있으면 그로기, 다른 액자에 있거나 어느 액자에도 없으면 가짜 액자들이 반격한다.
 // 진짜 액자 구석에는 위작가의 서명이 이따금 반짝여, 섞는 걸 놓쳐도 찾을 단서가 된다.
 // 쏘는 탄이 보스 자리를 알려 주지 않도록, 기믹 동안 플레이어 공격을 멈춘다(PausesTargetAttack).
+// 숨은 보스를 함께 담으려는 전투 카메라도 답을 알려 주므로, 기믹 동안 카메라를 네 액자의 가운데에 고정한다.
 [CreateAssetMenu(fileName = "FindOriginalGimmick", menuName = "Scriptable Objects/Boss/Gimmick/FindOriginal")]
 public class FindOriginalGimmick : PunishingBossGimmick
 {
@@ -24,6 +25,11 @@ public class FindOriginalGimmick : PunishingBossGimmick
     [SerializeField] private Color _edgeColor = new Color(0.1f, 0.1f, 0.12f, 1f);
     [SerializeField] private Color _fillColor = new Color(0.1f, 0.1f, 0.12f, 0.18f);
     [SerializeField, Min(0f)] private float _appearDuration = 0.4f;
+
+    [Header("카메라")]
+    // 네 액자 바깥으로 더 비출 여백.
+    [SerializeField, Min(0f)] private float _cameraPadding = 1.5f;
+    [SerializeField, Min(0f)] private float _cameraBlendDuration = 0.5f;
 
     [Header("숨기")]
     // 보스가 진짜 액자로 날아가며 오그라드는 시간. 플레이어가 어느 액자인지 똑똑히 보게 한다.
@@ -95,6 +101,8 @@ public class FindOriginalGimmick : PunishingBossGimmick
             List<Vector3> slots = BuildSlots(context.Target);
             Color hidden = new Color(_edgeColor.r, _edgeColor.g, _edgeColor.b, 0f);
 
+            GameManager.CameraRig.ShowArea(GetSlotArea(slots), _cameraPadding, _cameraBlendDuration);
+
             for (int i = 0; i < FRAME_COUNT; i++)
             {
                 GimmickFrame frame = new GimmickFrame(_framePrefab, _frameSize, _edgeWidth, hidden, _fillColor);
@@ -144,6 +152,7 @@ public class FindOriginalGimmick : PunishingBossGimmick
         }
         finally
         {
+            GameManager.CameraRig.EndShowArea(_cameraBlendDuration);
             body.localScale = bodyScale;
 
             if (null != context.Owner.Mover)
@@ -177,6 +186,21 @@ public class FindOriginalGimmick : PunishingBossGimmick
         }
 
         return slots;
+    }
+
+    // 네 액자를 다 담는 영역. 섞을 때 옆으로 휘어 바깥쪽으로 나가는 폭까지 넣는다.
+    private Bounds GetSlotArea(List<Vector3> slots)
+    {
+        Bounds area = new Bounds(slots[0], Vector3.zero);
+
+        for (int i = 1; i < slots.Count; i++)
+        {
+            area.Encapsulate(slots[i]);
+        }
+
+        area.Expand(new Vector3(_frameSize.x + _swapArc * 2f, _frameSize.y + _swapArc * 2f, 0f));
+
+        return area;
     }
 
     private async UniTask HideBossAsync(Transform root, Transform body, GimmickFrame frame, CancellationToken token)

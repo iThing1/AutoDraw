@@ -85,6 +85,14 @@ public class UnitView : MonoBehaviour
         }
     }
 
+    public void SetDazed(bool isDazed)
+    {
+        if (null != _animation)
+        {
+            _animation.SetDazed(isDazed);
+        }
+    }
+
     // 히트 스톱으로 게임 시간이 멈춘 동안에도 보여야 하므로 실제 시간으로 재생한다.
     public void Flash(Color flashColor, float duration)
     {

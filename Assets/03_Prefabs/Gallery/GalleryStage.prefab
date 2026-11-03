@@ -96,8 +96,6 @@ MonoBehaviour:
   _approachEase: 4
   _returnDuration: 1.2
   _returnEase: 4
-  _pauseAction: {fileID: 150020700587333932, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
-  _pauseMenuPrefab: {fileID: 1836262863735427526, guid: 3d5a64cf4c6d4302bd00a6a614241cfc, type: 3}
   _loadoutViewPrefab: {fileID: 7320000000000000006, guid: fd758bcb3e15b660556a030fbf607815, type: 3}
   _perkTreeViewPrefab: {fileID: 7420000000000000006, guid: 03c464281b2a374eb896fb18e674750d, type: 3}
   _bgm: {fileID: 8300000, guid: ffd5502089e222b41b843ebd61300de1, type: 3}

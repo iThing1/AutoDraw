@@ -3,7 +3,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-public class BattleStage : MonoBehaviour
+public class BattleStage : MonoBehaviour, IPausable
 {
     [Header("스폰 위치")]
     [SerializeField] private Transform _playerSpawnPoint;
@@ -49,11 +49,17 @@ public class BattleStage : MonoBehaviour
     private BattleHudView _hud;
     private BattleHudViewModel _hudViewModel;
     private ResultUI _result;
+    // 플레이어가 직접 움직이는 동안(접근, 전투)만 멈출 수 있다. 실제 시간으로 도는 컷신 중에는 멈추지 않는다.
+    private bool _canPause;
 
     // 결과 화면에서 고른 것. 다시 하기·갤러리 이동은 스테이지를 만든 쪽이 처리한다.
     public event Action<ResultChoice> OnResultChosen;
     // 결과 화면보다 먼저 알려, 버튼을 누르기 전에 게임을 꺼도 그림이 남게 한다. 텍스처는 받는 쪽이 지운다.
     public event Action<Texture2D> OnStageCleared;
+
+    public bool CanPause { get { return _canPause; } }
+    // 일시정지 메뉴에서 바로 다시 하거나 갤러리로 돌아갈 수 있다. 결과 화면을 거치지 않으므로 보상도 그림도 없다.
+    public bool CanLeave { get { return true; } }
 
     private void Start()
     {
@@ -254,14 +260,27 @@ public class BattleStage : MonoBehaviour
         }
     }
 
+    // 전투에는 Esc로 닫을 창이 없다.
+    public bool TryCloseScreen()
+    {
+        return false;
+    }
+
+    // 시간 정지와 입력 차단만으로 충분해 따로 할 일이 없다.
+    public void OnPauseChanged(bool isPaused)
+    {
+    }
+
     // 플레이어 이동은 여기서 한 번 시작해 스테이지가 끝날 때까지 돌고, 컷신 동안에는 상태(Idle)로 멈춘다.
     private async UniTask PlayApproachAsync(CancellationToken token)
     {
         _player.ChangeState(UnitState.Move);
         _player.Mover.RunAsync(token).Forget();
+        _canPause = true;
 
         await _introTrigger.WaitForEnterAsync(token);
 
+        _canPause = false;
         _player.ChangeState(UnitState.Idle);
     }
 
@@ -303,10 +322,14 @@ public class BattleStage : MonoBehaviour
                 _environmentHazard.RunAsync(_boss.Attacker, battleSource.Token).Forget();
             }
 
+            _canPause = true;
+
             // 먼저 쓰러진 쪽의 순서 번호다. 0은 보스, 1은 플레이어다.
             int defeatedIndex = await UniTask.WhenAny(
                 _boss.Health.WaitForDeathAsync(token),
                 _player.Health.WaitForDeathAsync(token));
+
+            _canPause = false;
 
             battleSource.Cancel();
 
@@ -331,8 +354,11 @@ public class BattleStage : MonoBehaviour
     }
 
     // 연출 중인 보스에게 계속 쏘아 대면 어색해, 쓰러졌다 일어나는 동안 플레이어도 공격·이동·막기를 멈춘다.
+    // 쓰러졌다 일어나는 연출은 실제 시간으로 돌아, 그동안은 멈추지 않는다.
     private void HandleBossRevivalChanged(bool isReviving)
     {
+        _canPause = false == isReviving;
+
         if (_player.Health.IsDead)
         {
             return;

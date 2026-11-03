@@ -1065,6 +1065,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapSpawner
   _galleryPrefab: {fileID: 5810000000000000000, guid: 289285181b0049d18d617d1529740a2a, type: 3}
+  _pauseAction: {fileID: 150020700587333932, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  _pauseMenuPrefab: {fileID: 1836262863735427526, guid: 3d5a64cf4c6d4302bd00a6a614241cfc, type: 3}
   _titlePrefab: {fileID: 2802402650152354962, guid: e77f8c2e1f13fdd4893329dee3f708ee, type: 3}
   _titleBgm: {fileID: 0}
   _titleBgmFadeDuration: 1

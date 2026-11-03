@@ -51,6 +51,11 @@ public class TimeScaleManager
     private int _activeSlowMotionTicket;
     private int _lastSlowMotionTicket;
 
+    // 걸려 있는 동안은 히트 스톱·슬로 모션보다 앞서 시간을 멈춘다.
+    private bool _isPaused;
+
+    public bool IsPaused { get { return _isPaused; } }
+
     public void Init(CancellationToken token)
     {
         _token = token;
@@ -91,9 +96,18 @@ public class TimeScaleManager
         return new SlowMotionScope(this, _activeSlowMotionTicket);
     }
 
+    // 일시정지 메뉴를 연 쪽이 부른다. 멈춘 동안 건 슬로 모션은 그대로 두어, 풀면 그 배율로 돌아간다.
+    public void SetPaused(bool isPaused)
+    {
+        _isPaused = isPaused;
+
+        ApplyTimeScale();
+    }
+
     // 이전 슬로 모션의 using 블록이 나중에 끝나도 번호표가 0이라 다시 건드리지 않는다.
     public void ResetToNormal()
     {
+        _isPaused = false;
         _hitStopEndTime = 0f;
         _isHitStopping = false;
         _activeSlowMotionTicket = 0;
@@ -143,7 +157,11 @@ public class TimeScaleManager
     // 슬로 모션 중에 맞으면 히트 스톱 배율이 슬로 모션보다 빠를 수 있어, 둘 중 느린 쪽을 쓴다.
     private void ApplyTimeScale()
     {
-        if (_isHitStopping)
+        if (_isPaused)
+        {
+            Time.timeScale = 0f;
+        }
+        else if (_isHitStopping)
         {
             Time.timeScale = Mathf.Min(_hitStopTimeScale, _slowTimeScale);
         }

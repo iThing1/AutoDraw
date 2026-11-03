@@ -3,10 +3,9 @@ using DG.Tweening;
 using System;
 using System.Threading;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 // 갤러리 맵. 맵 사이 이동(암전·생성)은 MapSpawner가 맡고, 여기는 갤러리 안의 일만 한다.
-public class GalleryStage : MonoBehaviour
+public class GalleryStage : MonoBehaviour, IPausable
 {
     [Header("플레이어")]
     [SerializeField] private GalleryPlayer _playerPrefab;
@@ -24,10 +23,6 @@ public class GalleryStage : MonoBehaviour
     [SerializeField, Min(0f)] private float _returnDuration = 1.2f;
     [SerializeField] private Ease _returnEase = Ease.InOutSine;
 
-    [Header("일시정지")]
-    [SerializeField] private InputActionReference _pauseAction;
-    [SerializeField] private PauseMenuUI _pauseMenuPrefab;
-
     [Header("장비")]
     [SerializeField] private LoadoutView _loadoutViewPrefab;
 
@@ -40,7 +35,6 @@ public class GalleryStage : MonoBehaviour
 
     private GalleryPlayer _player;
     private GalleryHudUI _hud;
-    private PauseMenuUI _pauseMenu;
     // 상호작용으로 연 창(장비, 특성 트리). 한 번에 하나만 연다.
     private Component _screen;
     private GalleryScreenViewModel _screenViewModel;
@@ -50,6 +44,10 @@ public class GalleryStage : MonoBehaviour
 
     // 들어갈 스테이지를 고르면 알린다. 화면을 가리고 스테이지를 만드는 것은 받는 쪽이 한다.
     public event Action<StageData> OnStageChosen;
+
+    // 걸어 다닐 수 있을 때만 멈춘다. 액자로 다가가거나 물러나는 중이나 창이 열린 동안은 조작이 꺼져 있다.
+    public bool CanPause { get { return _player.IsControlEnabled; } }
+    public bool CanLeave { get { return false; } }
 
     // 갤러리를 숨기면 함께 숨도록 플레이어를 갤러리 아래에 만든다.
     private void Awake()
@@ -62,48 +60,12 @@ public class GalleryStage : MonoBehaviour
         _player.SavePose();
 
         _palettes = new GalleryPalettes(GetComponentsInChildren<PaletteItem>(true));
-
-        if (null == _pauseAction)
-        {
-            Debug.LogError("갤러리 : 일시정지 입력(InputActionReference)이 지정되지 않았습니다.");
-        }
-    }
-
-    private void OnEnable()
-    {
-        _pauseAction.Enable();
     }
 
     private void OnDestroy()
     {
         _player.OnFocusChanged -= HandleFocusChanged;
         _player.OnInteract -= HandleInteract;
-    }
-
-    // Esc는 열린 창(설정 창 포함)부터 닫고, 걸어 다닐 수 있을 때만 멈춘다. 액자로 다가가거나 물러나는 중에는 무시한다.
-    private void Update()
-    {
-        if (false == _pauseAction.WasPressedThisFrame())
-        {
-            return;
-        }
-
-        if (null != _screen)
-        {
-            HandleScreenClosed();
-        }
-        else if (null != _pauseMenu)
-        {
-            // 설정 창이 열려 있으면 그것만 닫고 메뉴로 돌아간다.
-            if (false == _pauseMenu.TryCloseSettings())
-            {
-                Resume();
-            }
-        }
-        else if (_player.IsControlEnabled)
-        {
-            Pause();
-        }
     }
 
     public void Show()
@@ -137,7 +99,6 @@ public class GalleryStage : MonoBehaviour
     // 전투의 결과 버튼을 누를 수 있게 커서를 다시 보인다.
     public void Hide()
     {
-        ClosePauseMenu();
         CloseScreen();
         _player.SetControlEnabled(false);
 
@@ -226,43 +187,23 @@ public class GalleryStage : MonoBehaviour
         SetControlEnabled(true);
     }
 
-    // 갤러리에는 시간에 따라 움직이는 것이 플레이어뿐이라, 시간 배율은 두고 조작만 멈춘다.
-    private void Pause()
+    // Esc는 열린 창(장비, 특성 트리)부터 닫는다.
+    public bool TryCloseScreen()
     {
-        _pauseMenu = GameManager.UI.Open(_pauseMenuPrefab, UILayer.Overlay);
-
-        if (null == _pauseMenu)
+        if (null == _screen)
         {
-            return;
+            return false;
         }
 
-        _pauseMenu.OnResume += Resume;
-
-        GameManager.Sound.PlayUi(UISoundKind.Open);
-        SetControlEnabled(false);
-        SetCursorLocked(false);
+        HandleScreenClosed();
+        return true;
     }
 
-    private void Resume()
+    // 메뉴를 누를 수 있게 조작을 끄고 커서를 보인다.
+    public void OnPauseChanged(bool isPaused)
     {
-        GameManager.Sound.PlayUi(UISoundKind.Close);
-        ClosePauseMenu();
-
-        SetControlEnabled(true);
-        SetCursorLocked(true);
-    }
-
-    private void ClosePauseMenu()
-    {
-        if (null == _pauseMenu)
-        {
-            return;
-        }
-
-        _pauseMenu.OnResume -= Resume;
-        _pauseMenu.TryCloseSettings();
-        GameManager.UI.Close(_pauseMenu);
-        _pauseMenu = null;
+        SetControlEnabled(false == isPaused);
+        SetCursorLocked(false == isPaused);
     }
 
     // 창이 이미 열려 있거나 열리지 않으면 만든 ViewModel의 구독을 바로 푼다.

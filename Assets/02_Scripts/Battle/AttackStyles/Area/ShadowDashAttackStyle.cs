@@ -2,6 +2,7 @@ using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 종이를 가로지르는 길 몇 개를 한꺼번에 예고하고, 먹 그림자가 차례로 그 길을 따라 돌진한다.
 [CreateAssetMenu(fileName = "ShadowDashAttackStyle", menuName = "Scriptable Objects/AttackStyle/ShadowDash")]
@@ -38,17 +39,24 @@ public class ShadowDashAttackStyle : AttackStyle
 
     public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        List<UniTask> dashes = new List<UniTask>(_dashCount);
+        List<UniTask> dashes = ListPool<UniTask>.Get();
         Vector3 targetPoint = context.Target.GetAimPoint(Vector3.zero);
 
-        for (int i = 0; i < _dashCount; i++)
+        try
         {
-            LinePlacement line = LinePlacement.PickNear(targetPoint, _offsetRange);
+            for (int i = 0; i < _dashCount; i++)
+            {
+                LinePlacement line = LinePlacement.PickNear(targetPoint, _offsetRange);
 
-            dashes.Add(DashAsync(context, line, _warnDuration + _dashInterval * i, gaugeGain, token));
+                dashes.Add(DashAsync(context, line, _warnDuration + _dashInterval * i, gaugeGain, token));
+            }
+
+            await UniTask.WhenAll(dashes);
         }
-
-        await UniTask.WhenAll(dashes);
+        finally
+        {
+            ListPool<UniTask>.Release(dashes);
+        }
     }
 
     private async UniTask DashAsync(AttackContext context, LinePlacement line, float warnDuration, float gaugeGain, CancellationToken token)

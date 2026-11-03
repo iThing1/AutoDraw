@@ -111,15 +111,12 @@ public class ReflectOrbGimmick : PunishingBossGimmick
                 return false;
             }
 
+            // 대시로 피한 것(Dodged)은 비행이 닿는 순간 이미 알렸다.
             if (FlightOutcome.Blocked == flight.Outcome)
             {
                 target.NotifyBlocked(flight.LandingPoint);
             }
-            else if (FlightOutcome.Dodged == flight.Outcome)
-            {
-                target.NotifyDodged(flight.LandingPoint);
-            }
-            else
+            else if (FlightOutcome.Dodged != flight.Outcome)
             {
                 return false;
             }

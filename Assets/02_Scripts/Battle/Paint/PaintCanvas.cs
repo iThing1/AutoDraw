@@ -264,7 +264,7 @@ public class PaintCanvas : MonoBehaviour
             }
 
             // 물감에 덮여 안 보이던 잉크는 흐려지는 모습을 띄우면 물감 위로 튀어 보이므로 그냥 지운다.
-            bool wasVisible = IsInkExposed(ink);
+            bool wasVisible = IsExposed(ink);
 
             _inkMarks.RemoveAt(i);
             _marks.Remove(ink);
@@ -318,11 +318,11 @@ public class PaintCanvas : MonoBehaviour
         }
     }
 
-    // 잉크 웅덩이가 꿈틀하는 연출. 구운 그림은 움직일 수 없어 같은 모양을 위에 잠깐 띄워 흔든다.
-    // 물감에 덮인 잉크는 띄우면 물감 위로 튀어 보이므로 흔들지 않는다.
+    // 웅덩이가 꿈틀하는 연출. 구운 그림은 움직일 수 없어 같은 모양을 위에 잠깐 띄워 흔든다.
+    // 반대편 자국에 덮인 자국은 띄우면 그 위로 튀어 보이므로 흔들지 않는다.
     public void Twitch(PaintMark mark, float strength, float duration, bool isRealtime)
     {
-        if (null == mark.Sprite || false == IsInkExposed(mark))
+        if (null == mark.Sprite || false == IsExposed(mark))
         {
             return;
         }
@@ -331,12 +331,18 @@ public class PaintCanvas : MonoBehaviour
     }
 
     // 플레이어 쪽 물감(잉크가 아닌 자국)이 이 자리에 칠해져 있는지.
-    // 기믹 때 한 번씩만 불려, 자국 수만큼 도는 비용은 문제가 되지 않는다.
     public bool IsPaintedAt(Vector3 position, float radius)
+    {
+        return HasMarkAt(position, radius, false);
+    }
+
+    // 잉크(isInk) 또는 물감 자국이 이 자리에 있는지.
+    // 기믹·스킬에서 가끔씩만 불려, 자국 수만큼 도는 비용은 문제가 되지 않는다.
+    public bool HasMarkAt(Vector3 position, float radius, bool isInk)
     {
         for (int i = 0; i < _marks.Count; i++)
         {
-            if (false == _marks[i].IsInk && _marks[i].Overlaps(position, radius))
+            if (isInk == _marks[i].IsInk && _marks[i].Overlaps(position, radius))
             {
                 return true;
             }
@@ -345,19 +351,20 @@ public class PaintCanvas : MonoBehaviour
         return false;
     }
 
-    // 아직 캔버스에 남은 잉크이고, 그 뒤에 찍힌 플레이어 물감에 가운데가 덮이지 않았는지.
-    public bool IsInkExposed(PaintMark ink)
+    // 아직 캔버스에 남은 자국이고, 그 뒤에 찍힌 반대편 자국(잉크면 물감, 물감이면 잉크)에 가운데가 덮이지 않았는지.
+    // 위 장에는 찍힌 순서대로 그려, 나중에 찍힌 반대편 자국이 그 위를 덮는다.
+    public bool IsExposed(PaintMark mark)
     {
-        if (null == ink || false == ink.IsInk || ink.IsRemoved)
+        if (null == mark || mark.IsRemoved)
         {
             return false;
         }
 
-        Vector3 center = ink.Position;
+        Vector3 center = mark.Position;
 
-        for (int i = _marks.IndexOf(ink) + 1; i < _marks.Count; i++)
+        for (int i = _marks.IndexOf(mark) + 1; i < _marks.Count; i++)
         {
-            if (false == _marks[i].IsInk && _marks[i].Overlaps(center, 0f))
+            if (mark.IsInk != _marks[i].IsInk && _marks[i].Overlaps(center, 0f))
             {
                 return false;
             }

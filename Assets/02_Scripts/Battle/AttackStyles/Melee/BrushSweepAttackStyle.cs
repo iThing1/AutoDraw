@@ -133,7 +133,7 @@ public class BrushSweepAttackStyle : AttackStyle
             return;
         }
 
-        LineRenderer ring = GameManager.Pool.Spawn(_ringPrefab.gameObject, center, Quaternion.identity).GetComponent<LineRenderer>();
+        LineRenderer ring = GameManager.Pool.Spawn(_ringPrefab, center, Quaternion.identity);
         ring.widthMultiplier = _ringWidth;
 
         AttackTarget target = context.Target;
@@ -149,7 +149,8 @@ public class BrushSweepAttackStyle : AttackStyle
 
                 DrawRing(ring, radius);
 
-                if (false == hasStruck && IsRingPassing(target, center, previousRadius, radius))
+                // 대시로 지나가는 동안 걸친 고리는 맞힌 셈으로 치지 않는다.
+                if (false == hasStruck && IsRingPassing(target, center, previousRadius, radius) && false == target.TryDodge())
                 {
                     hasStruck = true;
                     context.Damage.Strike(_ringHit, target.GetAimPoint(Vector3.zero), gaugeGain);

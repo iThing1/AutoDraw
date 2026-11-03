@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 몸 양옆에 작은 포대를 꺼내 일제히 여러 번 쏜 뒤, 몸통에서 큰 한 발로 마무리한다.
 [CreateAssetMenu(fileName = "BarrageAttackStyle", menuName = "Scriptable Objects/AttackStyle/Barrage")]
@@ -47,7 +48,9 @@ public class BarrageAttackStyle : AttackStyle
 
         GameManager.Sound.PlaySfx(_turretAppearSound);
 
-        List<Transform> turrets = SpawnTurrets(context.Owner.transform);
+        List<Transform> turrets = ListPool<Transform>.Get();
+
+        SpawnTurrets(context.Owner.transform, turrets);
         AimTurrets(turrets, context.Target);
 
         try
@@ -74,12 +77,12 @@ public class BarrageAttackStyle : AttackStyle
         finally
         {
             DespawnTurrets(turrets);
+            ListPool<Transform>.Release(turrets);
         }
     }
 
-    private List<Transform> SpawnTurrets(Transform owner)
+    private void SpawnTurrets(Transform owner, List<Transform> turrets)
     {
-        List<Transform> turrets = new List<Transform>(_turretOffsets.Length);
         Vector3 turretScale = _turretPrefab.transform.localScale;
 
         for (int i = 0; i < _turretOffsets.Length; i++)
@@ -91,8 +94,6 @@ public class BarrageAttackStyle : AttackStyle
 
             turrets.Add(turret);
         }
-
-        return turrets;
     }
 
     // 포신 그림이 오른쪽(+x)을 향하므로, 쏘기 전에 목표 쪽으로 돌린다.

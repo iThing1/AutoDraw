@@ -20,6 +20,15 @@ public class CloneSkillAttackStyle : AttackStyle
     [SerializeField, Min(0f)] private float _fadeDuration = 0.3f;
     [SerializeField] private ImpactSettings _summonImpact = new();
 
+    // 처음 쓸 때 유닛 하나를 통째로 만드느라 끊기지 않도록 미리 만들어 둔다. 한 번에 하나만 남는다(같은 스킬은 끝나야 다시 쓴다).
+    public override void Prewarm()
+    {
+        if (null != _clonePrefab)
+        {
+            GameManager.Pool.Prewarm(_clonePrefab.gameObject, 1);
+        }
+    }
+
     public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         if (null == _clonePrefab)
@@ -29,7 +38,7 @@ public class CloneSkillAttackStyle : AttackStyle
         }
 
         BattleUnit player = context.Owner;
-        BattleUnit clone = Instantiate(_clonePrefab, GetFollowPoint(player), Quaternion.identity);
+        BattleUnit clone = GameManager.Pool.Spawn(_clonePrefab, GetFollowPoint(player), Quaternion.identity);
 
         // 복제체의 공격은 따로 끊어, 시간이 다 되면 복제체만 멈춘다.
         using (CancellationTokenSource attackSource = CancellationTokenSource.CreateLinkedTokenSource(token))
@@ -53,9 +62,12 @@ public class CloneSkillAttackStyle : AttackStyle
             {
                 attackSource.Cancel();
 
+                // 다음에 다시 꺼낼 때 지난 상태가 남지 않게, 멈춤을 풀고 가만히 세운 채 돌려준다. 체력은 꺼낼 때 SetStats가 다시 채운다.
                 if (null != clone)
                 {
-                    Destroy(clone.gameObject);
+                    clone.Attacker.Resume();
+                    clone.ChangeState(UnitState.Idle);
+                    GameManager.Pool.Despawn(clone.gameObject);
                 }
             }
         }

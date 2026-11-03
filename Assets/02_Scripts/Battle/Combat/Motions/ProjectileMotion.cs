@@ -89,11 +89,16 @@ public abstract class ProjectileMotion : MonoBehaviour
         {
             _contactOutcome = FlightOutcome.Blocked;
         }
-        else if (_target.IsTouching(contactPoint, _radius))
+        else if (false == _target.IsTouching(contactPoint, _radius))
+        {
+            return false;
+        }
+        else if (false == _target.TryDodge(contactPoint))
         {
             _contactOutcome = FlightOutcome.Arrived;
         }
-        else if (_endsOnDodge && _target.IsDodgedAt(contactPoint, _radius))
+        // 대시로 피했으면 몸을 지나가고, 피하면 멈추는 탄만 그 자리에서 끝난다.
+        else if (_endsOnDodge)
         {
             _contactOutcome = FlightOutcome.Dodged;
         }

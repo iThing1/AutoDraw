@@ -214,7 +214,8 @@ public class OrbitAttackStyle : AttackStyle
                     Vector3 previous = orbTransform.position;
                     orbTransform.position = Vector3.MoveTowards(previous, target.GetAimPoint(Vector3.zero), flySpeed * Time.deltaTime);
 
-                    if (false == target.IsTouchingSegment(previous, orbTransform.position, hitRadius))
+                    // 대시로 피하는 동안에는 몸을 지나 계속 쫓는다.
+                    if (false == target.IsTouchingSegment(previous, orbTransform.position, hitRadius) || target.TryDodge(orbTransform.position))
                     {
                         return false;
                     }

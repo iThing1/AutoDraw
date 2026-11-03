@@ -2,6 +2,7 @@ using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 플레이어 옆에 세로로 접는 선을 긋고, 플레이어 반대편에 먹 방울을 떨어뜨린 뒤 종이를 접어 같은 모양을 플레이어 쪽에 찍는다.
 // 반대편에 떨어진 모양을 보고 비어 있던 자리의 거울 자리로 피한다.
@@ -96,9 +97,21 @@ public class DecalcomanieAttackStyle : AttackStyle
     }
 
     // 되감으면 접어서 찍혔던 자리에 먼저 떨어지고, 종이를 편 뒤 처음 방울 자리에 찍힌다.
-    private UniTask RewindAsync(AttackContext context, Vector3 foldCenter, List<Vector3> drops, InkTint tint, float gaugeGain, CancellationToken token)
+    private async UniTask RewindAsync(AttackContext context, Vector3 foldCenter, List<Vector3> drops, InkTint tint, float gaugeGain,
+        CancellationToken token)
     {
-        return PlayAsync(context, foldCenter, Mirror(foldCenter.x, drops), tint, gaugeGain, token);
+        List<Vector3> mirrored = ListPool<Vector3>.Get();
+
+        try
+        {
+            Mirror(foldCenter.x, drops, mirrored);
+
+            await PlayAsync(context, foldCenter, mirrored, tint, gaugeGain, token);
+        }
+        finally
+        {
+            ListPool<Vector3>.Release(mirrored);
+        }
     }
 
     private async UniTask PlayAsync(AttackContext context, Vector3 foldCenter, List<Vector3> drops, InkTint tint, float gaugeGain,
@@ -109,20 +122,27 @@ public class DecalcomanieAttackStyle : AttackStyle
         await Telegraph.PlayLineAsync(_foldTelegraphPrefab, foldCenter, VERTICAL_ANGLE, _foldLength, _foldWidth, tint.Apply(_telegraphColor), _foldDuration,
             token);
 
-        await DropAllAsync(context, Mirror(foldCenter.x, drops), _stampWarnDuration, tint, gaugeGain, token);
+        List<Vector3> mirrored = ListPool<Vector3>.Get();
+
+        try
+        {
+            Mirror(foldCenter.x, drops, mirrored);
+
+            await DropAllAsync(context, mirrored, _stampWarnDuration, tint, gaugeGain, token);
+        }
+        finally
+        {
+            ListPool<Vector3>.Release(mirrored);
+        }
     }
 
-    // 넘긴 목록은 기록에도 쓰이므로 고치지 않고 새 목록에 담는다.
-    private static List<Vector3> Mirror(float foldX, List<Vector3> points)
+    // 넘긴 목록은 기록에도 쓰이므로 고치지 않고 mirrored에 담는다.
+    private static void Mirror(float foldX, List<Vector3> points, List<Vector3> mirrored)
     {
-        List<Vector3> mirrored = new List<Vector3>(points.Count);
-
         for (int i = 0; i < points.Count; i++)
         {
             mirrored.Add(new Vector3(2f * foldX - points[i].x, points[i].y, points[i].z));
         }
-
-        return mirrored;
     }
 
     // 한 묶음은 같은 순간에 떨어져, 방울이 겹쳐도 한 번만 맞고 막기 한 번으로 막는다.
@@ -130,34 +150,30 @@ public class DecalcomanieAttackStyle : AttackStyle
     private async UniTask DropAllAsync(AttackContext context, List<Vector3> points, float warnDuration, InkTint tint, float gaugeGain,
         CancellationToken token)
     {
-        List<UniTask> telegraphs = new List<UniTask>(points.Count);
-        Color telegraphColor = tint.Apply(_telegraphColor);
         Vector3 center = Vector3.zero;
 
         for (int i = 0; i < points.Count; i++)
         {
-            telegraphs.Add(Telegraph.PlayCircleAsync(_dropTelegraphPrefab, points[i], _dropRadius, telegraphColor, warnDuration, token));
             center += points[i];
         }
 
-        await UniTask.WhenAll(telegraphs);
+        await Telegraph.PlayCirclesAsync(_dropTelegraphPrefab, points, _dropRadius, tint.Apply(_telegraphColor), warnDuration, token);
 
         ImpactPlayer.Play(_impact, center / points.Count, tint.Apply(_impact.EffectColor));
 
-        bool hasStruck = false;
+        if (context.Target.IsInAnyBlast(points, _dropRadius))
+        {
+            context.Damage.Strike(_hit, context.Target.GetAimPoint(Vector3.zero), gaugeGain);
+        }
+
+        if (null == _groundSplat || null == context.PaintCanvas)
+        {
+            return;
+        }
 
         for (int i = 0; i < points.Count; i++)
         {
-            if (false == hasStruck && context.Target.IsInBlast(points[i], _dropRadius))
-            {
-                hasStruck = true;
-                context.Damage.Blast(_hit, points[i], _dropRadius, gaugeGain);
-            }
-
-            if (null != _groundSplat && null != context.PaintCanvas)
-            {
-                context.PaintCanvas.LeaveSplats(points[i], context.Damage.PickColor(), true, _groundSplat);
-            }
+            context.PaintCanvas.LeaveSplats(points[i], context.Damage.PickColor(), true, _groundSplat);
         }
     }
 }

@@ -184,7 +184,8 @@ public class TrajectoryMotion : ProjectileMotion
             return FlightOutcome.Canceled;
         }
 
-        if (null != Target && false == Target.IsHit(landingPoint))
+        // 비켜났거나 대시로 피했으면 빗나가 지나간다.
+        if (null != Target && (false == Target.IsInHitRadius(landingPoint) || Target.TryDodge(landingPoint)))
         {
             return FlightOutcome.Missed;
         }

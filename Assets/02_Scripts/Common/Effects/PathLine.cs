@@ -7,7 +7,7 @@ public static class PathLine
 {
     public static LineRenderer Spawn(LineRenderer prefab, float width, Color color)
     {
-        LineRenderer line = GameManager.Pool.Spawn(prefab.gameObject, Vector3.zero, Quaternion.identity).GetComponent<LineRenderer>();
+        LineRenderer line = GameManager.Pool.Spawn(prefab, Vector3.zero, Quaternion.identity);
 
         line.positionCount = 0;
         line.widthMultiplier = width;

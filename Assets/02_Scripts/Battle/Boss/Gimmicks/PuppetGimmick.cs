@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 꼭두각시. 플레이어와 보스 사이에 연필 실이 이어지고, 흉내쟁이 보스가 플레이어의 움직임을 같은 방향·같은 거리로 따라 한다(대시도 따라 한다).
 // 판에 빈 액자가 하나씩 걸리고, 플레이어가 움직여 보스를 액자 안에 잠시 머물게 하면 액자가 닫히며 보스를 가둔다.
@@ -81,8 +82,8 @@ public class PuppetGimmick : PunishingBossGimmick
         }
 
         LineRenderer thread = PathLine.Spawn(_threadPrefab, _threadWidth, _threadColor);
-        List<GimmickFrame> frames = new List<GimmickFrame>(_requiredCaptures);
-        List<UniTask> fades = new List<UniTask>(_requiredCaptures * GimmickFrame.SPRITE_COUNT);
+        List<GimmickFrame> frames = ListPool<GimmickFrame>.Get();
+        List<UniTask> fades = ListPool<UniTask>.Get();
 
         thread.positionCount = 2;
 
@@ -120,6 +121,9 @@ public class PuppetGimmick : PunishingBossGimmick
                 {
                     frames[i].Despawn();
                 }
+
+                ListPool<GimmickFrame>.Release(frames);
+                ListPool<UniTask>.Release(fades);
             }
         }
     }
@@ -251,8 +255,7 @@ public class PuppetGimmick : PunishingBossGimmick
     {
         AttackTarget target = context.Target;
         Vector3 center = target.FollowTransform.position;
-        List<Vector3> drops = new List<Vector3>(_dropCount);
-        List<UniTask> telegraphs = new List<UniTask>(_dropCount);
+        List<Vector3> drops = ListPool<Vector3>.Get();
 
         drops.Add(center);
 
@@ -261,29 +264,23 @@ public class PuppetGimmick : PunishingBossGimmick
             drops.Add(center + (Vector3)(UnityEngine.Random.insideUnitCircle * _spreadRadius));
         }
 
-        for (int i = 0; i < drops.Count; i++)
-        {
-            telegraphs.Add(Telegraph.PlayCircleAsync(_dropPrefab, drops[i], _dropRadius, _telegraphColor, _warnDuration, token));
-        }
-
         try
         {
-            await UniTask.WhenAll(telegraphs);
+            await Telegraph.PlayCirclesAsync(_dropPrefab, drops, _dropRadius, _telegraphColor, _warnDuration, token);
+
+            ImpactPlayer.Play(_dropImpact, center);
+
+            if (target.IsInAnyBlast(drops, _dropRadius))
+            {
+                context.Damage.Strike(_dropHit, target.GetAimPoint(Vector3.zero), 0f);
+            }
         }
         catch (OperationCanceledException)
         {
-            return;
         }
-
-        ImpactPlayer.Play(_dropImpact, center);
-
-        for (int i = 0; i < drops.Count; i++)
+        finally
         {
-            if (target.IsInBlast(drops[i], _dropRadius))
-            {
-                context.Damage.Strike(_dropHit, target.GetAimPoint(Vector3.zero), 0f);
-                return;
-            }
+            ListPool<Vector3>.Release(drops);
         }
     }
 }

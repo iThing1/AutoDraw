@@ -35,11 +35,14 @@ public static class ProjectileFlight
             SetupTrail(trail, shot, color);
         }
 
-        FlightResult result = await projectile.GetOrAddComponent<TrajectoryMotion>().FlyAsync(shot, trajectory, start, end, target, token);
-
-        GameManager.Pool.Despawn(projectile);
-
-        return result;
+        try
+        {
+            return await projectile.GetOrAddComponent<TrajectoryMotion>().FlyAsync(shot, trajectory, start, end, target, token);
+        }
+        finally
+        {
+            GameManager.Pool.Despawn(projectile);
+        }
     }
 
     private static void SetupTrail(TrailRenderer trail, ShotSettings shot, Color color)

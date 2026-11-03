@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 보스 자신을 소실점으로 삼아 목표 쪽으로 좁은 쐐기 모양의 원근선 두 줄을 연필로 긋고, 소실점에서 먹 덩어리가 그 사이를 따라 튀어나온다.
 // 먹 덩어리는 원근처럼 멀어질수록(목표에 다가올수록) 커지며 빨라져, 쐐기 밖으로 비켜서야 피한다. 여러 번 연달아 다시 겨눈다.
@@ -54,25 +55,32 @@ public class VanishingPointAttackStyle : AttackStyle
     // 쐐기는 그을 때마다 목표의 지금 자리로 다시 겨눈다.
     public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        List<UniTask> rushes = new List<UniTask>(_rushCount);
+        List<UniTask> rushes = ListPool<UniTask>.Get();
 
-        for (int i = 0; i < _rushCount; i++)
+        try
         {
-            Vector3 point = context.Owner.Body.position;
-            Vector3 toTarget = context.Target.GetAimPoint(Vector3.zero) - point;
-            float angle = Geometry2D.ToAngle(toTarget);
-
-            await PlayGuidesAsync(point, angle, token);
-
-            rushes.Add(RushAsync(context, point, angle, gaugeGain, token));
-
-            if (i < _rushCount - 1)
+            for (int i = 0; i < _rushCount; i++)
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(_rushInterval), cancellationToken: token);
-            }
-        }
+                Vector3 point = context.Owner.Body.position;
+                Vector3 toTarget = context.Target.GetAimPoint(Vector3.zero) - point;
+                float angle = Geometry2D.ToAngle(toTarget);
 
-        await UniTask.WhenAll(rushes);
+                await PlayGuidesAsync(point, angle, token);
+
+                rushes.Add(RushAsync(context, point, angle, gaugeGain, token));
+
+                if (i < _rushCount - 1)
+                {
+                    await UniTask.Delay(TimeSpan.FromSeconds(_rushInterval), cancellationToken: token);
+                }
+            }
+
+            await UniTask.WhenAll(rushes);
+        }
+        finally
+        {
+            ListPool<UniTask>.Release(rushes);
+        }
     }
 
     // 소실점에서 쐐기 양쪽 가장자리를 따라 원근선 두 줄을 긋는다.
@@ -123,7 +131,7 @@ public class VanishingPointAttackStyle : AttackStyle
                 block.transform.position = center;
                 block.transform.localScale = new Vector3(size, size, 1f);
 
-                if (false == hasStruck && target.IsTouchingSegment(previous, center, size * 0.5f))
+                if (false == hasStruck && target.IsTouchingSegment(previous, center, size * 0.5f) && false == target.TryDodge())
                 {
                     hasStruck = true;
                     context.Damage.Strike(_hit, target.GetAimPoint(Vector3.zero), gaugeGain);

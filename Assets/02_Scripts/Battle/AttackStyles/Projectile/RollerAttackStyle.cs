@@ -74,7 +74,8 @@ public class RollerAttackStyle : AttackStyle
                     carpet.SetLength(travelled);
                 }
 
-                bool isTouching = context.Target.IsTouchingSegment(previous, roller.transform.position, _width * 0.5f);
+                // 대시로 지나가는 동안은 닿지 않은 것으로 쳐, 피한 뒤 다시 닿으면 새로 맞는다.
+                bool isTouching = context.Target.IsTouchingSegment(previous, roller.transform.position, _width * 0.5f) && false == context.Target.TryDodge();
 
                 if (isTouching && false == wasTouching)
                 {

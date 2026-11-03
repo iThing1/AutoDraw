@@ -2,6 +2,7 @@ using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 잉크 팔에서 버티기. 종이 곳곳의 먹물 웅덩이에서 그림자 팔이 플레이어를 앞질러 노리며 뻗어 나온다. 끝까지 버티면 그로기로 이어진다.
 [CreateAssetMenu(fileName = "InkArmsGimmick", menuName = "Scriptable Objects/Boss/Gimmick/InkArms")]
@@ -22,7 +23,7 @@ public class InkArmsGimmick : BossGimmick
             return true;
         }
 
-        List<PaintMark> pools = new List<PaintMark>(_inkArms.PoolCount);
+        List<PaintMark> pools = ListPool<PaintMark>.Get();
 
         try
         {
@@ -46,6 +47,8 @@ public class InkArmsGimmick : BossGimmick
             {
                 context.Hands.ReturnToRest();
             }
+
+            ListPool<PaintMark>.Release(pools);
         }
 
         return true;

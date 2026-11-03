@@ -3,6 +3,7 @@ using DG.Tweening;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 목표 둘레에 네모 액자를 그리고, 테두리가 먹으로 차오르며 안쪽으로 조여 든다. 보스 반대쪽 변의 틈으로 빠져나가거나 대시로 테두리를 뚫는다.
 // 다 조인 뒤 남은 안쪽이 터져, 가운데에 버티면 맞는다.
@@ -119,15 +120,14 @@ public class FrameTrapAttackStyle : AttackStyle
     private async UniTask PlayAsync(AttackContext context, Layout layout, bool isReversed, InkTint tint, float gaugeGain, CancellationToken token)
     {
         Vector3 center = layout.Center;
-        List<Edge> edges = new List<Edge>(MAX_EDGE_COUNT);
-
-        BuildEdges(center, isReversed ? _endSize : _startSize, layout.GapSide, isReversed ? layout.Spin : 0f, edges);
-        await PlayTelegraphAsync(edges, tint.Apply(_telegraphColor), token);
-
-        List<SpriteRenderer> sprites = new List<SpriteRenderer>(MAX_EDGE_COUNT);
+        List<Edge> edges = ListPool<Edge>.Get();
+        List<SpriteRenderer> sprites = ListPool<SpriteRenderer>.Get();
 
         try
         {
+            BuildEdges(center, isReversed ? _endSize : _startSize, layout.GapSide, isReversed ? layout.Spin : 0f, edges);
+            await PlayTelegraphAsync(edges, tint.Apply(_telegraphColor), token);
+
             // 작은 액자는 틈 변이 사라져 조각이 적을 수 있어, 그림은 가장 큰 액자의 조각 수만큼 꺼내 둔다.
             BuildEdges(center, Mathf.Max(_startSize, _endSize), layout.GapSide, 0f, edges);
 
@@ -158,33 +158,50 @@ public class FrameTrapAttackStyle : AttackStyle
                 sprites[i].enabled = true;
                 PooledSprite.Despawn(sprites[i]);
             }
+
+            ListPool<Edge>.Release(edges);
+            ListPool<SpriteRenderer>.Release(sprites);
         }
     }
 
     // 숨긴 조각도 함께 옅어져 다시 보일 일은 없다.
     private async UniTask FadeEdgesAsync(List<SpriteRenderer> sprites, CancellationToken token)
     {
-        List<UniTask> fades = new List<UniTask>(sprites.Count);
+        List<UniTask> fades = ListPool<UniTask>.Get();
 
-        for (int i = 0; i < sprites.Count; i++)
+        try
         {
-            fades.Add(sprites[i].DOFade(0f, _fadeDuration).ToUniTaskKillOnCancel(token));
-        }
+            for (int i = 0; i < sprites.Count; i++)
+            {
+                fades.Add(sprites[i].DOFade(0f, _fadeDuration).ToUniTaskKillOnCancel(token));
+            }
 
-        await UniTask.WhenAll(fades);
+            await UniTask.WhenAll(fades);
+        }
+        finally
+        {
+            ListPool<UniTask>.Release(fades);
+        }
     }
 
     private async UniTask PlayTelegraphAsync(List<Edge> edges, Color telegraphColor, CancellationToken token)
     {
-        List<UniTask> telegraphs = new List<UniTask>(edges.Count);
+        List<UniTask> telegraphs = ListPool<UniTask>.Get();
 
-        for (int i = 0; i < edges.Count; i++)
+        try
         {
-            telegraphs.Add(Telegraph.PlayLineAsync(_telegraphPrefab, edges[i].Center, edges[i].Angle, edges[i].Length, _edgeWidth, telegraphColor,
-                _warnDuration, token));
-        }
+            for (int i = 0; i < edges.Count; i++)
+            {
+                telegraphs.Add(Telegraph.PlayLineAsync(_telegraphPrefab, edges[i].Center, edges[i].Angle, edges[i].Length, _edgeWidth, telegraphColor,
+                    _warnDuration, token));
+            }
 
-        await UniTask.WhenAll(telegraphs);
+            await UniTask.WhenAll(telegraphs);
+        }
+        finally
+        {
+            ListPool<UniTask>.Release(telegraphs);
+        }
     }
 
     private void Burst(AttackContext context, Vector3 center, InkTint tint, float gaugeGain)
@@ -221,7 +238,8 @@ public class FrameTrapAttackStyle : AttackStyle
                 }
             }
 
-            if (false == hasStruck && IsTouchingAny(target, edges))
+            // 대시로 테두리를 뚫는 동안 닿은 것은 맞힌 셈으로 치지 않는다.
+            if (false == hasStruck && IsTouchingAny(target, edges) && false == target.TryDodge())
             {
                 hasStruck = true;
                 context.Damage.Strike(_edgeHit, target.GetAimPoint(Vector3.zero), gaugeGain);

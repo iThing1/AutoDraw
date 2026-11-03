@@ -14,9 +14,19 @@ public class PlayerSetup : MonoBehaviour
 
         GetComponent<BattleUnit>().SetStats(stats);
         GetComponent<PlayerAttack>().Setup(loadout, stats, tables, assets);
-        GetComponent<PlayerGuard>().Setup(loadout.Utility, stats, assets);
-        GetComponent<PlayerDash>().Setup(loadout.Utility, stats, assets);
+        SetupUtilities(loadout.Utility, stats, assets);
         GetComponent<PlayerConsumable>().Setup(loadout.ConsumableId, stats, tables, assets);
         GetComponent<PlayerInputMover>().Setup(stats);
+    }
+
+    // 붙어 있는 유틸리티마다 넘기면, 끼운 종류만 켜지고 나머지는 스스로 꺼진다.
+    private void SetupUtilities(UtilityType utility, PlayerStats stats, AssetManager assets)
+    {
+        PlayerUtility[] utilities = GetComponents<PlayerUtility>();
+
+        for (int i = 0; i < utilities.Length; i++)
+        {
+            utilities[i].Setup(utility, stats, assets);
+        }
     }
 }

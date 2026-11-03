@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 
 // 유틸리티 키를 누르면 이동 방향으로 짧게 미끄러지고, 그동안 공격이 몸을 지나간다.
 [RequireComponent(typeof(BattleUnit), typeof(PlayerInputMover), typeof(Rigidbody2D))]
-public class PlayerDash : MonoBehaviour
+public class PlayerDash : PlayerUtility
 {
     [SerializeField] private InputActionReference _dashAction;
     [SerializeField] private DashPreset _preset;
@@ -19,16 +19,13 @@ public class PlayerDash : MonoBehaviour
     private SkillGauge _skillGauge;
     private DashState _state;
     private PlayerStats _stats;
-    private Sprite _icon;
-    // 이 전투에서 실제로 대시한 횟수. 보스가 대시를 자주 쓰는 플레이어에게 반응하는 데 쓴다.
-    private int _useCount;
 
     // 유틸리티 칸에 대시를 끼우지 않았으면 null이다.
     public DashState State { get { return _state; } }
-    public int UseCount { get { return _useCount; } }
 
-    public string KeyLabel { get { return _dashAction.GetKeyLabel(); } }
-    public Sprite Icon { get { return _icon; } }
+    public override UtilityType Type { get { return UtilityType.Dash; } }
+    public override bool IsEquipped { get { return null != _state; } }
+    public override string KeyLabel { get { return _dashAction.GetKeyLabel(); } }
 
     private void Awake()
     {
@@ -44,18 +41,10 @@ public class PlayerDash : MonoBehaviour
         }
     }
 
-    // 꺼 두면 입력도 받지 않고, State가 null이라 HUD도 대시 칸을 그리지 않는다.
-    public void Setup(UtilityType utility, PlayerStats stats, AssetManager assets)
+    protected override void Equip(PlayerStats stats)
     {
-        if (false == enabled || UtilityType.Dash != utility)
-        {
-            enabled = false;
-            return;
-        }
-
         _stats = stats;
         _state = new DashState(_preset, stats);
-        _icon = assets.Get<Sprite>(utility.GetIconKey());
 
         if (null != _preset.AfterimagePrefab)
         {
@@ -109,7 +98,7 @@ public class PlayerDash : MonoBehaviour
         }
 
         _state.Begin(Time.time);
-        _useCount++;
+        CountUse();
 
         DashAsync(_mover.GetFacingDirection(), destroyCancellationToken).Forget();
     }

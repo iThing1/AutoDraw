@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 따라 그리기 시험. 보스가 플레이어 자리를 지나는 커다란 8자 연필 선을 긋고, 플레이어는 정해진 시간 안에 그 선을 따라 달리며 칠한다.
 // 지나간 자리에는 플레이어 물감이 찍혀 완성 그림에도 남는다. 연필 선은 시간이 갈수록 옅어져 남은 시간을 보여 주고, 그동안 보스는 조준탄을 쏜다.
@@ -71,11 +72,13 @@ public class TracingTestGimmick : BossGimmick
         }
 
         Polyline path = BuildPath(context.Target);
-        List<Vector3> checkpoints = BuildCheckpoints(path);
+        List<Vector3> checkpoints = ListPool<Vector3>.Get();
         LineRenderer line = PathLine.Spawn(_pathPrefab, _pathWidth, _pathColor);
 
         try
         {
+            BuildCheckpoints(path, checkpoints);
+
             await SketchAsync(path, line, token);
 
             int coveredCount = await TraceAsync(context, line, checkpoints, token);
@@ -97,6 +100,7 @@ public class TracingTestGimmick : BossGimmick
         finally
         {
             PathLine.Despawn(line);
+            ListPool<Vector3>.Release(checkpoints);
         }
     }
 
@@ -125,18 +129,15 @@ public class TracingTestGimmick : BossGimmick
         return new Polyline(points);
     }
 
-    private List<Vector3> BuildCheckpoints(Polyline path)
+    private void BuildCheckpoints(Polyline path, List<Vector3> checkpoints)
     {
         int count = Mathf.Max(1, Mathf.FloorToInt(path.Length / _checkpointSpacing));
-        List<Vector3> checkpoints = new List<Vector3>(count);
         int segment = 0;
 
         for (int i = 0; i < count; i++)
         {
             checkpoints.Add(path.GetPointAt(path.Length * (i + 0.5f) / count, ref segment));
         }
-
-        return checkpoints;
     }
 
     // 펜 끝이 선을 처음부터 끝까지 그어 보인다.

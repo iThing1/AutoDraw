@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 명암을 넣듯 목표 둘레에 평행한 빗금 여러 줄을 한꺼번에 긋는다. 묶음마다 빗금 방향이 돌아가 좁은 빈틈 자리도 바뀐다.
 // 한 묶음은 같은 순간에 그어져, 줄이 겹쳐도 한 번만 맞고 막기 한 번으로 막는다.
@@ -61,21 +62,29 @@ public class HatchingAttackStyle : AttackStyle
     {
         float angle = UnityEngine.Random.Range(0f, 180f);
         float turn = 0.5f > UnityEngine.Random.value ? -1f : 1f;
-        List<Vector3> centers = new List<Vector3>(_lineCount);
-        List<Vector3> crossCenters = new List<Vector3>(_lineCount);
+        List<Vector3> centers = ListPool<Vector3>.Get();
+        List<Vector3> crossCenters = ListPool<Vector3>.Get();
 
-        for (int round = 0; round < _roundCount; round++)
+        try
         {
-            bool isCross = round >= _roundCount - _crossHatchRounds;
-
-            await PlayRoundAsync(context, angle, isCross, centers, crossCenters, gaugeGain, token);
-
-            angle += turn * _angleStep.PickRandom();
-
-            if (round < _roundCount - 1)
+            for (int round = 0; round < _roundCount; round++)
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(_roundInterval), cancellationToken: token);
+                bool isCross = round >= _roundCount - _crossHatchRounds;
+
+                await PlayRoundAsync(context, angle, isCross, centers, crossCenters, gaugeGain, token);
+
+                angle += turn * _angleStep.PickRandom();
+
+                if (round < _roundCount - 1)
+                {
+                    await UniTask.Delay(TimeSpan.FromSeconds(_roundInterval), cancellationToken: token);
+                }
             }
+        }
+        finally
+        {
+            ListPool<Vector3>.Release(centers);
+            ListPool<Vector3>.Release(crossCenters);
         }
     }
 
@@ -98,12 +107,19 @@ public class HatchingAttackStyle : AttackStyle
             crossCenters.Clear();
         }
 
-        List<UniTask> telegraphs = new List<UniTask>(centers.Count + crossCenters.Count);
+        List<UniTask> telegraphs = ListPool<UniTask>.Get();
 
-        AddTelegraphs(centers, angle, telegraphs, token);
-        AddTelegraphs(crossCenters, crossAngle, telegraphs, token);
+        try
+        {
+            AddTelegraphs(centers, angle, telegraphs, token);
+            AddTelegraphs(crossCenters, crossAngle, telegraphs, token);
 
-        await UniTask.WhenAll(telegraphs);
+            await UniTask.WhenAll(telegraphs);
+        }
+        finally
+        {
+            ListPool<UniTask>.Release(telegraphs);
+        }
 
         ImpactPlayer.Play(_impact, aimPoint);
 

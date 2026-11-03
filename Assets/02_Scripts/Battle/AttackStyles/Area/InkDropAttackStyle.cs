@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 먹물 방울을 연달아 떨어뜨려, 플레이어가 움직일 자리를 앞질러 노린다. 떨어진 자리에는 밟으면 느려지는 웅덩이가 남는다.
 [CreateAssetMenu(fileName = "InkDropAttackStyle", menuName = "Scriptable Objects/AttackStyle/InkDrop")]
@@ -51,23 +52,30 @@ public class InkDropAttackStyle : AttackStyle
 
     public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        List<UniTask> drops = new List<UniTask>(_dropCount);
+        List<UniTask> drops = ListPool<UniTask>.Get();
 
-        for (int i = 0; i < _dropCount; i++)
+        try
         {
-            float progress = DOVirtual.EasedValue(0f, 1f, 1 < _dropCount ? i / (float)(_dropCount - 1) : 1f, _speedUpEase);
-            float warnDuration = Mathf.Lerp(_firstWarnDuration, _lastWarnDuration, progress);
-            Vector3 point = context.Target.GetPredictedPoint(warnDuration * _leadRatio);
-
-            drops.Add(DropAsync(context, point, warnDuration, gaugeGain, token));
-
-            if (i < _dropCount - 1)
+            for (int i = 0; i < _dropCount; i++)
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(Mathf.Lerp(_firstInterval, _lastInterval, progress)), cancellationToken: token);
-            }
-        }
+                float progress = DOVirtual.EasedValue(0f, 1f, 1 < _dropCount ? i / (float)(_dropCount - 1) : 1f, _speedUpEase);
+                float warnDuration = Mathf.Lerp(_firstWarnDuration, _lastWarnDuration, progress);
+                Vector3 point = context.Target.GetPredictedPoint(warnDuration * _leadRatio);
 
-        await UniTask.WhenAll(drops);
+                drops.Add(DropAsync(context, point, warnDuration, gaugeGain, token));
+
+                if (i < _dropCount - 1)
+                {
+                    await UniTask.Delay(TimeSpan.FromSeconds(Mathf.Lerp(_firstInterval, _lastInterval, progress)), cancellationToken: token);
+                }
+            }
+
+            await UniTask.WhenAll(drops);
+        }
+        finally
+        {
+            ListPool<UniTask>.Release(drops);
+        }
     }
 
     private async UniTask DropAsync(AttackContext context, Vector3 point, float warnDuration, float gaugeGain, CancellationToken token)
@@ -84,7 +92,7 @@ public class InkDropAttackStyle : AttackStyle
 
         if (null != _puddlePrefab)
         {
-            SlowZone puddle = GameManager.Pool.Spawn(_puddlePrefab.gameObject, point, Quaternion.identity).GetComponent<SlowZone>();
+            SlowZone puddle = GameManager.Pool.Spawn(_puddlePrefab, point, Quaternion.identity);
             puddle.PlayAsync(_puddle, token).Forget();
         }
     }

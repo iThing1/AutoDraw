@@ -5,4 +5,6 @@ public enum UILayer
     Content,
     Loading,
     Overlay,
+    // 일시정지·타이틀 위에 겹쳐 여는 창(설정).
+    Popup,
 }

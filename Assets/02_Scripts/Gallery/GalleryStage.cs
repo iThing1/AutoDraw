@@ -80,7 +80,7 @@ public class GalleryStage : MonoBehaviour
         _player.OnInteract -= HandleInteract;
     }
 
-    // Esc는 열린 창부터 닫고, 걸어 다닐 수 있을 때만 멈춘다. 액자로 다가가거나 물러나는 중에는 무시한다.
+    // Esc는 열린 창(설정 창 포함)부터 닫고, 걸어 다닐 수 있을 때만 멈춘다. 액자로 다가가거나 물러나는 중에는 무시한다.
     private void Update()
     {
         if (false == _pauseAction.WasPressedThisFrame())
@@ -94,7 +94,11 @@ public class GalleryStage : MonoBehaviour
         }
         else if (null != _pauseMenu)
         {
-            Resume();
+            // 설정 창이 열려 있으면 그것만 닫고 메뉴로 돌아간다.
+            if (false == _pauseMenu.TryCloseSettings())
+            {
+                Resume();
+            }
         }
         else if (_player.IsControlEnabled)
         {
@@ -256,6 +260,7 @@ public class GalleryStage : MonoBehaviour
         }
 
         _pauseMenu.OnResume -= Resume;
+        _pauseMenu.TryCloseSettings();
         GameManager.UI.Close(_pauseMenu);
         _pauseMenu = null;
     }

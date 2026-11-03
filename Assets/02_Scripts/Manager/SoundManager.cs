@@ -10,9 +10,13 @@ public class SoundManager
     private int _nextSourceIndex;
 
     private AudioSource _bgmSource;
+    // 효과음과 맞춘 배경음 크기. 설정 볼륨(_bgmScale)은 이 위에 곱한다.
     private float _bgmVolume;
+    private float _bgmScale = 1f;
     private AudioClip _nextBgm;
     private UISoundSettings _uiSounds;
+
+    private float BgmTargetVolume { get { return _bgmVolume * _bgmScale; } }
 
     public void Init(GameObject owner, float bgmVolume, UISoundSettings uiSounds)
     {
@@ -33,6 +37,22 @@ public class SoundManager
         _bgmSource.playOnAwake = false;
         _bgmSource.loop = true;
         _bgmSource.volume = 0f;
+    }
+
+    // 설정 창에서 부른다. 배경음이 페이드 중이면 그 페이드는 예전 크기로 끝나고, 다음에 곡이나 볼륨이 바뀔 때 맞춰진다.
+    public void SetVolumes(float bgmScale, float sfxScale)
+    {
+        _bgmScale = bgmScale;
+
+        for (int i = 0; i < _sfxSources.Length; i++)
+        {
+            _sfxSources[i].volume = sfxScale;
+        }
+
+        if (_bgmSource.isPlaying && false == DOTween.IsTweening(_bgmSource))
+        {
+            _bgmSource.volume = BgmTargetVolume;
+        }
     }
 
     public void PlaySfx(AudioClip clip)
@@ -78,7 +98,7 @@ public class SoundManager
 
         if (clip == _bgmSource.clip && _bgmSource.isPlaying)
         {
-            _bgmSource.DOFade(_bgmVolume, fadeDuration).SetUpdate(true);
+            _bgmSource.DOFade(BgmTargetVolume, fadeDuration).SetUpdate(true);
             return;
         }
 
@@ -87,7 +107,7 @@ public class SoundManager
         DOTween.Sequence()
             .Append(_bgmSource.DOFade(0f, fadeDuration))
             .AppendCallback(SwapBgm)
-            .Append(_bgmSource.DOFade(_bgmVolume, fadeDuration))
+            .Append(_bgmSource.DOFade(BgmTargetVolume, fadeDuration))
             .SetTarget(_bgmSource)
             .SetUpdate(true);
     }

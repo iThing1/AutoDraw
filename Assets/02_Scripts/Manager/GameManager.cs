@@ -14,6 +14,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     public static BattleCameraRig CameraRig { get { return Instance._cameraRig; } }
     public static UIManager UI { get { return Instance._uiManager; } }
     public static SoundManager Sound { get { return Instance._soundManager; } }
+    public static SettingsManager Settings { get { return Instance._settingsManager; } }
     public static PoolManager Pool { get { return Instance._poolManager; } }
     public static TimeScaleManager TimeScale { get { return Instance._timeScaleManager; } }
     public static DataTableManager Tables { get { return Instance._dataTableManager; } }
@@ -37,6 +38,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     [SerializeField] private UISoundSettings _uiSounds = new();
 
     private SoundManager _soundManager = new();
+    private SettingsManager _settingsManager = new();
     private UIManager _uiManager = new();
     private PoolManager _poolManager = new();
     private TimeScaleManager _timeScaleManager = new();
@@ -57,6 +59,7 @@ public class GameManager : SingletonBehaviour<GameManager>
         DOTween.SetTweensCapacity(TWEENERS_CAPACITY, SEQUENCES_CAPACITY);
 
         _soundManager.Init(gameObject, _bgmVolume, _uiSounds);
+        _settingsManager.Init(_soundManager);
         _poolManager.Init();
         _timeScaleManager.Init(destroyCancellationToken);
 

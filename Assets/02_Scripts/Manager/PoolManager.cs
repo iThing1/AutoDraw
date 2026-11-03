@@ -66,6 +66,12 @@ public class PoolManager
         return instance;
     }
 
+    // 프리팹을 컴포넌트로 들고 있을 때 쓴다. 꺼낸 오브젝트의 같은 컴포넌트를 돌려준다.
+    public T Spawn<T>(T prefab, Vector3 position, Quaternion rotation) where T : Component
+    {
+        return Spawn(prefab.gameObject, position, rotation).GetComponent<T>();
+    }
+
     // UI처럼 특정 부모(Canvas) 아래에 있어야 하는 오브젝트용. 위치는 호출하는 쪽에서 맞춘다.
     public GameObject Spawn(GameObject prefab, Transform parent)
     {

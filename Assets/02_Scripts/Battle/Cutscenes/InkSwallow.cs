@@ -163,7 +163,7 @@ public class InkSwallow
                 Vector3 grabPoint = _center + (Vector3)(Random.insideUnitCircle * _settings.GrabSpread);
                 float startTime = firstStartTime + _settings.ArmStartDelay.PickRandom();
 
-                InkArm inkArm = GameManager.Pool.Spawn(_settings.ArmPrefab.gameObject, root, Quaternion.identity).GetComponent<InkArm>();
+                InkArm inkArm = GameManager.Pool.Spawn(_settings.ArmPrefab, root, Quaternion.identity);
                 inkArm.Setup(root, grabPoint, startTime, _sources[i] == _sinkSource, _settings);
 
                 _arms.Add(inkArm);

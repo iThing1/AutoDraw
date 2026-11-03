@@ -33,7 +33,7 @@ public class TimeWarpAttackStyle : AttackStyle
         for (int i = 0; i < _zoneCount; i++)
         {
             Vector3 center = context.Target.GetPredictedPoint(_zoneLeadTime * i);
-            SlowZone zone = GameManager.Pool.Spawn(_zonePrefab.gameObject, center, Quaternion.identity).GetComponent<SlowZone>();
+            SlowZone zone = GameManager.Pool.Spawn(_zonePrefab, center, Quaternion.identity);
 
             zone.PlayAsync(_zone, token).Forget();
         }

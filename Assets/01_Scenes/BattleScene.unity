@@ -1004,9 +1004,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   _cameraRig: {fileID: 1938150102}
-  _cinematicUIPrefab: {fileID: 6658607233805704159, guid: 2b193404ac6794343b9d5fa875708906, type: 3}
   _mapSpawner: {fileID: 2132573753}
+  _cinematicUIPrefab: {fileID: 6658607233805704159, guid: 2b193404ac6794343b9d5fa875708906, type: 3}
   _assetRegistry: {fileID: 11400000, guid: 3c1bc77973cc41fb847ede61fa60f94b, type: 2}
+  _bgmVolume: 0.5
   _uiSounds:
     _cues:
     - _kind: 1
@@ -1036,21 +1037,6 @@ MonoBehaviour:
     - _kind: 9
       _clip: {fileID: 8300000, guid: 6c59daa7c3264782b3e72988eb127a3e, type: 3}
       _pitch: 1
---- !u!114 &2132573753
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2132573750}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 625212ddec6d4d2ea8e736e409ecb85f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MapSpawner
-  _galleryPrefab: {fileID: 5810000000000000000, guid: 289285181b0049d18d617d1529740a2a, type: 3}
-  _startInStage: 0
-  _testStage: {fileID: 11400000, guid: 471b5d067c364a6f809fde2e0ed82b1b, type: 2}
 --- !u!4 &2132573752
 Transform:
   m_ObjectHideFlags: 0
@@ -1066,6 +1052,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2132573753
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2132573750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 625212ddec6d4d2ea8e736e409ecb85f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MapSpawner
+  _galleryPrefab: {fileID: 5810000000000000000, guid: 289285181b0049d18d617d1529740a2a, type: 3}
+  _titlePrefab: {fileID: 2802402650152354962, guid: e77f8c2e1f13fdd4893329dee3f708ee, type: 3}
+  _titleBgm: {fileID: 0}
+  _titleBgmFadeDuration: 1
+  _startInStage: 0
+  _testStage: {fileID: 11400000, guid: 471b5d067c364a6f809fde2e0ed82b1b, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

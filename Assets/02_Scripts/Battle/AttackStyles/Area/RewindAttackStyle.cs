@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 최근에 쓴 패턴 몇 개를 그 자리 그대로 거꾸로 다시 재생한다. 처음엔 하나씩 보던 패턴이 한꺼번에 겹쳐 온다.
 // 되감을 수 있는 패턴(휘갈기기, 데칼코마니, 액자 가두기)은 쏠 때 기록을 남기고, 어떻게 거꾸로 재생할지는 각 패턴이 정한다.
@@ -62,36 +63,52 @@ public class RewindAttackStyle : AttackStyle
 
     public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        List<RewindRecord> records = new List<RewindRecord>(_replayCount);
-        context.RewindLog.TakeLatest(_replayCount, records);
+        List<RewindRecord> records = ListPool<RewindRecord>.Get();
+        List<UniTask> replays = ListPool<UniTask>.Get();
 
-        await PlayIntroAsync(context.Owner.Body.position, token);
-
-        InkTint tint = new InkTint(_tintColor, _tintStrength);
-        List<UniTask> replays = new List<UniTask>(records.Count);
-
-        for (int i = 0; i < records.Count; i++)
+        try
         {
-            replays.Add(records[i].ReplayAsync(context, tint, gaugeGain, token));
-        }
+            context.RewindLog.TakeLatest(_replayCount, records);
 
-        await UniTask.WhenAll(replays);
+            await PlayIntroAsync(context.Owner.Body.position, token);
+
+            InkTint tint = new InkTint(_tintColor, _tintStrength);
+
+            for (int i = 0; i < records.Count; i++)
+            {
+                replays.Add(records[i].ReplayAsync(context, tint, gaugeGain, token));
+            }
+
+            await UniTask.WhenAll(replays);
+        }
+        finally
+        {
+            ListPool<RewindRecord>.Release(records);
+            ListPool<UniTask>.Release(replays);
+        }
     }
 
     private async UniTask PlayIntroAsync(Vector3 center, CancellationToken token)
     {
         ImpactPlayer.Play(_introImpact, center, _tintColor);
 
-        List<UniTask> effects = new List<UniTask>(_rippleCount + 1);
+        List<UniTask> effects = ListPool<UniTask>.Get();
 
-        for (int i = 0; i < _rippleCount; i++)
+        try
         {
-            effects.Add(PlayRippleAsync(center, _rippleInterval * i, token));
+            for (int i = 0; i < _rippleCount; i++)
+            {
+                effects.Add(PlayRippleAsync(center, _rippleInterval * i, token));
+            }
+
+            effects.Add(SpinHandAsync(center, token));
+
+            await UniTask.WhenAll(effects);
         }
-
-        effects.Add(SpinHandAsync(center, token));
-
-        await UniTask.WhenAll(effects);
+        finally
+        {
+            ListPool<UniTask>.Release(effects);
+        }
     }
 
     // 큰 원이 옅게 나타나며 보스 자리로 오그라든다. 퍼져 나가는 충격파를 거꾸로 돌린 모양이다.

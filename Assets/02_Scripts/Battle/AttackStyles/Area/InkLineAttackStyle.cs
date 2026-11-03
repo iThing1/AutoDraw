@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 예고선을 긋고 다 차면 붓 획이 그어진다. 한 묶음은 같은 순간에 그어져 막기 한 번으로 막을 수 있다.
 [CreateAssetMenu(fileName = "InkLineAttackStyle", menuName = "Scriptable Objects/AttackStyle/InkLine")]
@@ -41,24 +42,31 @@ public class InkLineAttackStyle : AttackStyle
 
     public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        List<UniTask> lines = new List<UniTask>(_volleyCount * _linesPerVolley.Max);
+        List<UniTask> lines = ListPool<UniTask>.Get();
 
-        for (int volley = 0; volley < _volleyCount; volley++)
+        try
         {
-            int lineCount = _linesPerVolley.PickRandom();
-
-            for (int i = 0; i < lineCount; i++)
+            for (int volley = 0; volley < _volleyCount; volley++)
             {
-                lines.Add(DrawLineAsync(context, gaugeGain, token));
+                int lineCount = _linesPerVolley.PickRandom();
+
+                for (int i = 0; i < lineCount; i++)
+                {
+                    lines.Add(DrawLineAsync(context, gaugeGain, token));
+                }
+
+                if (volley < _volleyCount - 1)
+                {
+                    await UniTask.Delay(TimeSpan.FromSeconds(_volleyInterval), cancellationToken: token);
+                }
             }
 
-            if (volley < _volleyCount - 1)
-            {
-                await UniTask.Delay(TimeSpan.FromSeconds(_volleyInterval), cancellationToken: token);
-            }
+            await UniTask.WhenAll(lines);
         }
-
-        await UniTask.WhenAll(lines);
+        finally
+        {
+            ListPool<UniTask>.Release(lines);
+        }
     }
 
     // 예고를 시작하는 순간의 목표 자리를 기준으로 줄을 정해, 예고를 본 뒤 비켜서면 피한다.

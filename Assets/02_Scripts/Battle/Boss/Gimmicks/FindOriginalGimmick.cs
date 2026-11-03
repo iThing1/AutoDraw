@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 원본 찾기. 플레이어 둘레에 액자 네 개가 걸리고, 보스가 그중 하나로 빨려 들어간 뒤 액자들이 뒤섞인다.
 // 섞인 뒤 정해진 시간 안에 보스가 든 액자 안에 서 있으면 그로기, 다른 액자에 있거나 어느 액자에도 없으면 가짜 액자들이 반격한다.
@@ -93,12 +94,14 @@ public class FindOriginalGimmick : PunishingBossGimmick
         Transform root = context.Owner.transform;
         Transform body = context.Owner.Body;
         Vector3 bodyScale = body.localScale;
-        List<GimmickFrame> frames = new List<GimmickFrame>(FRAME_COUNT);
+        List<GimmickFrame> frames = ListPool<GimmickFrame>.Get();
+        List<Vector3> slots = ListPool<Vector3>.Get();
+        List<UniTask> fades = ListPool<UniTask>.Get();
         SpriteRenderer glint = null;
 
         try
         {
-            List<Vector3> slots = BuildSlots(context.Target);
+            BuildSlots(context.Target, slots);
             Color hidden = new Color(_edgeColor.r, _edgeColor.g, _edgeColor.b, 0f);
 
             GameManager.CameraRig.ShowArea(GetSlotArea(slots), _cameraPadding, _cameraBlendDuration);
@@ -110,8 +113,6 @@ public class FindOriginalGimmick : PunishingBossGimmick
                 frame.SetFill(0f);
                 frames.Add(frame);
             }
-
-            List<UniTask> fades = new List<UniTask>(FRAME_COUNT * GimmickFrame.SPRITE_COUNT);
 
             for (int i = 0; i < frames.Count; i++)
             {
@@ -166,15 +167,17 @@ public class FindOriginalGimmick : PunishingBossGimmick
             }
 
             PooledSprite.Despawn(glint);
+            ListPool<GimmickFrame>.Release(frames);
+            ListPool<Vector3>.Release(slots);
+            ListPool<UniTask>.Release(fades);
         }
     }
 
     // 플레이어를 가운데 둔 네 귀퉁이. 판 가장자리에서는 플레이어 이동 범위 안으로 당긴다.
-    private List<Vector3> BuildSlots(AttackTarget target)
+    private void BuildSlots(AttackTarget target, List<Vector3> slots)
     {
         Vector3 center = target.FollowTransform.position;
         UnitMover mover = target.Unit.Mover;
-        List<Vector3> slots = new List<Vector3>(FRAME_COUNT);
 
         for (int i = 0; i < FRAME_COUNT; i++)
         {
@@ -184,8 +187,6 @@ public class FindOriginalGimmick : PunishingBossGimmick
 
             slots.Add(null != mover ? mover.ClampPosition(slot) : slot);
         }
-
-        return slots;
     }
 
     // 네 액자를 다 담는 영역. 섞을 때 옆으로 휘어 바깥쪽으로 나가는 폭까지 넣는다.

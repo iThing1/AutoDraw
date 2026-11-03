@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 플레이어 둘레를 격자로 나눠 한 칸씩 걸러 먹물을 떨어뜨리고, 다음에는 반대 칸에 떨어뜨린다.
 [CreateAssetMenu(fileName = "CheckerHazardPattern", menuName = "Scriptable Objects/Hazard/Checker")]
@@ -65,28 +66,38 @@ public class CheckerHazardPattern : HazardPattern
 
     private async UniTask PlayWaveAsync(AttackContext context, Vector3 origin, int parity, CancellationToken token)
     {
-        List<Vector3> cells = GetCells(origin, parity);
-        List<UniTask> telegraphs = new List<UniTask>(cells.Count);
+        List<Vector3> cells = ListPool<Vector3>.Get();
+        List<UniTask> telegraphs = ListPool<UniTask>.Get();
         float size = _cellSize * _cellFillRatio;
 
-        for (int i = 0; i < cells.Count; i++)
+        try
         {
-            telegraphs.Add(Telegraph.PlayAsync(_cellPrefab, cells[i], 0f, new Vector2(size, size), Vector2.zero, _telegraphColor, _warnDuration, token));
+            AddCells(origin, parity, cells);
+
+            for (int i = 0; i < cells.Count; i++)
+            {
+                telegraphs.Add(Telegraph.PlayAsync(_cellPrefab, cells[i], 0f, new Vector2(size, size), Vector2.zero, _telegraphColor, _warnDuration, token));
+            }
+
+            await UniTask.WhenAll(telegraphs);
+
+            ImpactPlayer.Play(_impact, origin + new Vector3(_columns, _rows, 0f) * (_cellSize * 0.5f));
+
+            for (int i = 0; i < cells.Count; i++)
+            {
+                FlashCellAsync(cells[i], size).Forget();
+            }
+
+            // 환경 탄막은 보스의 공격이 아니라서 게이지를 쌓지 않는다. 방패를 들고 있으면 막힌다.
+            if (IsInCells(context.Target.FollowTransform.position, cells))
+            {
+                context.Damage.Strike(_hit, context.Target.GetAimPoint(Vector3.zero), 0f);
+            }
         }
-
-        await UniTask.WhenAll(telegraphs);
-
-        ImpactPlayer.Play(_impact, origin + new Vector3(_columns, _rows, 0f) * (_cellSize * 0.5f));
-
-        for (int i = 0; i < cells.Count; i++)
+        finally
         {
-            FlashCellAsync(cells[i], size).Forget();
-        }
-
-        // 환경 탄막은 보스의 공격이 아니라서 게이지를 쌓지 않는다. 방패를 들고 있으면 막힌다.
-        if (IsInCells(context.Target.FollowTransform.position, cells))
-        {
-            context.Damage.Strike(_hit, context.Target.GetAimPoint(Vector3.zero), 0f);
+            ListPool<Vector3>.Release(cells);
+            ListPool<UniTask>.Release(telegraphs);
         }
     }
 
@@ -107,10 +118,8 @@ public class CheckerHazardPattern : HazardPattern
         return center - new Vector3(_columns * _cellSize, _rows * _cellSize, 0f) * 0.5f;
     }
 
-    private List<Vector3> GetCells(Vector3 origin, int parity)
+    private void AddCells(Vector3 origin, int parity, List<Vector3> cells)
     {
-        List<Vector3> cells = new List<Vector3>((_columns * _rows + 1) / 2);
-
         for (int column = 0; column < _columns; column++)
         {
             for (int row = 0; row < _rows; row++)
@@ -121,8 +130,6 @@ public class CheckerHazardPattern : HazardPattern
                 }
             }
         }
-
-        return cells;
     }
 
     private bool IsInCells(Vector3 position, List<Vector3> cells)

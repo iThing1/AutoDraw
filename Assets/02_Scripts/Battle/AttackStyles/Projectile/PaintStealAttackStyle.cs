@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 목표 둘레의 플레이어 물감을 빨아들여 보스에게 모은 뒤, 빼앗은 색 그대로 유도탄으로 되쏜다. 많이 칠한 자리에 서 있을수록 많이 날아온다.
 // 빨린 물감은 캔버스에서 지워져 클리어 그림에서도 사라진다.
@@ -33,51 +34,64 @@ public class PaintStealAttackStyle : AttackStyle
 
         await Telegraph.PlayCircleAsync(_telegraphPrefab, center, _stealRadius, _telegraphColor, _warnDuration, token);
 
-        List<PaintMark> stolen = new List<PaintMark>();
+        List<PaintMark> stolen = ListPool<PaintMark>.Get();
+        List<Color> colors = ListPool<Color>.Get();
 
-        if (null != context.PaintCanvas)
+        try
         {
-            context.PaintCanvas.RemovePaintAround(center, _stealRadius, stolen);
-        }
-
-        List<Color> colors = await GatherAsync(context, center, stolen, token);
-
-        ImpactPlayer.Play(_chargeImpact, context.Owner.Body.position);
-        await UniTask.Delay(TimeSpan.FromSeconds(_chargeDuration), cancellationToken: token);
-
-        for (int i = 0; i < colors.Count; i++)
-        {
-            context.Launcher.FireShot(_returnShot, context.Owner.Body.position, Vector3.zero, colors[i], gaugeGain, token);
-
-            if (i < colors.Count - 1)
+            if (null != context.PaintCanvas)
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(_shotInterval), cancellationToken: token);
+                context.PaintCanvas.RemovePaintAround(center, _stealRadius, stolen);
             }
+
+            await GatherAsync(context, center, stolen, colors, token);
+
+            ImpactPlayer.Play(_chargeImpact, context.Owner.Body.position);
+            await UniTask.Delay(TimeSpan.FromSeconds(_chargeDuration), cancellationToken: token);
+
+            for (int i = 0; i < colors.Count; i++)
+            {
+                context.Launcher.FireShot(_returnShot, context.Owner.Body.position, Vector3.zero, colors[i], gaugeGain, token);
+
+                if (i < colors.Count - 1)
+                {
+                    await UniTask.Delay(TimeSpan.FromSeconds(_shotInterval), cancellationToken: token);
+                }
+            }
+        }
+        finally
+        {
+            ListPool<PaintMark>.Release(stolen);
+            ListPool<Color>.Release(colors);
         }
     }
 
-    // 빨린 자국마다 보스에게 날아오는 방울을 띄우고, 되쏠 색을 돌려준다. 자국이 쏠 수보다 많으면 고르게 건너뛰어 고른다.
+    // 빨린 자국마다 보스에게 날아오는 방울을 띄우고, 되쏠 색을 colors에 담는다. 자국이 쏠 수보다 많으면 고르게 건너뛰어 고른다.
     // 빨린 물감이 모자라면 원 안 아무 데서나 보스 물감 색으로 채운다.
-    private async UniTask<List<Color>> GatherAsync(AttackContext context, Vector3 center, List<PaintMark> stolen, CancellationToken token)
+    private async UniTask GatherAsync(AttackContext context, Vector3 center, List<PaintMark> stolen, List<Color> colors, CancellationToken token)
     {
         int count = Mathf.Clamp(stolen.Count, _shotCount.Min, _shotCount.Max);
-        List<Color> colors = new List<Color>(count);
-        List<UniTask<bool>> gathers = new List<UniTask<bool>>(count);
+        List<UniTask<bool>> gathers = ListPool<UniTask<bool>>.Get();
         Vector3 destination = context.Owner.Body.position;
 
-        for (int i = 0; i < count; i++)
+        try
         {
-            PaintMark source = PickSource(stolen, i, count);
-            Vector3 start = null != source ? source.Position : center + (Vector3)(UnityEngine.Random.insideUnitCircle * _stealRadius);
-            Color color = null != source ? source.Color : context.Damage.PickColor();
+            for (int i = 0; i < count; i++)
+            {
+                PaintMark source = PickSource(stolen, i, count);
+                Vector3 start = null != source ? source.Position : center + (Vector3)(UnityEngine.Random.insideUnitCircle * _stealRadius);
+                Color color = null != source ? source.Color : context.Damage.PickColor();
 
-            colors.Add(color);
-            gathers.Add(context.Launcher.FlyToPointAsync(_gatherShot, start, destination, color, token));
+                colors.Add(color);
+                gathers.Add(context.Launcher.FlyToPointAsync(_gatherShot, start, destination, color, token));
+            }
+
+            await UniTask.WhenAll(gathers);
         }
-
-        await UniTask.WhenAll(gathers);
-
-        return colors;
+        finally
+        {
+            ListPool<UniTask<bool>>.Release(gathers);
+        }
     }
 
     // index번째 방울이 날아올 자국. 모자라면 null이다.

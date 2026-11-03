@@ -252,7 +252,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: SOUND
+  m_text: EFFECT
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 199cada541579504f896888008434631, type: 2}
   m_sharedMaterial: {fileID: 5754597117340076574, guid: 199cada541579504f896888008434631, type: 2}
@@ -3914,7 +3914,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: MUSIC
+  m_text: BACKGROUND
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 199cada541579504f896888008434631, type: 2}
   m_sharedMaterial: {fileID: 5754597117340076574, guid: 199cada541579504f896888008434631, type: 2}

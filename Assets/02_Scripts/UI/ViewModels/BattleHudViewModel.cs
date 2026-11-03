@@ -54,17 +54,7 @@ public class BattleHudViewModel : ViewModelBase
             _skillSlot = new SkillSlotViewModel(attack);
         }
 
-        // 유틸리티 칸에는 막기와 대시 중 하나만 끼운다.
-        if (player.TryGetComponent(out PlayerGuard guard) && null != guard.State)
-        {
-            _guard = guard.State;
-            _utilitySlot = new GuardSlotViewModel(guard.KeyLabel, _guard, guard.Icon);
-            _guard.OnRejected += HandleGuardRejected;
-        }
-        else if (player.TryGetComponent(out PlayerDash dash) && null != dash.State)
-        {
-            _utilitySlot = new DashSlotViewModel(dash.KeyLabel, dash.State, dash.Icon);
-        }
+        _utilitySlot = CreateUtilitySlot(player);
 
         if (player.TryGetComponent(out PlayerConsumable consumable) && null != consumable.State)
         {
@@ -136,6 +126,37 @@ public class BattleHudViewModel : ViewModelBase
             _bossPhases.OnGimmickFinished -= HandleGimmickFinished;
             _bossPhases = null;
         }
+    }
+
+    // 유틸리티는 끼운 종류 하나만 켜져 있다. 칸마다 보일 상태가 달라, 종류에 맞는 칸을 여기서 고른다.
+    private ActionSlotViewModel CreateUtilitySlot(BattleUnit player)
+    {
+        PlayerUtility[] utilities = player.GetComponents<PlayerUtility>();
+
+        for (int i = 0; i < utilities.Length; i++)
+        {
+            if (false == utilities[i].IsEquipped)
+            {
+                continue;
+            }
+
+            switch (utilities[i])
+            {
+                case PlayerGuard guard:
+                    _guard = guard.State;
+                    _guard.OnRejected += HandleGuardRejected;
+                    return new GuardSlotViewModel(guard.KeyLabel, guard.State, guard.Icon);
+
+                case PlayerDash dash:
+                    return new DashSlotViewModel(dash.KeyLabel, dash.State, dash.Icon);
+
+                default:
+                    Debug.LogError($"전투 HUD : {utilities[i].Type} 유틸리티에 맞는 칸이 없어 그리지 않습니다.");
+                    return null;
+            }
+        }
+
+        return null;
     }
 
     private void HandleDamaged(DamageInfo damage)

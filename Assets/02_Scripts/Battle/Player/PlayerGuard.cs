@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 
 // 막기 키를 누르는 순간 짧게 방패를 세운다. 그동안 닿은 공격은 피해 없이 막히고, 스킬 게이지를 조금 쓴다.
 [RequireComponent(typeof(BattleUnit), typeof(SkillGauge))]
-public class PlayerGuard : MonoBehaviour
+public class PlayerGuard : PlayerUtility
 {
     [SerializeField] private InputActionReference _guardAction;
     [SerializeField] private GuardPreset _preset;
@@ -19,23 +19,23 @@ public class PlayerGuard : MonoBehaviour
     private PlayerStats _stats;
     private Vector3 _shieldScale;
     private Color _shieldColor;
-    private Sprite _icon;
-    // 이 전투에서 실제로 방패를 세운 횟수. 보스가 막기를 자주 쓰는 플레이어에게 반응하는 데 쓴다.
-    private int _useCount;
+    // 막기가 안 나갈 때마다 콜백을 새로 만들지 않도록 한 번만 만든다.
+    private TweenCallback _hideShield;
     // 방패 한 번에 여러 공격을 막아도 게이지는 한 번만 되돌려 준다.
     private bool _hasRefundedGauge;
 
-    // 프리셋이나 입력이 비어 있으면 null이다.
+    // 막기를 끼우지 않았거나 프리셋·입력이 비어 있으면 null이다.
     public GuardState State { get { return _state; } }
-    public int UseCount { get { return _useCount; } }
 
-    public string KeyLabel { get { return _guardAction.GetKeyLabel(); } }
-    public Sprite Icon { get { return _icon; } }
+    public override UtilityType Type { get { return UtilityType.Guard; } }
+    public override bool IsEquipped { get { return null != _state; } }
+    public override string KeyLabel { get { return _guardAction.GetKeyLabel(); } }
 
     private void Awake()
     {
         _unit = GetComponent<BattleUnit>();
         _skillGauge = GetComponent<SkillGauge>();
+        _hideShield = HideShield;
 
         if (null != _shield)
         {
@@ -49,18 +49,10 @@ public class PlayerGuard : MonoBehaviour
         }
     }
 
-    // 유틸리티 칸에 막기를 끼웠을 때만 쓴다. 꺼 두면 입력도 받지 않고, State가 null이라 HUD도 막기 칸을 숨긴다.
-    public void Setup(UtilityType utility, PlayerStats stats, AssetManager assets)
+    protected override void Equip(PlayerStats stats)
     {
-        if (false == enabled || UtilityType.Guard != utility)
-        {
-            enabled = false;
-            return;
-        }
-
         _stats = stats;
         _state = new GuardState(_preset, _stats, _skillGauge);
-        _icon = assets.Get<Sprite>(utility.GetIconKey());
 
         if (null != _shield && null != _shield.sprite)
         {
@@ -134,7 +126,7 @@ public class PlayerGuard : MonoBehaviour
         }
 
         _state.Begin(Time.time);
-        _useCount++;
+        CountUse();
         _hasRefundedGauge = false;
 
         GuardAsync(destroyCancellationToken).Forget();
@@ -174,7 +166,7 @@ public class PlayerGuard : MonoBehaviour
         _shield.transform.localScale = _shieldScale;
         _shield.color = _preset.RejectColor;
         _shield.enabled = true;
-        _shield.DOFade(0f, _preset.RejectFlashDuration).OnComplete(HideShield);
+        _shield.DOFade(0f, _preset.RejectFlashDuration).OnComplete(_hideShield);
     }
 
     private void HandleBlocked(Vector3 hitPoint)

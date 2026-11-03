@@ -30,7 +30,8 @@ public static class ShadowRun
                 sprite.transform.position = path.GetPointAt(travelled, ref segment);
 
                 // 꺾인 곳을 지난 프레임은 모서리를 질러 재지만, 꺾인 점 간격보다 그림자가 커서 차이가 나지 않는다.
-                if (false == hasStruck && target.IsTouchingSegment(previous, sprite.transform.position, radius))
+                // 대시로 지나가는 동안 닿은 것은 맞힌 셈으로 치지 않는다.
+                if (false == hasStruck && target.IsTouchingSegment(previous, sprite.transform.position, radius) && false == target.TryDodge())
                 {
                     hasStruck = true;
                     context.Damage.Strike(shadow.Hit, target.GetAimPoint(Vector3.zero), gaugeGain);

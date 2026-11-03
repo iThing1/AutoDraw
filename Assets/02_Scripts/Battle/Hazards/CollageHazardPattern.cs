@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 오려 붙인 종이 조각 벽이 화면 한쪽에서 차례로 밀려온다. 벽마다 구멍이 나 있어, 구멍 자리에 서 있거나 대시로 벽을 뚫고 지나간다.
 // 예고는 벽이 플레이어를 지나갈 줄에 미리 그어, 어디가 구멍인지 보고 자리를 잡게 한다.
@@ -71,14 +72,21 @@ public class CollageHazardPattern : HazardPattern
 
         // 한 번 발동하는 동안은 같은 쪽에서만 밀려와, 방향이 엇갈린 벽이 겹쳐 피할 수 없게 되지 않는다.
         Vector3 travel = TRAVEL_DIRECTIONS[UnityEngine.Random.Range(0, TRAVEL_DIRECTIONS.Length)];
-        List<UniTask> walls = new List<UniTask>(_wallCount);
+        List<UniTask> walls = ListPool<UniTask>.Get();
 
-        for (int i = 0; i < _wallCount; i++)
+        try
         {
-            walls.Add(PlayWallAsync(context, travel, _wallInterval * i, token));
-        }
+            for (int i = 0; i < _wallCount; i++)
+            {
+                walls.Add(PlayWallAsync(context, travel, _wallInterval * i, token));
+            }
 
-        await UniTask.WhenAll(walls);
+            await UniTask.WhenAll(walls);
+        }
+        finally
+        {
+            ListPool<UniTask>.Release(walls);
+        }
     }
 
     // 벽은 예고를 시작하는 순간의 플레이어 자리를 지나는 줄을 기준으로 놓는다.
@@ -89,32 +97,48 @@ public class CollageHazardPattern : HazardPattern
         Vector3 crossing = context.Target.FollowTransform.position;
         Vector3 tangent = new Vector3(-travel.y, travel.x, 0f);
         float angle = Geometry2D.ToAngle(tangent);
-        List<Vector2> pieces = BuildPieces();
+        List<Vector2> pieces = ListPool<Vector2>.Get();
 
-        await PlayTelegraphAsync(crossing, tangent, angle, pieces, token);
-        await MoveAsync(context, crossing, travel, tangent, angle, pieces, token);
+        try
+        {
+            BuildPieces(pieces);
+
+            await PlayTelegraphAsync(crossing, tangent, angle, pieces, token);
+            await MoveAsync(context, crossing, travel, tangent, angle, pieces, token);
+        }
+        finally
+        {
+            ListPool<Vector2>.Release(pieces);
+        }
     }
 
     private async UniTask PlayTelegraphAsync(Vector3 crossing, Vector3 tangent, float angle, List<Vector2> pieces, CancellationToken token)
     {
-        List<UniTask> telegraphs = new List<UniTask>(pieces.Count);
+        List<UniTask> telegraphs = ListPool<UniTask>.Get();
 
-        for (int i = 0; i < pieces.Count; i++)
+        try
         {
-            Vector3 center = crossing + tangent * ((pieces[i].x + pieces[i].y) * 0.5f);
+            for (int i = 0; i < pieces.Count; i++)
+            {
+                Vector3 center = crossing + tangent * ((pieces[i].x + pieces[i].y) * 0.5f);
 
-            telegraphs.Add(Telegraph.PlayLineAsync(_telegraphPrefab, center, angle, pieces[i].y - pieces[i].x, _thickness, _telegraphColor, _warnDuration,
-                token));
+                telegraphs.Add(Telegraph.PlayLineAsync(_telegraphPrefab, center, angle, pieces[i].y - pieces[i].x, _thickness, _telegraphColor,
+                    _warnDuration, token));
+            }
+
+            await UniTask.WhenAll(telegraphs);
         }
-
-        await UniTask.WhenAll(telegraphs);
+        finally
+        {
+            ListPool<UniTask>.Release(telegraphs);
+        }
     }
 
     private async UniTask MoveAsync(AttackContext context, Vector3 crossing, Vector3 travel, Vector3 tangent, float angle, List<Vector2> pieces,
         CancellationToken token)
     {
         AttackTarget target = context.Target;
-        List<SpriteRenderer> sprites = new List<SpriteRenderer>(pieces.Count);
+        List<SpriteRenderer> sprites = ListPool<SpriteRenderer>.Get();
         float travelled = 0f;
         bool hasStruck = false;
 
@@ -144,8 +168,8 @@ public class CollageHazardPattern : HazardPattern
                         sprites[i].color = color;
                     }
 
-                    // 환경 탄막은 보스의 공격이 아니라서 게이지를 쌓지 않는다. 방패를 들고 있으면 막힌다.
-                    if (false == hasStruck && target.IsTouchingSegment(from, to, _thickness * 0.5f))
+                    // 환경 탄막은 보스의 공격이 아니라서 게이지를 쌓지 않는다. 방패를 들고 있으면 막히고, 대시로 지나가면 다시 닿을 때 맞는다.
+                    if (false == hasStruck && target.IsTouchingSegment(from, to, _thickness * 0.5f) && false == target.TryDodge())
                     {
                         hasStruck = true;
                         ImpactPlayer.Play(_impact, target.GetAimPoint(Vector3.zero));
@@ -163,6 +187,8 @@ public class CollageHazardPattern : HazardPattern
             {
                 PooledSprite.Despawn(sprites[i]);
             }
+
+            ListPool<SpriteRenderer>.Release(sprites);
         }
     }
 
@@ -175,12 +201,14 @@ public class CollageHazardPattern : HazardPattern
 
     // 벽을 구멍으로 나눈 조각들. 조각은 벽 줄을 따라 잰 (시작, 끝) 거리이고, 0이 플레이어를 지나는 자리다.
     // 겹칠 자리에 뽑힌 구멍은 버려, 구멍 수가 정한 수보다 적을 수 있다.
-    private List<Vector2> BuildPieces()
+    private void BuildPieces(List<Vector2> pieces)
     {
         float half = _span * 0.5f;
         float holeHalf = _holeWidth * 0.5f;
         int holeCount = _holeCount.PickRandom();
-        List<float> holes = new List<float>(holeCount) { UnityEngine.Random.Range(-_firstHoleRange, _firstHoleRange) };
+        List<float> holes = ListPool<float>.Get();
+
+        holes.Add(UnityEngine.Random.Range(-_firstHoleRange, _firstHoleRange));
 
         for (int i = 1; i < holeCount; i++)
         {
@@ -194,7 +222,6 @@ public class CollageHazardPattern : HazardPattern
 
         holes.Sort();
 
-        List<Vector2> pieces = new List<Vector2>(holes.Count + 1);
         float cursor = -half;
 
         for (int i = 0; i < holes.Count; i++)
@@ -214,7 +241,7 @@ public class CollageHazardPattern : HazardPattern
             pieces.Add(new Vector2(cursor, half));
         }
 
-        return pieces;
+        ListPool<float>.Release(holes);
     }
 
     // 구멍 둘이 붙어 하나로 보이지 않도록 구멍 폭의 절반만큼 더 띄운다.

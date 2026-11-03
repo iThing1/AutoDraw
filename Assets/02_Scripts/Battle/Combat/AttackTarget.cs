@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 // 공격이 목표를 어디로 겨누고 맞았는지 판정하는 곳. 회피 규칙을 바꿀 때는 여기만 고친다.
@@ -36,17 +37,18 @@ public class AttackTarget
         return _unit.Mover.PredictPosition(seconds) + (_unit.Body.position - _unit.transform.position);
     }
 
-    // 명중 반경 밖으로 움직였거나 대시로 피하는 중이면 피한 것이다.
-    public bool IsHit(Vector3 hitPoint)
+    // 아래 판정들은 닿았는지만 본다. 대시로 피하는 중인지는 공격이 실제로 들어갈 때 TryDodge로 따로 정해,
+    // 확인만 하는 호출이 회피 알림(게이지 보상)을 내지 않게 한다.
+    public bool IsInHitRadius(Vector3 hitPoint)
     {
-        return IsHitUnlessDodging(Vector2.Distance(hitPoint, _unit.Body.position) <= _unit.Stats.HitRadius, hitPoint);
+        return Vector2.Distance(hitPoint, _unit.Body.position) <= _unit.Stats.HitRadius;
     }
 
     // 날아가는 탄이 몸 그림과 겹쳤는지. 넉넉한 도착 판정(명중 반경)과 달리 실제 크기로 봐서,
     // 빠른 탄이 몸을 뚫고 지나가지 않으면서도 허공에서 미리 맞지 않게 한다.
     public bool IsTouching(Vector3 position, float attackRadius)
     {
-        return IsHitUnlessDodging(Vector2.Distance(position, _unit.Body.position) <= _bodyRadius + attackRadius, position);
+        return Vector2.Distance(position, _unit.Body.position) <= _bodyRadius + attackRadius;
     }
 
     // 움직이는 공격이 지난 길 위에서 몸에 닿았는지. 이전 자리와 지금 자리를 잇는 선분으로 봐, 빠르게 지나가도 건너뛰지 않는다.
@@ -58,31 +60,45 @@ public class AttackTarget
     // 대시로 피하는 중에 몸에 닿을 자리까지 왔는지. 막기 기믹에서는 이것도 받아친 것으로 본다(저스트 회피).
     public bool IsDodgedAt(Vector3 position, float attackRadius)
     {
-        return _unit.IsDodging && Vector2.Distance(position, _unit.Body.position) <= _bodyRadius + attackRadius;
+        return _unit.IsDodging && IsTouching(position, attackRadius);
     }
 
     public bool IsInBlast(Vector3 center, float radius)
     {
-        Vector3 body = _unit.Body.position;
-
-        return IsHitUnlessDodging(Vector2.Distance(center, body) <= radius, body);
+        return Vector2.Distance(center, _unit.Body.position) <= radius;
     }
 
-    // 닿을 자리에 온 공격이라도 대시로 피하는 중이면 맞지 않고, 막기처럼 피한 자리를 알려 회피 문구를 띄운다.
-    private bool IsHitUnlessDodging(bool isInReach, Vector3 point)
+    // 한꺼번에 떨어지는 여러 원 중 하나에라도 들었는지.
+    public bool IsInAnyBlast(IReadOnlyList<Vector3> centers, float radius)
     {
-        if (false == isInReach)
+        for (int i = 0; i < centers.Count; i++)
+        {
+            if (IsInBlast(centers[i], radius))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // 닿은 공격이 몸에 들어가기 직전에 부른다. 대시로 피하는 중이면 피한 자리를 알리고 true를 돌려, 공격은 맞히지 않고 지나간다.
+    // 피해 처리(DamageDealer)는 맞히기 전에 스스로 묻는다. 한 번 닿으면 끝나는 공격은 피하는 동안 닿은 것을 맞힌 셈으로 치지 않도록 판정과 함께 직접 묻는다.
+    public bool TryDodge(Vector3 point)
+    {
+        if (false == _unit.IsDodging)
         {
             return false;
         }
 
-        if (_unit.IsDodging)
-        {
-            _unit.NotifyDodged(point);
-            return false;
-        }
-
+        _unit.NotifyDodged(point);
         return true;
+    }
+
+    // 몸 자리에 회피 문구를 띄운다. 선·벽처럼 닿은 자리가 몸 근처 어디든 상관없는 공격용.
+    public bool TryDodge()
+    {
+        return TryDodge(_unit.Body.position);
     }
 
     // 방패가 떠 있는 동안 방패에 닿은 공격은 막힌다. 투사체는 날아오는 도중에도 이걸로 확인한다.
@@ -96,7 +112,7 @@ public class AttackTarget
     public bool TryBlockHit(Vector3 hitPoint)
     {
         bool isOnShield = IsBlockedAt(hitPoint, 0f);
-        bool isHitWhileGuarding = _unit.IsGuarding && IsHit(hitPoint);
+        bool isHitWhileGuarding = _unit.IsGuarding && IsInHitRadius(hitPoint);
 
         if (false == isOnShield && false == isHitWhileGuarding)
         {
@@ -113,6 +129,7 @@ public class AttackTarget
         _unit.NotifyBlocked(hitPoint);
     }
 
+    // 닿은 순간 피했다고 이미 정해 둔 공격용(받아치기 기믹). 알리는 지금은 대시가 끝났을 수 있어 다시 확인하지 않는다.
     public void NotifyDodged(Vector3 point)
     {
         _unit.NotifyDodged(point);

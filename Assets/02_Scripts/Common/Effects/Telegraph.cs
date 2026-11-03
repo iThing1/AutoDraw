@@ -1,8 +1,10 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 공격이 떨어질 자리를 미리 보여 주는 표시. 옅은 테두리 영역 안을 진한 면이 채워 가고, 다 차는 순간 공격이 온다.
 public static class Telegraph
@@ -51,6 +53,50 @@ public static class Telegraph
         float diameter = radius * 2f;
 
         return PlayAsync(prefab, center, 0f, new Vector2(diameter, diameter), Vector2.zero, color, duration, token);
+    }
+
+    // 같은 순간에 떨어지는 여러 원을 한꺼번에 예고한다. 원마다 기다리는 작업을 따로 만들지 않고, 같은 시간에 시작한 채움이 함께 다 찬다.
+    public static async UniTask PlayCirclesAsync(GameObject prefab, IReadOnlyList<Vector3> centers, float radius, Color color, float duration,
+        CancellationToken token)
+    {
+        if (null == prefab || 0 == centers.Count)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(duration), cancellationToken: token);
+            return;
+        }
+
+        float diameter = radius * 2f;
+        Vector2 size = new Vector2(diameter, diameter);
+        Color areaColor = new Color(color.r, color.g, color.b, color.a * AREA_ALPHA_RATIO);
+        List<SpriteRenderer> sprites = ListPool<SpriteRenderer>.Get();
+        Tween lastFill = null;
+
+        try
+        {
+            for (int i = 0; i < centers.Count; i++)
+            {
+                SpriteRenderer area = PooledSprite.Spawn(prefab, centers[i], 0f, size, areaColor);
+                SpriteRenderer fill = PooledSprite.Spawn(prefab, centers[i], 0f, Vector2.zero, color);
+
+                sprites.Add(area);
+                sprites.Add(fill);
+
+                FadeInArea(area, areaColor.a, duration);
+                lastFill = fill.transform.DOScale(new Vector3(size.x, size.y, 1f), duration).SetEase(Ease.Linear);
+            }
+
+            // 모든 채움이 같은 프레임에 같은 길이로 시작해 함께 끝나므로, 마지막 것만 기다린다. 나머지는 돌려줄 때 함께 끊긴다.
+            await lastFill.ToUniTaskKillOnCancel(token);
+        }
+        finally
+        {
+            for (int i = 0; i < sprites.Count; i++)
+            {
+                PooledSprite.Despawn(sprites[i]);
+            }
+
+            ListPool<SpriteRenderer>.Release(sprites);
+        }
     }
 
     // 선은 길이 방향(x)은 처음부터 다 보이고, 굵기 방향(y)만 차오른다.

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 위작에 서명하듯 목표 근처를 가로지르는 구불구불한 획을 연필로 먼저 그어 보이고, 펜 끝이 그 획을 따라 먹 선을 남긴다.
 // 남은 먹 선은 잠시 동안 닿으면 맞아 판을 갈라 놓는다. 펜 끝과 남은 선을 합쳐 획마다 한 번만 맞는다.
@@ -104,30 +105,45 @@ public class ScribbleAttackStyle : AttackStyle
     }
 
     // 되감으면 같은 자리의 획들을 마지막 획부터, 끝에서 처음 쪽으로 다시 긋는다.
-    private UniTask RewindAsync(AttackContext context, List<Polyline> paths, InkTint tint, float gaugeGain, CancellationToken token)
+    // 거꾸로 뒤집은 길은 Polyline이 점 목록을 쥐고 있어 새로 만든다. 길을 담는 목록만 빌려 쓴다.
+    private async UniTask RewindAsync(AttackContext context, List<Polyline> paths, InkTint tint, float gaugeGain, CancellationToken token)
     {
-        List<Polyline> reversed = new List<Polyline>(paths.Count);
+        List<Polyline> reversed = ListPool<Polyline>.Get();
 
-        for (int i = paths.Count - 1; i >= 0; i--)
+        try
         {
-            List<Vector3> points = new List<Vector3>(paths[i].Points);
-            points.Reverse();
-            reversed.Add(new Polyline(points));
-        }
+            for (int i = paths.Count - 1; i >= 0; i--)
+            {
+                List<Vector3> points = new List<Vector3>(paths[i].Points);
+                points.Reverse();
+                reversed.Add(new Polyline(points));
+            }
 
-        return PlayAllAsync(context, reversed, tint, gaugeGain, token);
+            await PlayAllAsync(context, reversed, tint, gaugeGain, token);
+        }
+        finally
+        {
+            ListPool<Polyline>.Release(reversed);
+        }
     }
 
     private async UniTask PlayAllAsync(AttackContext context, List<Polyline> paths, InkTint tint, float gaugeGain, CancellationToken token)
     {
-        List<UniTask> strokes = new List<UniTask>(paths.Count);
+        List<UniTask> strokes = ListPool<UniTask>.Get();
 
-        for (int i = 0; i < paths.Count; i++)
+        try
         {
-            strokes.Add(PlayAsync(context, paths[i], _strokeDelay * i, tint, gaugeGain, token));
-        }
+            for (int i = 0; i < paths.Count; i++)
+            {
+                strokes.Add(PlayAsync(context, paths[i], _strokeDelay * i, tint, gaugeGain, token));
+            }
 
-        await UniTask.WhenAll(strokes);
+            await UniTask.WhenAll(strokes);
+        }
+        finally
+        {
+            ListPool<UniTask>.Release(strokes);
+        }
     }
 
     private async UniTask PlayAsync(AttackContext context, Polyline path, float delay, InkTint tint, float gaugeGain, CancellationToken token)
@@ -213,7 +229,7 @@ public class ScribbleAttackStyle : AttackStyle
                     pen.transform.position = tip;
                 }
 
-                if (false == hasStruck && target.IsTouchingSegment(previous, tip, radius))
+                if (false == hasStruck && target.IsTouchingSegment(previous, tip, radius) && false == target.TryDodge())
                 {
                     hasStruck = true;
                     context.Damage.Strike(_hit, target.GetAimPoint(Vector3.zero), gaugeGain);
@@ -230,7 +246,7 @@ public class ScribbleAttackStyle : AttackStyle
         return hasStruck;
     }
 
-    // 다 그은 선은 남아 있는 동안 닿으면 맞는다. 펜 끝에 이미 맞았으면 다시 맞지 않는다.
+    // 다 그은 선은 남아 있는 동안 닿으면 맞는다. 펜 끝에 이미 맞았으면 다시 맞지 않고, 대시로 지나가면 다시 닿을 때 맞는다.
     private async UniTask LingerAsync(AttackContext context, Polyline path, bool hasStruck, float gaugeGain, CancellationToken token)
     {
         AttackTarget target = context.Target;
@@ -238,7 +254,7 @@ public class ScribbleAttackStyle : AttackStyle
 
         while (elapsed < _lingerDuration)
         {
-            if (false == hasStruck && IsTouchingPath(target, path))
+            if (false == hasStruck && IsTouchingPath(target, path) && false == target.TryDodge())
             {
                 hasStruck = true;
                 context.Damage.Strike(_hit, target.GetAimPoint(Vector3.zero), gaugeGain);

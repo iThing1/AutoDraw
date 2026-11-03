@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 데칼코마니 분신. 판 가운데에 세로로 접는 선이 그어지고, 반대편에 플레이어를 좌우 반전으로 따라 하는 먹 분신이 나타난다.
 // 먹 방울은 플레이어와 분신 둘레에 따로 떨어지고, 분신이 맞아도 플레이어가 피해를 입는다. 두 몸이 함께 빈자리에 서는 자리를 찾아 버틴다.
@@ -75,6 +76,7 @@ public class DecalcomanieCloneGimmick : BossGimmick
         Vector3 foldCenter = new Vector3(foldX, target.FollowTransform.position.y, target.FollowTransform.position.z);
         SpriteRenderer fold = null;
         SpriteRenderer clone = null;
+        List<Vector3> drops = ListPool<Vector3>.Get();
 
         // 분신이 접는 선 위에서 생겨나는 것처럼 보이도록, 선을 먼저 긋고 분신을 띄운다.
         using (CancellationTokenSource followSource = CancellationTokenSource.CreateLinkedTokenSource(token))
@@ -98,8 +100,6 @@ public class DecalcomanieCloneGimmick : BossGimmick
                 await clone.DOFade(_cloneColor.a, _cloneFadeDuration)
                     .ToUniTaskKillOnCancel(token);
 
-                List<Vector3> drops = new List<Vector3>(_dropsPerBody * 2);
-
                 for (int round = 0; round < _roundCount && false == target.IsDefeated; round++)
                 {
                     await PlayRoundAsync(context, clone.transform, drops, token);
@@ -122,6 +122,7 @@ public class DecalcomanieCloneGimmick : BossGimmick
                 followSource.Cancel();
                 PooledSprite.Despawn(clone);
                 PooledSprite.Despawn(fold);
+                ListPool<Vector3>.Release(drops);
             }
         }
     }
@@ -185,18 +186,12 @@ public class DecalcomanieCloneGimmick : BossGimmick
         AddDrops(target.FollowTransform.position, drops);
         AddDrops(clone.position, drops);
 
-        List<UniTask> telegraphs = new List<UniTask>(drops.Count);
-
-        for (int i = 0; i < drops.Count; i++)
-        {
-            telegraphs.Add(Telegraph.PlayCircleAsync(_dropPrefab, drops[i], _dropRadius, _telegraphColor, _warnDuration, token));
-        }
-
-        await UniTask.WhenAll(telegraphs);
+        await Telegraph.PlayCirclesAsync(_dropPrefab, drops, _dropRadius, _telegraphColor, _warnDuration, token);
 
         ImpactPlayer.Play(_impact, (target.FollowTransform.position + clone.position) * 0.5f);
 
-        if (IsBodyHit(target, drops) || IsCloneHit(target, clone.position, drops))
+        // 분신도 플레이어와 같은 규칙으로 맞는다. 대시로 피하는 중이면 분신도 함께 피하는 것은 피해 처리가 정한다.
+        if (target.IsInAnyBlast(drops, _dropRadius) || IsCloneHit(clone.position, drops))
         {
             context.Damage.Strike(_hit, target.GetAimPoint(Vector3.zero), 0f);
         }
@@ -222,36 +217,14 @@ public class DecalcomanieCloneGimmick : BossGimmick
         }
     }
 
-    private bool IsBodyHit(AttackTarget target, List<Vector3> drops)
+    private bool IsCloneHit(Vector3 clone, List<Vector3> drops)
     {
         for (int i = 0; i < drops.Count; i++)
         {
-            if (target.IsInBlast(drops[i], _dropRadius))
+            if (Vector2.Distance(drops[i], clone) <= _dropRadius)
             {
                 return true;
             }
-        }
-
-        return false;
-    }
-
-    // 분신도 플레이어와 같은 규칙으로 맞는다. 플레이어가 대시로 피하는 중이면 분신도 함께 피한다.
-    private bool IsCloneHit(AttackTarget target, Vector3 clone, List<Vector3> drops)
-    {
-        for (int i = 0; i < drops.Count; i++)
-        {
-            if (Vector2.Distance(drops[i], clone) > _dropRadius)
-            {
-                continue;
-            }
-
-            if (target.Unit.IsDodging)
-            {
-                target.NotifyDodged(clone);
-                return false;
-            }
-
-            return true;
         }
 
         return false;

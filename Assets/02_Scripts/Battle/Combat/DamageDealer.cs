@@ -72,11 +72,11 @@ public class DamageDealer
         ApplyHit(hit, RollDamage(hit), _target.GetAimPoint(Vector3.zero), gaugeGain);
     }
 
-    // 막혔으면 피해·물감 자국·게이지 없이 끝난다. 막기 연출은 막은 쪽이 맡는다.
+    // 막혔거나 대시로 피했으면 피해·물감 자국·게이지 없이 끝난다. 막기·회피 연출은 당한 쪽이 맡는다.
     // 투사체는 비행이 이미 닿았다고 본 뒤에 불러, 명중 반경으로 다시 거르지 않는다(큰 탄은 반경 밖에서 몸 가장자리에 닿는다).
     public void DealHit(HitSettings hit, DamageInfo damage, Vector3 hitPoint, float gaugeGain)
     {
-        if (_target.IsDefeated || _target.TryBlockHit(hitPoint))
+        if (_target.IsDefeated || _target.TryBlockHit(hitPoint) || _target.TryDodge(hitPoint))
         {
             return;
         }
@@ -134,7 +134,7 @@ public class DamageDealer
     // 방패가 명중 반경보다 넓어서, 명중 반경 밖이어도 방패 안이면 막기 판정으로 넘긴다.
     private void ApplyHit(HitSettings hit, DamageInfo damage, Vector3 hitPoint, float gaugeGain)
     {
-        if (false == _target.IsHit(hitPoint) && false == _target.IsBlockedAt(hitPoint, 0f))
+        if (false == _target.IsInHitRadius(hitPoint) && false == _target.IsBlockedAt(hitPoint, 0f))
         {
             return;
         }

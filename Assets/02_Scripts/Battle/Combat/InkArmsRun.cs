@@ -3,9 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 목표 둘레에 먹물 웅덩이를 흩뿌리고, 정해진 시간 동안 웅덩이에서 그림자 팔을 뻗어 목표를 붙잡는다.
 // 손 자세처럼 쓰는 쪽마다 다른 연출은 부르는 쪽이 두 단계 사이에 끼운다.
+// 웅덩이는 쓰는 쪽 편의 자국으로 남는다. 보스가 쓰면 잉크, 플레이어가 쓰면 물감이라 리무버·잉크 연출이 플레이어 웅덩이를 보스 잉크로 다루지 않는다.
 public static class InkArmsRun
 {
     private const int FALLBACK_POOL_TRIES = 5;
@@ -37,7 +39,7 @@ public static class InkArmsRun
         for (int i = 0; i < settings.PoolCount; i++)
         {
             Vector3 position = center + (Vector3)(UnityEngine.Random.insideUnitCircle * settings.PoolScatterRadius);
-            PaintMark pool = context.PaintCanvas.LeaveInkSplat(position, settings.PoolStyle, settings.Arms.InkColor, settings.PoolScale.PickRandom());
+            PaintMark pool = LeavePool(context, settings, position);
 
             if (null != pool)
             {
@@ -53,24 +55,32 @@ public static class InkArmsRun
     // 시간이 다 되거나 목표가 쓰러질 때까지 간격마다 팔을 뻗고, 마지막 팔이 거둬질 때까지 기다린다.
     public static async UniTask LungeAsync(AttackContext context, InkArmsSettings settings, List<PaintMark> pools, float gaugeGain, CancellationToken token)
     {
-        List<PaintMark> sources = new List<PaintMark>(settings.ArmsPerLunge.Max);
-        List<UniTask> lunges = new List<UniTask>();
+        List<PaintMark> sources = ListPool<PaintMark>.Get();
+        List<UniTask> lunges = ListPool<UniTask>.Get();
         float elapsed = 0f;
 
-        while (elapsed < settings.Duration && false == context.Target.IsDefeated)
+        try
         {
-            PickSources(context, settings, pools, settings.ArmsPerLunge.PickRandom(), sources);
-
-            for (int i = 0; i < sources.Count; i++)
+            while (elapsed < settings.Duration && false == context.Target.IsDefeated)
             {
-                lunges.Add(LungeArmAsync(context, settings, sources[i], gaugeGain, token));
+                PickSources(context, settings, pools, settings.ArmsPerLunge.PickRandom(), sources);
+
+                for (int i = 0; i < sources.Count; i++)
+                {
+                    lunges.Add(LungeArmAsync(context, settings, sources[i], gaugeGain, token));
+                }
+
+                await UniTask.Delay(TimeSpan.FromSeconds(settings.LungeInterval), cancellationToken: token);
+                elapsed += settings.LungeInterval;
             }
 
-            await UniTask.Delay(TimeSpan.FromSeconds(settings.LungeInterval), cancellationToken: token);
-            elapsed += settings.LungeInterval;
+            await UniTask.WhenAll(lunges);
         }
-
-        await UniTask.WhenAll(lunges);
+        finally
+        {
+            ListPool<PaintMark>.Release(sources);
+            ListPool<UniTask>.Release(lunges);
+        }
     }
 
     private static async UniTask LungeArmAsync(AttackContext context, InkArmsSettings settings, PaintMark source, float gaugeGain, CancellationToken token)
@@ -85,7 +95,7 @@ public static class InkArmsRun
         Vector3 root = source.Position;
         Vector3 grabPoint = target.GetPredictedPoint(settings.LeadTime);
 
-        InkArm arm = GameManager.Pool.Spawn(arms.ArmPrefab.gameObject, root, Quaternion.identity).GetComponent<InkArm>();
+        InkArm arm = GameManager.Pool.Spawn(arms.ArmPrefab, root, Quaternion.identity);
         arm.Setup(root, grabPoint, 0f, false, arms);
 
         SwallowFrame frame = new SwallowFrame { Remain = 1f };
@@ -173,29 +183,35 @@ public static class InkArmsRun
     {
         for (int i = pools.Count - 1; i >= 0; i--)
         {
-            if (false == canvas.IsInkExposed(pools[i]))
+            if (false == canvas.IsExposed(pools[i]))
             {
                 pools.RemoveAt(i);
             }
         }
     }
 
-    // 칠해지지 않은 자리를 몇 번 찾아보고, 못 찾으면 마지막에 고른 자리에 찍는다.
+    // 반대편 자국이 없는 자리를 몇 번 찾아보고, 못 찾으면 마지막에 고른 자리에 찍는다.
     private static PaintMark LeavePoolAround(AttackContext context, InkArmsSettings settings, Vector3 center)
     {
         Vector3 position = center;
+        bool isOpponentInk = false == context.Damage.IsInk;
 
         for (int i = 0; i < FALLBACK_POOL_TRIES; i++)
         {
             float angle = UnityEngine.Random.Range(0f, 360f) * Mathf.Deg2Rad;
             position = center + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * settings.SourceDistance.PickRandom();
 
-            if (false == context.PaintCanvas.IsPaintedAt(position, 0f))
+            if (false == context.PaintCanvas.HasMarkAt(position, 0f, isOpponentInk))
             {
                 break;
             }
         }
 
-        return context.PaintCanvas.LeaveInkSplat(position, settings.PoolStyle, settings.Arms.InkColor, settings.PoolScale.PickRandom());
+        return LeavePool(context, settings, position);
+    }
+
+    private static PaintMark LeavePool(AttackContext context, InkArmsSettings settings, Vector3 position)
+    {
+        return context.PaintCanvas.LeaveSplat(position, settings.PoolStyle, settings.Arms.InkColor, context.Damage.IsInk, settings.PoolScale.PickRandom());
     }
 }

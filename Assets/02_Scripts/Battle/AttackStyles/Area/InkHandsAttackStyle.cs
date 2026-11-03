@@ -2,8 +2,10 @@ using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
 
 // 잉크 손. 보스 2의 잉크 팔을 뒤집어, 보스 둘레에 먹물 웅덩이를 흩뿌리고 그림자 팔이 보스를 붙잡아 때리게 한다.
+// 웅덩이는 플레이어 물감 자국으로 남아, 리무버에 지워지거나 보스 잉크 연출에 끌려가지 않는다.
 // 쓰는 동안에도 움직이고 무기를 쏠 수 있도록 플레이어를 멈추지 않는다.
 [CreateAssetMenu(fileName = "InkHandsAttackStyle", menuName = "Scriptable Objects/AttackStyle/InkHands")]
 public class InkHandsAttackStyle : AttackStyle
@@ -23,9 +25,16 @@ public class InkHandsAttackStyle : AttackStyle
             return;
         }
 
-        List<PaintMark> pools = new List<PaintMark>(_inkArms.PoolCount);
+        List<PaintMark> pools = ListPool<PaintMark>.Get();
 
-        await InkArmsRun.ScatterPoolsAsync(context, _inkArms, pools, token);
-        await InkArmsRun.LungeAsync(context, _inkArms, pools, gaugeGain, token);
+        try
+        {
+            await InkArmsRun.ScatterPoolsAsync(context, _inkArms, pools, token);
+            await InkArmsRun.LungeAsync(context, _inkArms, pools, gaugeGain, token);
+        }
+        finally
+        {
+            ListPool<PaintMark>.Release(pools);
+        }
     }
 }

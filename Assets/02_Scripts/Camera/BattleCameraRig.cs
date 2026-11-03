@@ -34,11 +34,24 @@ public class BattleCameraRig : MonoBehaviour
     // 판 전체(엔딩)나 일부 영역(기믹)을 고정해 비추는 카메라. 가끔만 쓰여 씬에 두지 않고 처음 쓸 때 만든다.
     private CinemachineCamera _fixedCamera;
     private CinemachineCamera _activeCamera;
+    // 브레인과 같은 오브젝트의 카메라. 처음 찾을 때 한 번만 찾는다.
+    private Camera _renderCamera;
 
     public Camera OutputCamera { get { return _brain.OutputCamera; } }
     // 브레인을 거치지 않고 직접 켜고 끄거나 그림을 찍을 때 쓰는 카메라.
     // 브레인의 OutputCamera는 게임 시작 직후 비어 있을 수 있어 같은 오브젝트의 카메라를 직접 찾는다.
-    public Camera RenderCamera { get { return _brain.GetComponent<Camera>(); } }
+    public Camera RenderCamera
+    {
+        get
+        {
+            if (null == _renderCamera)
+            {
+                _renderCamera = _brain.GetComponent<Camera>();
+            }
+
+            return _renderCamera;
+        }
+    }
     // 스테이지가 넘겨준 카메라 경계. 경계가 없는 스테이지면 null이다.
     public Collider2D CameraBounds { get { return _cameraBounds; } }
 

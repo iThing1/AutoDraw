@@ -20,6 +20,8 @@ public class PlayerAttack : MonoBehaviour
     private readonly AttackStyle[] _slotStyles = new AttackStyle[WEAPON_SLOT_COUNT];
     private readonly WeaponModifier[] _slotModifiers = new WeaponModifier[WEAPON_SLOT_COUNT];
     private readonly Sprite[] _slotIcons = new Sprite[WEAPON_SLOT_COUNT];
+    // 칸에 끼운 무기의 종류. 칸 번호로 짐작하지 않고 무기 표에서 읽은 값을 쓴다.
+    private readonly WeaponType[] _slotTypes = new WeaponType[WEAPON_SLOT_COUNT];
 
     private BattleUnit _unit;
     private SkillGauge _skillGauge;
@@ -106,9 +108,14 @@ public class PlayerAttack : MonoBehaviour
     // 지금 고른 무기 칸의 종류. 아직 고르지 않았으면 false다.
     public bool TryGetSelectedWeaponType(out WeaponType type)
     {
-        type = HEAVY_SLOT == _selectedIndex ? WeaponType.Heavy : WeaponType.Basic;
+        if (0 > _selectedIndex)
+        {
+            type = WeaponType.Basic;
+            return false;
+        }
 
-        return 0 <= _selectedIndex;
+        type = _slotTypes[_selectedIndex];
+        return true;
     }
 
     public AttackStyle GetSlotStyle(int index)
@@ -141,6 +148,7 @@ public class PlayerAttack : MonoBehaviour
 
         _slotStyles[slot] = assets.Get<AttackStyle>(weapon.AttackStyleKey);
         _slotIcons[slot] = assets.Get<Sprite>(weapon.IconKey);
+        _slotTypes[slot] = weapon.Type;
         _slotModifiers[slot] = new WeaponModifier(weapon.DamageBonus + stats.GetWeaponDamageBonus(weapon.Type), weapon.IntervalScale);
     }
 

@@ -29,8 +29,8 @@ public class AdmissionTicketGimmick : BossGimmick
     [SerializeField, Min(0.1f)] private float _duration = 8f;
     [SerializeField] private GameObject _shutterPrefab;
     [SerializeField, Min(0.01f)] private float _edgeWidth = 0.3f;
-    [SerializeField] private Color _shutterEdgeColor = new Color(0.85f, 0.1f, 0.1f, 0.8f);
-    [SerializeField] private Color _shutterFillColor = new Color(0.85f, 0.1f, 0.1f, 0.18f);
+    [SerializeField] private Color _shutterEdgeColor = new Color(0.35f, 0.38f, 0.45f, 0.85f);
+    [SerializeField] private Color _shutterFillColor = new Color(0.35f, 0.38f, 0.45f, 0.18f);
     // 못 주운 관람권 한 장마다 한 번씩 맞는다.
     [SerializeField] private HitSettings _missHit = new();
     [SerializeField] private ImpactSettings _missImpact = new();
@@ -38,12 +38,7 @@ public class AdmissionTicketGimmick : BossGimmick
 
     [Header("물감 방울")]
     [SerializeField, Min(0.1f)] private float _dropInterval = 1.4f;
-    [SerializeField, Min(0.1f)] private float _dropRadius = 1.4f;
-    [SerializeField] private GameObject _dropPrefab;
-    [SerializeField] private Color _telegraphColor = new Color(0.1f, 0.1f, 0.12f, 0.35f);
-    [SerializeField, Min(0f)] private float _warnDuration = 0.8f;
-    [SerializeField] private HitSettings _dropHit = new();
-    [SerializeField] private ImpactSettings _dropImpact = new();
+    [SerializeField] private GroundDropSettings _drop = new();
 
     [Header("결과")]
     [SerializeField] private ImpactSettings _successImpact = new();
@@ -60,10 +55,7 @@ public class AdmissionTicketGimmick : BossGimmick
             GameManager.Pool.Prewarm(_shutterPrefab, GimmickFrame.SPRITE_COUNT);
         }
 
-        if (null != _dropPrefab)
-        {
-            GameManager.Pool.Prewarm(_dropPrefab, 4);
-        }
+        GroundDrop.Prewarm(GameManager.Pool, _drop, 2);
     }
 
     public override async UniTask<bool> PlayAsync(AttackContext context, CancellationToken token)
@@ -198,7 +190,7 @@ public class AdmissionTicketGimmick : BossGimmick
             if (elapsed >= nextDrop)
             {
                 nextDrop += _dropInterval;
-                DropAsync(context, dropToken).Forget();
+                GroundDrop.PlayAsync(GameManager.Pool, GameManager.Feedback, context, _drop, target.GetAimPoint(Vector3.zero), dropToken).Forget();
             }
 
             await UniTask.Yield(PlayerLoopTiming.Update, token);
@@ -230,22 +222,6 @@ public class AdmissionTicketGimmick : BossGimmick
             {
                 await UniTask.Delay(TimeSpan.FromSeconds(_missInterval), cancellationToken: token);
             }
-        }
-    }
-
-    private async UniTaskVoid DropAsync(AttackContext context, CancellationToken token)
-    {
-        Vector3 point = context.Target.GetAimPoint(Vector3.zero);
-
-        try
-        {
-            await Telegraph.PlayCircleAsync(GameManager.Pool, _dropPrefab, point, _dropRadius, _telegraphColor, _warnDuration, token);
-
-            GameManager.Feedback.PlayImpact(_dropImpact, point);
-            context.Damage.Blast(_dropHit, point, _dropRadius, 0f);
-        }
-        catch (OperationCanceledException)
-        {
         }
     }
 

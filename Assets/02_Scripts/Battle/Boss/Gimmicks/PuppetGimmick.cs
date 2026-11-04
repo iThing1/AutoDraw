@@ -42,13 +42,8 @@ public class PuppetGimmick : PunishingBossGimmick
     [SerializeField, Min(0.1f)] private float _dropInterval = 1.3f;
     // 첫 방울은 플레이어 바로 위에 떨어져 계속 움직이게 한다.
     [SerializeField, Min(1)] private int _dropCount = 3;
-    [SerializeField, Min(0.1f)] private float _dropRadius = 1.6f;
     [SerializeField, Min(0f)] private float _spreadRadius = 4f;
-    [SerializeField] private GameObject _dropPrefab;
-    [SerializeField] private Color _telegraphColor = new Color(0.1f, 0.1f, 0.12f, 0.35f);
-    [SerializeField, Min(0f)] private float _warnDuration = 0.8f;
-    [SerializeField] private HitSettings _dropHit = new();
-    [SerializeField] private ImpactSettings _dropImpact = new();
+    [SerializeField] private GroundDropSettings _drop = new();
 
     [Header("결과")]
     [SerializeField] private ImpactSettings _successImpact = new();
@@ -67,10 +62,7 @@ public class PuppetGimmick : PunishingBossGimmick
             GameManager.Pool.Prewarm(_framePrefab, _requiredCaptures * GimmickFrame.SPRITE_COUNT);
         }
 
-        if (null != _dropPrefab)
-        {
-            GameManager.Pool.Prewarm(_dropPrefab, _dropCount * 4);
-        }
+        GroundDrop.Prewarm(GameManager.Pool, _drop, _dropCount * 2);
     }
 
     public override async UniTask<bool> PlayAsync(AttackContext context, CancellationToken token)
@@ -253,8 +245,7 @@ public class PuppetGimmick : PunishingBossGimmick
 
     private async UniTaskVoid DropAsync(AttackContext context, CancellationToken token)
     {
-        AttackTarget target = context.Target;
-        Vector3 center = target.FollowTransform.position;
+        Vector3 center = context.Target.FollowTransform.position;
         List<Vector3> drops = ListPool<Vector3>.Get();
 
         drops.Add(center);
@@ -266,14 +257,7 @@ public class PuppetGimmick : PunishingBossGimmick
 
         try
         {
-            await Telegraph.PlayCirclesAsync(GameManager.Pool, _dropPrefab, drops, _dropRadius, _telegraphColor, _warnDuration, token);
-
-            GameManager.Feedback.PlayImpact(_dropImpact, center);
-
-            if (target.IsInAnyBlast(drops, _dropRadius))
-            {
-                context.Damage.Strike(_dropHit, target.GetAimPoint(Vector3.zero), 0f);
-            }
+            await GroundDrop.PlayAsync(GameManager.Pool, GameManager.Feedback, context, _drop, drops, token);
         }
         catch (OperationCanceledException)
         {

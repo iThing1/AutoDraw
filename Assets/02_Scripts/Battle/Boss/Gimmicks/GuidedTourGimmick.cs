@@ -35,12 +35,8 @@ public class GuidedTourGimmick : PunishingBossGimmick
 
     [Header("방해")]
     [SerializeField, Min(0.1f)] private float _hazardInterval = 1.6f;
-    [SerializeField, Min(0.1f)] private float _hazardRadius = 1.1f;
-    [SerializeField] private GameObject _hazardPrefab;
-    [SerializeField] private Color _hazardColor = new Color(0.1f, 0.1f, 0.12f, 0.4f);
-    [SerializeField, Min(0f)] private float _hazardWarnDuration = 0.7f;
-    [SerializeField] private HitSettings _hazardHit = new();
-    [SerializeField] private ImpactSettings _hazardImpact = new();
+    // 원이 조명보다 작아야 조명 안에서 피할 수 있다.
+    [SerializeField] private GroundDropSettings _hazard = new();
 
     [Header("마무리")]
     [SerializeField] private GameObject _overlayPrefab;
@@ -61,10 +57,7 @@ public class GuidedTourGimmick : PunishingBossGimmick
             GameManager.Pool.Prewarm(_markerPrefab, 1);
         }
 
-        if (null != _hazardPrefab)
-        {
-            GameManager.Pool.Prewarm(_hazardPrefab, 4);
-        }
+        GroundDrop.Prewarm(GameManager.Pool, _hazard, 2);
     }
 
     public override async UniTask<bool> PlayAsync(AttackContext context, CancellationToken token)
@@ -195,8 +188,11 @@ public class GuidedTourGimmick : PunishingBossGimmick
             {
                 nextHazard += _hazardInterval;
 
-                Vector3 ahead = Vector3.MoveTowards(lightTransform.position, waypoints[index], speed * _hazardWarnDuration);
-                DropHazardAsync(context, ahead, hazardToken).Forget();
+                // 터질 때 조명이 와 있을 자리 둘레에 떨어뜨린다.
+                Vector3 ahead = Vector3.MoveTowards(lightTransform.position, waypoints[index], speed * _hazard.WarnDuration);
+                Vector3 point = ahead + (Vector3)(UnityEngine.Random.insideUnitCircle * (_lightRadius * 0.5f));
+
+                GroundDrop.PlayAsync(GameManager.Pool, GameManager.Feedback, context, _hazard, point, hazardToken).Forget();
             }
 
             await UniTask.Yield(PlayerLoopTiming.Update, token);
@@ -228,23 +224,6 @@ public class GuidedTourGimmick : PunishingBossGimmick
         {
             light.sortingOrder = lightOrder;
             GameManager.Pool.DespawnSprite(overlay);
-        }
-    }
-
-    // 터질 때 조명이 와 있을 자리에 떨어진다. 원이 조명보다 작아 조명 안에서 피할 수 있다.
-    private async UniTaskVoid DropHazardAsync(AttackContext context, Vector3 lightCenter, CancellationToken token)
-    {
-        Vector3 point = lightCenter + (Vector3)(UnityEngine.Random.insideUnitCircle * (_lightRadius * 0.5f));
-
-        try
-        {
-            await Telegraph.PlayCircleAsync(GameManager.Pool, _hazardPrefab, point, _hazardRadius, _hazardColor, _hazardWarnDuration, token);
-
-            GameManager.Feedback.PlayImpact(_hazardImpact, point);
-            context.Damage.Blast(_hazardHit, point, _hazardRadius, 0f);
-        }
-        catch (OperationCanceledException)
-        {
         }
     }
 

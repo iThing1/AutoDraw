@@ -15,16 +15,20 @@ MonoBehaviour:
   _hpRatio: 1
   _attackStyle: {fileID: 11400000, guid: 3cce316c21da112459b47102ffa108d4, type: 2}
   _colorSegments:
-  - _from: {r: 0.78, g: 0.78, b: 0.78, a: 1}
-    _to: {r: 0.64, g: 0.64, b: 0.64, a: 1}
-  - _from: {r: 0.56, g: 0.56, b: 0.56, a: 1}
-    _to: {r: 0.44, g: 0.44, b: 0.44, a: 1}
-  - _from: {r: 0.38, g: 0.38, b: 0.38, a: 1}
-    _to: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+  - _from: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+    _to: {r: 0.68, g: 0.68, b: 0.68, a: 1}
+  - _from: {r: 0.62, g: 0.62, b: 0.62, a: 1}
+    _to: {r: 0.52, g: 0.52, b: 0.52, a: 1}
+  - _from: {r: 0.48, g: 0.48, b: 0.48, a: 1}
+    _to: {r: 0.4, g: 0.4, b: 0.4, a: 1}
+  - _from: {r: 0.36, g: 0.36, b: 0.36, a: 1}
+    _to: {r: 0.28, g: 0.28, b: 0.28, a: 1}
   _gimmickLines:
-  - _hpRatio: 0.66
+  - _hpRatio: 0.75
     _gimmick: {fileID: 11400000, guid: 47ebadab9cb936149b1642dfd011e4ee, type: 2}
-  - _hpRatio: 0.33
+  - _hpRatio: 0.5
     _gimmick: {fileID: 11400000, guid: 18fb0a00f11e9b24a9a2c0e0c2136089, type: 2}
+  - _hpRatio: 0.25
+    _gimmick: {fileID: 11400000, guid: 10888ae5e8dbeaf4ca6ce0a384642ebe, type: 2}
   _bannerTitle: 
   _bannerSubtitle: 

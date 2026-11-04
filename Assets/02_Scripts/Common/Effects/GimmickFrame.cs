@@ -70,6 +70,11 @@ public sealed class GimmickFrame
         }
     }
 
+    public void SetFillColor(Color color)
+    {
+        _fill.color = color;
+    }
+
     // 0이면 비어 있고 1이면 안쪽이 다 찬다. 아래 변에서부터 차오른다.
     public void SetFill(float progress)
     {

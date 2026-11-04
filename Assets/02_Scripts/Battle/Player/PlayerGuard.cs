@@ -180,7 +180,7 @@ public class PlayerGuard : PlayerUtility
         }
 
         GameManager.TimeScale.PlayHitStop(_preset.BlockHitStopDuration, _preset.BlockHitStopTimeScale);
-        ImpactPlayer.Play(_preset.BlockImpact, hitPoint);
+        GameManager.Feedback.PlayImpact(_preset.BlockImpact, hitPoint);
 
         if (null == _shield)
         {

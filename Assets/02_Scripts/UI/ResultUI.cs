@@ -73,7 +73,7 @@ public class ResultUI : MonoBehaviour
         CreateLetters(settings);
         ShowBackdrop(settings.BackdropColor);
 
-        await RealtimeDelay.WaitAsync(settings.DelayBefore, token);
+        await GameManager.TimeScale.WaitRealtimeAsync(settings.DelayBefore, token);
 
         for (int i = 0; i < _letters.Count; i++)
         {
@@ -86,10 +86,10 @@ public class ResultUI : MonoBehaviour
 
             PopLetter(letter, settings);
 
-            await RealtimeDelay.WaitAsync(settings.LetterInterval, token);
+            await GameManager.TimeScale.WaitRealtimeAsync(settings.LetterInterval, token);
         }
 
-        await RealtimeDelay.WaitAsync(settings.LetterPopDuration, token);
+        await GameManager.TimeScale.WaitRealtimeAsync(settings.LetterPopDuration, token);
 
         GameManager.Sound.PlaySfx(settings.FinishSound);
 

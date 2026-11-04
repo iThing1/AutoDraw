@@ -28,10 +28,10 @@ public abstract class GuardAuraAttackStyle : UtilityReactionAttackStyle
     {
         BattleUnit owner = context.Owner;
         float diameter = _radius * 2f;
-        SpriteRenderer aura = null != _auraPrefab ? PooledSprite.Spawn(_auraPrefab, owner.Body.position, 0f, new Vector2(diameter, diameter), _auraColor) : null;
+        SpriteRenderer aura = null != _auraPrefab ? GameManager.Pool.SpawnSprite(_auraPrefab, owner.Body.position, 0f, new Vector2(diameter, diameter), _auraColor) : null;
         Action<Vector3> handleBlocked = point => OnBlocked(context, point, gaugeGain, token);
 
-        ImpactPlayer.Play(_startImpact, owner.Body.position);
+        GameManager.Feedback.PlayImpact(_startImpact, owner.Body.position);
         owner.OnBlocked += handleBlocked;
 
         try
@@ -58,7 +58,7 @@ public abstract class GuardAuraAttackStyle : UtilityReactionAttackStyle
         {
             owner.OnBlocked -= handleBlocked;
             OnEnd(context);
-            PooledSprite.Despawn(aura);
+            GameManager.Pool.DespawnSprite(aura);
         }
     }
 

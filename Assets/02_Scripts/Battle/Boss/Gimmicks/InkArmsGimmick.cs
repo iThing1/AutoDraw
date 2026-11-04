@@ -12,7 +12,7 @@ public class InkArmsGimmick : BossGimmick
 
     public override void Prewarm()
     {
-        InkArmsRun.Prewarm(_inkArms);
+        InkArmsRun.Prewarm(GameManager.Pool, _inkArms);
     }
 
     public override async UniTask<bool> PlayAsync(AttackContext context, CancellationToken token)
@@ -39,7 +39,7 @@ public class InkArmsGimmick : BossGimmick
                 context.Hands.PoseAsync(HandGesture.BothPress, context.Target.GetAimPoint(Vector3.zero), _inkArms.LungeInterval, token).Forget();
             }
 
-            await InkArmsRun.LungeAsync(context, _inkArms, pools, 0f, token);
+            await InkArmsRun.LungeAsync(GameManager.Pool, context, _inkArms, pools, 0f, token);
         }
         finally
         {

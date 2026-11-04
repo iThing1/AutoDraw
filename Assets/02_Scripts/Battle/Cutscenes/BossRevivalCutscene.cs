@@ -25,10 +25,10 @@ public class BossRevivalCutscene
     {
         using (GameManager.TimeScale.BeginSlowMotion(_settings.SlowTimeScale))
         {
-            await RealtimeDelay.WaitAsync(_settings.SlowDuration, token);
+            await GameManager.TimeScale.WaitRealtimeAsync(_settings.SlowDuration, token);
         }
 
-        await CinematicPlayer.EnterAsync(_boss.Body, _settings.Cinematic, token);
+        await GameManager.Director.EnterAsync(_boss.Body, _settings.Cinematic, token);
 
         SetHandsGroggy(true);
 
@@ -39,12 +39,12 @@ public class BossRevivalCutscene
             .SetUpdate(true)
             .ToUniTaskKillOnCancel(token);
 
-        await RealtimeDelay.WaitAsync(_settings.HoldDuration, token);
+        await GameManager.TimeScale.WaitRealtimeAsync(_settings.HoldDuration, token);
 
         _beam = SpawnBeam();
         await DropBeamAsync(token);
 
-        ImpactPlayer.Play(_settings.BeamImpact, _boss.Body.position);
+        GameManager.Feedback.PlayImpact(_settings.BeamImpact, _boss.Body.position);
     }
 
     public async UniTask RiseAsync(BossPhaseData nextPhase, CancellationToken token)
@@ -56,7 +56,7 @@ public class BossRevivalCutscene
             .SetUpdate(true)
             .ToUniTaskKillOnCancel(token);
 
-        ImpactPlayer.Play(_settings.RiseImpact, _boss.Body.position);
+        GameManager.Feedback.PlayImpact(_settings.RiseImpact, _boss.Body.position);
 
         if (null != _beam)
         {
@@ -66,14 +66,14 @@ public class BossRevivalCutscene
         }
 
         await PlayBannerAsync(nextPhase, token);
-        await CinematicPlayer.ExitAsync(_settings.Cinematic, token);
+        await GameManager.Director.ExitAsync(_settings.Cinematic, token);
     }
 
     // 끊겨도 쓰러진 크기로 남거나 빛기둥이 떠 있지 않게 되돌린다.
     public void Cleanup()
     {
         _boss.transform.localScale = _startScale;
-        PooledSprite.Despawn(_beam);
+        GameManager.Pool.DespawnSprite(_beam);
         _beam = null;
     }
 
@@ -84,7 +84,7 @@ public class BossRevivalCutscene
             return null;
         }
 
-        return PooledSprite.Spawn(_settings.BeamPrefab, _boss.Body.position, 0f, new Vector2(_settings.BeamWidth, 0f), _settings.BeamColor);
+        return GameManager.Pool.SpawnSprite(_settings.BeamPrefab, _boss.Body.position, 0f, new Vector2(_settings.BeamWidth, 0f), _settings.BeamColor);
     }
 
     // 윗끝은 화면 위에 고정한 채 아랫끝이 보스까지 내려온다.

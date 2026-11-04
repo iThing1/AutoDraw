@@ -85,7 +85,7 @@ public class DecalcomanieCloneGimmick : BossGimmick
             {
                 if (null != _foldPrefab)
                 {
-                    fold = PooledSprite.Spawn(_foldPrefab, foldCenter, VERTICAL_ANGLE, new Vector2(_foldLength, _foldWidth), _foldColor);
+                    fold = GameManager.Pool.SpawnSprite(_foldPrefab, foldCenter, VERTICAL_ANGLE, new Vector2(_foldLength, _foldWidth), _foldColor);
                     fold.transform.localScale = new Vector3(0f, _foldWidth, 1f);
 
                     await fold.transform.DOScaleX(_foldLength, _foldDuration)
@@ -95,7 +95,7 @@ public class DecalcomanieCloneGimmick : BossGimmick
 
                 clone = SpawnClone(target, foldX);
                 FollowAsync(target, clone, foldX, followSource.Token).Forget();
-                ImpactPlayer.Play(_cloneImpact, clone.transform.position);
+                GameManager.Feedback.PlayImpact(_cloneImpact, clone.transform.position);
 
                 await clone.DOFade(_cloneColor.a, _cloneFadeDuration)
                     .ToUniTaskKillOnCancel(token);
@@ -120,8 +120,8 @@ public class DecalcomanieCloneGimmick : BossGimmick
             finally
             {
                 followSource.Cancel();
-                PooledSprite.Despawn(clone);
-                PooledSprite.Despawn(fold);
+                GameManager.Pool.DespawnSprite(clone);
+                GameManager.Pool.DespawnSprite(fold);
                 ListPool<Vector3>.Release(drops);
             }
         }
@@ -143,7 +143,7 @@ public class DecalcomanieCloneGimmick : BossGimmick
     private SpriteRenderer SpawnClone(AttackTarget target, float foldX)
     {
         Color hidden = new Color(_cloneColor.r, _cloneColor.g, _cloneColor.b, 0f);
-        SpriteRenderer clone = PooledSprite.Spawn(_clonePrefab, Vector3.zero, 0f, Vector2.one, hidden);
+        SpriteRenderer clone = GameManager.Pool.SpawnSprite(_clonePrefab, Vector3.zero, 0f, Vector2.one, hidden);
 
         MirrorBody(target.Unit.BodyRenderer, clone, foldX);
 
@@ -186,9 +186,9 @@ public class DecalcomanieCloneGimmick : BossGimmick
         AddDrops(target.FollowTransform.position, drops);
         AddDrops(clone.position, drops);
 
-        await Telegraph.PlayCirclesAsync(_dropPrefab, drops, _dropRadius, _telegraphColor, _warnDuration, token);
+        await Telegraph.PlayCirclesAsync(GameManager.Pool, _dropPrefab, drops, _dropRadius, _telegraphColor, _warnDuration, token);
 
-        ImpactPlayer.Play(_impact, (target.FollowTransform.position + clone.position) * 0.5f);
+        GameManager.Feedback.PlayImpact(_impact, (target.FollowTransform.position + clone.position) * 0.5f);
 
         // 분신도 플레이어와 같은 규칙으로 맞는다. 대시로 피하는 중이면 분신도 함께 피하는 것은 피해 처리가 정한다.
         if (target.IsInAnyBlast(drops, _dropRadius) || IsCloneHit(clone.position, drops))

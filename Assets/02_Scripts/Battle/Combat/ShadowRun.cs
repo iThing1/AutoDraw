@@ -5,7 +5,7 @@ using UnityEngine;
 // 먹 그림자를 풀에서 꺼내 길을 따라 일정한 빠르기로 달리게 하고, 몸에 닿으면 한 번 맞힌 뒤 돌려준다.
 public static class ShadowRun
 {
-    public static async UniTask RunAsync(AttackContext context, ShadowRunSettings shadow, Polyline path, float gaugeGain, CancellationToken token)
+    public static async UniTask RunAsync(PoolManager pool, AttackContext context, ShadowRunSettings shadow, Polyline path, float gaugeGain, CancellationToken token)
     {
         if (null == shadow.Prefab)
         {
@@ -15,7 +15,7 @@ public static class ShadowRun
         float diameter = shadow.Diameter;
         float radius = diameter * 0.5f;
 
-        SpriteRenderer sprite = PooledSprite.Spawn(shadow.Prefab, path.Points[0], 0f, new Vector2(diameter, diameter), shadow.Color);
+        SpriteRenderer sprite = pool.SpawnSprite(shadow.Prefab, path.Points[0], 0f, new Vector2(diameter, diameter), shadow.Color);
         AttackTarget target = context.Target;
         float travelled = 0f;
         int segment = 0;
@@ -42,7 +42,7 @@ public static class ShadowRun
         }
         finally
         {
-            PooledSprite.Despawn(sprite);
+            pool.DespawnSprite(sprite);
         }
     }
 }

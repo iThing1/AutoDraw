@@ -137,7 +137,7 @@ public class BossPhaseMachine : MonoBehaviour
             UpdateGimmickRatios();
             OnPhaseChanged?.Invoke();
 
-            ImpactPlayer.Play(_toneShiftImpact, _unit.Body.position);
+            GameManager.Feedback.PlayImpact(_toneShiftImpact, _unit.Body.position);
             await _tint.ShiftAsync(_tint.Current, _tint.GetSegmentStart(_phases[_phaseIndex], _nextLineIndex), _toneShiftDuration, false, token);
 
             UpdateFloor();

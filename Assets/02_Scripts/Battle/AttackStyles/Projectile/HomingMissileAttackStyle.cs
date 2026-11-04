@@ -100,7 +100,7 @@ public class HomingMissileAttackStyle : AttackStyle
     // 방패에 닿아 멈췄어도 그 자리에서 터지고, 피해는 Blast가 방패를 다시 확인해 막는다.
     private void Explode(AttackContext context, Vector3 position, float gaugeGain)
     {
-        ImpactPlayer.Play(_blastImpact, position);
+        GameManager.Feedback.PlayImpact(_blastImpact, position);
 
         context.Damage.Blast(_hit, position, _blastRadius, gaugeGain);
     }

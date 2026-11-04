@@ -15,7 +15,7 @@ public class WindFieldAttackStyle : GuardAuraAttackStyle
 
     protected override void OnBlocked(AttackContext context, Vector3 point, float gaugeGain, CancellationToken token)
     {
-        ImpactPlayer.Play(_deflectImpact, point);
+        GameManager.Feedback.PlayImpact(_deflectImpact, point);
     }
 
     protected override void OnTick(AttackContext context)

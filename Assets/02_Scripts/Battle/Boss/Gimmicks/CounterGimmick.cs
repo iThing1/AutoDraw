@@ -152,7 +152,7 @@ public class CounterGimmick : BossGimmick
         }
 
         float endDiameter = context.Owner.GetBodyRadius() * 2f;
-        SpriteRenderer warn = PooledSprite.Spawn(_warnPrefab, context.Owner.Body.position, 0f, new Vector2(_warnStartDiameter, _warnStartDiameter), _warnColor);
+        SpriteRenderer warn = GameManager.Pool.SpawnSprite(_warnPrefab, context.Owner.Body.position, 0f, new Vector2(_warnStartDiameter, _warnStartDiameter), _warnColor);
 
         try
         {
@@ -162,7 +162,7 @@ public class CounterGimmick : BossGimmick
         }
         finally
         {
-            PooledSprite.Despawn(warn);
+            GameManager.Pool.DespawnSprite(warn);
         }
     }
 
@@ -182,7 +182,7 @@ public class CounterGimmick : BossGimmick
         }
 
         GameManager.TimeScale.PlayHitStop(_counterHitStopDuration, _counterHitStopTimeScale);
-        ImpactPlayer.Play(_counterImpact, body);
+        GameManager.Feedback.PlayImpact(_counterImpact, body);
 
         Vector3 away = body - target.FollowTransform.position;
         away.z = 0f;

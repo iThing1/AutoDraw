@@ -67,7 +67,7 @@ public class InkDiveAttackStyle : AttackStyle
             risePoint.z = owner.position.z;
 
             LeaveInk(context, risePoint);
-            await Telegraph.PlayCircleAsync(_telegraphPrefab, risePoint, _blastRadius, _telegraphColor, _warnDuration, token);
+            await Telegraph.PlayCircleAsync(GameManager.Pool, _telegraphPrefab, risePoint, _blastRadius, _telegraphColor, _warnDuration, token);
 
             owner.position = risePoint;
 
@@ -76,7 +76,7 @@ public class InkDiveAttackStyle : AttackStyle
                 .ToUniTaskKillOnCancel(token);
         }
 
-        ImpactPlayer.Play(_riseImpact, owner.position);
+        GameManager.Feedback.PlayImpact(_riseImpact, owner.position);
         context.Damage.Blast(_hit, owner.position, _blastRadius, gaugeGain);
     }
 

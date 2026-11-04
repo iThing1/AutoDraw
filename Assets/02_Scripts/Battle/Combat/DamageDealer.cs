@@ -59,7 +59,7 @@ public class DamageDealer
 
         _target.Unit.Health.TakeDamage(damage);
 
-        HitFeedbackPlayer.Play(hit.GetHitFeedback(damage.IsCritical), _target.Unit, damage, _paintCanvas);
+        GameManager.Feedback.PlayHit(hit.GetHitFeedback(damage.IsCritical), _target.Unit, damage, _paintCanvas);
     }
 
     public void Blast(HitSettings hit, Vector3 center, float radius, float gaugeGain)
@@ -85,7 +85,7 @@ public class DamageDealer
 
         _target.Unit.Health.TakeDamage(damage);
 
-        HitFeedbackPlayer.Play(hit.GetHitFeedback(damage.IsCritical), _target.Unit, damage, _paintCanvas);
+        GameManager.Feedback.PlayHit(hit.GetHitFeedback(damage.IsCritical), _target.Unit, damage, _paintCanvas);
 
         if (null != _skillGauge && 0f < gaugeGain)
         {

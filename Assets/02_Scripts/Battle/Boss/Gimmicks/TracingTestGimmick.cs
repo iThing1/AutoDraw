@@ -73,7 +73,7 @@ public class TracingTestGimmick : BossGimmick
 
         Polyline path = BuildPath(context.Target);
         List<Vector3> checkpoints = ListPool<Vector3>.Get();
-        LineRenderer line = PathLine.Spawn(_pathPrefab, _pathWidth, _pathColor);
+        LineRenderer line = GameManager.Pool.SpawnLine(_pathPrefab, _pathWidth, _pathColor);
 
         try
         {
@@ -86,7 +86,7 @@ public class TracingTestGimmick : BossGimmick
 
             if (isPassed)
             {
-                ImpactPlayer.Play(_successImpact, context.Target.GetAimPoint(Vector3.zero));
+                GameManager.Feedback.PlayImpact(_successImpact, context.Target.GetAimPoint(Vector3.zero));
             }
 
             Color current = line.startColor;
@@ -99,7 +99,7 @@ public class TracingTestGimmick : BossGimmick
         }
         finally
         {
-            PathLine.Despawn(line);
+            GameManager.Pool.DespawnLine(line);
             ListPool<Vector3>.Release(checkpoints);
         }
     }
@@ -143,7 +143,7 @@ public class TracingTestGimmick : BossGimmick
     // 펜 끝이 선을 처음부터 끝까지 그어 보인다.
     private async UniTask SketchAsync(Polyline path, LineRenderer line, CancellationToken token)
     {
-        SpriteRenderer pen = null != _penPrefab ? PooledSprite.Spawn(_penPrefab, path.Points[0], 0f, new Vector2(_penDiameter, _penDiameter), _penColor) : null;
+        SpriteRenderer pen = null != _penPrefab ? GameManager.Pool.SpawnSprite(_penPrefab, path.Points[0], 0f, new Vector2(_penDiameter, _penDiameter), _penColor) : null;
         float elapsed = 0f;
         int segment = 0;
 
@@ -171,7 +171,7 @@ public class TracingTestGimmick : BossGimmick
         }
         finally
         {
-            PooledSprite.Despawn(pen);
+            GameManager.Pool.DespawnSprite(pen);
         }
     }
 

@@ -122,7 +122,7 @@ public class CollageHazardPattern : HazardPattern
             {
                 Vector3 center = crossing + tangent * ((pieces[i].x + pieces[i].y) * 0.5f);
 
-                telegraphs.Add(Telegraph.PlayLineAsync(_telegraphPrefab, center, angle, pieces[i].y - pieces[i].x, _thickness, _telegraphColor,
+                telegraphs.Add(Telegraph.PlayLineAsync(GameManager.Pool, _telegraphPrefab, center, angle, pieces[i].y - pieces[i].x, _thickness, _telegraphColor,
                     _warnDuration, token));
             }
 
@@ -146,7 +146,7 @@ public class CollageHazardPattern : HazardPattern
         {
             for (int i = 0; i < pieces.Count; i++)
             {
-                sprites.Add(PooledSprite.Spawn(_wallPrefab, crossing, angle, new Vector2(pieces[i].y - pieces[i].x, _thickness), _wallColor));
+                sprites.Add(GameManager.Pool.SpawnSprite(_wallPrefab, crossing, angle, new Vector2(pieces[i].y - pieces[i].x, _thickness), _wallColor));
             }
 
             float fadeStart = _travelDistance - _speed * _fadeDuration;
@@ -172,7 +172,7 @@ public class CollageHazardPattern : HazardPattern
                     if (false == hasStruck && target.IsTouchingSegment(from, to, _thickness * 0.5f) && false == target.TryDodge())
                     {
                         hasStruck = true;
-                        ImpactPlayer.Play(_impact, target.GetAimPoint(Vector3.zero));
+                        GameManager.Feedback.PlayImpact(_impact, target.GetAimPoint(Vector3.zero));
                         context.Damage.Strike(_hit, target.GetAimPoint(Vector3.zero), 0f);
                     }
                 }
@@ -185,7 +185,7 @@ public class CollageHazardPattern : HazardPattern
         {
             for (int i = 0; i < sprites.Count; i++)
             {
-                PooledSprite.Despawn(sprites[i]);
+                GameManager.Pool.DespawnSprite(sprites[i]);
             }
 
             ListPool<SpriteRenderer>.Release(sprites);

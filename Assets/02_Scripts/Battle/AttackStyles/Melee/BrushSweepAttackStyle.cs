@@ -54,7 +54,7 @@ public class BrushSweepAttackStyle : AttackStyle
     {
         Vector3 center = context.Owner.Body.position;
 
-        await Telegraph.PlayCircleAsync(_telegraphPrefab, center, _radius, _telegraphColor, _warnDuration, token);
+        await Telegraph.PlayCircleAsync(GameManager.Pool, _telegraphPrefab, center, _radius, _telegraphColor, _warnDuration, token);
 
         Vector3 toTarget = context.Target.GetAimPoint(Vector3.zero) - center;
         float startAngle = Geometry2D.ToAngle(toTarget) + 180f;

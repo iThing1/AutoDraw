@@ -17,6 +17,8 @@ public class GameManager : SingletonBehaviour<GameManager>
     public static SettingsManager Settings { get { return Instance._settingsManager; } }
     public static PoolManager Pool { get { return Instance._poolManager; } }
     public static TimeScaleManager TimeScale { get { return Instance._timeScaleManager; } }
+    public static FeedbackManager Feedback { get { return Instance._feedbackManager; } }
+    public static CinematicDirector Director { get { return Instance._cinematicDirector; } }
     public static DataTableManager Tables { get { return Instance._dataTableManager; } }
     public static AssetManager Assets { get { return Instance._assetManager; } }
     // 표를 읽은 뒤에 만들어지고, 그 전에는 null이다.
@@ -42,6 +44,8 @@ public class GameManager : SingletonBehaviour<GameManager>
     private UIManager _uiManager = new();
     private PoolManager _poolManager = new();
     private TimeScaleManager _timeScaleManager = new();
+    private FeedbackManager _feedbackManager = new();
+    private CinematicDirector _cinematicDirector = new();
     private DataTableManager _dataTableManager = new();
     private AssetManager _assetManager = new();
     private PlayerModel _player;
@@ -65,6 +69,10 @@ public class GameManager : SingletonBehaviour<GameManager>
 
         // 스테이지가 생성되자마자 등장 컷신이 시네마틱 UI를 쓰므로 UI를 먼저 만든다.
         _uiManager.Init(_cinematicUIPrefab);
+
+        // 연출은 위에서 만든 매니저들을 넘겨받아 쓴다.
+        _feedbackManager.Init(_cameraRig, _soundManager, _poolManager, _timeScaleManager);
+        _cinematicDirector.Init(_soundManager, _cameraRig, _uiManager.Cinematic.Letterbox, _timeScaleManager);
 
         if (null == _mapSpawner)
         {

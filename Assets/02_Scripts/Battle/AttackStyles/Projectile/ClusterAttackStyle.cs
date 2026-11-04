@@ -27,7 +27,7 @@ public class ClusterAttackStyle : AttackStyle
             return;
         }
 
-        ImpactPlayer.Play(_cluster.SplitImpact, splitPoint, color);
+        GameManager.Feedback.PlayImpact(_cluster.SplitImpact, splitPoint, color);
 
         for (int i = 0; i < _cluster.FragmentCount; i++)
         {

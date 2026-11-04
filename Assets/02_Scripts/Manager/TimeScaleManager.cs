@@ -104,6 +104,23 @@ public class TimeScaleManager
         ApplyTimeScale();
     }
 
+    // 컷신과 UI 연출은 히트 스톱이나 슬로 모션과 상관없이 정해진 시간만큼 보여야 하므로 실제 시간으로 기다린다.
+    // 일시정지 동안 흐른 시간은 세지 않아, 실제 시간으로 재는 공격(돌진 베기)이 멈춘 사이에 맞지 않게 한다.
+    public async UniTask WaitRealtimeAsync(float seconds, CancellationToken token)
+    {
+        float elapsed = 0f;
+
+        while (elapsed < seconds)
+        {
+            await UniTask.Yield(PlayerLoopTiming.Update, token);
+
+            if (false == _isPaused)
+            {
+                elapsed += Time.unscaledDeltaTime;
+            }
+        }
+    }
+
     // 이전 슬로 모션의 using 블록이 나중에 끝나도 번호표가 0이라 다시 건드리지 않는다.
     public void ResetToNormal()
     {

@@ -10,7 +10,7 @@ public static class SpriteShatter
     private const float MIN_DIRECTION_SQR_LENGTH = 0.0001f;
 
     // 조각은 원본 텍스처의 일부 영역만 쓰는 스프라이트라서 원래 그림이 그대로 쪼개진다.
-    public static async UniTask PlayAsync(SpriteRenderer source, ShatterSettings settings, CancellationToken token)
+    public static async UniTask PlayAsync(FeedbackManager feedback, SpriteRenderer source, ShatterSettings settings, CancellationToken token)
     {
         Sprite sprite = source.sprite;
 
@@ -58,7 +58,7 @@ public static class SpriteShatter
 
         source.enabled = false;
 
-        ImpactPlayer.Play(settings.Impact, center, source.color);
+        feedback.PlayImpact(settings.Impact, center, source.color);
 
         try
         {

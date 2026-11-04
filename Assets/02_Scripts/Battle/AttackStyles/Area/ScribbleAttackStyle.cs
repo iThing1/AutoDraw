@@ -153,7 +153,7 @@ public class ScribbleAttackStyle : AttackStyle
             await UniTask.Delay(TimeSpan.FromSeconds(delay), cancellationToken: token);
         }
 
-        await Telegraph.PlayPathAsync(_telegraphPrefab, path, _strokeWidth, tint.Apply(_telegraphColor), _sketchDuration, _warnDuration, token);
+        await Telegraph.PlayPathAsync(GameManager.Pool, _telegraphPrefab, path, _strokeWidth, tint.Apply(_telegraphColor), _sketchDuration, _warnDuration, token);
 
         if (null == _strokePrefab)
         {
@@ -161,7 +161,7 @@ public class ScribbleAttackStyle : AttackStyle
         }
 
         Color strokeColor = tint.Apply(_strokeColor);
-        LineRenderer stroke = PathLine.Spawn(_strokePrefab, _strokeWidth, strokeColor);
+        LineRenderer stroke = GameManager.Pool.SpawnLine(_strokePrefab, _strokeWidth, strokeColor);
 
         try
         {
@@ -175,7 +175,7 @@ public class ScribbleAttackStyle : AttackStyle
         }
         finally
         {
-            PathLine.Despawn(stroke);
+            GameManager.Pool.DespawnLine(stroke);
         }
     }
 
@@ -205,7 +205,7 @@ public class ScribbleAttackStyle : AttackStyle
         CancellationToken token)
     {
         AttackTarget target = context.Target;
-        SpriteRenderer pen = null != _penPrefab ? PooledSprite.Spawn(_penPrefab, path.Points[0], 0f, new Vector2(_penDiameter, _penDiameter), penColor) : null;
+        SpriteRenderer pen = null != _penPrefab ? GameManager.Pool.SpawnSprite(_penPrefab, path.Points[0], 0f, new Vector2(_penDiameter, _penDiameter), penColor) : null;
         float radius = Mathf.Max(_penDiameter, _strokeWidth) * 0.5f;
         Vector3 previous = path.Points[0];
         float elapsed = 0f;
@@ -240,7 +240,7 @@ public class ScribbleAttackStyle : AttackStyle
         }
         finally
         {
-            PooledSprite.Despawn(pen);
+            GameManager.Pool.DespawnSprite(pen);
         }
 
         return hasStruck;

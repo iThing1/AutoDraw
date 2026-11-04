@@ -113,7 +113,7 @@ public class PlayerDash : PlayerUtility
         float nextAfterimageTime = 0f;
         PaintStripe stroke = BeginStroke(start, end);
 
-        ImpactPlayer.Play(_preset.StartImpact, _unit.Body.position);
+        GameManager.Feedback.PlayImpact(_preset.StartImpact, _unit.Body.position);
 
         bool hasEnded = false;
 
@@ -221,7 +221,7 @@ public class PlayerDash : PlayerUtility
         }
 
         Transform visual = body.transform;
-        SpriteRenderer afterimage = PooledSprite.Spawn(_preset.AfterimagePrefab, visual.position, visual.eulerAngles.z, visual.lossyScale, _preset.AfterimageColor);
+        SpriteRenderer afterimage = GameManager.Pool.SpawnSprite(_preset.AfterimagePrefab, visual.position, visual.eulerAngles.z, visual.lossyScale, _preset.AfterimageColor);
         afterimage.sprite = body.sprite;
         afterimage.flipX = body.flipX;
 
@@ -239,7 +239,7 @@ public class PlayerDash : PlayerUtility
         }
         finally
         {
-            PooledSprite.Despawn(afterimage);
+            GameManager.Pool.DespawnSprite(afterimage);
         }
     }
 }

@@ -35,7 +35,7 @@ public class BossBanner : MonoBehaviour
 
         await enter.ToUniTaskKillOnCancel(token);
 
-        await RealtimeDelay.WaitAsync(settings.HoldDuration, token);
+        await GameManager.TimeScale.WaitRealtimeAsync(settings.HoldDuration, token);
 
         Sequence exit = DOTween.Sequence()
             .Join(_canvasGroup.DOFade(0f, settings.OutDuration))

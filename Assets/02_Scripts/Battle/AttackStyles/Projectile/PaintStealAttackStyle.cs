@@ -32,7 +32,7 @@ public class PaintStealAttackStyle : AttackStyle
     {
         Vector3 center = context.Target.GetAimPoint(Vector3.zero);
 
-        await Telegraph.PlayCircleAsync(_telegraphPrefab, center, _stealRadius, _telegraphColor, _warnDuration, token);
+        await Telegraph.PlayCircleAsync(GameManager.Pool, _telegraphPrefab, center, _stealRadius, _telegraphColor, _warnDuration, token);
 
         List<PaintMark> stolen = ListPool<PaintMark>.Get();
         List<Color> colors = ListPool<Color>.Get();
@@ -46,7 +46,7 @@ public class PaintStealAttackStyle : AttackStyle
 
             await GatherAsync(context, center, stolen, colors, token);
 
-            ImpactPlayer.Play(_chargeImpact, context.Owner.Body.position);
+            GameManager.Feedback.PlayImpact(_chargeImpact, context.Owner.Body.position);
             await UniTask.Delay(TimeSpan.FromSeconds(_chargeDuration), cancellationToken: token);
 
             for (int i = 0; i < colors.Count; i++)

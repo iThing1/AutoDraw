@@ -74,9 +74,9 @@ public class InkLineAttackStyle : AttackStyle
     {
         LinePlacement line = LinePlacement.PickNear(context.Target.GetAimPoint(Vector3.zero), _offsetRange);
 
-        await Telegraph.PlayLineAsync(_telegraphPrefab, line.Center, line.Angle, _length, _width, _telegraphColor, _warnDuration, token);
+        await Telegraph.PlayLineAsync(GameManager.Pool, _telegraphPrefab, line.Center, line.Angle, _length, _width, _telegraphColor, _warnDuration, token);
 
-        SpriteRenderer stroke = PooledSprite.Spawn(_telegraphPrefab, line.Center, line.Angle, new Vector2(_length, 0f), _strokeColor);
+        SpriteRenderer stroke = GameManager.Pool.SpawnSprite(_telegraphPrefab, line.Center, line.Angle, new Vector2(_length, 0f), _strokeColor);
 
         try
         {
@@ -84,7 +84,7 @@ public class InkLineAttackStyle : AttackStyle
                 .SetEase(Ease.OutQuad)
                 .ToUniTaskKillOnCancel(token);
 
-            ImpactPlayer.Play(_impact, GetClosestPoint(line.Center, line.Along, context.Target.GetAimPoint(Vector3.zero)));
+            GameManager.Feedback.PlayImpact(_impact, GetClosestPoint(line.Center, line.Along, context.Target.GetAimPoint(Vector3.zero)));
             StrikeIfTouching(context, line.Center, line.Along, gaugeGain);
 
             await UniTask.Delay(TimeSpan.FromSeconds(_lingerDuration), cancellationToken: token);
@@ -94,7 +94,7 @@ public class InkLineAttackStyle : AttackStyle
         }
         finally
         {
-            PooledSprite.Despawn(stroke);
+            GameManager.Pool.DespawnSprite(stroke);
         }
     }
 

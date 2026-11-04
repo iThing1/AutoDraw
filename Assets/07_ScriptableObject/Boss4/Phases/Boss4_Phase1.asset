@@ -21,6 +21,10 @@ MonoBehaviour:
     _to: {r: 0.44, g: 0.44, b: 0.44, a: 1}
   - _from: {r: 0.38, g: 0.38, b: 0.38, a: 1}
     _to: {r: 0.3, g: 0.3, b: 0.3, a: 1}
-  _gimmickLines: []
+  _gimmickLines:
+  - _hpRatio: 0.66
+    _gimmick: {fileID: 11400000, guid: 47ebadab9cb936149b1642dfd011e4ee, type: 2}
+  - _hpRatio: 0.33
+    _gimmick: {fileID: 11400000, guid: 18fb0a00f11e9b24a9a2c0e0c2136089, type: 2}
   _bannerTitle: 
   _bannerSubtitle: 

@@ -6,14 +6,12 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.Pool;
 
-// 보스가 목표 둘레 네 모서리에 차단봉을 던져 박고, 기둥 사이에 줄을 걸어 보스 쪽만 열린 네모 울타리를 친다.
-// 줄은 기둥과 함께 가운데로 조여 들어, 열린 쪽(보스 앞)으로 빠져나가야 한다. 줄에 닿아 있는 동안 계속 맞아, 막기로 버티면 게이지만 줄어든다.
+// 목표 둘레에 보스 쪽만 열린 차단봉 울타리를 치고 조인다. 줄에 닿아 있는 동안 계속 맞는다.
 [CreateAssetMenu(fileName = "VelvetRopeAttackStyle", menuName = "Scriptable Objects/AttackStyle/VelvetRope")]
 public class VelvetRopeAttackStyle : AttackStyle
 {
     private const int CORNER_COUNT = 4;
 
-    // 모서리 순서. 이웃한 두 모서리를 이은 것이 한 변이다.
     private static readonly Vector3[] CornerDirections =
     {
         new Vector3(-1f, -1f, 0f),
@@ -23,7 +21,6 @@ public class VelvetRopeAttackStyle : AttackStyle
     };
 
     [Header("울타리")]
-    // 목표에서 각 변까지의 거리. 처음 친 크기에서 끝 크기까지 조여 든다.
     [SerializeField, Min(0.5f)] private float _startHalfSize = 4.5f;
     [SerializeField, Min(0f)] private float _endHalfSize = 0.8f;
     [SerializeField, Min(0.01f)] private float _tightenDuration = 1.6f;
@@ -31,7 +28,6 @@ public class VelvetRopeAttackStyle : AttackStyle
     [SerializeField, Min(0.05f)] private float _ropeWidth = 0.35f;
 
     [Header("기둥")]
-    // 기둥과 줄 그림. 1x1 네모 그림을 크기에 맞춰 늘린다.
     [SerializeField] private GameObject _postPrefab;
     [SerializeField, Min(0.1f)] private float _postSize = 0.6f;
     [SerializeField] private Color _postColor = new Color(0.62f, 0.48f, 0.2f, 1f);
@@ -47,7 +43,6 @@ public class VelvetRopeAttackStyle : AttackStyle
     [SerializeField] private GameObject _ropePrefab;
     [SerializeField] private Color _ropeColor = new Color(0.55f, 0.04f, 0.1f, 1f);
     [SerializeField, Min(0f)] private float _fadeDuration = 0.25f;
-    // 줄에 닿아 있으면 이 간격마다 다시 맞는다.
     [SerializeField, Min(0.05f)] private float _hitInterval = 0.3f;
     [SerializeField] private HitSettings _hit = new();
     [SerializeField] private ImpactSettings _impact = new();
@@ -108,7 +103,6 @@ public class VelvetRopeAttackStyle : AttackStyle
         }
     }
 
-    // 보스 자리에서 네 모서리로 하나씩 던진다. 마지막 기둥이 박히면 끝난다.
     private async UniTask ThrowPostsAsync(Vector3 from, Vector3 center, List<SpriteRenderer> posts, CancellationToken token)
     {
         Vector2 size = new Vector2(_postSize, _postSize);
@@ -158,7 +152,6 @@ public class VelvetRopeAttackStyle : AttackStyle
         }
     }
 
-    // 조이는 동안 매 프레임 기둥과 줄을 옮기고, 목표가 줄에 닿았는지 본다. 맞힌 뒤 hitInterval 동안은 다시 맞히지 않는다.
     private async UniTask TightenAsync(AttackContext context, Vector3 center, int openSide, List<SpriteRenderer> posts, List<SpriteRenderer> ropes,
         float gaugeGain, CancellationToken token)
     {
@@ -241,8 +234,7 @@ public class VelvetRopeAttackStyle : AttackStyle
         rope.transform.localScale = new Vector3(delta.magnitude, _ropeWidth, 1f);
     }
 
-    // 보스 쪽 변을 연다. 목표가 벽에 붙어 있어도 보스는 판 안에 있으므로, 열린 쪽이 벽에 막히지 않는다.
-    // 변 번호 순서(아래·오른쪽·위·왼쪽)는 CornerDirections의 모서리 순서를 따른다.
+    // 보스는 판 안에 있으므로 보스 쪽 변을 열면 벽에 막히지 않는다.
     private static int PickOpenSide(Vector3 toOwner)
     {
         if (Mathf.Abs(toOwner.x) > Mathf.Abs(toOwner.y))

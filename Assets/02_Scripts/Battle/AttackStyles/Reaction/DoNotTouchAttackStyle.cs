@@ -6,22 +6,19 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.Pool;
 
-// 플레이어가 막기를 자주 쓰면 "손대지 마시오". 유리 진열장 여러 개를 플레이어가 갈 자리에 연달아 떨어뜨린다.
-// 진열장은 막을 수 없어 빨간 예고를 보고 움직여 피해야 한다. 대시로 피하는 것은 그대로 통한다.
+// 막기를 자주 쓰면 나오는 반응. 막을 수 없는 유리 진열장을 플레이어가 갈 자리에 연달아 떨어뜨린다.
 [CreateAssetMenu(fileName = "DoNotTouchAttackStyle", menuName = "Scriptable Objects/AttackStyle/DoNotTouch")]
 public class DoNotTouchAttackStyle : UtilityReactionAttackStyle
 {
     [Header("진열장")]
     [SerializeField, Min(1)] private int _caseCount = 3;
     [SerializeField] private Vector2 _caseSize = new Vector2(2.4f, 2.4f);
-    // 떨어지기까지의 시간 중 이 비율만큼 앞질러 노린다. 0이면 지금 자리다.
+    // 0이면 지금 자리, 1이면 떨어질 때 있을 자리를 노린다.
     [SerializeField, Range(0f, 1.5f)] private float _leadRatio = 0.6f;
     [SerializeField, Min(0f)] private float _dropInterval = 0.45f;
 
     [Header("예고")]
-    // 예고와 진열장 그림. 1x1 네모 그림을 크기에 맞춰 늘린다.
     [SerializeField] private GameObject _telegraphPrefab;
-    // 막을 수 없다는 것을 알리도록 다른 예고와 달리 빨갛게 둔다.
     [SerializeField] private Color _telegraphColor = new Color(0.85f, 0.1f, 0.1f, 0.45f);
     [SerializeField, Min(0f)] private float _warnDuration = 0.8f;
 
@@ -91,7 +88,6 @@ public class DoNotTouchAttackStyle : UtilityReactionAttackStyle
         return Mathf.Abs(position.x - center.x) <= _caseSize.x * 0.5f && Mathf.Abs(position.y - center.y) <= _caseSize.y * 0.5f;
     }
 
-    // 떨어진 진열장은 판정과 상관없이 잠깐 남았다가 옅어지며 사라진다.
     private async UniTask ShowCaseAsync(Vector3 point, CancellationToken token)
     {
         if (null == _casePrefab)

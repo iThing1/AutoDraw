@@ -5,8 +5,7 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.Pool;
 
-// 소장품(앞서 쓰러뜨린 보스들의 패턴) 하나를 골라, 보스 머리 위에 액자를 걸고 그 소장품의 색으로 그림이 차오른 뒤 그대로 쓴다.
-// 액자는 소장품 패턴이 끝날 때까지 걸려 있어, 지금 어느 보스의 패턴인지 알려 준다.
+// 앞 보스들의 패턴 하나를 골라, 보스 머리 위에 그 보스 색의 액자를 걸고 그대로 쓴다.
 [CreateAssetMenu(fileName = "ExhibitAttackStyle", menuName = "Scriptable Objects/AttackStyle/Exhibit")]
 public class ExhibitAttackStyle : AttackStyle
 {
@@ -15,7 +14,6 @@ public class ExhibitAttackStyle : AttackStyle
     {
         // 묶음을 넣으면 그 안에서 하나를 고른다.
         [SerializeField] private AttackStyle _style;
-        // 액자 안쪽 그림 색. 어느 보스의 소장품인지 알아보게 보스마다 다르게 둔다.
         [SerializeField] private Color _color = Color.white;
 
         public AttackStyle Style { get { return _style; } }
@@ -26,7 +24,6 @@ public class ExhibitAttackStyle : AttackStyle
     [SerializeField] private Entry[] _exhibits;
 
     [Header("액자")]
-    // 1x1 네모 그림. 액자 테두리와 안쪽 그림을 늘려 그린다.
     [SerializeField] private GameObject _framePrefab;
     [SerializeField] private Vector2 _frameSize = new Vector2(2.6f, 3.2f);
     [SerializeField] private Vector3 _frameOffset = new Vector3(0f, 3.4f, 0f);

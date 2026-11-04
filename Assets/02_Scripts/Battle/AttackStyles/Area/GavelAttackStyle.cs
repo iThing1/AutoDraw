@@ -49,7 +49,12 @@ public class GavelAttackStyle : AttackStyle
                 await Telegraph.PlayCircleAsync(GameManager.Pool, _telegraphPrefab, center, radius, _finalTelegraphColor, _warnDuration, token);
 
                 GameManager.Feedback.PlayImpact(_finalImpact, center);
-                StrikeUnblockable(context, center, radius);
+
+                if (context.Target.IsInBlast(center, radius))
+                {
+                    context.Damage.StrikeThroughGuard(_finalHit, context.Target.GetAimPoint(Vector3.zero));
+                }
+
                 break;
             }
 
@@ -59,16 +64,6 @@ public class GavelAttackStyle : AttackStyle
             context.Damage.Blast(_hit, center, radius, gaugeGain);
 
             await UniTask.Delay(TimeSpan.FromSeconds(_strikeInterval), cancellationToken: token);
-        }
-    }
-
-    private void StrikeUnblockable(AttackContext context, Vector3 center, float radius)
-    {
-        AttackTarget target = context.Target;
-
-        if (target.IsInBlast(center, radius) && false == target.TryDodge())
-        {
-            context.Damage.StrikeUnblockable(_finalHit, target.GetAimPoint(Vector3.zero));
         }
     }
 }

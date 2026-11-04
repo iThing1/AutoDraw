@@ -17,7 +17,7 @@ MonoBehaviour:
   _attackInterval: 0.8
   _gaugeGainPerHit: 0
   _waitUntilFinished: 1
-  _stopsMovement: 0
+  _stopsMovement: 1
   _tell: 0
   _tellDuration: 0.5
   _exhibits:

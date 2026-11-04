@@ -73,11 +73,11 @@ public class DoNotTouchAttackStyle : UtilityReactionAttackStyle
 
         GameManager.Feedback.PlayImpact(_impact, point);
 
-        AttackTarget target = context.Target;
+        Vector3 aimPoint = context.Target.GetAimPoint(Vector3.zero);
 
-        if (IsInside(target.GetAimPoint(Vector3.zero), point) && false == target.TryDodge())
+        if (IsInside(aimPoint, point))
         {
-            context.Damage.StrikeUnblockable(_hit, target.GetAimPoint(Vector3.zero));
+            context.Damage.StrikeThroughGuard(_hit, aimPoint);
         }
 
         await ShowCaseAsync(point, token);

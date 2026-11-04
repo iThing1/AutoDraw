@@ -62,6 +62,17 @@ public class DamageDealer
         GameManager.Feedback.PlayHit(hit.GetHitFeedback(damage.IsCritical), _target.Unit, damage, _paintCanvas);
     }
 
+    // 빨간 예고 공격. 막기는 뚫지만 대시로는 피할 수 있다.
+    public void StrikeThroughGuard(HitSettings hit, Vector3 hitPoint)
+    {
+        if (_target.IsDefeated || _target.TryDodge(hitPoint))
+        {
+            return;
+        }
+
+        StrikeUnblockable(hit, hitPoint);
+    }
+
     public void Blast(HitSettings hit, Vector3 center, float radius, float gaugeGain)
     {
         if (false == _target.IsInBlast(center, radius))

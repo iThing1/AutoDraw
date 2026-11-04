@@ -61,10 +61,10 @@ public class ShadowDashAttackStyle : AttackStyle
 
     private async UniTask DashAsync(AttackContext context, LinePlacement line, float warnDuration, float gaugeGain, CancellationToken token)
     {
-        await Telegraph.PlayLineAsync(_telegraphPrefab, line.Center, line.Angle, _length, _shadow.Diameter, _telegraphColor, warnDuration, token);
+        await Telegraph.PlayLineAsync(GameManager.Pool, _telegraphPrefab, line.Center, line.Angle, _length, _shadow.Diameter, _telegraphColor, warnDuration, token);
 
         Polyline path = line.ToPath(_length, 0.5f > Random.value);
 
-        await ShadowRun.RunAsync(context, _shadow, path, gaugeGain, token);
+        await ShadowRun.RunAsync(GameManager.Pool, context, _shadow, path, gaugeGain, token);
     }
 }

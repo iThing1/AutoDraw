@@ -133,7 +133,7 @@ public class FrameTrapAttackStyle : AttackStyle
 
             for (int i = 0; i < edges.Count; i++)
             {
-                sprites.Add(PooledSprite.Spawn(_edgePrefab, edges[i].Center, edges[i].Angle, new Vector2(edges[i].Length, _edgeWidth), tint.Apply(_edgeColor)));
+                sprites.Add(GameManager.Pool.SpawnSprite(_edgePrefab, edges[i].Center, edges[i].Angle, new Vector2(edges[i].Length, _edgeWidth), tint.Apply(_edgeColor)));
             }
 
             if (isReversed)
@@ -156,7 +156,7 @@ public class FrameTrapAttackStyle : AttackStyle
             for (int i = 0; i < sprites.Count; i++)
             {
                 sprites[i].enabled = true;
-                PooledSprite.Despawn(sprites[i]);
+                GameManager.Pool.DespawnSprite(sprites[i]);
             }
 
             ListPool<Edge>.Release(edges);
@@ -192,7 +192,7 @@ public class FrameTrapAttackStyle : AttackStyle
         {
             for (int i = 0; i < edges.Count; i++)
             {
-                telegraphs.Add(Telegraph.PlayLineAsync(_telegraphPrefab, edges[i].Center, edges[i].Angle, edges[i].Length, _edgeWidth, telegraphColor,
+                telegraphs.Add(Telegraph.PlayLineAsync(GameManager.Pool, _telegraphPrefab, edges[i].Center, edges[i].Angle, edges[i].Length, _edgeWidth, telegraphColor,
                     _warnDuration, token));
             }
 
@@ -206,7 +206,7 @@ public class FrameTrapAttackStyle : AttackStyle
 
     private void Burst(AttackContext context, Vector3 center, InkTint tint, float gaugeGain)
     {
-        ImpactPlayer.Play(_burstImpact, center, tint.Apply(_burstImpact.EffectColor));
+        GameManager.Feedback.PlayImpact(_burstImpact, center, tint.Apply(_burstImpact.EffectColor));
         context.Damage.Blast(_burstHit, center, _endSize * 0.5f, gaugeGain);
     }
 

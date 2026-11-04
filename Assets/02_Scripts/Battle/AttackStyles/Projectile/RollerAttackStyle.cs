@@ -50,7 +50,7 @@ public class RollerAttackStyle : AttackStyle
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg + 90f;
 
         Color color = context.Damage.PickColor();
-        SpriteRenderer roller = PooledSprite.Spawn(_rollerPrefab, start, angle, new Vector2(_width, _thickness), color);
+        SpriteRenderer roller = GameManager.Pool.SpawnSprite(_rollerPrefab, start, angle, new Vector2(_width, _thickness), color);
         PaintStripe carpet = context.PaintCanvas.BeginStripe(start, direction, _carpetWidth, _carpetTexture, _carpetTileLength, color, context.Damage.IsInk);
         float travelled = 0f;
         int hitCount = 0;
@@ -84,7 +84,7 @@ public class RollerAttackStyle : AttackStyle
 
                     if (hitCount >= _maxHits)
                     {
-                        ImpactPlayer.Play(_burstImpact, roller.transform.position, color);
+                        GameManager.Feedback.PlayImpact(_burstImpact, roller.transform.position, color);
                         return;
                     }
                 }
@@ -102,7 +102,7 @@ public class RollerAttackStyle : AttackStyle
                 carpet.Finish();
             }
 
-            PooledSprite.Despawn(roller);
+            GameManager.Pool.DespawnSprite(roller);
         }
     }
 }

@@ -58,7 +58,7 @@ public class InkFloodGimmick : PunishingBossGimmick
 
         AttackTarget target = context.Target;
         Color clear = new Color(_floodColor.r, _floodColor.g, _floodColor.b, 0f);
-        SpriteRenderer flood = PooledSprite.Spawn(_floodPrefab, context.Owner.transform.position, 0f, new Vector2(_floodSize, _floodSize), clear);
+        SpriteRenderer flood = GameManager.Pool.SpawnSprite(_floodPrefab, context.Owner.transform.position, 0f, new Vector2(_floodSize, _floodSize), clear);
         SpriteRenderer dim = SpawnDim(context.Owner.transform.position);
 
         try
@@ -78,7 +78,7 @@ public class InkFloodGimmick : PunishingBossGimmick
             await flood.DOFade(_surgeAlpha, _surgeDuration)
                 .ToUniTaskKillOnCancel(token);
 
-            ImpactPlayer.Play(_surgeImpact, target.GetAimPoint(Vector3.zero));
+            GameManager.Feedback.PlayImpact(_surgeImpact, target.GetAimPoint(Vector3.zero));
 
             bool isSafe = null != context.PaintCanvas && context.PaintCanvas.IsPaintedAt(target.FollowTransform.position, _footRadius);
 
@@ -98,8 +98,8 @@ public class InkFloodGimmick : PunishingBossGimmick
         }
         finally
         {
-            PooledSprite.Despawn(flood);
-            PooledSprite.Despawn(dim);
+            GameManager.Pool.DespawnSprite(flood);
+            GameManager.Pool.DespawnSprite(dim);
 
             if (null != context.Hands)
             {
@@ -115,7 +115,7 @@ public class InkFloodGimmick : PunishingBossGimmick
             return null;
         }
 
-        return PooledSprite.Spawn(_dimPrefab, center, 0f, new Vector2(_floodSize, _floodSize), Color.clear);
+        return GameManager.Pool.SpawnSprite(_dimPrefab, center, 0f, new Vector2(_floodSize, _floodSize), Color.clear);
     }
 
     private void FadeDim(SpriteRenderer dim, float alpha)

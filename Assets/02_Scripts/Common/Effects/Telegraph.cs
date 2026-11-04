@@ -13,7 +13,7 @@ public static class Telegraph
     private const float AREA_ALPHA_RATIO = 0.45f;
     private const float AREA_FADE_DURATION = 0.15f;
 
-    public static async UniTask PlayAsync(GameObject prefab, Vector3 position, float angle, Vector2 size, Vector2 startFillSize, Color color,
+    public static async UniTask PlayAsync(PoolManager pool, GameObject prefab, Vector3 position, float angle, Vector2 size, Vector2 startFillSize, Color color,
         float duration, CancellationToken token)
     {
         if (null == prefab)
@@ -23,8 +23,8 @@ public static class Telegraph
         }
 
         Color areaColor = new Color(color.r, color.g, color.b, color.a * AREA_ALPHA_RATIO);
-        SpriteRenderer area = PooledSprite.Spawn(prefab, position, angle, size, areaColor);
-        SpriteRenderer fill = PooledSprite.Spawn(prefab, position, angle, startFillSize, color);
+        SpriteRenderer area = pool.SpawnSprite(prefab, position, angle, size, areaColor);
+        SpriteRenderer fill = pool.SpawnSprite(prefab, position, angle, startFillSize, color);
 
         try
         {
@@ -36,8 +36,8 @@ public static class Telegraph
         }
         finally
         {
-            PooledSprite.Despawn(area);
-            PooledSprite.Despawn(fill);
+            pool.DespawnSprite(area);
+            pool.DespawnSprite(fill);
         }
     }
 
@@ -48,15 +48,15 @@ public static class Telegraph
         area.DOFade(alpha, Mathf.Min(AREA_FADE_DURATION, duration));
     }
 
-    public static UniTask PlayCircleAsync(GameObject prefab, Vector3 center, float radius, Color color, float duration, CancellationToken token)
+    public static UniTask PlayCircleAsync(PoolManager pool, GameObject prefab, Vector3 center, float radius, Color color, float duration, CancellationToken token)
     {
         float diameter = radius * 2f;
 
-        return PlayAsync(prefab, center, 0f, new Vector2(diameter, diameter), Vector2.zero, color, duration, token);
+        return PlayAsync(pool, prefab, center, 0f, new Vector2(diameter, diameter), Vector2.zero, color, duration, token);
     }
 
     // 같은 순간에 떨어지는 여러 원을 한꺼번에 예고한다. 원마다 기다리는 작업을 따로 만들지 않고, 같은 시간에 시작한 채움이 함께 다 찬다.
-    public static async UniTask PlayCirclesAsync(GameObject prefab, IReadOnlyList<Vector3> centers, float radius, Color color, float duration,
+    public static async UniTask PlayCirclesAsync(PoolManager pool, GameObject prefab, IReadOnlyList<Vector3> centers, float radius, Color color, float duration,
         CancellationToken token)
     {
         if (null == prefab || 0 == centers.Count)
@@ -75,8 +75,8 @@ public static class Telegraph
         {
             for (int i = 0; i < centers.Count; i++)
             {
-                SpriteRenderer area = PooledSprite.Spawn(prefab, centers[i], 0f, size, areaColor);
-                SpriteRenderer fill = PooledSprite.Spawn(prefab, centers[i], 0f, Vector2.zero, color);
+                SpriteRenderer area = pool.SpawnSprite(prefab, centers[i], 0f, size, areaColor);
+                SpriteRenderer fill = pool.SpawnSprite(prefab, centers[i], 0f, Vector2.zero, color);
 
                 sprites.Add(area);
                 sprites.Add(fill);
@@ -92,7 +92,7 @@ public static class Telegraph
         {
             for (int i = 0; i < sprites.Count; i++)
             {
-                PooledSprite.Despawn(sprites[i]);
+                pool.DespawnSprite(sprites[i]);
             }
 
             ListPool<SpriteRenderer>.Release(sprites);
@@ -100,15 +100,15 @@ public static class Telegraph
     }
 
     // 선은 길이 방향(x)은 처음부터 다 보이고, 굵기 방향(y)만 차오른다.
-    public static UniTask PlayLineAsync(GameObject prefab, Vector3 center, float angle, float length, float width, Color color, float duration,
+    public static UniTask PlayLineAsync(PoolManager pool, GameObject prefab, Vector3 center, float angle, float length, float width, Color color, float duration,
         CancellationToken token)
     {
-        return PlayAsync(prefab, center, angle, new Vector2(length, width), new Vector2(length, 0f), color, duration, token);
+        return PlayAsync(pool, prefab, center, angle, new Vector2(length, width), new Vector2(length, 0f), color, duration, token);
     }
 
     // 꺾인 길을 따라가는 선. 연필로 긋듯 sketchDuration 동안 처음부터 끝까지 그어 나가고, 굵기는 duration 동안 차오른다.
     // 프리팹은 월드 좌표를 쓰는 LineRenderer여야 한다.
-    public static async UniTask PlayPathAsync(LineRenderer prefab, Polyline path, float width, Color color, float sketchDuration, float duration,
+    public static async UniTask PlayPathAsync(PoolManager pool, LineRenderer prefab, Polyline path, float width, Color color, float sketchDuration, float duration,
         CancellationToken token)
     {
         if (null == prefab)
@@ -118,8 +118,8 @@ public static class Telegraph
         }
 
         Color areaColor = new Color(color.r, color.g, color.b, color.a * AREA_ALPHA_RATIO);
-        LineRenderer area = PathLine.Spawn(prefab, width, areaColor);
-        LineRenderer fill = PathLine.Spawn(prefab, 0f, color);
+        LineRenderer area = pool.SpawnLine(prefab, width, areaColor);
+        LineRenderer fill = pool.SpawnLine(prefab, 0f, color);
         // 다 긋기 전에 공격이 오지 않도록, 긋는 시간은 예고 시간을 넘지 않게 한다.
         sketchDuration = Mathf.Min(sketchDuration, duration);
         float elapsed = 0f;
@@ -147,8 +147,8 @@ public static class Telegraph
         }
         finally
         {
-            PathLine.Despawn(area);
-            PathLine.Despawn(fill);
+            pool.DespawnLine(area);
+            pool.DespawnLine(fill);
         }
     }
 }

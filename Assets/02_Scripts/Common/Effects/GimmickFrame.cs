@@ -27,10 +27,10 @@ public sealed class GimmickFrame
 
         for (int i = 0; i < EDGE_COUNT; i++)
         {
-            _edges[i] = PooledSprite.Spawn(prefab, Vector3.zero, 0f, Vector2.zero, edgeColor);
+            _edges[i] = GameManager.Pool.SpawnSprite(prefab, Vector3.zero, 0f, Vector2.zero, edgeColor);
         }
 
-        _fill = PooledSprite.Spawn(prefab, Vector3.zero, 0f, Vector2.zero, fillColor);
+        _fill = GameManager.Pool.SpawnSprite(prefab, Vector3.zero, 0f, Vector2.zero, fillColor);
     }
 
     public Vector3 Center { get { return _center; } }
@@ -93,10 +93,10 @@ public sealed class GimmickFrame
     {
         for (int i = 0; i < EDGE_COUNT; i++)
         {
-            PooledSprite.Despawn(_edges[i]);
+            GameManager.Pool.DespawnSprite(_edges[i]);
         }
 
-        PooledSprite.Despawn(_fill);
+        GameManager.Pool.DespawnSprite(_fill);
     }
 
     private static void PlaceEdge(SpriteRenderer edge, Vector3 position, float angle, Vector3 scale)

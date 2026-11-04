@@ -121,9 +121,9 @@ public class ReflectOrbGimmick : PunishingBossGimmick
                 return false;
             }
 
-            await ProjectileFlight.FlyAsync(_orbPrefab, _reflectShot, flight.LandingPoint, context.Owner.Body.position, _reflectColor, token);
+            await ProjectileFlight.FlyAsync(GameManager.Pool, _orbPrefab, _reflectShot, flight.LandingPoint, context.Owner.Body.position, _reflectColor, token);
 
-            ImpactPlayer.Play(_reflectImpact, context.Owner.Body.position, _reflectColor);
+            GameManager.Feedback.PlayImpact(_reflectImpact, context.Owner.Body.position, _reflectColor);
 
             return true;
         }
@@ -170,7 +170,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
 
     private async UniTask ChargeAsync(Transform hand, CancellationToken token)
     {
-        SpriteRenderer charge = PooledSprite.Spawn(_chargePrefab, hand.position, 0f, Vector2.zero, _orbColor);
+        SpriteRenderer charge = GameManager.Pool.SpawnSprite(_chargePrefab, hand.position, 0f, Vector2.zero, _orbColor);
         float elapsed = 0f;
 
         try
@@ -188,7 +188,7 @@ public class ReflectOrbGimmick : PunishingBossGimmick
         }
         finally
         {
-            PooledSprite.Despawn(charge);
+            GameManager.Pool.DespawnSprite(charge);
         }
     }
 }

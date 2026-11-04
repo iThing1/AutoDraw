@@ -125,7 +125,7 @@ public class FindOriginalGimmick : PunishingBossGimmick
 
             if (null != _glintPrefab)
             {
-                glint = PooledSprite.Spawn(_glintPrefab, frames[real].GetSignaturePoint(_glintInset), 0f, Vector2.zero, _glintColor);
+                glint = GameManager.Pool.SpawnSprite(_glintPrefab, frames[real].GetSignaturePoint(_glintInset), 0f, Vector2.zero, _glintColor);
             }
 
             await HideBossAsync(root, body, frames[real], token);
@@ -166,7 +166,7 @@ public class FindOriginalGimmick : PunishingBossGimmick
                 frames[i].Despawn();
             }
 
-            PooledSprite.Despawn(glint);
+            GameManager.Pool.DespawnSprite(glint);
             ListPool<GimmickFrame>.Release(frames);
             ListPool<Vector3>.Release(slots);
             ListPool<UniTask>.Release(fades);
@@ -251,7 +251,7 @@ public class FindOriginalGimmick : PunishingBossGimmick
                 from[i] = frames[i].Center;
             }
 
-            ImpactPlayer.Play(_swapImpact, middle);
+            GameManager.Feedback.PlayImpact(_swapImpact, middle);
 
             float elapsed = 0f;
 
@@ -322,7 +322,7 @@ public class FindOriginalGimmick : PunishingBossGimmick
         bool isFound, CancellationToken token)
     {
         FollowFrame(root, frames[real]);
-        ImpactPlayer.Play(_revealImpact, frames[real].Center);
+        GameManager.Feedback.PlayImpact(_revealImpact, frames[real].Center);
 
         if (false == isFound)
         {
@@ -330,7 +330,7 @@ public class FindOriginalGimmick : PunishingBossGimmick
             {
                 if (i != real)
                 {
-                    ImpactPlayer.Play(_counterImpact, frames[i].Center);
+                    GameManager.Feedback.PlayImpact(_counterImpact, frames[i].Center);
                 }
             }
 

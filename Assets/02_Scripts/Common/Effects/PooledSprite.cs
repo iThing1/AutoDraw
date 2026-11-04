@@ -2,11 +2,12 @@ using DG.Tweening;
 using UnityEngine;
 
 // 풀에서 꺼내 잠깐 보였다 돌려주는 스프라이트. 돌려줄 때 걸려 있던 트윈을 함께 끊어, 다음에 꺼낸 그림이 이전 트윈에 움직이지 않게 한다.
+// 풀에 붙는 확장 메서드라, 부르는 쪽에서 GameManager.Pool.SpawnSprite처럼 어느 풀을 쓰는지 보인다.
 public static class PooledSprite
 {
-    public static SpriteRenderer Spawn(GameObject prefab, Vector3 position, float angle, Vector2 size, Color color)
+    public static SpriteRenderer SpawnSprite(this PoolManager pool, GameObject prefab, Vector3 position, float angle, Vector2 size, Color color)
     {
-        GameObject instance = GameManager.Pool.Spawn(prefab, position, Quaternion.Euler(0f, 0f, angle));
+        GameObject instance = pool.Spawn(prefab, position, Quaternion.Euler(0f, 0f, angle));
         instance.transform.localScale = new Vector3(size.x, size.y, 1f);
 
         SpriteRenderer sprite = instance.GetComponent<SpriteRenderer>();
@@ -15,7 +16,7 @@ public static class PooledSprite
         return sprite;
     }
 
-    public static void Despawn(SpriteRenderer sprite)
+    public static void DespawnSprite(this PoolManager pool, SpriteRenderer sprite)
     {
         if (null == sprite)
         {
@@ -24,6 +25,6 @@ public static class PooledSprite
 
         sprite.transform.DOKill();
         sprite.DOKill();
-        GameManager.Pool.Despawn(sprite.gameObject);
+        pool.Despawn(sprite.gameObject);
     }
 }

@@ -23,7 +23,7 @@ public class BurstAttackStyle : AttackStyle
 
         for (int i = 0; i < shotCount; i++)
         {
-            FireFeedbackPlayer.Play(_fireFeedback, context.Owner, context.Owner.Body.position);
+            GameManager.Feedback.PlayFire(_fireFeedback, context.Owner, context.Owner.Body.position);
             context.Launcher.FireShot(_shot, context.Owner.Body.position, Vector3.zero, gaugeGain, token);
 
             await UniTask.Delay(TimeSpan.FromSeconds(_burstInterval), cancellationToken: token);

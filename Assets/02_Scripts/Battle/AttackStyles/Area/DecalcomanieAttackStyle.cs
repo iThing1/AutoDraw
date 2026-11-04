@@ -119,7 +119,7 @@ public class DecalcomanieAttackStyle : AttackStyle
     {
         await DropAllAsync(context, drops, _dropWarnDuration, tint, gaugeGain, token);
 
-        await Telegraph.PlayLineAsync(_foldTelegraphPrefab, foldCenter, VERTICAL_ANGLE, _foldLength, _foldWidth, tint.Apply(_telegraphColor), _foldDuration,
+        await Telegraph.PlayLineAsync(GameManager.Pool, _foldTelegraphPrefab, foldCenter, VERTICAL_ANGLE, _foldLength, _foldWidth, tint.Apply(_telegraphColor), _foldDuration,
             token);
 
         List<Vector3> mirrored = ListPool<Vector3>.Get();
@@ -157,9 +157,9 @@ public class DecalcomanieAttackStyle : AttackStyle
             center += points[i];
         }
 
-        await Telegraph.PlayCirclesAsync(_dropTelegraphPrefab, points, _dropRadius, tint.Apply(_telegraphColor), warnDuration, token);
+        await Telegraph.PlayCirclesAsync(GameManager.Pool, _dropTelegraphPrefab, points, _dropRadius, tint.Apply(_telegraphColor), warnDuration, token);
 
-        ImpactPlayer.Play(_impact, center / points.Count, tint.Apply(_impact.EffectColor));
+        GameManager.Feedback.PlayImpact(_impact, center / points.Count, tint.Apply(_impact.EffectColor));
 
         if (context.Target.IsInAnyBlast(points, _dropRadius))
         {

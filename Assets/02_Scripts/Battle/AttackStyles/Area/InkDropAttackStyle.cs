@@ -80,9 +80,9 @@ public class InkDropAttackStyle : AttackStyle
 
     private async UniTask DropAsync(AttackContext context, Vector3 point, float warnDuration, float gaugeGain, CancellationToken token)
     {
-        await Telegraph.PlayCircleAsync(_telegraphPrefab, point, _dropRadius, _telegraphColor, warnDuration, token);
+        await Telegraph.PlayCircleAsync(GameManager.Pool, _telegraphPrefab, point, _dropRadius, _telegraphColor, warnDuration, token);
 
-        ImpactPlayer.Play(_impact, point);
+        GameManager.Feedback.PlayImpact(_impact, point);
         context.Damage.Blast(_hit, point, _dropRadius, gaugeGain);
 
         if (null != _groundSplat && null != context.PaintCanvas)

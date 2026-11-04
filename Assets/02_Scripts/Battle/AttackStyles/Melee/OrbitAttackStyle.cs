@@ -51,7 +51,7 @@ public class OrbitAttackStyle : AttackStyle
         {
             for (int i = 0; i < _orbCount; i++)
             {
-                orbs[i] = new Orb(PooledSprite.Spawn(_orbPrefab, context.Owner.Body.position, 0f, Vector2.zero, context.Damage.PickColor()));
+                orbs[i] = new Orb(GameManager.Pool.SpawnSprite(_orbPrefab, context.Owner.Body.position, 0f, Vector2.zero, context.Damage.PickColor()));
             }
 
             for (float t = 0f; t < _transitionDuration; t += Time.deltaTime)
@@ -75,7 +75,7 @@ public class OrbitAttackStyle : AttackStyle
                 if (Time.time >= nextLaunchTime && 0 <= index)
                 {
                     orbs[index].Launch(context.Damage.RollDamage(_hit));
-                    FireFeedbackPlayer.Play(_fireFeedback, context.Owner, orbs[index].Position, orbs[index].Sprite.color);
+                    GameManager.Feedback.PlayFire(_fireFeedback, context.Owner, orbs[index].Position, orbs[index].Sprite.color);
                     launchIndex = index + 1;
                     nextLaunchTime = Time.time + _launchInterval * context.Owner.WeaponModifier.IntervalScale;
                 }
@@ -117,7 +117,7 @@ public class OrbitAttackStyle : AttackStyle
             {
                 if (null != orbs[i])
                 {
-                    PooledSprite.Despawn(orbs[i].Sprite);
+                    GameManager.Pool.DespawnSprite(orbs[i].Sprite);
                 }
             }
         }

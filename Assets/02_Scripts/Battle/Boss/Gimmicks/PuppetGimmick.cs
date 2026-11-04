@@ -81,7 +81,7 @@ public class PuppetGimmick : PunishingBossGimmick
             return true;
         }
 
-        LineRenderer thread = PathLine.Spawn(_threadPrefab, _threadWidth, _threadColor);
+        LineRenderer thread = GameManager.Pool.SpawnLine(_threadPrefab, _threadWidth, _threadColor);
         List<GimmickFrame> frames = ListPool<GimmickFrame>.Get();
         List<UniTask> fades = ListPool<UniTask>.Get();
 
@@ -92,7 +92,7 @@ public class PuppetGimmick : PunishingBossGimmick
         {
             try
             {
-                ImpactPlayer.Play(_linkImpact, context.Owner.Body.position);
+                GameManager.Feedback.PlayImpact(_linkImpact, context.Owner.Body.position);
 
                 bool isCaptured = await PullStringsAsync(context, thread, frames, fades, dropSource.Token, token);
 
@@ -100,11 +100,11 @@ public class PuppetGimmick : PunishingBossGimmick
 
                 if (isCaptured)
                 {
-                    ImpactPlayer.Play(_successImpact, context.Owner.Body.position);
+                    GameManager.Feedback.PlayImpact(_successImpact, context.Owner.Body.position);
                 }
                 else
                 {
-                    ImpactPlayer.Play(_snapImpact, context.Owner.Body.position);
+                    GameManager.Feedback.PlayImpact(_snapImpact, context.Owner.Body.position);
                     PunishTarget(context);
                 }
 
@@ -115,7 +115,7 @@ public class PuppetGimmick : PunishingBossGimmick
             finally
             {
                 dropSource.Cancel();
-                PathLine.Despawn(thread);
+                GameManager.Pool.DespawnLine(thread);
 
                 for (int i = 0; i < frames.Count; i++)
                 {
@@ -162,7 +162,7 @@ public class PuppetGimmick : PunishingBossGimmick
                 captures++;
                 hold = 0f;
                 CloseFrame(frame, fades, token);
-                ImpactPlayer.Play(_captureImpact, frame.Center);
+                GameManager.Feedback.PlayImpact(_captureImpact, frame.Center);
 
                 if (captures >= _requiredCaptures)
                 {
@@ -266,9 +266,9 @@ public class PuppetGimmick : PunishingBossGimmick
 
         try
         {
-            await Telegraph.PlayCirclesAsync(_dropPrefab, drops, _dropRadius, _telegraphColor, _warnDuration, token);
+            await Telegraph.PlayCirclesAsync(GameManager.Pool, _dropPrefab, drops, _dropRadius, _telegraphColor, _warnDuration, token);
 
-            ImpactPlayer.Play(_dropImpact, center);
+            GameManager.Feedback.PlayImpact(_dropImpact, center);
 
             if (target.IsInAnyBlast(drops, _dropRadius))
             {

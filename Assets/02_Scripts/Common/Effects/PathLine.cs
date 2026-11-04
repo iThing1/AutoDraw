@@ -2,12 +2,12 @@ using DG.Tweening;
 using UnityEngine;
 
 // 꺾은선을 처음부터 조금씩 그어 나가는 선 하나. 예고선과 남는 먹 선이 함께 쓴다.
-// 프리팹은 월드 좌표를 쓰는 LineRenderer여야 한다.
+// 프리팹은 월드 좌표를 쓰는 LineRenderer여야 한다. 꺼내고 돌려주는 것은 풀에 붙는 확장 메서드다.
 public static class PathLine
 {
-    public static LineRenderer Spawn(LineRenderer prefab, float width, Color color)
+    public static LineRenderer SpawnLine(this PoolManager pool, LineRenderer prefab, float width, Color color)
     {
-        LineRenderer line = GameManager.Pool.Spawn(prefab, Vector3.zero, Quaternion.identity);
+        LineRenderer line = pool.Spawn(prefab, Vector3.zero, Quaternion.identity);
 
         line.positionCount = 0;
         line.widthMultiplier = width;
@@ -42,7 +42,7 @@ public static class PathLine
     }
 
     // 걸려 있던 트윈을 함께 끊어, 다음에 꺼낸 선이 이전 트윈에 흐려지지 않게 한다.
-    public static void Despawn(LineRenderer line)
+    public static void DespawnLine(this PoolManager pool, LineRenderer line)
     {
         if (null == line)
         {
@@ -50,6 +50,6 @@ public static class PathLine
         }
 
         DOTween.Kill(line);
-        GameManager.Pool.Despawn(line.gameObject);
+        pool.Despawn(line.gameObject);
     }
 }

@@ -121,7 +121,7 @@ public class HatchingAttackStyle : AttackStyle
             ListPool<UniTask>.Release(telegraphs);
         }
 
-        ImpactPlayer.Play(_impact, aimPoint);
+        GameManager.Feedback.PlayImpact(_impact, aimPoint);
 
         if (IsTouchingAny(target, centers, angle) || IsTouchingAny(target, crossCenters, crossAngle))
         {
@@ -152,7 +152,7 @@ public class HatchingAttackStyle : AttackStyle
     {
         for (int i = 0; i < centers.Count; i++)
         {
-            telegraphs.Add(Telegraph.PlayLineAsync(_telegraphPrefab, centers[i], angle, _length, _lineWidth, _telegraphColor, _warnDuration, token));
+            telegraphs.Add(Telegraph.PlayLineAsync(GameManager.Pool, _telegraphPrefab, centers[i], angle, _length, _lineWidth, _telegraphColor, _warnDuration, token));
         }
     }
 
@@ -188,7 +188,7 @@ public class HatchingAttackStyle : AttackStyle
             return;
         }
 
-        SpriteRenderer stroke = PooledSprite.Spawn(_strokePrefab, center, angle, new Vector2(_length, _lineWidth), _strokeColor);
+        SpriteRenderer stroke = GameManager.Pool.SpawnSprite(_strokePrefab, center, angle, new Vector2(_length, _lineWidth), _strokeColor);
 
         try
         {
@@ -202,7 +202,7 @@ public class HatchingAttackStyle : AttackStyle
         }
         finally
         {
-            PooledSprite.Despawn(stroke);
+            GameManager.Pool.DespawnSprite(stroke);
         }
     }
 }

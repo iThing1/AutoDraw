@@ -14,7 +14,7 @@ public class InkHandsAttackStyle : AttackStyle
 
     public override void Prewarm()
     {
-        InkArmsRun.Prewarm(_inkArms);
+        InkArmsRun.Prewarm(GameManager.Pool, _inkArms);
     }
 
     public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
@@ -30,7 +30,7 @@ public class InkHandsAttackStyle : AttackStyle
         try
         {
             await InkArmsRun.ScatterPoolsAsync(context, _inkArms, pools, token);
-            await InkArmsRun.LungeAsync(context, _inkArms, pools, gaugeGain, token);
+            await InkArmsRun.LungeAsync(GameManager.Pool, context, _inkArms, pools, gaugeGain, token);
         }
         finally
         {

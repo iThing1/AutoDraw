@@ -67,7 +67,7 @@ public class ProjectileLauncher
             return false;
         }
 
-        FlightResult flight = await ProjectileFlight.FlyAsync(_owner.Data.ProjectilePrefab, shot, start, end, color, token);
+        FlightResult flight = await ProjectileFlight.FlyAsync(GameManager.Pool, _owner.Data.ProjectilePrefab, shot, start, end, color, token);
 
         return FlightOutcome.Arrived == flight.Outcome;
     }
@@ -78,7 +78,7 @@ public class ProjectileLauncher
     {
         DamageInfo damage = _damage.RollDamage(shot.Hit);
 
-        FlightResult flight = await ProjectileFlight.FlyAsync(projectilePrefab, shot, start, end, _target, tint ?? damage.PaintColor, token);
+        FlightResult flight = await ProjectileFlight.FlyAsync(GameManager.Pool, projectilePrefab, shot, start, end, _target, tint ?? damage.PaintColor, token);
 
         if (FlightOutcome.Blocked == flight.Outcome)
         {

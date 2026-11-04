@@ -90,7 +90,7 @@ public class RewindAttackStyle : AttackStyle
 
     private async UniTask PlayIntroAsync(Vector3 center, CancellationToken token)
     {
-        ImpactPlayer.Play(_introImpact, center, _tintColor);
+        GameManager.Feedback.PlayImpact(_introImpact, center, _tintColor);
 
         List<UniTask> effects = ListPool<UniTask>.Get();
 
@@ -122,7 +122,7 @@ public class RewindAttackStyle : AttackStyle
         await UniTask.Delay(TimeSpan.FromSeconds(delay), cancellationToken: token);
 
         Color color = new Color(_tintColor.r, _tintColor.g, _tintColor.b, 0f);
-        SpriteRenderer ripple = PooledSprite.Spawn(_ripplePrefab, center, 0f, new Vector2(_rippleDiameter, _rippleDiameter), color);
+        SpriteRenderer ripple = GameManager.Pool.SpawnSprite(_ripplePrefab, center, 0f, new Vector2(_rippleDiameter, _rippleDiameter), color);
 
         try
         {
@@ -137,7 +137,7 @@ public class RewindAttackStyle : AttackStyle
         }
         finally
         {
-            PooledSprite.Despawn(ripple);
+            GameManager.Pool.DespawnSprite(ripple);
         }
     }
 
@@ -150,7 +150,7 @@ public class RewindAttackStyle : AttackStyle
             return;
         }
 
-        SpriteRenderer hand = PooledSprite.Spawn(_handPrefab, center, TWELVE_O_CLOCK, new Vector2(_handLength, _handWidth), _tintColor);
+        SpriteRenderer hand = GameManager.Pool.SpawnSprite(_handPrefab, center, TWELVE_O_CLOCK, new Vector2(_handLength, _handWidth), _tintColor);
         float sweep = _handTurns * FULL_TURN_DEGREES;
         float elapsed = 0f;
 
@@ -173,7 +173,7 @@ public class RewindAttackStyle : AttackStyle
         }
         finally
         {
-            PooledSprite.Despawn(hand);
+            GameManager.Pool.DespawnSprite(hand);
         }
     }
 }

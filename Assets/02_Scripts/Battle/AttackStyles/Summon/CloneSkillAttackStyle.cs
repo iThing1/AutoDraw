@@ -50,7 +50,7 @@ public class CloneSkillAttackStyle : AttackStyle
                 clone.ChangeState(UnitState.Move);
                 CopyLook(player, clone, 1f);
 
-                ImpactPlayer.Play(_summonImpact, clone.Body.position);
+                GameManager.Feedback.PlayImpact(_summonImpact, clone.Body.position);
                 clone.Attacker.RunAsync(context.Target.Unit, context.PaintCanvas, attackSource.Token).Forget();
 
                 await FollowAsync(context, player, clone, token);

@@ -55,14 +55,14 @@ public class EndingCutscene : MonoBehaviour
         using (GameManager.TimeScale.BeginSlowMotion(_preset.SlowTimeScale))
         {
             await UniTask.WhenAll(
-                CinematicPlayer.EnterAsync(focusTarget, _preset.Cinematic, token),
-                RealtimeDelay.WaitAsync(_preset.SlowDuration, token));
+                GameManager.Director.EnterAsync(focusTarget, _preset.Cinematic, token),
+                GameManager.TimeScale.WaitRealtimeAsync(_preset.SlowDuration, token));
         }
     }
 
     private async UniTask PlayShatterAsync(BattleUnit boss, CancellationToken token)
     {
-        await RealtimeDelay.WaitAsync(_preset.DelayBeforeShatter, token);
+        await GameManager.TimeScale.WaitRealtimeAsync(_preset.DelayBeforeShatter, token);
 
         // 손 달린 보스처럼 그림이 여러 장이면 함께 조각내, 남은 손이 완성된 그림에 찍히지 않게 한다.
         // 보스 오브젝트는 끄지 않고 그림만 숨긴다. 전투 카메라가 보스 자리를 기준으로 화면을 잡고 있어서,
@@ -72,7 +72,7 @@ public class EndingCutscene : MonoBehaviour
 
         for (int i = 0; i < renderers.Count; i++)
         {
-            shatters.Add(SpriteShatter.PlayAsync(renderers[i], _preset.Shatter, token));
+            shatters.Add(SpriteShatter.PlayAsync(GameManager.Feedback, renderers[i], _preset.Shatter, token));
         }
 
         await UniTask.WhenAll(shatters);
@@ -83,9 +83,9 @@ public class EndingCutscene : MonoBehaviour
     {
         if (GameManager.CameraRig.TryShowWholeStage(_preset.OverviewPadding, _preset.OverviewBlendDuration))
         {
-            return CinematicPlayer.HideAsync(_preset.Cinematic, _preset.OverviewBlendDuration, token);
+            return GameManager.Director.HideAsync(_preset.Cinematic, _preset.OverviewBlendDuration, token);
         }
 
-        return CinematicPlayer.ExitAsync(_preset.Cinematic, token);
+        return GameManager.Director.ExitAsync(_preset.Cinematic, token);
     }
 }

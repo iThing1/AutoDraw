@@ -36,10 +36,10 @@ public class DefeatCutscene : MonoBehaviour
         using (GameManager.TimeScale.BeginSlowMotion(_preset.SlowTimeScale))
         {
             await UniTask.WhenAll(
-                CinematicPlayer.EnterAsync(player.transform, _preset.Cinematic, token),
+                GameManager.Director.EnterAsync(player.transform, _preset.Cinematic, token),
                 InkSwallow.PlayAsync(player, _preset.Swallow, paintCanvas, token));
         }
 
-        await RealtimeDelay.WaitAsync(_preset.HoldBeforeResult, token);
+        await GameManager.TimeScale.WaitRealtimeAsync(_preset.HoldBeforeResult, token);
     }
 }

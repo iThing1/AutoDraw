@@ -21,17 +21,17 @@ public class BossIntroCutscene : MonoBehaviour
     // 프리셋 값은 캐싱하지 않고 매번 읽어, 플레이 중에 바꾼 값이 다음 재생에 바로 반영되게 한다.
     public async UniTask PlayAsync(BattleUnit boss, Transform landingPoint, CancellationToken token)
     {
-        await CinematicPlayer.EnterAsync(landingPoint, _preset.Cinematic, token);
+        await GameManager.Director.EnterAsync(landingPoint, _preset.Cinematic, token);
         await PlayDropAsync(boss, landingPoint.position, token);
         await PlayBannerAsync(boss.Data as BossData, token);
-        await CinematicPlayer.ExitAsync(_preset.Cinematic, token);
+        await GameManager.Director.ExitAsync(_preset.Cinematic, token);
     }
 
     private async UniTask PlayDropAsync(BattleUnit boss, Vector3 landingPosition, CancellationToken token)
     {
         boss.transform.position = landingPosition + Vector3.up * _preset.BossDropHeight;
 
-        await RealtimeDelay.WaitAsync(_preset.DelayBeforeDrop, token);
+        await GameManager.TimeScale.WaitRealtimeAsync(_preset.DelayBeforeDrop, token);
 
         boss.gameObject.SetActive(true);
 
@@ -41,7 +41,7 @@ public class BossIntroCutscene : MonoBehaviour
 
         await drop.ToUniTaskKillOnCancel(token);
 
-        ImpactPlayer.Play(_preset.LandImpact, landingPosition);
+        GameManager.Feedback.PlayImpact(_preset.LandImpact, landingPosition);
     }
 
     // 보스 데이터가 아니면(배너 문구가 없는 유닛) 띄우지 않는다.

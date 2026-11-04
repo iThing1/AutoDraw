@@ -6,12 +6,12 @@ using UnityEngine;
 // 보통 탄을 풀에서 꺼내 크기·색·꼬리를 맞추고, 궤적을 골라 날린 뒤 돌려준다. 어떻게 나는지는 TrajectoryMotion이 맡는다.
 public static class ProjectileFlight
 {
-    public static UniTask<FlightResult> FlyAsync(GameObject prefab, ShotSettings shot, Vector3 start, Vector3 end, Color color, CancellationToken token)
+    public static UniTask<FlightResult> FlyAsync(PoolManager pool, GameObject prefab, ShotSettings shot, Vector3 start, Vector3 end, Color color, CancellationToken token)
     {
-        return FlyAsync(prefab, shot, start, end, null, color, token);
+        return FlyAsync(pool, prefab, shot, start, end, null, color, token);
     }
 
-    public static async UniTask<FlightResult> FlyAsync(GameObject prefab, ShotSettings shot, Vector3 start, Vector3 end, AttackTarget target,
+    public static async UniTask<FlightResult> FlyAsync(PoolManager pool, GameObject prefab, ShotSettings shot, Vector3 start, Vector3 end, AttackTarget target,
         Color color, CancellationToken token)
     {
         TrajectorySettings trajectory = PickTrajectory(shot.Trajectories);
@@ -22,7 +22,7 @@ public static class ProjectileFlight
             return new FlightResult(FlightOutcome.Canceled, start);
         }
 
-        GameObject projectile = GameManager.Pool.Spawn(prefab, start, Quaternion.identity);
+        GameObject projectile = pool.Spawn(prefab, start, Quaternion.identity);
         projectile.transform.localScale = prefab.transform.localScale * shot.ProjectileScale;
 
         if (projectile.TryGetComponent(out SpriteRenderer projectileRenderer))
@@ -41,7 +41,7 @@ public static class ProjectileFlight
         }
         finally
         {
-            GameManager.Pool.Despawn(projectile);
+            pool.Despawn(projectile);
         }
     }
 

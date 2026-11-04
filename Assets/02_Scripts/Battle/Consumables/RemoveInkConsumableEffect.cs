@@ -13,6 +13,6 @@ public class RemoveInkConsumableEffect : ConsumableEffect
 
         context.PaintCanvas.RemoveInkAround(center, value);
         SlowZone.ClearAround(center, value);
-        ImpactPlayer.Play(_impact, center);
+        GameManager.Feedback.PlayImpact(_impact, center);
     }
 }

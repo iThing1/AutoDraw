@@ -12,7 +12,7 @@ public static class InkArmsRun
 {
     private const int FALLBACK_POOL_TRIES = 5;
 
-    public static void Prewarm(InkArmsSettings settings)
+    public static void Prewarm(PoolManager objectPool, InkArmsSettings settings)
     {
         InkSwallowSettings arms = settings.Arms;
 
@@ -23,7 +23,7 @@ public static class InkArmsRun
 
         int lungeCount = Mathf.CeilToInt((arms.SourceTwitchDuration + settings.SourceDistance.Max / arms.CrawlSpeed + settings.RetractDuration) / settings.LungeInterval) + 1;
 
-        GameManager.Pool.Prewarm(arms.ArmPrefab.gameObject, lungeCount * settings.ArmsPerLunge.Max);
+        objectPool.Prewarm(arms.ArmPrefab.gameObject, lungeCount * settings.ArmsPerLunge.Max);
     }
 
     // 팔 프리팹이나 물감 캔버스가 없으면 뻗을 수 없다.
@@ -53,7 +53,7 @@ public static class InkArmsRun
     }
 
     // 시간이 다 되거나 목표가 쓰러질 때까지 간격마다 팔을 뻗고, 마지막 팔이 거둬질 때까지 기다린다.
-    public static async UniTask LungeAsync(AttackContext context, InkArmsSettings settings, List<PaintMark> pools, float gaugeGain, CancellationToken token)
+    public static async UniTask LungeAsync(PoolManager objectPool, AttackContext context, InkArmsSettings settings, List<PaintMark> pools, float gaugeGain, CancellationToken token)
     {
         List<PaintMark> sources = ListPool<PaintMark>.Get();
         List<UniTask> lunges = ListPool<UniTask>.Get();
@@ -67,7 +67,7 @@ public static class InkArmsRun
 
                 for (int i = 0; i < sources.Count; i++)
                 {
-                    lunges.Add(LungeArmAsync(context, settings, sources[i], gaugeGain, token));
+                    lunges.Add(LungeArmAsync(objectPool, context, settings, sources[i], gaugeGain, token));
                 }
 
                 await UniTask.Delay(TimeSpan.FromSeconds(settings.LungeInterval), cancellationToken: token);
@@ -83,7 +83,7 @@ public static class InkArmsRun
         }
     }
 
-    private static async UniTask LungeArmAsync(AttackContext context, InkArmsSettings settings, PaintMark source, float gaugeGain, CancellationToken token)
+    private static async UniTask LungeArmAsync(PoolManager objectPool, AttackContext context, InkArmsSettings settings, PaintMark source, float gaugeGain, CancellationToken token)
     {
         InkSwallowSettings arms = settings.Arms;
 
@@ -95,7 +95,7 @@ public static class InkArmsRun
         Vector3 root = source.Position;
         Vector3 grabPoint = target.GetPredictedPoint(settings.LeadTime);
 
-        InkArm arm = GameManager.Pool.Spawn(arms.ArmPrefab, root, Quaternion.identity);
+        InkArm arm = objectPool.Spawn(arms.ArmPrefab, root, Quaternion.identity);
         arm.Setup(root, grabPoint, 0f, false, arms);
 
         SwallowFrame frame = new SwallowFrame { Remain = 1f };
@@ -129,7 +129,7 @@ public static class InkArmsRun
         }
         finally
         {
-            GameManager.Pool.Despawn(arm.gameObject);
+            objectPool.Despawn(arm.gameObject);
         }
     }
 

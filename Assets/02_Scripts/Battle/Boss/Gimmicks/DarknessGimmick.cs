@@ -58,7 +58,7 @@ public class DarknessGimmick : BossGimmick
         Transform bossTransform = context.Owner.transform;
         Vector3 origin = bossTransform.position;
         Color clear = new Color(_darkColor.r, _darkColor.g, _darkColor.b, 0f);
-        SpriteRenderer darkness = PooledSprite.Spawn(_darknessPrefab, context.Target.FollowTransform.position, 0f, new Vector2(_coverSize, _coverSize), clear);
+        SpriteRenderer darkness = GameManager.Pool.SpawnSprite(_darknessPrefab, context.Target.FollowTransform.position, 0f, new Vector2(_coverSize, _coverSize), clear);
 
         try
         {
@@ -87,7 +87,7 @@ public class DarknessGimmick : BossGimmick
                 {
                     isCueing = true;
                     Reposition(context);
-                    ImpactPlayer.Play(_cue, context.Owner.Body.position);
+                    GameManager.Feedback.PlayImpact(_cue, context.Owner.Body.position);
                 }
 
                 if (isCueing && elapsed >= nextBurst + _cueDuration)
@@ -112,7 +112,7 @@ public class DarknessGimmick : BossGimmick
             // 어둠이 걷히기 전에 원래 자리로 돌아가, 걷힌 뒤에는 보스가 처음 자리에 있다.
             bossTransform.position = origin;
 
-            PooledSprite.Despawn(darkness);
+            GameManager.Pool.DespawnSprite(darkness);
 
             if (null != context.Hands)
             {

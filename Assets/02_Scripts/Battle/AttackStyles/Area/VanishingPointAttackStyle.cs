@@ -96,7 +96,7 @@ public class VanishingPointAttackStyle : AttackStyle
     {
         Vector3 center = point + Geometry2D.ToDirection(angle) * (_length * 0.5f);
 
-        return Telegraph.PlayLineAsync(_guidePrefab, center, angle, _length, _guideWidth, _telegraphColor, _warnDuration, token);
+        return Telegraph.PlayLineAsync(GameManager.Pool, _guidePrefab, center, angle, _length, _guideWidth, _telegraphColor, _warnDuration, token);
     }
 
     // 먹 덩어리가 쐐기를 따라 나아가며 소실점에서 떨어진 거리에 맞춰 커진다. 빠르게 지나쳐도 놓치지 않도록, 지난 자리부터 지금 자리까지 쓸고 지나간 길로 판정한다.
@@ -110,12 +110,12 @@ public class VanishingPointAttackStyle : AttackStyle
         AttackTarget target = context.Target;
         Vector3 along = Geometry2D.ToDirection(angle);
         float spread = Mathf.Tan(_halfAngle * Mathf.Deg2Rad) * 2f;
-        SpriteRenderer block = PooledSprite.Spawn(_blockPrefab, point, angle, new Vector2(_minBlockSize, _minBlockSize), _inkColor);
+        SpriteRenderer block = GameManager.Pool.SpawnSprite(_blockPrefab, point, angle, new Vector2(_minBlockSize, _minBlockSize), _inkColor);
         Vector3 previous = point;
         float elapsed = 0f;
         bool hasStruck = false;
 
-        ImpactPlayer.Play(_impact, point);
+        GameManager.Feedback.PlayImpact(_impact, point);
 
         try
         {
@@ -145,7 +145,7 @@ public class VanishingPointAttackStyle : AttackStyle
         }
         finally
         {
-            PooledSprite.Despawn(block);
+            GameManager.Pool.DespawnSprite(block);
         }
     }
 }

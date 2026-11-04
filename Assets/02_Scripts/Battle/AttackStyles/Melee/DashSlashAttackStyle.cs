@@ -87,7 +87,7 @@ public class DashSlashAttackStyle : AttackStyle
         {
             Tween swing = StartSwing(blade.transform, center, startAngle, endAngle);
 
-            await RealtimeDelay.WaitAsync(_swingDuration * _hitTiming, token);
+            await GameManager.TimeScale.WaitRealtimeAsync(_swingDuration * _hitTiming, token);
 
             // 칼이 닿는 거리 밖으로 벗어났으면 빗나간다.
             Vector3 hitPoint = Vector3.MoveTowards(context.Owner.Body.position, context.Target.GetAimPoint(Vector3.zero), _swingRadius);
@@ -95,7 +95,7 @@ public class DashSlashAttackStyle : AttackStyle
             context.Damage.Strike(_hit, hitPoint, gaugeGain);
 
             await swing.ToUniTaskKillOnCancel(token);
-            await RealtimeDelay.WaitAsync(_trailLingerTime, token);
+            await GameManager.TimeScale.WaitRealtimeAsync(_trailLingerTime, token);
         }
         finally
         {

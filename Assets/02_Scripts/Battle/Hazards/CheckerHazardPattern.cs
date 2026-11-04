@@ -76,12 +76,12 @@ public class CheckerHazardPattern : HazardPattern
 
             for (int i = 0; i < cells.Count; i++)
             {
-                telegraphs.Add(Telegraph.PlayAsync(_cellPrefab, cells[i], 0f, new Vector2(size, size), Vector2.zero, _telegraphColor, _warnDuration, token));
+                telegraphs.Add(Telegraph.PlayAsync(GameManager.Pool, _cellPrefab, cells[i], 0f, new Vector2(size, size), Vector2.zero, _telegraphColor, _warnDuration, token));
             }
 
             await UniTask.WhenAll(telegraphs);
 
-            ImpactPlayer.Play(_impact, origin + new Vector3(_columns, _rows, 0f) * (_cellSize * 0.5f));
+            GameManager.Feedback.PlayImpact(_impact, origin + new Vector3(_columns, _rows, 0f) * (_cellSize * 0.5f));
 
             for (int i = 0; i < cells.Count; i++)
             {
@@ -103,13 +103,13 @@ public class CheckerHazardPattern : HazardPattern
 
     private async UniTaskVoid FlashCellAsync(Vector3 center, float size)
     {
-        SpriteRenderer cell = PooledSprite.Spawn(_cellPrefab, center, 0f, new Vector2(size, size), _impactColor);
+        SpriteRenderer cell = GameManager.Pool.SpawnSprite(_cellPrefab, center, 0f, new Vector2(size, size), _impactColor);
 
         await cell.DOFade(0f, _impactFadeDuration)
             .SetEase(Ease.InQuad)
             .ToUniTask();
 
-        PooledSprite.Despawn(cell);
+        GameManager.Pool.DespawnSprite(cell);
     }
 
     // 플레이어가 가운데 칸에 오도록 격자 왼쪽 아래 모서리를 잡는다.

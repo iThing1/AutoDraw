@@ -191,6 +191,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossPhaseMachine
   _phases:
   - {fileID: 11400000, guid: 46c84a1a8acffe94992fbb57dfe8d1bc, type: 2}
+  - {fileID: 11400000, guid: 9d71bbd98a030984bb3bd4b564954acf, type: 2}
   _toneShiftDuration: 1
   _toneShiftImpact:
     _shakeForce: 0.8

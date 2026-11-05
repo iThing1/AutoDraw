@@ -11,7 +11,7 @@ public class GavelAttackStyle : AttackStyle
     [Serializable]
     private struct Strike
     {
-        // 0이면 가운데까지 차는 원, 0보다 크면 이 안쪽이 안전한 고리다.
+        // 0이면 가운데까지 차는 원, 0보다 크면 이 안쪽이 안전한 고리다. 몸 전체가 이 안에 들어야 안전하다.
         public float InnerRadius;
         public float OuterRadius;
     }
@@ -20,7 +20,7 @@ public class GavelAttackStyle : AttackStyle
     [SerializeField] private Strike[] _strikes =
     {
         new Strike { InnerRadius = 0f, OuterRadius = 4f },
-        new Strike { InnerRadius = 3f, OuterRadius = 40f },
+        new Strike { InnerRadius = 3.5f, OuterRadius = 40f },
         new Strike { InnerRadius = 0f, OuterRadius = 8f },
     };
     [SerializeField, Min(0f)] private float _warnDuration = 0.7f;
@@ -115,6 +115,6 @@ public class GavelAttackStyle : AttackStyle
 
     private static bool IsHit(AttackTarget target, Vector3 center, Strike strike)
     {
-        return target.IsInBlast(center, strike.OuterRadius) && (0f >= strike.InnerRadius || false == target.IsInBlast(center, strike.InnerRadius));
+        return target.IsInBlast(center, strike.OuterRadius) && (0f >= strike.InnerRadius || false == target.IsInsideCircle(center, strike.InnerRadius));
     }
 }

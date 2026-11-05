@@ -14,7 +14,7 @@ public class GuidedTourGimmick : PunishingBossGimmick
 
     [Header("안내 조명")]
     [SerializeField] private GameObject _lightPrefab;
-    [SerializeField, Min(0.5f)] private float _lightRadius = 2f;
+    [SerializeField, Min(0.5f)] private float _lightRadius = 2.5f;
     [SerializeField] private Color _lightColor = new Color(1f, 0.92f, 0.6f, 0.45f);
     [SerializeField] private Color _lostColor = new Color(0.85f, 0.1f, 0.1f, 0.45f);
     [SerializeField, Min(0f)] private float _startDelay = 1.2f;
@@ -176,7 +176,8 @@ public class GuidedTourGimmick : PunishingBossGimmick
                 marker.transform.position = waypoints[index];
             }
 
-            lost = IsInside(target, lightTransform.position) ? Mathf.Max(0f, lost - Time.deltaTime * _recoverRate) : lost + Time.deltaTime;
+            bool isInside = target.IsInsideCircle(lightTransform.position, _lightRadius);
+            lost = isInside ? Mathf.Max(0f, lost - Time.deltaTime * _recoverRate) : lost + Time.deltaTime;
             light.color = Color.Lerp(_lightColor, _lostColor, lost / _lostLimit);
 
             if (lost >= _lostLimit)
@@ -218,18 +219,13 @@ public class GuidedTourGimmick : PunishingBossGimmick
 
             GameManager.Feedback.PlayImpact(_finalImpact, context.Target.GetAimPoint(Vector3.zero));
 
-            return IsInside(context.Target, light.transform.position);
+            return context.Target.IsInsideCircle(light.transform.position, _lightRadius);
         }
         finally
         {
             light.sortingOrder = lightOrder;
             GameManager.Pool.DespawnSprite(overlay);
         }
-    }
-
-    private bool IsInside(AttackTarget target, Vector3 lightCenter)
-    {
-        return Vector2.Distance(target.FollowTransform.position, lightCenter) <= _lightRadius;
     }
 
     private static float GetRouteLength(Vector3 start, List<Vector3> waypoints)

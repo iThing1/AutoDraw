@@ -23,7 +23,7 @@ MonoBehaviour:
   _strikes:
   - InnerRadius: 0
     OuterRadius: 4.5
-  - InnerRadius: 3
+  - InnerRadius: 3.5
     OuterRadius: 40
   - InnerRadius: 0
     OuterRadius: 8

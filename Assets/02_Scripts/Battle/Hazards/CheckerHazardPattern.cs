@@ -89,7 +89,7 @@ public class CheckerHazardPattern : HazardPattern
             }
 
             // 환경 탄막은 보스의 공격이 아니라서 게이지를 쌓지 않는다. 방패를 들고 있으면 막힌다.
-            if (IsInCells(context.Target.FollowTransform.position, cells))
+            if (IsTouchingAnyCell(context.Target, cells))
             {
                 context.Damage.Strike(_hit, context.Target.GetAimPoint(Vector3.zero), 0f);
             }
@@ -132,13 +132,13 @@ public class CheckerHazardPattern : HazardPattern
         }
     }
 
-    private bool IsInCells(Vector3 position, List<Vector3> cells)
+    private bool IsTouchingAnyCell(AttackTarget target, List<Vector3> cells)
     {
-        float half = _cellSize * 0.5f;
+        Vector2 size = new Vector2(_cellSize, _cellSize);
 
         for (int i = 0; i < cells.Count; i++)
         {
-            if (Mathf.Abs(position.x - cells[i].x) <= half && Mathf.Abs(position.y - cells[i].y) <= half)
+            if (target.IsTouchingRect(cells[i], size))
             {
                 return true;
             }

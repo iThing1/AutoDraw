@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Pool;
 
 // 소장 목록. 판을 칸으로 나눠 터질 순서를 한 칸씩 보여 준 뒤 감추고, 그 순서대로 아주 짧은 예고만 주고 터뜨린다.
-// 이미 터진 칸으로 옮겨 다니며 모든 판을 맞지 않고 버티면 그로기, 한 번이라도 맞으면 실패다.
+// 이미 터진 칸으로 옮겨 다니며 모든 판을 맞지 않고 버티면 그로기다. 맞아도 끝까지 이어 가며 맞을 때마다 피해를 받고, 그로기는 없다.
 [CreateAssetMenu(fileName = "CatalogGimmick", menuName = "Scriptable Objects/Boss/Gimmick/Catalog")]
 public class CatalogGimmick : PunishingBossGimmick
 {
@@ -67,7 +67,9 @@ public class CatalogGimmick : PunishingBossGimmick
 
             BuildTiles(area, cell, tiles, order);
 
-            for (int round = 0; round < _rounds; round++)
+            bool isClean = true;
+
+            for (int round = 0; round < _rounds && false == context.Target.IsDefeated; round++)
             {
                 ResetTiles(tiles);
                 Shuffle(order);
@@ -75,11 +77,12 @@ public class CatalogGimmick : PunishingBossGimmick
                 await ShowOrderAsync(tiles, order, token);
                 await UniTask.Delay(TimeSpan.FromSeconds(_memorizeDelay), cancellationToken: token);
 
-                if (false == await DetonateAsync(context, area, tiles, order, token))
-                {
-                    PunishTarget(context);
-                    return false;
-                }
+                isClean &= await DetonateAsync(context, area, tiles, order, token);
+            }
+
+            if (false == isClean || context.Target.IsDefeated)
+            {
+                return false;
             }
 
             GameManager.Feedback.PlayImpact(_successImpact, context.Target.GetAimPoint(Vector3.zero));
@@ -152,11 +155,12 @@ public class CatalogGimmick : PunishingBossGimmick
         }
     }
 
-    // 끝까지 한 번도 맞지 않았으면 true다.
+    // 맞아도 판은 끝까지 이어 가고, 맞을 때마다 실패 피해를 준다. 한 번도 맞지 않았으면 true다.
     private async UniTask<bool> DetonateAsync(AttackContext context, Rect area, List<GimmickFrame> tiles, List<int> order,
         CancellationToken token)
     {
         AttackTarget target = context.Target;
+        bool isClean = true;
 
         for (int i = 0; i < order.Count; i++)
         {
@@ -175,7 +179,8 @@ public class CatalogGimmick : PunishingBossGimmick
             // 칸 사이 틈에 서도 피할 수 없게, 그림이 아니라 판을 나눈 칸으로 본다.
             if (order[i] == Geometry2D.GetCellIndex(area, _columns, _rows, target.FollowTransform.position))
             {
-                return false;
+                PunishTarget(context);
+                isClean = false;
             }
 
             tile.SetFillColor(_clearedColor);
@@ -183,7 +188,7 @@ public class CatalogGimmick : PunishingBossGimmick
             await UniTask.Delay(TimeSpan.FromSeconds(_detonateGap), cancellationToken: token);
         }
 
-        return true;
+        return isClean;
     }
 
     private async UniTask FillAsync(GimmickFrame tile, CancellationToken token)

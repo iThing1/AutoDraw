@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CatalogGimmick
   _failHit:
     _damage:
-      _min: 32
-      _max: 38
+      _min: 18
+      _max: 22
     _criticalChance: 0
     _criticalMultiplier: 2
     _normalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}

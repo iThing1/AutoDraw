@@ -78,10 +78,13 @@ public sealed class GimmickFrame
     // 0이면 비어 있고 1이면 안쪽이 다 찬다. 아래 변에서부터 차오른다.
     public void SetFill(float progress)
     {
-        float height = _size.y * Mathf.Clamp01(progress);
+        ApplyFill(progress, -1f);
+    }
 
-        _fill.transform.position = _center + new Vector3(0f, (height - _size.y) * 0.5f, 0f);
-        _fill.transform.localScale = new Vector3(_size.x, height, 1f);
+    // SetFill과 같되 위 변에서부터 내려온다.
+    public void SetFillDown(float progress)
+    {
+        ApplyFill(progress, 1f);
     }
 
     public void AddFades(float edgeAlpha, float fillAlpha, float duration, List<UniTask> fades, CancellationToken token)
@@ -102,6 +105,15 @@ public sealed class GimmickFrame
         }
 
         GameManager.Pool.DespawnSprite(_fill);
+    }
+
+    // side가 -1이면 아래 변, 1이면 위 변에 붙여 채운다.
+    private void ApplyFill(float progress, float side)
+    {
+        float height = _size.y * Mathf.Clamp01(progress);
+
+        _fill.transform.position = _center + new Vector3(0f, (_size.y - height) * 0.5f * side, 0f);
+        _fill.transform.localScale = new Vector3(_size.x, height, 1f);
     }
 
     private static void PlaceEdge(SpriteRenderer edge, Vector3 position, float angle, Vector3 scale)

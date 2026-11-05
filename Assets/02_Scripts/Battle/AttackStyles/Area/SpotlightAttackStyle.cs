@@ -15,6 +15,8 @@ public class SpotlightAttackStyle : AttackStyle
     [SerializeField, Min(0f)] private float _chaseDuration = 1.2f;
     // 조명마다 이만큼씩 늦게 멈춘다.
     [SerializeField, Min(0f)] private float _lockInterval = 0.45f;
+    // 두 번째마다 오는 조명은 플레이어가 움직이는 방향으로 이만큼(초) 앞질러 쫓아, 한 방향으로만 달려서는 다 피할 수 없다.
+    [SerializeField, Min(0f)] private float _leadTime = 0.5f;
 
     [Header("그림")]
     [SerializeField] private GameObject _lightPrefab;
@@ -58,7 +60,7 @@ public class SpotlightAttackStyle : AttackStyle
         {
             for (int i = 0; i < _lightCount; i++)
             {
-                lights.Add(LightAsync(context, _chaseDuration + _lockInterval * i, gaugeGain, token));
+                lights.Add(LightAsync(context, _chaseDuration + _lockInterval * i, 1 == i % 2, gaugeGain, token));
             }
 
             await UniTask.WhenAll(lights);
@@ -69,7 +71,7 @@ public class SpotlightAttackStyle : AttackStyle
         }
     }
 
-    private async UniTask LightAsync(AttackContext context, float chaseDuration, float gaugeGain, CancellationToken token)
+    private async UniTask LightAsync(AttackContext context, float chaseDuration, bool leads, float gaugeGain, CancellationToken token)
     {
         if (null == _lightPrefab || null == _beamPrefab)
         {
@@ -88,7 +90,7 @@ public class SpotlightAttackStyle : AttackStyle
 
             while (elapsed < chaseDuration)
             {
-                Vector3 aimPoint = context.Target.GetAimPoint(Vector3.zero);
+                Vector3 aimPoint = leads ? context.Target.GetPredictedPoint(_leadTime) : context.Target.GetAimPoint(Vector3.zero);
 
                 light.transform.position = Vector3.MoveTowards(light.transform.position, aimPoint, speed * Time.deltaTime);
                 PlaceBeam(beam, origin.position, light.transform.position);

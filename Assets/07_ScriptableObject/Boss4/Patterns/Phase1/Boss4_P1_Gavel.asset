@@ -20,15 +20,19 @@ MonoBehaviour:
   _stopsMovement: 1
   _tell: 0
   _tellDuration: 0.5
-  _radii:
-  - 4
-  - 6.5
-  - 9.5
-  _warnDuration: 0.55
+  _strikes:
+  - InnerRadius: 0
+    OuterRadius: 4.5
+  - InnerRadius: 3
+    OuterRadius: 40
+  - InnerRadius: 0
+    OuterRadius: 8
+  _warnDuration: 0.6
   _strikeInterval: 0.1
   _telegraphPrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
   _telegraphColor: {r: 0.45, g: 0.3, b: 0.12, a: 0.4}
   _finalTelegraphColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.45}
+  _safeColor: {r: 0.95, g: 0.92, b: 0.82, a: 0.85}
   _hit:
     _damage:
       _min: 10

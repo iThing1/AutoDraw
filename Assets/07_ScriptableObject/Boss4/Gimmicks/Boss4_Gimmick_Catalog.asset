@@ -58,3 +58,5 @@ MonoBehaviour:
     _effectColor: {r: 0.95, g: 0.78, b: 0.25, a: 1}
     _effectScale: 2
     _effectLifetime: 2
+  _cameraPadding: 1
+  _cameraBlendDuration: 0.5

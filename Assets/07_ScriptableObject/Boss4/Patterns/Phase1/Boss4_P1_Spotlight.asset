@@ -20,20 +20,21 @@ MonoBehaviour:
   _stopsMovement: 1
   _tell: 0
   _tellDuration: 0.5
-  _lightCount: 4
+  _lightCount: 5
   _radius: 1.8
   _chaseSpeed:
     _min: 8
     _max: 11
   _chaseDuration: 1
   _lockInterval: 0.3
+  _leadTime: 0.5
   _lightPrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
   _beamPrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
   _lightColor: {r: 1, g: 0.92, b: 0.6, a: 0.3}
   _beamWidth: 0.12
   _telegraphPrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
   _telegraphColor: {r: 1, g: 0.82, b: 0.35, a: 0.45}
-  _warnDuration: 0.45
+  _warnDuration: 0.4
   _hit:
     _damage:
       _min: 11

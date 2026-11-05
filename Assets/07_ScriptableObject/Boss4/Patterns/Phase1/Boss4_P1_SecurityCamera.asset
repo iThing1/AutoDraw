@@ -21,7 +21,7 @@ MonoBehaviour:
   _tell: 0
   _tellDuration: 0.5
   _cameraCount: 3
-  _duration: 7
+  _duration: 12
   _bodyPrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
   _bodySize: {x: 0.7, y: 0.5}
   _bodyColor: {r: 0.2, g: 0.22, b: 0.26, a: 1}

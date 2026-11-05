@@ -24,7 +24,7 @@ MonoBehaviour:
   _lightRadius: 2
   _lightColor: {r: 1, g: 0.92, b: 0.6, a: 0.45}
   _lostColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.45}
-  _startDelay: 1.2
+  _startDelay: 2.5
   _waypointCount: 6
   _segmentLength:
     _min: 5

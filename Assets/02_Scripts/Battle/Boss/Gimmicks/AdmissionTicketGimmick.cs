@@ -5,32 +5,45 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.Pool;
 
-// 관람권. 판 곳곳에 흩어진 관람권을 폐관 전에 주워야 한다.
+// 관람권. 플레이어 둘레 구역에 흩어진 관람권을 폐관 셔터가 다 내려오기 전에 주워야 한다.
 // 폐관 때 못 주운 장수만큼 막을 수 없는 피해를 받고, 모두 주웠으면 그로기로 이어진다.
 [CreateAssetMenu(fileName = "AdmissionTicketGimmick", menuName = "Scriptable Objects/Boss/Gimmick/AdmissionTicket")]
 public class AdmissionTicketGimmick : BossGimmick
 {
     private const int MAX_PICK_TRIES = 12;
 
+    [Header("구역")]
+    // 관람권은 플레이어 둘레 이 크기 안에만 뿌린다. 카메라와 셔터도 이 구역을 비춘다.
+    [SerializeField] private Vector2 _fieldSize = new Vector2(28f, 16f);
+
     [Header("관람권")]
     [SerializeField, Min(1)] private int _ticketCount = 4;
     [SerializeField] private GameObject _ticketPrefab;
-    [SerializeField] private Vector2 _ticketSize = new Vector2(0.6f, 0.9f);
-    [SerializeField] private Color _ticketColor = new Color(0.95f, 0.78f, 0.25f, 1f);
+    [SerializeField] private Vector2 _ticketSize = new Vector2(0.8f, 1.1f);
+    [SerializeField] private Color _ticketColor = new Color(1f, 0.62f, 0.1f, 1f);
+    [SerializeField, Min(0.01f)] private float _ticketEdgeWidth = 0.12f;
+    [SerializeField] private Color _ticketEdgeColor = new Color(0.15f, 0.08f, 0.03f, 1f);
+    // 바닥에 놓인 관람권은 이 색과 오가며 반짝인다.
+    [SerializeField] private Color _glintColor = new Color(1f, 0.97f, 0.8f, 1f);
+    [SerializeField, Min(0.05f)] private float _glintPeriod = 0.6f;
     // 관람권끼리, 그리고 플레이어 시작 자리에서 떨어뜨릴 거리.
     [SerializeField, Min(0f)] private float _minSpacing = 6f;
     [SerializeField, Min(0.1f)] private float _pickRadius = 0.8f;
     [SerializeField] private ImpactSettings _pickImpact = new();
     [SerializeField] private Vector3 _heldOffset = new Vector3(0f, 1.6f, 0f);
-    [SerializeField, Min(0f)] private float _heldSpacing = 0.5f;
+    [SerializeField, Min(0f)] private float _heldSpacing = 0.6f;
     [SerializeField, Range(0.1f, 1f)] private float _heldScale = 0.6f;
 
     [Header("폐관")]
-    [SerializeField, Min(0.1f)] private float _duration = 8f;
+    // 플레이어 자리에서 가까운 관람권부터 차례로 도는 거리를 routeSpeed로 걸을 시간에 graceTime을 더해 준다.
+    [SerializeField, Min(0f)] private float _graceTime = 2.5f;
+    [SerializeField, Min(0.1f)] private float _routeSpeed = 5f;
     [SerializeField] private GameObject _shutterPrefab;
     [SerializeField, Min(0.01f)] private float _edgeWidth = 0.3f;
     [SerializeField] private Color _shutterEdgeColor = new Color(0.35f, 0.38f, 0.45f, 0.85f);
     [SerializeField] private Color _shutterFillColor = new Color(0.35f, 0.38f, 0.45f, 0.18f);
+    // 셔터가 내려올수록 이 색으로 붉어진다.
+    [SerializeField] private Color _shutterWarnColor = new Color(0.85f, 0.1f, 0.1f, 0.3f);
     // 못 주운 관람권 한 장마다 한 번씩 맞는다.
     [SerializeField] private HitSettings _missHit = new();
     [SerializeField] private ImpactSettings _missImpact = new();
@@ -43,11 +56,15 @@ public class AdmissionTicketGimmick : BossGimmick
     [Header("결과")]
     [SerializeField] private ImpactSettings _successImpact = new();
 
+    [Header("카메라")]
+    [SerializeField, Min(0f)] private float _cameraPadding = 1f;
+    [SerializeField, Min(0f)] private float _cameraBlendDuration = 0.5f;
+
     public override void Prewarm()
     {
         if (null != _ticketPrefab)
         {
-            GameManager.Pool.Prewarm(_ticketPrefab, _ticketCount);
+            GameManager.Pool.Prewarm(_ticketPrefab, _ticketCount * GimmickFrame.SPRITE_COUNT);
         }
 
         if (null != _shutterPrefab)
@@ -55,7 +72,7 @@ public class AdmissionTicketGimmick : BossGimmick
             GameManager.Pool.Prewarm(_shutterPrefab, GimmickFrame.SPRITE_COUNT);
         }
 
-        GroundDrop.Prewarm(GameManager.Pool, _drop, 2);
+        GroundDrop.Prewarm(GameManager.Pool, _drop, 4);
     }
 
     public override async UniTask<bool> PlayAsync(AttackContext context, CancellationToken token)
@@ -68,19 +85,25 @@ public class AdmissionTicketGimmick : BossGimmick
             return true;
         }
 
-        GimmickFrame shutter = new GimmickFrame(_shutterPrefab, area.size, _edgeWidth, _shutterEdgeColor, _shutterFillColor);
-        List<SpriteRenderer> tickets = ListPool<SpriteRenderer>.Get();
-        List<SpriteRenderer> held = ListPool<SpriteRenderer>.Get();
+        Vector3 start = context.Target.FollowTransform.position;
+        Rect field = GetField(area, start);
+        GimmickFrame shutter = new GimmickFrame(_shutterPrefab, field.size, _edgeWidth, _shutterEdgeColor, _shutterFillColor);
+        List<GimmickFrame> tickets = ListPool<GimmickFrame>.Get();
+        List<GimmickFrame> held = ListPool<GimmickFrame>.Get();
 
         using (CancellationTokenSource dropSource = CancellationTokenSource.CreateLinkedTokenSource(token))
         {
             try
             {
-                shutter.Place(area.center);
-                shutter.SetFill(0f);
-                SpawnTickets(area, context.Target.FollowTransform.position, tickets);
+                GameManager.CameraRig.ShowArea(new Bounds(field.center, field.size), _cameraPadding, _cameraBlendDuration);
 
-                await CollectAsync(context, shutter, tickets, held, dropSource.Token, token);
+                shutter.Place(field.center);
+                shutter.SetFillDown(0f);
+                SpawnTickets(field, start, tickets);
+
+                float duration = _graceTime + GetRouteLength(start, tickets) / _routeSpeed;
+
+                await CollectAsync(context, shutter, tickets, held, duration, dropSource.Token, token);
 
                 dropSource.Cancel();
 
@@ -98,17 +121,72 @@ public class AdmissionTicketGimmick : BossGimmick
             }
             finally
             {
+                GameManager.CameraRig.EndShowArea(_cameraBlendDuration);
                 dropSource.Cancel();
                 shutter.Despawn();
                 DespawnAll(tickets);
                 DespawnAll(held);
-                ListPool<SpriteRenderer>.Release(tickets);
-                ListPool<SpriteRenderer>.Release(held);
+                ListPool<GimmickFrame>.Release(tickets);
+                ListPool<GimmickFrame>.Release(held);
             }
         }
     }
 
-    private void SpawnTickets(Rect area, Vector3 playerPosition, List<SpriteRenderer> tickets)
+    // 판이 넓어 끝과 끝에 뿌리면 시간 안에 다 돌 수 없으므로, 플레이어 둘레로 구역을 좁히되 판 밖으로는 나가지 않게 한다.
+    private Rect GetField(Rect area, Vector3 player)
+    {
+        Vector2 size = Vector2.Min(_fieldSize, area.size);
+        float x = Mathf.Clamp(player.x - size.x * 0.5f, area.xMin, area.xMax - size.x);
+        float y = Mathf.Clamp(player.y - size.y * 0.5f, area.yMin, area.yMax - size.y);
+
+        return new Rect(x, y, size.x, size.y);
+    }
+
+    // 가장 가까운 관람권부터 차례로 줍는 길이. 가장 짧은 길은 아니지만 사람이 실제로 도는 길에 가깝다.
+    private static float GetRouteLength(Vector3 start, List<GimmickFrame> tickets)
+    {
+        List<Vector3> left = ListPool<Vector3>.Get();
+
+        try
+        {
+            for (int i = 0; i < tickets.Count; i++)
+            {
+                left.Add(tickets[i].Center);
+            }
+
+            float length = 0f;
+            Vector3 current = start;
+
+            while (0 < left.Count)
+            {
+                int nearest = 0;
+                float nearestDistance = float.MaxValue;
+
+                for (int i = 0; i < left.Count; i++)
+                {
+                    float distance = Vector2.Distance(current, left[i]);
+
+                    if (distance < nearestDistance)
+                    {
+                        nearest = i;
+                        nearestDistance = distance;
+                    }
+                }
+
+                length += nearestDistance;
+                current = left[nearest];
+                left.RemoveAt(nearest);
+            }
+
+            return length;
+        }
+        finally
+        {
+            ListPool<Vector3>.Release(left);
+        }
+    }
+
+    private void SpawnTickets(Rect area, Vector3 playerPosition, List<GimmickFrame> tickets)
     {
         List<Vector3> taken = ListPool<Vector3>.Get();
 
@@ -119,15 +197,29 @@ public class AdmissionTicketGimmick : BossGimmick
             for (int i = 0; i < _ticketCount; i++)
             {
                 Vector3 point = PickTicketPoint(area, taken);
+                GimmickFrame ticket = CreateTicket(1f);
 
                 taken.Add(point);
-                tickets.Add(GameManager.Pool.SpawnSprite(_ticketPrefab, point, 0f, _ticketSize, _ticketColor));
+                PlaceTicket(ticket, point);
+                tickets.Add(ticket);
             }
         }
         finally
         {
             ListPool<Vector3>.Release(taken);
         }
+    }
+
+    private GimmickFrame CreateTicket(float scale)
+    {
+        return new GimmickFrame(_ticketPrefab, _ticketSize * scale, _ticketEdgeWidth * scale, _ticketEdgeColor, _ticketColor);
+    }
+
+    // 액자는 Place가 테두리만 옮기므로, 안쪽 면도 다시 채워 같이 옮긴다.
+    private static void PlaceTicket(GimmickFrame ticket, Vector3 point)
+    {
+        ticket.Place(point);
+        ticket.SetFill(1f);
     }
 
     // 다른 자리와 충분히 떨어진 곳을 몇 번 골라 보고, 끝내 못 찾으면 마지막에 고른 자리를 쓴다.
@@ -161,31 +253,37 @@ public class AdmissionTicketGimmick : BossGimmick
         return true;
     }
 
-    // 주운 관람권은 tickets에서 held로 옮긴다. 다 줍거나 시간이 다 되면 끝난다.
-    private async UniTask CollectAsync(AttackContext context, GimmickFrame shutter, List<SpriteRenderer> tickets, List<SpriteRenderer> held,
+    // 주운 관람권은 바닥에서 거두고 머리 위에 작게 새로 띄운다. 다 줍거나 시간이 다 되면 끝난다.
+    private async UniTask CollectAsync(AttackContext context, GimmickFrame shutter, List<GimmickFrame> tickets, List<GimmickFrame> held, float duration,
         CancellationToken dropToken, CancellationToken token)
     {
         AttackTarget target = context.Target;
         float elapsed = 0f;
         float nextDrop = _dropInterval;
 
-        while (elapsed < _duration && 0 < tickets.Count && false == target.IsDefeated)
+        while (elapsed < duration && 0 < tickets.Count && false == target.IsDefeated)
         {
             for (int i = tickets.Count - 1; i >= 0; i--)
             {
-                if (false == target.IsTouching(tickets[i].transform.position, _pickRadius))
+                Vector3 point = tickets[i].Center;
+
+                if (false == target.IsTouching(point, _pickRadius))
                 {
                     continue;
                 }
 
-                GameManager.Feedback.PlayImpact(_pickImpact, tickets[i].transform.position);
-                tickets[i].transform.localScale = new Vector3(_ticketSize.x * _heldScale, _ticketSize.y * _heldScale, 1f);
-                held.Add(tickets[i]);
+                GameManager.Feedback.PlayImpact(_pickImpact, point);
+                tickets[i].Despawn();
                 tickets.RemoveAt(i);
+                held.Add(CreateTicket(_heldScale));
             }
 
+            Glint(tickets, elapsed);
             PlaceHeld(target, held);
-            shutter.SetFill(elapsed / _duration);
+
+            float progress = elapsed / duration;
+            shutter.SetFillDown(progress);
+            shutter.SetFillColor(Color.Lerp(_shutterFillColor, _shutterWarnColor, progress * progress));
 
             if (elapsed >= nextDrop)
             {
@@ -198,14 +296,25 @@ public class AdmissionTicketGimmick : BossGimmick
         }
     }
 
-    private void PlaceHeld(AttackTarget target, List<SpriteRenderer> held)
+    private void Glint(List<GimmickFrame> tickets, float elapsed)
+    {
+        float wave = 0.5f + 0.5f * Mathf.Sin(elapsed * Mathf.PI * 2f / _glintPeriod);
+        Color color = Color.Lerp(_ticketColor, _glintColor, wave);
+
+        for (int i = 0; i < tickets.Count; i++)
+        {
+            tickets[i].SetFillColor(color);
+        }
+    }
+
+    private void PlaceHeld(AttackTarget target, List<GimmickFrame> held)
     {
         Vector3 center = target.FollowTransform.position + _heldOffset;
         float firstOffset = -_heldSpacing * (held.Count - 1) * 0.5f;
 
         for (int i = 0; i < held.Count; i++)
         {
-            held[i].transform.position = center + new Vector3(firstOffset + _heldSpacing * i, 0f, 0f);
+            PlaceTicket(held[i], center + new Vector3(firstOffset + _heldSpacing * i, 0f, 0f));
         }
     }
 
@@ -225,11 +334,11 @@ public class AdmissionTicketGimmick : BossGimmick
         }
     }
 
-    private static void DespawnAll(List<SpriteRenderer> sprites)
+    private static void DespawnAll(List<GimmickFrame> frames)
     {
-        for (int i = 0; i < sprites.Count; i++)
+        for (int i = 0; i < frames.Count; i++)
         {
-            GameManager.Pool.DespawnSprite(sprites[i]);
+            frames[i].Despawn();
         }
     }
 }

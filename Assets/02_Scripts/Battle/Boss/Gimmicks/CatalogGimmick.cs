@@ -35,6 +35,10 @@ public class CatalogGimmick : PunishingBossGimmick
     [Header("결과")]
     [SerializeField] private ImpactSettings _successImpact = new();
 
+    [Header("카메라")]
+    [SerializeField, Min(0f)] private float _cameraPadding = 1f;
+    [SerializeField, Min(0f)] private float _cameraBlendDuration = 0.5f;
+
     public override void Prewarm()
     {
         if (null != _tilePrefab)
@@ -59,6 +63,8 @@ public class CatalogGimmick : PunishingBossGimmick
 
         try
         {
+            GameManager.CameraRig.ShowArea(new Bounds(area.center, area.size), _cameraPadding, _cameraBlendDuration);
+
             BuildTiles(area, cell, tiles, order);
 
             for (int round = 0; round < _rounds; round++)
@@ -82,6 +88,8 @@ public class CatalogGimmick : PunishingBossGimmick
         }
         finally
         {
+            GameManager.CameraRig.EndShowArea(_cameraBlendDuration);
+
             for (int i = 0; i < tiles.Count; i++)
             {
                 tiles[i].Despawn();

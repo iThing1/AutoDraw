@@ -13,7 +13,7 @@ public class AdmissionTicketGimmick : BossGimmick
     private const int MAX_PICK_TRIES = 12;
 
     [Header("구역")]
-    // 관람권은 플레이어 둘레 이 크기 안에만 뿌린다. 카메라와 셔터도 이 구역을 비춘다.
+    // 판이 넓어 끝과 끝에 뿌리면 시간 안에 다 돌 수 없으므로, 관람권은 플레이어 둘레 이 크기 안에만 뿌린다. 카메라와 셔터도 이 구역을 비춘다.
     [SerializeField] private Vector2 _fieldSize = new Vector2(28f, 16f);
 
     [Header("관람권")]
@@ -86,7 +86,7 @@ public class AdmissionTicketGimmick : BossGimmick
         }
 
         Vector3 start = context.Target.FollowTransform.position;
-        Rect field = GetField(area, start);
+        Rect field = Geometry2D.FitRect(area, start, _fieldSize);
         GimmickFrame shutter = new GimmickFrame(_shutterPrefab, field.size, _edgeWidth, _shutterEdgeColor, _shutterFillColor);
         List<GimmickFrame> tickets = ListPool<GimmickFrame>.Get();
         List<GimmickFrame> held = ListPool<GimmickFrame>.Get();
@@ -130,16 +130,6 @@ public class AdmissionTicketGimmick : BossGimmick
                 ListPool<GimmickFrame>.Release(held);
             }
         }
-    }
-
-    // 판이 넓어 끝과 끝에 뿌리면 시간 안에 다 돌 수 없으므로, 플레이어 둘레로 구역을 좁히되 판 밖으로는 나가지 않게 한다.
-    private Rect GetField(Rect area, Vector3 player)
-    {
-        Vector2 size = Vector2.Min(_fieldSize, area.size);
-        float x = Mathf.Clamp(player.x - size.x * 0.5f, area.xMin, area.xMax - size.x);
-        float y = Mathf.Clamp(player.y - size.y * 0.5f, area.yMin, area.yMax - size.y);
-
-        return new Rect(x, y, size.x, size.y);
     }
 
     // 가장 가까운 관람권부터 차례로 줍는 길이. 가장 짧은 길은 아니지만 사람이 실제로 도는 길에 가깝다.

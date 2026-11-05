@@ -75,7 +75,7 @@ public class CatalogGimmick : PunishingBossGimmick
                 await ShowOrderAsync(tiles, order, token);
                 await UniTask.Delay(TimeSpan.FromSeconds(_memorizeDelay), cancellationToken: token);
 
-                if (false == await DetonateAsync(context, area, cell, tiles, order, token))
+                if (false == await DetonateAsync(context, area, tiles, order, token))
                 {
                     PunishTarget(context);
                     return false;
@@ -153,7 +153,7 @@ public class CatalogGimmick : PunishingBossGimmick
     }
 
     // 끝까지 한 번도 맞지 않았으면 true다.
-    private async UniTask<bool> DetonateAsync(AttackContext context, Rect area, Vector2 cell, List<GimmickFrame> tiles, List<int> order,
+    private async UniTask<bool> DetonateAsync(AttackContext context, Rect area, List<GimmickFrame> tiles, List<int> order,
         CancellationToken token)
     {
         AttackTarget target = context.Target;
@@ -172,7 +172,8 @@ public class CatalogGimmick : PunishingBossGimmick
 
             GameManager.Feedback.PlayImpact(_detonateImpact, tile.Center);
 
-            if (order[i] == GetCellIndex(area, cell, target.FollowTransform.position))
+            // 칸 사이 틈에 서도 피할 수 없게, 그림이 아니라 판을 나눈 칸으로 본다.
+            if (order[i] == Geometry2D.GetCellIndex(area, _columns, _rows, target.FollowTransform.position))
             {
                 return false;
             }
@@ -198,14 +199,5 @@ public class CatalogGimmick : PunishingBossGimmick
         }
 
         tile.SetFill(1f);
-    }
-
-    // 칸 사이 틈에 서도 피할 수 없게, 그림이 아니라 판을 나눈 칸으로 본다.
-    private int GetCellIndex(Rect area, Vector2 cell, Vector3 position)
-    {
-        int column = Mathf.Clamp(Mathf.FloorToInt((position.x - area.xMin) / cell.x), 0, _columns - 1);
-        int row = Mathf.Clamp(Mathf.FloorToInt((position.y - area.yMin) / cell.y), 0, _rows - 1);
-
-        return row * _columns + column;
     }
 }

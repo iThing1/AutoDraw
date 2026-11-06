@@ -13,6 +13,7 @@ public class AutoAttacker : MonoBehaviour
     private AttackContext _context;
     private AttackContext _skillContext;
     private CancellationToken _battleToken;
+    private int _runningAttackCount;
     private bool _isRunning;
 
     // 기믹·부활이 진행 중인 공격을 끊을 때 쓴다. 끊으면 버리고 다음 공격 때 새로 만든다.
@@ -60,7 +61,7 @@ public class AutoAttacker : MonoBehaviour
 
                 try
                 {
-                    if (false == await AttackOnceAsync(GetAttackToken(token)))
+                    if (false == await AttackOnceAsync(GetAttackToken()))
                     {
                         return;
                     }
@@ -92,6 +93,28 @@ public class AutoAttacker : MonoBehaviour
             _interruptSource.Cancel();
             _interruptSource = null;
         }
+    }
+
+    // 새 공격은 막되 진행 중인 공격은 끊지 않고, 모두 끝날 때까지 기다린다. Interrupt처럼 Resume으로 푼다.
+    public async UniTask HoldUntilIdleAsync(CancellationToken token)
+    {
+        _isInterrupted = true;
+
+        while (0 < _runningAttackCount)
+        {
+            await UniTask.Yield(PlayerLoopTiming.Update, token);
+        }
+    }
+
+    // 공격 순서 밖에서 도는 공격(환경 탄막)도 HoldUntilIdleAsync가 기다리도록 센다.
+    public void BeginOutsideAttack()
+    {
+        _runningAttackCount++;
+    }
+
+    public void EndOutsideAttack()
+    {
+        _runningAttackCount--;
     }
 
     public void Resume()
@@ -151,7 +174,8 @@ public class AutoAttacker : MonoBehaviour
 
         await WaitIntervalAsync(selectedStyle, style, token);
 
-        if (_owner.Health.IsDead || _context.Target.IsDefeated)
+        // 간격을 기다리는 사이 HoldUntilIdleAsync가 걸렸으면 쏘지 않는다.
+        if (_isInterrupted || _owner.Health.IsDead || _context.Target.IsDefeated)
         {
             return true;
         }
@@ -206,11 +230,19 @@ public class AutoAttacker : MonoBehaviour
         return style.AttackInterval * _owner.WeaponModifier.IntervalScale;
     }
 
-    private CancellationToken GetAttackToken(CancellationToken battleToken)
+    private float GetGaugeGain(AttackStyle style)
+    {
+        WeaponModifier weapon = _owner.WeaponModifier;
+
+        return weapon.IsWeapon ? weapon.GaugeGain : style.GaugeGainPerHit;
+    }
+
+    // Interrupt나 전투 종료에 끊기는 토큰.
+    public CancellationToken GetAttackToken()
     {
         if (null == _interruptSource)
         {
-            _interruptSource = CancellationTokenSource.CreateLinkedTokenSource(battleToken);
+            _interruptSource = CancellationTokenSource.CreateLinkedTokenSource(_battleToken);
         }
 
         return _interruptSource.Token;
@@ -241,7 +273,9 @@ public class AutoAttacker : MonoBehaviour
 
         try
         {
-            await FireAsync(style, _skillContext, false, _battleToken);
+            CancellationToken token = style.EndsOnInterrupt ? GetAttackToken() : _battleToken;
+
+            await FireAsync(style, _skillContext, false, token);
         }
         finally
         {
@@ -251,11 +285,12 @@ public class AutoAttacker : MonoBehaviour
 
     private async UniTask FireAsync(AttackStyle style, AttackContext context, bool gainsGauge, CancellationToken token)
     {
-        float gaugeGain = gainsGauge ? style.GaugeGainPerHit : 0f;
+        float gaugeGain = gainsGauge ? GetGaugeGain(style) : 0f;
         bool hasBegunAction = false;
         bool hasPosed = false;
 
         _lastFireTimes[style] = Time.time;
+        _runningAttackCount++;
 
         try
         {
@@ -282,6 +317,8 @@ public class AutoAttacker : MonoBehaviour
         }
         finally
         {
+            _runningAttackCount--;
+
             if (hasPosed)
             {
                 _hands.ReturnToRest();

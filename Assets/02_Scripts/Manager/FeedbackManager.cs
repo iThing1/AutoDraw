@@ -39,7 +39,7 @@ public class FeedbackManager
             return;
         }
 
-        _timeScale.PlayHitStop(preset.HitStopDuration, preset.HitStopTimeScale);
+        _timeScale.PlayHitStopThrottled(preset.HitStopDuration, preset.HitStopTimeScale);
 
         UnitView view = target.View;
 

@@ -3,7 +3,7 @@ public class WeaponLoadoutRule : LoadoutRule
 {
     private readonly WeaponType _type;
 
-    public WeaponLoadoutRule(string title, WeaponType type, PlayerLoadout loadout, DataTableManager tables, AssetManager assets)
+    public WeaponLoadoutRule(string title, WeaponType type, PlayerLoadout loadout, PlayerStats stats, DataTableManager tables, AssetManager assets)
         : base(title, loadout, assets)
     {
         _type = type;
@@ -12,7 +12,8 @@ public class WeaponLoadoutRule : LoadoutRule
         {
             if (type == weapon.Type)
             {
-                AddEntry(weapon.Id, weapon.Name, weapon.Description, weapon.IconKey, GetStyleColor(weapon.AttackStyleKey), weapon.PreviewKey);
+                AddEntry(weapon.Id, weapon.Name, weapon.Description, weapon.IconKey, GetStyleColor(weapon.AttackStyleKey), weapon.PreviewKey,
+                    new LoadoutWeaponStats(weapon, stats.GetWeaponDamageBonus(weapon.Type)));
             }
         }
     }

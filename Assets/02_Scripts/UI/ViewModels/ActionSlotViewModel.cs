@@ -29,8 +29,6 @@ public abstract class ActionSlotViewModel : ViewModelBase
     public float GaugeRatio { get { return _gaugeRatio; } }
     // 게이지가 다 차 지금 쓸 수 있는지.
     public bool IsReady { get { return _isReady; } }
-    // 쓸 수 있게 된 순간 낼 소리. 대시·막기처럼 자주 차는 칸은 소리 없이 밝아지기만 한다.
-    public virtual UISoundKind ReadySound { get { return UISoundKind.None; } }
 
     protected ActionSlotViewModel(string keyLabel, AttackStyle style, Sprite icon, bool usesGauge)
         : this(keyLabel, null != style ? style.DisplayName : string.Empty, icon, null != style ? style.IconColor : Color.white, usesGauge)

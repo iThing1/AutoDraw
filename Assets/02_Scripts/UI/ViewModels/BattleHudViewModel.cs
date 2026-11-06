@@ -35,6 +35,10 @@ public class BattleHudViewModel : ViewModelBase
     // 페이즈가 하나뿐인 보스나 마지막 페이즈에서는 숨긴다.
     public bool ShowsPhaseCount { get { return 1 < RemainingPhaseCount; } }
 
+    // HUD가 몸을 가리는지 볼 때 쓴다. UnBind 뒤에는 null이다.
+    public Transform PlayerBody { get { return null != _player ? _player.Body : null; } }
+    public Transform BossBody { get { return null != _boss ? _boss.Body : null; } }
+
     public BattleHudViewModel(BattleUnit player, BattleUnit boss)
     {
         _player = player;

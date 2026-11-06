@@ -54,6 +54,7 @@ MonoBehaviour:
     _useTrailColor: 0
     _trailColor: {r: 0, g: 0, b: 0, a: 1}
     _hit:
+      _skillHitId: black_square.turret
       _damage:
         _min: 4
         _max: 6
@@ -84,6 +85,7 @@ MonoBehaviour:
     _useTrailColor: 0
     _trailColor: {r: 0, g: 0, b: 0, a: 1}
     _hit:
+      _skillHitId: black_square.finale
       _damage:
         _min: 24
         _max: 30

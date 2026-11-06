@@ -50,10 +50,32 @@ public class EnvironmentHazard : MonoBehaviour
 
             if (null != pattern)
             {
-                await pattern.PlayAsync(context, token);
+                await PlayPatternAsync(pattern, attacker, token);
             }
 
             await UniTask.Delay(TimeSpan.FromSeconds(_interval.PickRandom()), cancellationToken: token);
+        }
+    }
+
+    // 보스 공격이 끊기면(부활, 기믹 시작) 탄막과 날아가던 탄도 함께 거둔다. 다음 탄막 주기는 그대로 이어진다.
+    private async UniTask PlayPatternAsync(HazardPattern pattern, AutoAttacker attacker, CancellationToken token)
+    {
+        attacker.BeginOutsideAttack();
+
+        try
+        {
+            await pattern.PlayAsync(attacker.Context, attacker.GetAttackToken());
+        }
+        catch (OperationCanceledException)
+        {
+            if (token.IsCancellationRequested)
+            {
+                throw;
+            }
+        }
+        finally
+        {
+            attacker.EndOutsideAttack();
         }
     }
 

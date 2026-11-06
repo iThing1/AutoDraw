@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -19,6 +20,13 @@ public class LoadoutView : ViewBase<LoadoutViewModel>
     // 영상 플레이어가 RenderTexture 에셋에 그리고, 이 RawImage가 그 텍스처를 보여 준다.
     [SerializeField] private RawImage _preview;
     [SerializeField] private VideoPlayer _videoPlayer;
+
+    [Header("무기 스펙")]
+    [SerializeField] private GameObject _weaponStats;
+    [SerializeField] private TMP_Text _damageText;
+    [SerializeField] private TMP_Text _criticalText;
+    [SerializeField] private TMP_Text _speedText;
+    [SerializeField] private Color _perkBonusColor = new Color(0.45f, 0.9f, 0.55f, 1f);
 
     private readonly List<LoadoutSlotView> _slotViews = new();
 
@@ -66,6 +74,10 @@ public class LoadoutView : ViewBase<LoadoutViewModel>
             case nameof(LoadoutViewModel.Preview):
                 DrawPreview();
                 break;
+
+            case nameof(LoadoutViewModel.WeaponStats):
+                DrawWeaponStats();
+                break;
         }
     }
 
@@ -73,6 +85,7 @@ public class LoadoutView : ViewBase<LoadoutViewModel>
     {
         DrawDescription();
         DrawPreview();
+        DrawWeaponStats();
     }
 
     private string GetKeyLabel(int index)
@@ -99,6 +112,38 @@ public class LoadoutView : ViewBase<LoadoutViewModel>
         _preview.gameObject.SetActive(true);
         _videoPlayer.clip = clip;
         _videoPlayer.Play();
+    }
+
+    private void DrawWeaponStats()
+    {
+        LoadoutWeaponStats stats = ViewModel.WeaponStats;
+        bool hasStats = null != stats;
+
+        _weaponStats.SetActive(hasStats);
+
+        if (false == hasStats)
+        {
+            return;
+        }
+
+        string attacksPerSecond = stats.AttacksPerSecond.ToString("0.##", CultureInfo.InvariantCulture);
+
+        _damageText.text = FormatDamage(stats);
+        _criticalText.text = $"CRIT {Mathf.RoundToInt(stats.CriticalChance * 100f)}%";
+        _speedText.text = $"SPD {attacksPerSecond}/s";
+    }
+
+    private string FormatDamage(LoadoutWeaponStats stats)
+    {
+        string hits = 1 < stats.HitCount ? $" x{stats.HitCount}" : string.Empty;
+        string text = $"DMG {stats.MinDamage}-{stats.MaxDamage}{hits}";
+
+        if (0 >= stats.PerkDamage)
+        {
+            return text;
+        }
+
+        return $"{text} <color=#{ColorUtility.ToHtmlStringRGB(_perkBonusColor)}>+{stats.PerkDamage}</color>";
     }
 
     private void HandleCloseClicked()

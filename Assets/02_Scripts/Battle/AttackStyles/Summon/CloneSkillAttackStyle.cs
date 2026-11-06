@@ -20,6 +20,9 @@ public class CloneSkillAttackStyle : AttackStyle
     [SerializeField, Min(0f)] private float _fadeDuration = 0.3f;
     [SerializeField] private ImpactSettings _summonImpact = new();
 
+    // 복제체는 플레이어의 멈춤을 따라 쉬었다가 이어 쏜다(SyncInterrupt).
+    public override bool EndsOnInterrupt { get { return false; } }
+
     // 처음 쓸 때 유닛 하나를 통째로 만드느라 끊기지 않도록 미리 만들어 둔다. 한 번에 하나만 남는다(같은 스킬은 끝나야 다시 쓴다).
     public override void Prewarm()
     {
@@ -77,9 +80,10 @@ public class CloneSkillAttackStyle : AttackStyle
     // 몸 그림은 애니메이션이 움직인 뒤에 베껴, 복제체 자신의 애니메이션에 덮이지 않게 한다.
     private async UniTask FollowAsync(AttackContext context, BattleUnit player, BattleUnit clone, CancellationToken token)
     {
+        float duration = player.SkillModifier.ResolveDuration(_duration);
         float elapsed = 0f;
 
-        while (elapsed < _duration && false == player.Health.IsDead && false == context.Target.IsDefeated)
+        while (elapsed < duration && false == player.Health.IsDead && false == context.Target.IsDefeated)
         {
             float follow = 1f - Mathf.Exp(-_followSharpness * Time.deltaTime);
             clone.transform.position = Vector3.Lerp(clone.transform.position, GetFollowPoint(player), follow);

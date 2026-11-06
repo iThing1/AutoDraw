@@ -79,6 +79,7 @@ public class BattleUnit : MonoBehaviour
     // 키로 고른 공격이 데이터 에셋을 고치지 않도록, 실행 중에만 쓰는 덮어쓰기 값을 따로 둔다.
     private AttackStyle _attackStyleOverride;
     private WeaponModifier _weaponModifier = WeaponModifier.NONE;
+    private SkillModifier _skillModifier = SkillModifier.NONE;
 
     public BattleUnitData Data { get { return _data; } }
     public IUnitStats Stats { get { return _stats; } }
@@ -99,6 +100,7 @@ public class BattleUnit : MonoBehaviour
 
     public AttackStyle AttackStyle { get { return null != _attackStyleOverride ? _attackStyleOverride : GetDataAttackStyle(); } }
     public WeaponModifier WeaponModifier { get { return _weaponModifier; } }
+    public SkillModifier SkillModifier { get { return _skillModifier; } }
 
     // 렌더러의 bounds는 꺼진 오브젝트나 프리팹에서 0이 되므로 스프라이트 크기에 스케일을 곱해 읽는다. 애니메이션이 늘이는 그림 자식의 크기는 빼, 판정 범위가 출렁이지 않게 한다.
     public Vector2 GetBodyExtents()
@@ -263,6 +265,11 @@ public class BattleUnit : MonoBehaviour
     {
         _attackStyleOverride = attackStyle;
         _weaponModifier = modifier;
+    }
+
+    public void SetSkillModifier(SkillModifier modifier)
+    {
+        _skillModifier = modifier;
     }
 
     private void EndGuard()

@@ -49,6 +49,9 @@ public class BarrageAttackStyle : AttackStyle
         GameManager.Sound.PlaySfx(_turretAppearSound);
 
         List<Transform> turrets = ListPool<Transform>.Get();
+        SkillModifier skill = context.Owner.SkillModifier;
+        int volleyCount = skill.ResolveCount(_volleyCount);
+        float volleyInterval = skill.ResolveInterval(_volleyInterval);
 
         SpawnTurrets(context.Owner.transform, turrets);
         AimTurrets(turrets, context.Target);
@@ -57,17 +60,17 @@ public class BarrageAttackStyle : AttackStyle
         {
             await UniTask.Delay(TimeSpan.FromSeconds(_turretAppearDuration), cancellationToken: token);
 
-            for (int volley = 0; volley < _volleyCount; volley++)
+            for (int volley = 0; volley < volleyCount; volley++)
             {
                 AimTurrets(turrets, context.Target);
 
                 for (int i = 0; i < turrets.Count; i++)
                 {
                     context.Launcher.FireShot(_turretShot, turrets[i].position, Vector3.zero, gaugeGain, token);
-                    Recoil(turrets[i]);
+                    Recoil(turrets[i], volleyInterval);
                 }
 
-                await UniTask.Delay(TimeSpan.FromSeconds(_volleyInterval), cancellationToken: token);
+                await UniTask.Delay(TimeSpan.FromSeconds(volleyInterval), cancellationToken: token);
             }
 
             await UniTask.Delay(TimeSpan.FromSeconds(_finaleDelay), cancellationToken: token);
@@ -112,10 +115,10 @@ public class BarrageAttackStyle : AttackStyle
         }
     }
 
-    private void Recoil(Transform turret)
+    private void Recoil(Transform turret, float duration)
     {
         turret.DOComplete();
-        turret.DOPunchScale(Vector3.one * _turretRecoil, _volleyInterval, PunchTween.VIBRATO, PunchTween.ELASTICITY);
+        turret.DOPunchScale(Vector3.one * _turretRecoil, duration, PunchTween.VIBRATO, PunchTween.ELASTICITY);
     }
 
     private void DespawnTurrets(List<Transform> turrets)

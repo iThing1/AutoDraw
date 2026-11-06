@@ -54,11 +54,12 @@ public abstract class LoadoutRule
     }
 
     // 아이콘은 아직 없을 수 있어 조용히 찾고, 영상은 가져오기 때 검사한 키라 그대로 찾는다.
-    protected LoadoutEntry AddEntry(string id, string label, string description, string iconKey, Color iconColor, string previewKey)
+    protected LoadoutEntry AddEntry(string id, string label, string description, string iconKey, Color iconColor, string previewKey,
+        LoadoutWeaponStats weaponStats = null)
     {
         _assets.TryGet(iconKey, out Sprite icon);
         VideoClip preview = _assets.Get<VideoClip>(previewKey);
-        LoadoutEntry entry = new LoadoutEntry(id, label, description, icon, iconColor, preview);
+        LoadoutEntry entry = new LoadoutEntry(id, label, description, icon, iconColor, preview, weaponStats);
 
         _entries.Add(entry);
 

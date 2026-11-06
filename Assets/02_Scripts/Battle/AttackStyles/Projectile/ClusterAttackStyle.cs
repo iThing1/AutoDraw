@@ -29,13 +29,17 @@ public class ClusterAttackStyle : AttackStyle
 
         GameManager.Feedback.PlayImpact(_cluster.SplitImpact, splitPoint, color);
 
-        for (int i = 0; i < _cluster.FragmentCount; i++)
+        SkillModifier skill = context.Owner.SkillModifier;
+        int fragmentCount = skill.ResolveCount(_cluster.FragmentCount);
+        float fragmentInterval = skill.ResolveInterval(_cluster.FragmentInterval);
+
+        for (int i = 0; i < fragmentCount; i++)
         {
             Vector3 landingOffset = UnityEngine.Random.insideUnitCircle * _cluster.LandingSpread;
 
             context.Launcher.FireShot(_cluster.Fragment, splitPoint, landingOffset, gaugeGain, token);
 
-            await UniTask.Delay(TimeSpan.FromSeconds(_cluster.FragmentInterval), cancellationToken: token);
+            await UniTask.Delay(TimeSpan.FromSeconds(fragmentInterval), cancellationToken: token);
         }
     }
 }

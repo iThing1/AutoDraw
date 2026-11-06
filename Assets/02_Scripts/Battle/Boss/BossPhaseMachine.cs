@@ -25,6 +25,15 @@ public class BossPhaseMachine : MonoBehaviour
     [SerializeField, Min(0f)] private float _groggyDuration = 4f;
     [SerializeField, Min(1f)] private float _groggyDamageMultiplier = 1.5f;
 
+    [Header("파훼 보상")]
+    // 기믹을 해내면 이 시간(초) 동안 보스가 받는 공격의 치명타 확률에 더한다. 그로기와 함께 시작한다.
+    [SerializeField, Range(0f, 1f)] private float _breakCriticalBonus = 0.3f;
+    [SerializeField, Min(0f)] private float _breakDuration = 5f;
+    // 남은 시간을 보여 주는 보스 발밑 원. 몸 크기까지 줄어들면 끝난다.
+    [SerializeField] private GameObject _breakMarkPrefab;
+    [SerializeField] private Color _breakMarkColor = new Color(1f, 0.35f, 0.2f, 0.45f);
+    [SerializeField, Min(0f)] private float _breakMarkMargin = 2.5f;
+
     [Header("부활")]
     [SerializeField] private RevivalSettings _revival = new();
 
@@ -38,11 +47,14 @@ public class BossPhaseMachine : MonoBehaviour
     private int _phaseIndex;
     // 다음에 닿을 기믹 줄이자, 지금 색 구간의 번호.
     private int _nextLineIndex;
+    private bool _isBroken;
+    private float _breakEndTime;
     // 기믹·부활을 끊는 소스. 보스가 사라지거나 전투가 끝나면(플레이어가 쓰러짐) 함께 끊겨, 패배 연출 위로 기믹이 계속 돌지 않는다.
     private CancellationTokenSource _flowSource;
 
     public event Action OnPhaseChanged;
-    public event Action<bool> OnGimmickActiveChanged;
+    // 체력이 기믹 줄에 닿으면 true, 그 기믹이 끝나면 false. 그동안 체력이 더 줄지 않는다.
+    public event Action<bool> OnHpLockChanged;
     // 기믹 결과(해냈으면 true)를 알려, 화면에 성공·실패를 띄우게 한다.
     public event Action<bool> OnGimmickFinished;
     // 부활 연출이 시작되면 true, 끝나면 false. 그동안 플레이어를 멈추는 일은 전투를 맡은 쪽이 한다.
@@ -124,13 +136,15 @@ public class BossPhaseMachine : MonoBehaviour
 
         try
         {
-            await StopBossAsync(token);
+            OnHpLockChanged?.Invoke(true);
 
-            OnGimmickActiveChanged?.Invoke(true);
+            // 하던 패턴과 환경 탄막이 끝난 뒤에 시작한다. 그동안 체력은 기믹 줄에 멈춰 있다.
+            await _unit.Attacker.HoldUntilIdleAsync(token);
+            await StopBossAsync(token);
 
             bool isSucceeded = await PlayGimmickWithGuardAsync(line.Gimmick, token);
 
-            OnGimmickActiveChanged?.Invoke(false);
+            OnHpLockChanged?.Invoke(false);
             OnGimmickFinished?.Invoke(isSucceeded);
 
             _nextLineIndex++;
@@ -144,6 +158,7 @@ public class BossPhaseMachine : MonoBehaviour
 
             if (isSucceeded)
             {
+                ApplyBreak();
                 await PlayGroggyAsync(token);
             }
 
@@ -192,6 +207,7 @@ public class BossPhaseMachine : MonoBehaviour
     private async UniTaskVoid PlayRevivalAsync(CancellationToken token)
     {
         _state = BossPhaseState.Revival;
+        _breakEndTime = 0f;
 
         BossRevivalCutscene revival = new BossRevivalCutscene(_unit, _hands, _revival);
 
@@ -245,6 +261,53 @@ public class BossPhaseMachine : MonoBehaviour
         {
             _unit.Health.SetDamageMultiplier(1f);
             SetGroggy(false);
+        }
+    }
+
+    // 이미 걸려 있으면 겹치지 않고 시간만 다시 채운다.
+    private void ApplyBreak()
+    {
+        _breakEndTime = Time.time + _breakDuration;
+
+        if (false == _isBroken)
+        {
+            RunBreakAsync(destroyCancellationToken).Forget();
+        }
+    }
+
+    private async UniTaskVoid RunBreakAsync(CancellationToken token)
+    {
+        float bodyDiameter = _unit.GetBodyRadius() * 2f;
+        SpriteRenderer mark = null != _breakMarkPrefab
+            ? GameManager.Pool.SpawnSprite(_breakMarkPrefab, _unit.Body.position, 0f, Vector2.zero, _breakMarkColor)
+            : null;
+
+        _isBroken = true;
+        _unit.Health.SetCriticalChanceBonus(_breakCriticalBonus);
+
+        try
+        {
+            while (Time.time < _breakEndTime && false == _unit.Health.IsDead && false == _unit.Attacker.BattleToken.IsCancellationRequested)
+            {
+                if (null != mark)
+                {
+                    float diameter = bodyDiameter + _breakMarkMargin * 2f * (_breakEndTime - Time.time) / _breakDuration;
+
+                    mark.transform.position = _unit.Body.position;
+                    mark.transform.localScale = new Vector3(diameter, diameter, 1f);
+                }
+
+                await UniTask.Yield(PlayerLoopTiming.Update, token);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        finally
+        {
+            _isBroken = false;
+            _unit.Health.SetCriticalChanceBonus(0f);
+            GameManager.Pool.DespawnSprite(mark);
         }
     }
 
@@ -369,6 +432,11 @@ public class BossPhaseMachine : MonoBehaviour
 
     private void PrewarmGimmicks()
     {
+        if (null != _breakMarkPrefab)
+        {
+            GameManager.Pool.Prewarm(_breakMarkPrefab, 1);
+        }
+
         for (int phase = 0; phase < _phases.Length; phase++)
         {
             for (int line = 0; line < _phases[phase].GimmickLineCount; line++)

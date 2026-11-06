@@ -21,7 +21,7 @@ MonoBehaviour:
   _tell: 0
   _tellDuration: 0.5
   _inkArms:
-    _poolCount: 10
+    _poolCount: 5
     _poolScatterRadius: 6
     _poolStyle: {fileID: 11400000, guid: 07afd730bfaf7e554f9e63f67499d5a9, type: 2}
     _poolScale:
@@ -47,7 +47,7 @@ MonoBehaviour:
         _max: 6
       _sourceSearchRadius: 10
       _sourceTwitchDuration: 0.25
-      _sourceTwitchStrength: 0.35
+      _sourceTwitchStrength: 0.1
       _fallbackSplatStyle: {fileID: 11400000, guid: 07afd730bfaf7e554f9e63f67499d5a9, type: 2}
       _fallbackSplatScale:
         _min: 0.8
@@ -83,5 +83,5 @@ MonoBehaviour:
         _max: 7
       _criticalChance: 0.15
       _criticalMultiplier: 2
-      _normalHit: {fileID: 11400000, guid: 8f01e519d7e777a4fae5f35580a49372, type: 2}
-      _criticalHit: {fileID: 11400000, guid: 83dcd58e110b1174b84b0be067d65ac6, type: 2}
+      _normalHit: {fileID: 11400000, guid: 6ed7fb2ee3c1a3b4f925a166000bced5, type: 2}
+      _criticalHit: {fileID: 11400000, guid: a09265648bc08b24abd8880e19edf3a6, type: 2}

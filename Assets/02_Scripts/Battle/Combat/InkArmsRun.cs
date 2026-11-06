@@ -8,6 +8,7 @@ using UnityEngine.Pool;
 // 목표 둘레에 먹물 웅덩이를 흩뿌리고, 정해진 시간 동안 웅덩이에서 그림자 팔을 뻗어 목표를 붙잡는다.
 // 손 자세처럼 쓰는 쪽마다 다른 연출은 부르는 쪽이 두 단계 사이에 끼운다.
 // 웅덩이는 쓰는 쪽 편의 자국으로 남는다. 보스가 쓰면 잉크, 플레이어가 쓰면 물감이라 리무버·잉크 연출이 플레이어 웅덩이를 보스 잉크로 다루지 않는다.
+// 플레이어가 쓰면 웅덩이는 팔레트 색으로 칠하고, 팔은 나온 웅덩이의 색을 따른다.
 public static class InkArmsRun
 {
     private const int FALLBACK_POOL_TRIES = 5;
@@ -102,6 +103,11 @@ public static class InkArmsRun
 
         InkArm arm = objectPool.Spawn(arms.ArmPrefab, root, Quaternion.identity);
         arm.Setup(root, grabPoint, 0f, false, arms);
+
+        if (false == context.Damage.IsInk)
+        {
+            arm.SetColor(source.Color);
+        }
 
         SwallowFrame frame = new SwallowFrame { Remain = 1f };
         float arrivalTime = arm.ArrivalTime;
@@ -217,6 +223,9 @@ public static class InkArmsRun
 
     private static PaintMark LeavePool(AttackContext context, InkArmsSettings settings, Vector3 position)
     {
-        return context.PaintCanvas.LeaveSplat(position, settings.PoolStyle, settings.Arms.InkColor, context.Damage.IsInk, settings.PoolScale.PickRandom());
+        bool isInk = context.Damage.IsInk;
+        Color color = isInk ? settings.Arms.InkColor : context.Damage.PickColor();
+
+        return context.PaintCanvas.LeaveSplat(position, settings.PoolStyle, color, isInk, settings.PoolScale.PickRandom());
     }
 }

@@ -27,6 +27,7 @@ public class InkArm : MonoBehaviour
 
     private readonly Vector3[] _fingerPoints = new Vector3[FINGER_POINT_COUNT];
     private Vector3[] _points;
+    private Color _defaultColor;
 
     private InkSwallowSettings _settings;
     private Vector3 _root;
@@ -42,6 +43,7 @@ public class InkArm : MonoBehaviour
     private void Awake()
     {
         _points = new Vector3[_segments + 1];
+        _defaultColor = _body.startColor;
 
         SetPointCount(_body, _points.Length);
         SetPointCount(_bodyOutline, _points.Length);
@@ -57,6 +59,23 @@ public class InkArm : MonoBehaviour
     private void OnEnable()
     {
         ApplyVisible(false);
+    }
+
+    // 보스와 같은 풀을 쓰므로, 칠한 색이 다음 보스 팔에 남지 않게 돌려줄 때 되돌린다.
+    private void OnDisable()
+    {
+        SetColor(_defaultColor);
+    }
+
+    // 테두리는 프리팹의 흰색 그대로 둔다.
+    public void SetColor(Color color)
+    {
+        SetLineColor(_body, color);
+
+        for (int i = 0; i < _fingers.Length; i++)
+        {
+            SetLineColor(_fingers[i], color);
+        }
     }
 
     // 가라앉을 잉크의 팔(isSinkArm)은 대상을 쥔 채 따라가고, 나머지는 끌고 가는 동안 손을 놓고 되감긴다.
@@ -204,6 +223,15 @@ public class InkArm : MonoBehaviour
         if (null != line)
         {
             line.positionCount = count;
+        }
+    }
+
+    private static void SetLineColor(LineRenderer line, Color color)
+    {
+        if (null != line)
+        {
+            line.startColor = color;
+            line.endColor = color;
         }
     }
 

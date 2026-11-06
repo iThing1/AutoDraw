@@ -1,6 +1,6 @@
 {"_items":[
 {"_id":"paint_bomb","_name":"Paint Bomb","_attackStyleKey":"AttackStyle/PaintBomb","_count":12,"_duration":0,"_interval":0.05,"_isStarting":true,"_iconKey":"Icon/Skill/PaintBomb","_description":"Bursts paint all around you.","_previewKey":""},
 {"_id":"black_square","_name":"Black Square","_attackStyleKey":"AttackStyle/BlackSquare","_count":7,"_duration":0,"_interval":0.15,"_isStarting":false,"_iconKey":"Icon/Skill/BlackSquare","_description":"Summons two black turrets beside you that fire a volley, then a heavy final shot.","_previewKey":""},
-{"_id":"ink_hands","_name":"Ink Hands","_attackStyleKey":"AttackStyle/InkHands","_count":10,"_duration":4,"_interval":0.4,"_isStarting":false,"_iconKey":"Icon/Skill/InkHands","_description":"Spills ink around the boss. Shadow hands reach out of it and strike for 4 seconds.","_previewKey":""},
+{"_id":"ink_hands","_name":"Ink Hands","_attackStyleKey":"AttackStyle/InkHands","_count":5,"_duration":4,"_interval":0.4,"_isStarting":false,"_iconKey":"Icon/Skill/InkHands","_description":"Spills ink around the boss. Shadow hands reach out of it and strike for 4 seconds.","_previewKey":""},
 {"_id":"clone","_name":"Clone","_attackStyleKey":"AttackStyle/Clone","_count":0,"_duration":5,"_interval":0,"_isStarting":false,"_iconKey":"Icon/Skill/Clone","_description":"Summons a copy of you that fires your current weapon for 5 seconds.","_previewKey":""}
 ]}

@@ -63,9 +63,33 @@ public class AttackTarget
         return _unit.IsDodging && IsTouching(position, attackRadius);
     }
 
+    // 바닥에 깔리는 영역 공격도 날아가는 탄과 같은 기준으로, 영역이 몸 그림에 조금이라도 닿으면 맞는다.
     public bool IsInBlast(Vector3 center, float radius)
     {
-        return Vector2.Distance(center, _unit.Body.position) <= radius;
+        return IsTouching(center, radius);
+    }
+
+    public bool IsTouchingRect(Vector3 center, Vector2 size)
+    {
+        Vector3 body = _unit.Body.position;
+        Vector2 closest = new Vector2(
+            Mathf.Clamp(body.x, center.x - size.x * 0.5f, center.x + size.x * 0.5f),
+            Mathf.Clamp(body.y, center.y - size.y * 0.5f, center.y + size.y * 0.5f));
+
+        return Vector2.Distance(closest, body) <= _bodyRadius;
+    }
+
+    // 안전한 원 안에 몸 전체가 들었는지. 원 밖이 위험한 공격은 몸이 원 밖으로 조금만 나가도 닿은 것으로 본다.
+    public bool IsInsideCircle(Vector3 center, float radius)
+    {
+        return Vector2.Distance(center, _unit.Body.position) + _bodyRadius <= radius;
+    }
+
+    public bool IsInsideRect(Vector3 center, Vector2 size)
+    {
+        Vector3 body = _unit.Body.position;
+
+        return Mathf.Abs(body.x - center.x) + _bodyRadius <= size.x * 0.5f && Mathf.Abs(body.y - center.y) + _bodyRadius <= size.y * 0.5f;
     }
 
     // 한꺼번에 떨어지는 여러 원 중 하나에라도 들었는지.

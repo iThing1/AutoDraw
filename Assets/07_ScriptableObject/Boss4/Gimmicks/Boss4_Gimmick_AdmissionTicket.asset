@@ -1,0 +1,128 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9a2b35d97a6d9f4199b778490978be6, type: 3}
+  m_Name: Boss4_Gimmick_AdmissionTicket
+  m_EditorClassIdentifier: Assembly-CSharp::AdmissionTicketGimmick
+  _fieldSize: {x: 28, y: 16}
+  _ticketCount: 4
+  _ticketPrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
+  _ticketSize: {x: 0.8, y: 1.1}
+  _ticketColor: {r: 1, g: 0.62, b: 0.1, a: 1}
+  _ticketEdgeWidth: 0.12
+  _ticketEdgeColor: {r: 0.15, g: 0.08, b: 0.03, a: 1}
+  _glintColor: {r: 1, g: 0.97, b: 0.8, a: 1}
+  _glintPeriod: 0.6
+  _minSpacing: 6
+  _pickRadius: 0.8
+  _pickImpact:
+    _shakeForce: 0.2
+    _sounds:
+    - {fileID: 8300000, guid: bc241be328531014fa49af9c462337f0, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0.95, g: 0.78, b: 0.25, a: 1}
+    _effectScale: 0.8
+    _effectLifetime: 2
+  _heldOffset: {x: 0, y: 1.6, z: 0}
+  _heldSpacing: 0.6
+  _heldScale: 0.6
+  _graceTime: 2.5
+  _routeSpeed: 5
+  _shutterPrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
+  _edgeWidth: 0.3
+  _shutterEdgeColor: {r: 0.35, g: 0.38, b: 0.45, a: 0.85}
+  _shutterFillColor: {r: 0.35, g: 0.38, b: 0.45, a: 0.18}
+  _shutterWarnColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.3}
+  _missHit:
+    _damage:
+      _min: 12
+      _max: 15
+    _criticalChance: 0
+    _criticalMultiplier: 2
+    _normalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+    _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+  _missImpact:
+    _shakeForce: 1
+    _sounds:
+    - {fileID: 8300000, guid: 50fd2ff187c1bb349a27ed90afbb8560, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0.85, g: 0.1, b: 0.1, a: 1}
+    _effectScale: 1.8
+    _effectLifetime: 2
+  _missInterval: 0.15
+  _dropInterval: 1.4
+  _drop:
+    _radius: 2.2
+    _prefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
+    _telegraphColor: {r: 0.1, g: 0.1, b: 0.12, a: 0.35}
+    _warnDuration: 0.8
+    _hit:
+      _damage:
+        _min: 10
+        _max: 13
+      _criticalChance: 0.1
+      _criticalMultiplier: 2
+      _normalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}
+      _criticalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}
+    _impact:
+      _shakeForce: 0.5
+      _sounds:
+      - {fileID: 8300000, guid: bc241be328531014fa49af9c462337f0, type: 3}
+      _pitch:
+        _min: 0.9
+        _max: 1.1
+      _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+      _effectColor: {r: 0, g: 0, b: 0, a: 1}
+      _effectScale: 1.2
+      _effectLifetime: 2
+    _linger: 4
+    _puddleColor: {r: 0.1, g: 0.1, b: 0.12, a: 0.55}
+    _flashColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.65}
+    _touchInterval: 0.5
+    _fadeDuration: 0.3
+    _touchHit:
+      _damage:
+        _min: 6
+        _max: 8
+      _criticalChance: 0.1
+      _criticalMultiplier: 2
+      _normalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}
+      _criticalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}
+    _touchImpact:
+      _shakeForce: 0.3
+      _sounds:
+      - {fileID: 8300000, guid: bc241be328531014fa49af9c462337f0, type: 3}
+      _pitch:
+        _min: 1.1
+        _max: 1.3
+      _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+      _effectColor: {r: 0.85, g: 0.1, b: 0.1, a: 1}
+      _effectScale: 0.8
+      _effectLifetime: 2
+  _successImpact:
+    _shakeForce: 1
+    _sounds:
+    - {fileID: 8300000, guid: 50fd2ff187c1bb349a27ed90afbb8560, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0.95, g: 0.78, b: 0.25, a: 1}
+    _effectScale: 2
+    _effectLifetime: 2
+  _cameraPadding: 1
+  _cameraBlendDuration: 0.5

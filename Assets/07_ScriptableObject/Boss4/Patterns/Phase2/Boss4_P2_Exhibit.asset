@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c390d4c28ba4cf49a0567e1d97e60f8, type: 3}
+  m_Name: Boss4_P2_Exhibit
+  m_EditorClassIdentifier: Assembly-CSharp::ExhibitAttackStyle
+  _displayName: Exhibit
+  _iconColor: {r: 0.08, g: 0.08, b: 0.1, a: 1}
+  _attackInterval: 0.8
+  _gaugeGainPerHit: 0
+  _waitUntilFinished: 1
+  _stopsMovement: 1
+  _tell: 0
+  _tellDuration: 0.5
+  _exhibits:
+  - _style: {fileID: 11400000, guid: 56abb8a0ccc3540419438d6fc7786aee, type: 2}
+    _color: {r: 0.05, g: 0.05, b: 0.06, a: 0.9}
+  - _style: {fileID: 11400000, guid: dd0ed279fd9eb1a51784fabacb2192f0, type: 2}
+    _color: {r: 0.12, g: 0.14, b: 0.32, a: 0.9}
+  - _style: {fileID: 11400000, guid: 6b42841850cfe2572dd857de6b22ad1f, type: 2}
+    _color: {r: 0.58, g: 0.58, b: 0.62, a: 0.9}
+  _exhibitCount: 2
+  _framePrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
+  _frameSize: {x: 2.6, y: 3.2}
+  _frameOffset: {x: 0, y: 3.4, z: 0}
+  _frameSpacing: 3.2
+  _edgeWidth: 0.18
+  _edgeColor: {r: 0.78, g: 0.62, b: 0.25, a: 1}
+  _revealDuration: 0.8
+  _fadeDuration: 0.3

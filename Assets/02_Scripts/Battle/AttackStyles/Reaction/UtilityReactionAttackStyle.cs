@@ -10,6 +10,8 @@ public abstract class UtilityReactionAttackStyle : AttackStyle
     [SerializeField] private UtilityType _utility;
     [SerializeField, Min(1)] private int _requiredUses = 10;
 
+    protected UtilityType Utility { get { return _utility; } }
+
     public override bool CanFire(AttackContext context)
     {
         return context.Observer.GetUsesSinceMark(_utility) >= _requiredUses;

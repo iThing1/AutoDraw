@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fd1951a92c4fc9b2296841c8dcf5cca, type: 3}
+  m_Name: Boss4_P2_PatternSet
+  m_EditorClassIdentifier: Assembly-CSharp::AttackStyleSet
+  _displayName: Boss4 Phase2
+  _iconColor: {r: 0.08, g: 0.08, b: 0.1, a: 1}
+  _attackInterval: 1
+  _gaugeGainPerHit: 0
+  _waitUntilFinished: 0
+  _stopsMovement: 0
+  _tell: 0
+  _tellDuration: 0.5
+  _entries:
+  - _style: {fileID: 11400000, guid: 934595d24a194e4469dfd15290100bd7, type: 2}
+    _weight: 28
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 0
+  - _style: {fileID: 11400000, guid: 3602b749cb87e5840baf824749c82a4d, type: 2}
+    _weight: 20
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 5
+  - _style: {fileID: 11400000, guid: e24dc0df876f1ac4d9fd35167177186c, type: 2}
+    _weight: 18
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 16
+  - _style: {fileID: 11400000, guid: 37ce4bdab026f524a880dfe8bcc6bd00, type: 2}
+    _weight: 16
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 7
+  - _style: {fileID: 11400000, guid: 71bcad432059f764d899cf13d077c164, type: 2}
+    _weight: 18
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 8
+  - _style: {fileID: 11400000, guid: 9bc7d0498854b2647afb49ee27cc3a29, type: 2}
+    _weight: 16
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 9
+  - _style: {fileID: 11400000, guid: ae584c0570601bc4f91fa1144e1cce54, type: 2}
+    _weight: 14
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 10
+  - _style: {fileID: 11400000, guid: ba8f6f3fefbe65943902bcf83f882a5b, type: 2}
+    _weight: 14
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 14
+  - _style: {fileID: 11400000, guid: 3effa18b93da1b841b7ab042f5de814e, type: 2}
+    _weight: 200
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 10
+  - _style: {fileID: 11400000, guid: f7443b6196b8ab94c9afd69fb01bc43c, type: 2}
+    _weight: 200
+    _minDistance: 0
+    _maxDistance: 0
+    _cooldown: 10

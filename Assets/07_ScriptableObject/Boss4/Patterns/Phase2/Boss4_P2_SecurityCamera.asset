@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d3cb89ac17180e4db27b384703bc06c, type: 3}
+  m_Name: Boss4_P2_SecurityCamera
+  m_EditorClassIdentifier: Assembly-CSharp::SecurityCameraAttackStyle
+  _displayName: SecurityCamera
+  _iconColor: {r: 0.08, g: 0.08, b: 0.1, a: 1}
+  _attackInterval: 0.7
+  _gaugeGainPerHit: 0
+  _waitUntilFinished: 0
+  _stopsMovement: 0
+  _tell: 0
+  _tellDuration: 0.5
+  _cameraCount: 5
+  _duration: 12
+  _bodyPrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
+  _bodySize: {x: 0.7, y: 0.5}
+  _bodyColor: {r: 0.2, g: 0.22, b: 0.26, a: 1}
+  _throwDuration: 0.4
+  _deployDistance: 5
+  _wanderSpread: 5
+  _wanderSpeed: 3.6
+  _fadeDuration: 0.25
+  _sightPrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
+  _sightRadius: 2.4
+  _sightColor: {r: 0.6, g: 0.85, b: 1, a: 0.22}
+  _alertColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.35}
+  _restColor: {r: 0.6, g: 0.85, b: 1, a: 0.08}
+  _detectTime: 0.4
+  _rearmTime: 1.2
+  _telegraphPrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
+  _telegraphColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.4}
+  _shotRadius: 1.6
+  _warnDuration: 0.45
+  _hit:
+    _damage:
+      _min: 12
+      _max: 15
+    _criticalChance: 0.1
+    _criticalMultiplier: 2
+    _normalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}
+    _criticalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}
+  _impact:
+    _shakeForce: 0.6
+    _sounds:
+    - {fileID: 8300000, guid: bc241be328531014fa49af9c462337f0, type: 3}
+    - {fileID: 8300000, guid: 1daae339c06742e4c8074055986fb3f8, type: 3}
+    _pitch:
+      _min: 0.9
+      _max: 1.1
+    _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
+    _effectColor: {r: 0.85, g: 0.1, b: 0.1, a: 1}
+    _effectScale: 1.2
+    _effectLifetime: 2

@@ -15,6 +15,7 @@ public class LoadoutItemViewModel : ViewModelBase
     public Sprite Icon { get { return _entry.Icon; } }
     public Color IconColor { get { return _entry.IconColor; } }
     public VideoClip Preview { get { return _entry.Preview; } }
+    public LoadoutWeaponStats WeaponStats { get { return _entry.WeaponStats; } }
     public LoadoutItemState State { get { return _state; } }
 
     public LoadoutItemViewModel(LoadoutEntry entry, LoadoutRule rule, Action<LoadoutItemViewModel> onSelected)

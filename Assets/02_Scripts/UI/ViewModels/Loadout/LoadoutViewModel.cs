@@ -11,11 +11,14 @@ public class LoadoutViewModel : GalleryScreenViewModel
     private readonly List<LoadoutSlotViewModel> _slots = new();
     private string _description = string.Empty;
     private VideoClip _preview;
+    private LoadoutWeaponStats _weaponStats;
 
     public IReadOnlyList<LoadoutSlotViewModel> Slots { get { return _slots; } }
     public string Description { get { return _description; } }
     // 마지막으로 고른 장비의 공격 예시 영상. 없으면 null이다.
     public VideoClip Preview { get { return _preview; } }
+    // 마지막으로 고른 장비가 무기일 때의 스펙. 아니면 null이다.
+    public LoadoutWeaponStats WeaponStats { get { return _weaponStats; } }
 
     public LoadoutViewModel(PlayerModel player, DataTableManager tables, AssetManager assets)
     {
@@ -25,8 +28,8 @@ public class LoadoutViewModel : GalleryScreenViewModel
         // 화면 위에서부터 이 순서로 놓인다. LoadoutView의 칸 키도 같은 순서로 넣는다.
         LoadoutRule[] rules =
         {
-            new WeaponLoadoutRule("Basic", WeaponType.Basic, loadout, tables, assets),
-            new WeaponLoadoutRule("Heavy", WeaponType.Heavy, loadout, tables, assets),
+            new WeaponLoadoutRule("Basic", WeaponType.Basic, loadout, player.Stats, tables, assets),
+            new WeaponLoadoutRule("Heavy", WeaponType.Heavy, loadout, player.Stats, tables, assets),
             new SkillLoadoutRule(loadout, tables, assets),
             new UtilityLoadoutRule(loadout, player.Stats, assets),
             new ConsumableLoadoutRule(loadout, player.Stats, tables, assets),
@@ -65,6 +68,9 @@ public class LoadoutViewModel : GalleryScreenViewModel
 
         _preview = item.Preview;
         NotifyPropertyChanged(nameof(Preview));
+
+        _weaponStats = item.WeaponStats;
+        NotifyPropertyChanged(nameof(WeaponStats));
     }
 
     private static string Describe(string description, LoadoutItemState state)

@@ -10,6 +10,7 @@ public class LoadoutEntry
     private readonly Sprite _icon;
     private readonly Color _iconColor;
     private readonly VideoClip _preview;
+    private readonly LoadoutWeaponStats _weaponStats;
 
     // 칸마다 뜻이 다르다. 무기·스킬·소모품은 표 Id, 유틸리티는 종류 이름, 소모품 없음은 빈 값이다.
     public string Id { get { return _id; } }
@@ -20,8 +21,10 @@ public class LoadoutEntry
     public Color IconColor { get { return _iconColor; } }
     // 공격 예시 영상. 아직 녹화하지 않았으면 null이다.
     public VideoClip Preview { get { return _preview; } }
+    // 무기가 아니면 null이다.
+    public LoadoutWeaponStats WeaponStats { get { return _weaponStats; } }
 
-    public LoadoutEntry(string id, string label, string description, Sprite icon, Color iconColor, VideoClip preview)
+    public LoadoutEntry(string id, string label, string description, Sprite icon, Color iconColor, VideoClip preview, LoadoutWeaponStats weaponStats)
     {
         _id = id;
         _label = label;
@@ -29,5 +32,6 @@ public class LoadoutEntry
         _icon = icon;
         _iconColor = iconColor;
         _preview = preview;
+        _weaponStats = weaponStats;
     }
 }

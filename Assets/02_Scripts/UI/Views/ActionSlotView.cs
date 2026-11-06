@@ -52,14 +52,8 @@ public class ActionSlotView : ViewBase<ActionSlotViewModel>
     {
         switch (propertyName)
         {
-            // 처음 그릴 때(RefreshAll)는 소리 없이, 전투 중에 바뀔 때만 소리를 낸다.
             case nameof(ActionSlotViewModel.IsSelected):
                 DrawSelected();
-
-                if (ViewModel.IsSelected)
-                {
-                    GameManager.Sound.PlayUi(UISoundKind.WeaponSwitch);
-                }
                 break;
 
             case nameof(ActionSlotViewModel.DisplayName):

@@ -21,7 +21,7 @@ MonoBehaviour:
   _tell: 0
   _tellDuration: 0.5
   _utility: 0
-  _requiredUses: 10
+  _requiredUses: 5
   _caseCount: 3
   _caseSize: {x: 2.4, y: 2.4}
   _leadRatio: 0.6
@@ -29,7 +29,7 @@ MonoBehaviour:
   _telegraphPrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
   _telegraphColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.45}
   _warnDuration: 0.6
-  _casePrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
+  _casePrefab: {fileID: 8300000000000000001, guid: f505ac063b0f6cc4c94f9f51d23f8994, type: 3}
   _caseColor: {r: 0.75, g: 0.9, b: 0.95, a: 0.55}
   _lingerDuration: 0.15
   _fadeDuration: 0.25

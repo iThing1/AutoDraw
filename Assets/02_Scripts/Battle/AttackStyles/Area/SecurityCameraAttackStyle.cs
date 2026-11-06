@@ -26,7 +26,7 @@ public class SecurityCameraAttackStyle : AttackStyle
     [SerializeField, Min(1)] private int _cameraCount = 3;
     [SerializeField, Min(0.1f)] private float _duration = 7f;
     [SerializeField] private GameObject _bodyPrefab;
-    [SerializeField] private Vector2 _bodySize = new Vector2(0.7f, 0.5f);
+    [SerializeField] private Vector2 _bodySize = new Vector2(1.2f, 1.2f);
     [SerializeField] private Color _bodyColor = new Color(0.2f, 0.22f, 0.26f, 1f);
     [SerializeField, Min(0f)] private float _throwDuration = 0.4f;
     [SerializeField, Min(0f)] private float _deployDistance = 5f;

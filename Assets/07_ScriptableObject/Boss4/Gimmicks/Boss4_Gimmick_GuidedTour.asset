@@ -20,10 +20,17 @@ MonoBehaviour:
     _criticalMultiplier: 2
     _normalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
     _criticalHit: {fileID: 11400000, guid: c9425f8f2c2ee3b42ad8cf17444603e7, type: 2}
+  _fieldSize: {x: 28, y: 16}
+  _cameraPadding: 1
+  _cameraBlendDuration: 0.5
   _lightPrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
   _lightRadius: 2.5
-  _lightColor: {r: 1, g: 0.92, b: 0.6, a: 0.45}
+  _lightColor: {r: 1, g: 0.82, b: 0.3, a: 0.4}
   _lostColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.45}
+  _ringPrefab: {fileID: 8300000000000000005, guid: b0b827ea587d9a0e97c529dcfeb407c4, type: 3}
+  _ringWidth: 0.18
+  _ringColor: {r: 0.85, g: 0.55, b: 0.1, a: 1}
+  _ringLostColor: {r: 0.85, g: 0.1, b: 0.1, a: 1}
   _startDelay: 2.5
   _waypointCount: 6
   _segmentLength:
@@ -32,8 +39,8 @@ MonoBehaviour:
   _startSpeed: 3
   _endSpeed: 6
   _markerPrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
-  _markerSize: 0.6
-  _markerColor: {r: 1, g: 0.92, b: 0.6, a: 0.8}
+  _markerSize: 0.9
+  _markerColor: {r: 0.95, g: 0.5, b: 0.1, a: 1}
   _lostLimit: 1.5
   _recoverRate: 0.5
   _hazardInterval: 1.6

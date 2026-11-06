@@ -40,8 +40,14 @@ public class TimeScaleManager
         }
     }
 
+    // 타격이 잦을 때 멈춤이 이어져 끊겨 보이지 않게, 한 번 멈춘 뒤 이만큼(실제 시간 초)은 작은 타격으로 다시 멈추지 않는다.
+    private const float HIT_STOP_COOLDOWN = 0.3f;
+    // 이 길이 이상의 묵직한 타격은 쉬는 동안에도 멈춘다.
+    private const float HEAVY_HIT_STOP_DURATION = 0.09f;
+
     private CancellationToken _token;
 
+    private float _hitStopReadyTime;
     private bool _isHitStopping;
     private float _hitStopEndTime;
     private float _hitStopTimeScale = 1f;
@@ -71,6 +77,8 @@ public class TimeScaleManager
 
         float endTime = Time.realtimeSinceStartup + duration;
 
+        _hitStopReadyTime = Mathf.Max(_hitStopReadyTime, endTime + HIT_STOP_COOLDOWN);
+
         if (_isHitStopping)
         {
             _hitStopEndTime = Mathf.Max(_hitStopEndTime, endTime);
@@ -83,6 +91,17 @@ public class TimeScaleManager
         _hitStopTimeScale = timeScale;
 
         RunHitStopAsync().Forget();
+    }
+
+    // 일반 타격용. 막기·받아치기처럼 꼭 멈춰야 하는 순간은 PlayHitStop을 쓴다.
+    public void PlayHitStopThrottled(float duration, float timeScale)
+    {
+        if (duration < HEAVY_HIT_STOP_DURATION && Time.realtimeSinceStartup < _hitStopReadyTime)
+        {
+            return;
+        }
+
+        PlayHitStop(duration, timeScale);
     }
 
     public SlowMotionScope BeginSlowMotion(float timeScale)
@@ -126,6 +145,7 @@ public class TimeScaleManager
     {
         _isPaused = false;
         _hitStopEndTime = 0f;
+        _hitStopReadyTime = 0f;
         _isHitStopping = false;
         _activeSlowMotionTicket = 0;
         _slowTimeScale = 1f;

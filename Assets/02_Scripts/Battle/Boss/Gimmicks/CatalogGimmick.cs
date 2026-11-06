@@ -18,7 +18,7 @@ public class CatalogGimmick : PunishingBossGimmick
     [SerializeField, Min(0.01f)] private float _edgeWidth = 0.2f;
     [SerializeField] private Color _edgeColor = new Color(0.62f, 0.48f, 0.2f, 0.7f);
     [SerializeField] private Color _showColor = new Color(0.95f, 0.78f, 0.25f, 0.45f);
-    [SerializeField] private Color _warnColor = new Color(0.85f, 0.1f, 0.1f, 0.45f);
+    [SerializeField] private Color _warnColor = new Color(0.55f, 0.25f, 0.85f, 0.5f);
     [SerializeField] private Color _clearedColor = new Color(0.1f, 0.1f, 0.12f, 0.25f);
 
     [Header("순서")]
@@ -77,7 +77,7 @@ public class CatalogGimmick : PunishingBossGimmick
                 await ShowOrderAsync(tiles, order, token);
                 await UniTask.Delay(TimeSpan.FromSeconds(_memorizeDelay), cancellationToken: token);
 
-                isClean &= await DetonateAsync(context, area, tiles, order, token);
+                isClean &= await DetonateAsync(context, cell, tiles, order, token);
             }
 
             if (false == isClean || context.Target.IsDefeated)
@@ -156,7 +156,7 @@ public class CatalogGimmick : PunishingBossGimmick
     }
 
     // 맞아도 판은 끝까지 이어 가고, 맞을 때마다 실패 피해를 준다. 한 번도 맞지 않았으면 true다.
-    private async UniTask<bool> DetonateAsync(AttackContext context, Rect area, List<GimmickFrame> tiles, List<int> order,
+    private async UniTask<bool> DetonateAsync(AttackContext context, Vector2 cell, List<GimmickFrame> tiles, List<int> order,
         CancellationToken token)
     {
         AttackTarget target = context.Target;
@@ -176,8 +176,8 @@ public class CatalogGimmick : PunishingBossGimmick
 
             GameManager.Feedback.PlayImpact(_detonateImpact, tile.Center);
 
-            // 칸 사이 틈에 서도 피할 수 없게, 그림이 아니라 판을 나눈 칸으로 본다.
-            if (order[i] == Geometry2D.GetCellIndex(area, _columns, _rows, target.FollowTransform.position))
+            // 칸 사이 틈에 서도 피할 수 없게, 그림이 아니라 판을 나눈 칸 크기로 본다.
+            if (target.IsTouchingRect(tile.Center, cell))
             {
                 PunishTarget(context);
                 isClean = false;

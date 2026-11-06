@@ -31,13 +31,13 @@ MonoBehaviour:
   - 2
   _litColor: {r: 1, g: 0.92, b: 0.6, a: 0.14}
   _flickerColor: {r: 0.05, g: 0.05, b: 0.08, a: 0.4}
-  _finalFlickerColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.4}
+  _blackoutFlickerColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.4}
   _darkColor: {r: 0.03, g: 0.03, b: 0.05, a: 0.75}
   _exitColor: {r: 0.3, g: 0.95, b: 0.45, a: 0.4}
   _flickerDuration: 0.8
-  _exitFlickerDuration: 1.4
+  _blackoutFlickerDuration: 1.4
   _flickerPeriod: 0.12
-  _exitReach: 2
+  _exitReach: 1
   _darkHold: 0.35
   _roundGap: 0.2
   _fadeDuration: 0.25
@@ -61,7 +61,7 @@ MonoBehaviour:
     _effectColor: {r: 0.1, g: 0.1, b: 0.12, a: 1}
     _effectScale: 1.5
     _effectLifetime: 2
-  _finalHit:
+  _blackoutHit:
     _damage:
       _min: 18
       _max: 22
@@ -69,7 +69,7 @@ MonoBehaviour:
     _criticalMultiplier: 2
     _normalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}
     _criticalHit: {fileID: 11400000, guid: 81aa8410e94c35f40ad6ab7fed0815e4, type: 2}
-  _finalImpact:
+  _blackoutImpact:
     _shakeForce: 1.2
     _sounds:
     - {fileID: 8300000, guid: bc241be328531014fa49af9c462337f0, type: 3}

@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Pool;
 
 // 폐관 시간. 플레이어 둘레를 천장 조명 칸으로 나누고, 차례마다 정해진 무늬대로 조명을 깜빡이다 꺼서 어두워진 칸을 친다.
-// 마지막 차례는 비상구 한 칸만 남기고 모두 끄며, 빨간 예고 규칙대로 막을 수 없다.
+// 비상구 한 칸만 남기고 모두 끄는 정전 차례는 빨간 예고 규칙대로 막을 수 없다.
 [CreateAssetMenu(fileName = "ClosingTimeAttackStyle", menuName = "Scriptable Objects/AttackStyle/ClosingTime")]
 public class ClosingTimeAttackStyle : AttackStyle
 {
@@ -29,15 +29,15 @@ public class ClosingTimeAttackStyle : AttackStyle
     [SerializeField] private LightsOut[] _rounds = { LightsOut.Checker, LightsOut.CheckerFlipped, LightsOut.AllButExit };
     [SerializeField] private Color _litColor = new Color(1f, 0.92f, 0.6f, 0.14f);
     [SerializeField] private Color _flickerColor = new Color(0.05f, 0.05f, 0.08f, 0.4f);
-    [SerializeField] private Color _finalFlickerColor = new Color(0.85f, 0.1f, 0.1f, 0.4f);
+    [SerializeField] private Color _blackoutFlickerColor = new Color(0.85f, 0.1f, 0.1f, 0.4f);
     [SerializeField] private Color _darkColor = new Color(0.03f, 0.03f, 0.05f, 0.75f);
     [SerializeField] private Color _exitColor = new Color(0.3f, 0.95f, 0.45f, 0.4f);
     [SerializeField, Min(0.05f)] private float _flickerDuration = 0.8f;
-    // 비상구까지 달려갈 수 있게 마지막 차례는 더 길게 깜빡인다.
-    [SerializeField, Min(0.05f)] private float _exitFlickerDuration = 1.4f;
+    // 비상구까지 달려갈 수 있게 정전 차례는 더 길게 깜빡인다.
+    [SerializeField, Min(0.05f)] private float _blackoutFlickerDuration = 1.4f;
     [SerializeField, Min(0.02f)] private float _flickerPeriod = 0.12f;
     // 비상구는 플레이어가 선 칸에서 이 칸 수 안쪽(자기 칸 제외)에서 고른다.
-    [SerializeField, Min(1)] private int _exitReach = 2;
+    [SerializeField, Min(1)] private int _exitReach = 1;
     [SerializeField, Min(0f)] private float _darkHold = 0.35f;
     [SerializeField, Min(0f)] private float _roundGap = 0.2f;
     [SerializeField, Min(0f)] private float _fadeDuration = 0.25f;
@@ -45,8 +45,8 @@ public class ClosingTimeAttackStyle : AttackStyle
     [Header("터짐")]
     [SerializeField] private HitSettings _hit = new();
     [SerializeField] private ImpactSettings _impact = new();
-    [SerializeField] private HitSettings _finalHit = new();
-    [SerializeField] private ImpactSettings _finalImpact = new();
+    [SerializeField] private HitSettings _blackoutHit = new();
+    [SerializeField] private ImpactSettings _blackoutImpact = new();
 
     public override void Prewarm()
     {
@@ -75,9 +75,9 @@ public class ClosingTimeAttackStyle : AttackStyle
 
             for (int i = 0; i < _rounds.Length; i++)
             {
-                bool isFinal = LightsOut.AllButExit == _rounds[i];
+                bool isBlackout = LightsOut.AllButExit == _rounds[i];
                 int playerCell = Geometry2D.GetCellIndex(field, _columns, _rows, context.Target.FollowTransform.position);
-                int exit = isFinal ? PickExit(playerCell) : -1;
+                int exit = isBlackout ? PickExit(playerCell) : -1;
 
                 MarkDark(_rounds[i], exit, dark);
 
@@ -86,10 +86,13 @@ public class ClosingTimeAttackStyle : AttackStyle
                     tiles[exit].color = _exitColor;
                 }
 
-                await FlickerAsync(tiles, dark, isFinal ? _finalFlickerColor : _flickerColor, isFinal ? _exitFlickerDuration : _flickerDuration, token);
+                Color flickerColor = isBlackout ? _blackoutFlickerColor : _flickerColor;
+                float flickerDuration = isBlackout ? _blackoutFlickerDuration : _flickerDuration;
+
+                await FlickerAsync(tiles, dark, flickerColor, flickerDuration, token);
 
                 SetDarkColors(tiles, dark);
-                Strike(context, field, dark, isFinal, gaugeGain);
+                Strike(context, field, dark, isBlackout, gaugeGain);
 
                 await UniTask.Delay(TimeSpan.FromSeconds(_darkHold), cancellationToken: token);
 
@@ -232,27 +235,44 @@ public class ClosingTimeAttackStyle : AttackStyle
         }
     }
 
-    // 칸 사이 틈에 서도 피할 수 없게, 그림이 아니라 판을 나눈 칸으로 본다.
-    private void Strike(AttackContext context, Rect field, List<bool> dark, bool isFinal, float gaugeGain)
+    private void Strike(AttackContext context, Rect field, List<bool> dark, bool isBlackout, float gaugeGain)
     {
         AttackTarget target = context.Target;
         Vector3 hitPoint = target.GetAimPoint(Vector3.zero);
 
-        GameManager.Feedback.PlayImpact(isFinal ? _finalImpact : _impact, isFinal ? hitPoint : (Vector3)field.center);
+        GameManager.Feedback.PlayImpact(isBlackout ? _blackoutImpact : _impact, isBlackout ? hitPoint : (Vector3)field.center);
 
-        if (target.IsDefeated || false == dark[Geometry2D.GetCellIndex(field, _columns, _rows, target.FollowTransform.position)])
+        if (target.IsDefeated || false == IsTouchingDark(target, field, dark))
         {
             return;
         }
 
-        if (isFinal)
+        if (isBlackout)
         {
-            context.Damage.StrikeThroughGuard(_finalHit, hitPoint);
+            context.Damage.StrikeThroughGuard(_blackoutHit, hitPoint);
         }
         else
         {
             context.Damage.Strike(_hit, hitPoint, gaugeGain);
         }
+    }
+
+    // 칸 사이 틈에 서도 피할 수 없게, 그림이 아니라 판을 나눈 칸 크기로 본다.
+    private bool IsTouchingDark(AttackTarget target, Rect field, List<bool> dark)
+    {
+        Vector2 cell = new Vector2(field.width / _columns, field.height / _rows);
+
+        for (int i = 0; i < dark.Count; i++)
+        {
+            Vector3 center = new Vector3(field.xMin + cell.x * (i % _columns + 0.5f), field.yMin + cell.y * (i / _columns + 0.5f), 0f);
+
+            if (dark[i] && target.IsTouchingRect(center, cell))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private UniTask FadeOutAsync(List<SpriteRenderer> tiles, CancellationToken token)

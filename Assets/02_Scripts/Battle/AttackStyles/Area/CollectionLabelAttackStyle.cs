@@ -64,6 +64,11 @@ public class CollectionLabelAttackStyle : AttackStyle
 
         Vector3 point = await CountdownAsync(context, token);
 
+        if (context.Target.IsDefeated)
+        {
+            return;
+        }
+
         await Telegraph.PlayCircleAsync(GameManager.Pool, _telegraphPrefab, point, _dropRadius, _telegraphColor, _warnDuration, token);
 
         GameManager.Feedback.PlayImpact(_dropImpact, point);

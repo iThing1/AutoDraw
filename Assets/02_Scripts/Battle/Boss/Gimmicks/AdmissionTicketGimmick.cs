@@ -95,7 +95,9 @@ public class AdmissionTicketGimmick : BossGimmick
         {
             try
             {
+                // 카메라가 구역에 고정되므로, 화면 밖으로 나가지 않게 셔터 테두리를 벽으로 삼는다.
                 GameManager.CameraRig.ShowArea(new Bounds(field.center, field.size), _cameraPadding, _cameraBlendDuration);
+                mover.SetMoveArea(field);
 
                 shutter.Place(field.center);
                 shutter.SetFillDown(0f);
@@ -122,6 +124,7 @@ public class AdmissionTicketGimmick : BossGimmick
             finally
             {
                 GameManager.CameraRig.EndShowArea(_cameraBlendDuration);
+                mover.SetMoveArea(area);
                 dropSource.Cancel();
                 shutter.Despawn();
                 DespawnAll(tickets);

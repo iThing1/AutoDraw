@@ -27,7 +27,7 @@ MonoBehaviour:
   _edgeWidth: 0.2
   _edgeColor: {r: 0.62, g: 0.48, b: 0.2, a: 0.7}
   _showColor: {r: 0.95, g: 0.78, b: 0.25, a: 0.45}
-  _warnColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.45}
+  _warnColor: {r: 0.55, g: 0.25, b: 0.85, a: 0.5}
   _clearedColor: {r: 0.1, g: 0.1, b: 0.12, a: 0.25}
   _rounds: 2
   _showDuration: 0.35
@@ -44,7 +44,7 @@ MonoBehaviour:
       _min: 0.9
       _max: 1.1
     _effectPrefab: {fileID: 4553287630450876385, guid: 15483e51212e3d74886ea57291f4639a, type: 3}
-    _effectColor: {r: 0.85, g: 0.1, b: 0.1, a: 1}
+    _effectColor: {r: 0.55, g: 0.25, b: 0.85, a: 1}
     _effectScale: 2.5
     _effectLifetime: 2
   _successImpact:

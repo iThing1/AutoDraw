@@ -63,7 +63,7 @@ public class NoRunningAttackStyle : UtilityReactionAttackStyle
             int seenUses = 0;
             float elapsed = 0f;
 
-            while (elapsed < _watchDuration)
+            while (elapsed < _watchDuration && false == context.Target.IsDefeated)
             {
                 sign.transform.position = context.Owner.Body.position + _signOffset;
                 marker.transform.position = context.Target.FollowTransform.position;

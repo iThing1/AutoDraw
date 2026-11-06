@@ -27,6 +27,8 @@ public class VisitorParadeAttackStyle : AttackStyle
         public int Lane;
         // 처음 순간 동선 시작점에서 떨어진 거리. 걸은 거리를 더해 동선 길이로 되감는다.
         public float Start;
+        // 동선 끝에서 흐려진 동안은 보이지 않으므로 부딪히지 않는다.
+        public bool IsFaded;
     }
 
     [Header("동선")]
@@ -252,6 +254,8 @@ public class VisitorParadeAttackStyle : AttackStyle
             visitor.Head.transform.position = point + headOffset;
             visitor.Body.color = color;
             visitor.Head.color = color;
+            visitor.IsFaded = edge < 0.5f;
+            visitors[i] = visitor;
         }
     }
 
@@ -259,7 +263,7 @@ public class VisitorParadeAttackStyle : AttackStyle
     {
         for (int i = 0; i < visitors.Count; i++)
         {
-            if (target.IsTouching(visitors[i].Body.transform.position, _visitorRadius))
+            if (false == visitors[i].IsFaded && target.IsTouching(visitors[i].Body.transform.position, _visitorRadius))
             {
                 return true;
             }

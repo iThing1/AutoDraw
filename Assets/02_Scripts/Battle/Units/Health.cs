@@ -42,12 +42,14 @@ public class Health : MonoBehaviour
     private int _floorHp;
     private int _invulnerableCount;
     private float _damageMultiplier = 1f;
+    private float _criticalChanceBonus;
 
     public int MaxHp { get { return _maxHp; } }
     public int CurrentHp { get { return _currentHp; } }
     public float Ratio { get { return 0 < _maxHp ? (float)_currentHp / _maxHp : 0f; } }
     public bool IsDead { get { return 0 >= _currentHp; } }
     public bool IsInvulnerable { get { return 0 < _invulnerableCount; } }
+    public float CriticalChanceBonus { get { return _criticalChanceBonus; } }
     // 체력이 바닥(기믹 줄·부활 줄)에 멈춰 있는지. 바닥이 없으면(0) 늘 false다.
     public bool IsAtFloor { get { return 0 < _floorHp && _currentHp == _floorHp; } }
 
@@ -67,6 +69,11 @@ public class Health : MonoBehaviour
     public void SetDamageMultiplier(float multiplier)
     {
         _damageMultiplier = Mathf.Max(0f, multiplier);
+    }
+
+    public void SetCriticalChanceBonus(float bonus)
+    {
+        _criticalChanceBonus = Mathf.Max(0f, bonus);
     }
 
     public InvulnerableScope BeginInvulnerable()

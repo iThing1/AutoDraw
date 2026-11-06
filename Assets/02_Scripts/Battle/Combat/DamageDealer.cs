@@ -109,7 +109,7 @@ public class DamageDealer
     {
         int damageBonus = _appliesWeaponModifier ? _owner.WeaponModifier.DamageBonus : 0;
         int amount = hit.Damage.PickRandom(damageBonus);
-        bool isCritical = Random.value < hit.CriticalChance;
+        bool isCritical = Random.value < hit.CriticalChance + _target.Unit.Health.CriticalChanceBonus;
 
         if (isCritical)
         {

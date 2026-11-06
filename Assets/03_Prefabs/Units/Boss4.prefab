@@ -206,6 +206,11 @@ MonoBehaviour:
     _effectLifetime: 2
   _groggyDuration: 4
   _groggyDamageMultiplier: 1.5
+  _breakCriticalBonus: 0.3
+  _breakDuration: 5
+  _breakMarkPrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
+  _breakMarkColor: {r: 1, g: 0.35, b: 0.2, a: 0.45}
+  _breakMarkMargin: 2.5
   _revival:
     _slowTimeScale: 0.25
     _slowDuration: 0.8

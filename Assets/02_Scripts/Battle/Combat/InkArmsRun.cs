@@ -36,7 +36,9 @@ public static class InkArmsRun
     {
         Vector3 center = context.Target.FollowTransform.position;
 
-        for (int i = 0; i < settings.PoolCount; i++)
+        int poolCount = context.Owner.SkillModifier.ResolveCount(settings.PoolCount);
+
+        for (int i = 0; i < poolCount; i++)
         {
             Vector3 position = center + (Vector3)(UnityEngine.Random.insideUnitCircle * settings.PoolScatterRadius);
             PaintMark pool = LeavePool(context, settings, position);
@@ -57,11 +59,14 @@ public static class InkArmsRun
     {
         List<PaintMark> sources = ListPool<PaintMark>.Get();
         List<UniTask> lunges = ListPool<UniTask>.Get();
+        SkillModifier skill = context.Owner.SkillModifier;
+        float duration = skill.ResolveDuration(settings.Duration);
+        float lungeInterval = skill.ResolveInterval(settings.LungeInterval);
         float elapsed = 0f;
 
         try
         {
-            while (elapsed < settings.Duration && false == context.Target.IsDefeated)
+            while (elapsed < duration && false == context.Target.IsDefeated)
             {
                 PickSources(context, settings, pools, settings.ArmsPerLunge.PickRandom(), sources);
 
@@ -70,8 +75,8 @@ public static class InkArmsRun
                     lunges.Add(LungeArmAsync(objectPool, context, settings, sources[i], gaugeGain, token));
                 }
 
-                await UniTask.Delay(TimeSpan.FromSeconds(settings.LungeInterval), cancellationToken: token);
-                elapsed += settings.LungeInterval;
+                await UniTask.Delay(TimeSpan.FromSeconds(lungeInterval), cancellationToken: token);
+                elapsed += lungeInterval;
             }
 
             await UniTask.WhenAll(lunges);

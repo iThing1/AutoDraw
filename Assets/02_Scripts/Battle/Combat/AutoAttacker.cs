@@ -206,6 +206,13 @@ public class AutoAttacker : MonoBehaviour
         return style.AttackInterval * _owner.WeaponModifier.IntervalScale;
     }
 
+    private float GetGaugeGain(AttackStyle style)
+    {
+        WeaponModifier weapon = _owner.WeaponModifier;
+
+        return weapon.IsWeapon ? weapon.GaugeGain : style.GaugeGainPerHit;
+    }
+
     private CancellationToken GetAttackToken(CancellationToken battleToken)
     {
         if (null == _interruptSource)
@@ -251,7 +258,7 @@ public class AutoAttacker : MonoBehaviour
 
     private async UniTask FireAsync(AttackStyle style, AttackContext context, bool gainsGauge, CancellationToken token)
     {
-        float gaugeGain = gainsGauge ? style.GaugeGainPerHit : 0f;
+        float gaugeGain = gainsGauge ? GetGaugeGain(style) : 0f;
         bool hasBegunAction = false;
         bool hasPosed = false;
 

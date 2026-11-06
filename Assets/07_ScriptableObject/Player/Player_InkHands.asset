@@ -77,6 +77,7 @@ MonoBehaviour:
       _sinkRippleStrength: 0.3
       _residueSplat: {fileID: 0}
     _grabHit:
+      _skillHitId: ink_hands.grab
       _damage:
         _min: 5
         _max: 7

@@ -54,6 +54,7 @@ public class RollerAttackStyle : AttackStyle
         PaintStripe carpet = context.PaintCanvas.BeginStripe(start, direction, _carpetWidth, _carpetTexture, _carpetTileLength, color, context.Damage.IsInk);
         float travelled = 0f;
         int hitCount = 0;
+        int maxHits = context.Owner.WeaponModifier.ResolveHitCount(_maxHits);
         bool wasTouching = false;
 
         try
@@ -82,7 +83,7 @@ public class RollerAttackStyle : AttackStyle
                     hitCount++;
                     context.Damage.Strike(_hit, context.Target.GetAimPoint(Vector3.zero), gaugeGain);
 
-                    if (hitCount >= _maxHits)
+                    if (hitCount >= maxHits)
                     {
                         GameManager.Feedback.PlayImpact(_burstImpact, roller.transform.position, color);
                         return;

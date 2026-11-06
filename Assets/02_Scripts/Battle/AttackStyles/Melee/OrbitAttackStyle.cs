@@ -36,6 +36,9 @@ public class OrbitAttackStyle : AttackStyle
         }
     }
 
+    // 공격 간격이 아니라 구슬을 내보내는 간격이 실제 공격 속도다.
+    public override float WeaponIntervalBase { get { return _launchInterval; } }
+
     public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
         if (null == _orbPrefab)

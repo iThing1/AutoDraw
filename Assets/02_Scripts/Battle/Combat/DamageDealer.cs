@@ -107,13 +107,13 @@ public class DamageDealer
     // 피해량과 물감 색은 쏘는 순간 정해, 날아가는 투사체의 색과 맞은 자리의 물감 색이 같게 한다.
     public DamageInfo RollDamage(HitSettings hit)
     {
-        int damageBonus = _appliesWeaponModifier ? _owner.WeaponModifier.DamageBonus : 0;
-        int amount = hit.Damage.PickRandom(damageBonus);
-        bool isCritical = Random.value < hit.CriticalChance + _target.Unit.Health.CriticalChanceBonus;
+        HitStats stats = GetHitStats(hit);
+        int amount = stats.Damage.PickRandom();
+        bool isCritical = Random.value < stats.CriticalChance + _target.Unit.Health.CriticalChanceBonus;
 
         if (isCritical)
         {
-            amount = Mathf.RoundToInt(amount * hit.CriticalMultiplier);
+            amount = Mathf.RoundToInt(amount * stats.CriticalMultiplier);
         }
 
         return new DamageInfo
@@ -124,6 +124,24 @@ public class DamageDealer
             IsInk = IsInk,
             Attacker = _owner,
         };
+    }
+
+    // 무기는 무기 표, 스킬 타격은 스킬 타격 표, 그 밖(보스 등)은 에셋 값을 쓴다.
+    private HitStats GetHitStats(HitSettings hit)
+    {
+        WeaponModifier weapon = _owner.WeaponModifier;
+
+        if (_appliesWeaponModifier && weapon.IsWeapon)
+        {
+            return weapon.Hit;
+        }
+
+        if (false == string.IsNullOrEmpty(hit.SkillHitId) && GameManager.Tables.SkillHits.TryGet(hit.SkillHitId, out SkillHitData skillHit))
+        {
+            return skillHit.Stats;
+        }
+
+        return hit.Stats;
     }
 
     // 팔레트 색을 차례로 돌려 써, 맞은 자리마다 색이 바뀐다.

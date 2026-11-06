@@ -19,7 +19,7 @@ public class BurstAttackStyle : AttackStyle
 
     public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
-        int shotCount = Mathf.Max(1, _shotCount.PickRandom());
+        int shotCount = Mathf.Max(1, context.Owner.WeaponModifier.ResolveHitCount(_shotCount.PickRandom()));
 
         for (int i = 0; i < shotCount; i++)
         {

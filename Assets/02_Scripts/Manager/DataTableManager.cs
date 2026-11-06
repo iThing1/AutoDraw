@@ -11,6 +11,7 @@ public class DataTableManager
     private DataTable<PerkEffectData> _perkEffects = CreateEmpty<PerkEffectData>();
     private DataTable<WeaponData> _weapons = CreateEmpty<WeaponData>();
     private DataTable<SkillData> _skills = CreateEmpty<SkillData>();
+    private DataTable<SkillHitData> _skillHits = CreateEmpty<SkillHitData>();
     private DataTable<ConsumableData> _consumables = CreateEmpty<ConsumableData>();
 
     public DataTable<PlayerStatData> PlayerStats { get { return _playerStats; } }
@@ -18,16 +19,18 @@ public class DataTableManager
     public DataTable<PerkEffectData> PerkEffects { get { return _perkEffects; } }
     public DataTable<WeaponData> Weapons { get { return _weapons; } }
     public DataTable<SkillData> Skills { get { return _skills; } }
+    public DataTable<SkillHitData> SkillHits { get { return _skillHits; } }
     public DataTable<ConsumableData> Consumables { get { return _consumables; } }
 
     public async UniTask LoadAsync(IDataTableLoader loader, CancellationToken token)
     {
-        (_playerStats, _perkNodes, _perkEffects, _weapons, _skills, _consumables) = await UniTask.WhenAll(
+        (_playerStats, _perkNodes, _perkEffects, _weapons, _skills, _skillHits, _consumables) = await UniTask.WhenAll(
             LoadTableAsync<PlayerStatData>(loader, token),
             LoadTableAsync<PerkNodeData>(loader, token),
             LoadTableAsync<PerkEffectData>(loader, token),
             LoadTableAsync<WeaponData>(loader, token),
             LoadTableAsync<SkillData>(loader, token),
+            LoadTableAsync<SkillHitData>(loader, token),
             LoadTableAsync<ConsumableData>(loader, token));
     }
 

@@ -77,9 +77,10 @@ public class CloneSkillAttackStyle : AttackStyle
     // 몸 그림은 애니메이션이 움직인 뒤에 베껴, 복제체 자신의 애니메이션에 덮이지 않게 한다.
     private async UniTask FollowAsync(AttackContext context, BattleUnit player, BattleUnit clone, CancellationToken token)
     {
+        float duration = player.SkillModifier.ResolveDuration(_duration);
         float elapsed = 0f;
 
-        while (elapsed < _duration && false == player.Health.IsDead && false == context.Target.IsDefeated)
+        while (elapsed < duration && false == player.Health.IsDead && false == context.Target.IsDefeated)
         {
             float follow = 1f - Mathf.Exp(-_followSharpness * Time.deltaTime);
             clone.transform.position = Vector3.Lerp(clone.transform.position, GetFollowPoint(player), follow);

@@ -62,6 +62,7 @@ public class PlayerAttack : MonoBehaviour
         {
             _skillStyle = assets.Get<AttackStyle>(skill.AttackStyleKey);
             _skillIcon = assets.Get<Sprite>(skill.IconKey);
+            _unit.SetSkillModifier(new SkillModifier(skill.Count, skill.Duration, skill.Interval));
         }
     }
 
@@ -149,7 +150,11 @@ public class PlayerAttack : MonoBehaviour
         _slotStyles[slot] = assets.Get<AttackStyle>(weapon.AttackStyleKey);
         _slotIcons[slot] = assets.Get<Sprite>(weapon.IconKey);
         _slotTypes[slot] = weapon.Type;
-        _slotModifiers[slot] = new WeaponModifier(weapon.DamageBonus + stats.GetWeaponDamageBonus(weapon.Type), weapon.IntervalScale);
+
+        if (null != _slotStyles[slot])
+        {
+            _slotModifiers[slot] = WeaponModifier.Create(weapon, _slotStyles[slot], stats.GetWeaponDamageBonus(weapon.Type));
+        }
     }
 
     public void Prewarm()

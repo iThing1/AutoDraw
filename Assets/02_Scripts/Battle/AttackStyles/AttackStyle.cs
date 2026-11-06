@@ -35,6 +35,9 @@ public abstract class AttackStyle : ScriptableObject
     // 무기 표의 공격 간격이 이 값을 대신한다. 둘의 비율이 WeaponModifier의 간격 배율이다.
     public virtual float WeaponIntervalBase { get { return _attackInterval; } }
 
+    // 특수 스킬로 쓸 때 공격이 끊기면 함께 끊긴다. 멈춤을 스스로 따르는 스킬만 false로 둔다.
+    public virtual bool EndsOnInterrupt { get { return true; } }
+
     // 이번 공격에 쓸 스타일. 여러 패턴을 묶은 스타일은 쏘는 쪽 상황(거리·쿨타임)을 보고 이 중 하나를 골라 돌려준다.
     // 쏘는 쪽을 모르면 null을 넘기고, 그때는 조건 없이 고른다.
     public virtual AttackStyle PickStyle(AutoAttacker picker)

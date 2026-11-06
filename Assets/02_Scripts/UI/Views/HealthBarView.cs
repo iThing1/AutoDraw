@@ -20,9 +20,20 @@ public class HealthBarView : ViewBase<HealthBarViewModel>
     // 꺼 둔 눈금 하나. 줄 수만큼 복제해 체력 비율 자리에 세운다. 비워 두면 눈금을 그리지 않는다.
     [SerializeField] private RectTransform _markerTemplate;
 
-    [Header("기믹 중")]
-    // 보스가 기믹을 쓰는 동안 막대를 이 색으로 바꿔, 지금은 체력이 줄지 않는 시간임을 알린다.
+    [Header("기믹 잠금")]
+    // 체력이 기믹 줄에 닿으면 막대가 번쩍인 뒤 이 색으로 남아, 지금은 체력이 줄지 않는 시간임을 알린다.
     [SerializeField] private Color _alertColor = new Color(0.55f, 0.3f, 0.85f, 1f);
+    [SerializeField] private Color _lockFlashColor = Color.white;
+    [SerializeField, Min(0f)] private float _lockSettleDuration = 0.3f;
+    [SerializeField, Min(0f)] private float _lockShakeDuration = 0.35f;
+    [SerializeField, Min(0f)] private float _lockShakeStrength = 10f;
+    [SerializeField, Min(0f)] private float _lockMarkerPunch = 1.5f;
+    [SerializeField, Min(0f)] private float _unlockDuration = 0.3f;
+    // 막대 뒤에 번지는 잉크 얼룩. 처음에는 꺼 둔다. 비워 두면 얼룩 없이 색만 바꾼다.
+    [SerializeField] private Image _lockStain;
+    [SerializeField] private Vector2 _lockStainStartScale = new Vector2(0.9f, 0.35f);
+    [SerializeField, Min(0f)] private float _lockStainInDuration = 0.6f;
+    [SerializeField, Min(0f)] private float _lockStainOutDuration = 0.4f;
 
     private readonly List<RectTransform> _markers = new();
 
@@ -44,6 +55,17 @@ public class HealthBarView : ViewBase<HealthBarViewModel>
     {
         _fill.DOKill();
         _trail.DOKill();
+        transform.DOKill();
+
+        if (null != _fillGraphic)
+        {
+            _fillGraphic.DOKill();
+        }
+
+        for (int i = 0; i < _markers.Count; i++)
+        {
+            _markers[i].DOKill();
+        }
 
         base.OnDestroy();
     }
@@ -61,7 +83,7 @@ public class HealthBarView : ViewBase<HealthBarViewModel>
                 break;
 
             case nameof(HealthBarViewModel.IsAlert):
-                DrawAlert();
+                PlayAlert();
                 break;
 
             default:
@@ -143,7 +165,70 @@ public class HealthBarView : ViewBase<HealthBarViewModel>
             return;
         }
 
+        _fillGraphic.DOKill();
         _fillGraphic.color = ViewModel.IsAlert ? _alertColor : _fillColor;
+    }
+
+    // 잠길 때는 막대가 번쩍이며 흔들리고 닿은 눈금이 튀어, 체력이 그 줄에서 멈췄음을 보여 준다.
+    private void PlayAlert()
+    {
+        if (null == _fillGraphic)
+        {
+            return;
+        }
+
+        _fillGraphic.DOKill();
+        PlayLockStain(ViewModel.IsAlert);
+
+        if (false == ViewModel.IsAlert)
+        {
+            _fillGraphic.DOColor(_fillColor, _unlockDuration).SetUpdate(true);
+            return;
+        }
+
+        _fillGraphic.color = _lockFlashColor;
+        _fillGraphic.DOColor(_alertColor, _lockSettleDuration).SetUpdate(true);
+
+        transform.DOComplete();
+        ((RectTransform)transform).DOShakeAnchorPos(_lockShakeDuration, _lockShakeStrength).SetUpdate(true);
+
+        // 눈금은 남은 줄 순서대로라 맨 앞이 지금 닿은 줄이다.
+        if (0 < _markers.Count && _markers[0].gameObject.activeSelf)
+        {
+            _markers[0].DOComplete();
+            _markers[0].DOPunchScale(Vector3.one * _lockMarkerPunch, _lockShakeDuration).SetUpdate(true);
+        }
+    }
+
+    // 막대 뒤에서 위아래로 천천히 번지고, 풀릴 때는 옅어지며 사라진다.
+    private void PlayLockStain(bool isLocked)
+    {
+        if (null == _lockStain)
+        {
+            return;
+        }
+
+        RectTransform rect = _lockStain.rectTransform;
+
+        _lockStain.DOKill();
+        rect.DOKill();
+
+        if (isLocked)
+        {
+            _lockStain.gameObject.SetActive(true);
+            rect.localScale = new Vector3(_lockStainStartScale.x, _lockStainStartScale.y, 1f);
+
+            rect.DOScale(1f, _lockStainInDuration).SetEase(Ease.OutCubic).SetUpdate(true).SetLink(rect.gameObject);
+            _lockStain.DOFade(1f, _lockStainInDuration * 0.5f).SetUpdate(true).SetLink(rect.gameObject);
+            return;
+        }
+
+        _lockStain.DOFade(0f, _lockStainOutDuration).SetUpdate(true).SetLink(rect.gameObject).OnComplete(HideLockStain);
+    }
+
+    private void HideLockStain()
+    {
+        _lockStain.gameObject.SetActive(false);
     }
 
     private void TweenFill(float ratio)

@@ -28,12 +28,61 @@ public class BattleHudView : ViewBase<BattleHudViewModel>
     [SerializeField] private GameObject _floatingTextPrefab;
     [SerializeField] private FloatingTextSettings _floatingText = new();
 
+    [Header("가림 방지")]
+    // 플레이어나 보스가 이 UI 뒤로 들어가면 반투명해져 전투가 보이게 한다.
+    [SerializeField] private CanvasGroup[] _fadeWhenCovering;
+    [SerializeField, Range(0f, 1f)] private float _coveringAlpha = 0.3f;
+    [SerializeField, Min(0.01f)] private float _coveringFadeDuration = 0.15f;
+    // 몸이 UI에 걸치기 전에 옅어지도록 UI 둘레로 넓혀 본다.
+    [SerializeField, Min(0f)] private float _coveringMargin = 50f;
+
     [Header("표시")]
     [SerializeField, Min(0f)] private float _fadeDuration = 0.3f;
 
     private void Awake()
     {
         _canvasGroup.alpha = 0f;
+    }
+
+    private void Update()
+    {
+        if (null == ViewModel)
+        {
+            return;
+        }
+
+        Camera battleCamera = GameManager.CameraRig.RenderCamera;
+        float step = Time.unscaledDeltaTime / _coveringFadeDuration;
+
+        for (int i = 0; i < _fadeWhenCovering.Length; i++)
+        {
+            CanvasGroup group = _fadeWhenCovering[i];
+            RectTransform rect = (RectTransform)group.transform;
+            bool isCovering = IsCovering(rect, ViewModel.PlayerBody, battleCamera) || IsCovering(rect, ViewModel.BossBody, battleCamera);
+
+            group.alpha = Mathf.MoveTowards(group.alpha, isCovering ? _coveringAlpha : 1f, step);
+        }
+    }
+
+    // HUD 캔버스는 화면에 바로 그려(Overlay) 변환에 카메라를 넘기지 않는다.
+    private bool IsCovering(RectTransform rect, Transform body, Camera battleCamera)
+    {
+        if (null == body)
+        {
+            return false;
+        }
+
+        Vector2 screenPoint = battleCamera.WorldToScreenPoint(body.position);
+
+        if (false == RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, screenPoint, null, out Vector2 local))
+        {
+            return false;
+        }
+
+        Rect area = rect.rect;
+
+        return local.x >= area.xMin - _coveringMargin && local.x <= area.xMax + _coveringMargin
+            && local.y >= area.yMin - _coveringMargin && local.y <= area.yMax + _coveringMargin;
     }
 
     public void Show()

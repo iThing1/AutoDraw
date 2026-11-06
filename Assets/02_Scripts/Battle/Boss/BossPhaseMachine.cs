@@ -53,7 +53,8 @@ public class BossPhaseMachine : MonoBehaviour
     private CancellationTokenSource _flowSource;
 
     public event Action OnPhaseChanged;
-    public event Action<bool> OnGimmickActiveChanged;
+    // 체력이 기믹 줄에 닿으면 true, 그 기믹이 끝나면 false. 그동안 체력이 더 줄지 않는다.
+    public event Action<bool> OnHpLockChanged;
     // 기믹 결과(해냈으면 true)를 알려, 화면에 성공·실패를 띄우게 한다.
     public event Action<bool> OnGimmickFinished;
     // 부활 연출이 시작되면 true, 끝나면 false. 그동안 플레이어를 멈추는 일은 전투를 맡은 쪽이 한다.
@@ -135,13 +136,15 @@ public class BossPhaseMachine : MonoBehaviour
 
         try
         {
-            await StopBossAsync(token);
+            OnHpLockChanged?.Invoke(true);
 
-            OnGimmickActiveChanged?.Invoke(true);
+            // 하던 패턴과 환경 탄막이 끝난 뒤에 시작한다. 그동안 체력은 기믹 줄에 멈춰 있다.
+            await _unit.Attacker.HoldUntilIdleAsync(token);
+            await StopBossAsync(token);
 
             bool isSucceeded = await PlayGimmickWithGuardAsync(line.Gimmick, token);
 
-            OnGimmickActiveChanged?.Invoke(false);
+            OnHpLockChanged?.Invoke(false);
             OnGimmickFinished?.Invoke(isSucceeded);
 
             _nextLineIndex++;

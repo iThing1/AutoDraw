@@ -20,6 +20,9 @@ public class CloneSkillAttackStyle : AttackStyle
     [SerializeField, Min(0f)] private float _fadeDuration = 0.3f;
     [SerializeField] private ImpactSettings _summonImpact = new();
 
+    // 복제체는 플레이어의 멈춤을 따라 쉬었다가 이어 쏜다(SyncInterrupt).
+    public override bool EndsOnInterrupt { get { return false; } }
+
     // 처음 쓸 때 유닛 하나를 통째로 만드느라 끊기지 않도록 미리 만들어 둔다. 한 번에 하나만 남는다(같은 스킬은 끝나야 다시 쓴다).
     public override void Prewarm()
     {

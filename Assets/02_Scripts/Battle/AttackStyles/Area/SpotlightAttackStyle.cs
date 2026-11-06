@@ -4,7 +4,7 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.Pool;
 
-// 조명들이 보스에게서 빛줄기를 뻗어 목표를 쫓다가 하나씩 멈춰, 비춘 자리를 터뜨린다.
+// 조명들이 쓰는 쪽에게서 빛줄기를 뻗어 목표를 쫓다가 하나씩 멈춰, 비춘 자리를 터뜨린다.
 [CreateAssetMenu(fileName = "SpotlightAttackStyle", menuName = "Scriptable Objects/AttackStyle/Spotlight")]
 public class SpotlightAttackStyle : AttackStyle
 {
@@ -54,13 +54,17 @@ public class SpotlightAttackStyle : AttackStyle
 
     public override async UniTask FireAsync(AttackContext context, float gaugeGain, CancellationToken token)
     {
+        SkillModifier skill = context.Owner.SkillModifier;
+        int lightCount = skill.ResolveCount(_lightCount);
+        float chaseDuration = skill.ResolveDuration(_chaseDuration);
+        float lockInterval = skill.ResolveInterval(_lockInterval);
         List<UniTask> lights = ListPool<UniTask>.Get();
 
         try
         {
-            for (int i = 0; i < _lightCount; i++)
+            for (int i = 0; i < lightCount; i++)
             {
-                lights.Add(LightAsync(context, _chaseDuration + _lockInterval * i, 1 == i % 2, gaugeGain, token));
+                lights.Add(LightAsync(context, chaseDuration + lockInterval * i, 1 == i % 2, gaugeGain, token));
             }
 
             await UniTask.WhenAll(lights);

@@ -21,10 +21,11 @@ MonoBehaviour:
   _tell: 0
   _tellDuration: 0.5
   _utility: 1
-  _requiredUses: 10
+  _requiredUses: 5
   _watchDuration: 3
-  _signPrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
-  _signSize: {x: 1.2, y: 1.2}
+  _signPrefab: {fileID: 8300000000000000001, guid: 40c1f7b4cb814d246be9d5137c68fb23, type: 3}
+  _signSize: {x: 1.6, y: 1.6}
+  _signColor: {r: 0.85, g: 0.1, b: 0.1, a: 1}
   _signOffset: {x: 0, y: 2.6, z: 0}
   _markerPrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
   _markerRadius: 1.1

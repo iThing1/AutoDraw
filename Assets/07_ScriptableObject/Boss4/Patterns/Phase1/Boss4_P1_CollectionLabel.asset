@@ -20,8 +20,8 @@ MonoBehaviour:
   _stopsMovement: 0
   _tell: 0
   _tellDuration: 0.5
-  _labelPrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
-  _labelSize: {x: 0.9, y: 0.5}
+  _labelPrefab: {fileID: 8300000000000000001, guid: a1c93345a7cab73438a58a3f2a6c3f3d, type: 3}
+  _labelSize: {x: 1.1, y: 1.1}
   _labelOffset: {x: 0, y: 1.6, z: 0}
   _labelColor: {r: 0.95, g: 0.92, b: 0.82, a: 1}
   _urgentColor: {r: 0.85, g: 0.1, b: 0.1, a: 1}

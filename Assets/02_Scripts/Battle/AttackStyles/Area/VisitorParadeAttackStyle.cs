@@ -23,7 +23,6 @@ public class VisitorParadeAttackStyle : AttackStyle
     private struct Visitor
     {
         public SpriteRenderer Body;
-        public SpriteRenderer Head;
         public int Lane;
         // 처음 순간 동선 시작점에서 떨어진 거리. 걸은 거리를 더해 동선 길이로 되감는다.
         public float Start;
@@ -54,9 +53,7 @@ public class VisitorParadeAttackStyle : AttackStyle
 
     [Header("그림")]
     [SerializeField] private GameObject _bodyPrefab;
-    [SerializeField] private GameObject _headPrefab;
-    [SerializeField] private Vector2 _bodySize = new Vector2(0.6f, 1.1f);
-    [SerializeField, Min(0.05f)] private float _headSize = 0.45f;
+    [SerializeField] private Vector2 _bodySize = new Vector2(1.6f, 1.6f);
     [SerializeField] private Color _visitorColor = new Color(0.08f, 0.08f, 0.11f, 0.85f);
     [SerializeField, Min(0f)] private float _bobHeight = 0.06f;
     [SerializeField, Min(0f)] private float _bobSpeed = 10f;
@@ -76,11 +73,6 @@ public class VisitorParadeAttackStyle : AttackStyle
             GameManager.Pool.Prewarm(_bodyPrefab, count);
         }
 
-        if (null != _headPrefab)
-        {
-            GameManager.Pool.Prewarm(_headPrefab, count);
-        }
-
         if (null != _guidePrefab)
         {
             GameManager.Pool.Prewarm(_guidePrefab, _laneCount);
@@ -91,7 +83,7 @@ public class VisitorParadeAttackStyle : AttackStyle
     {
         UnitMover mover = context.Target.Unit.Mover;
 
-        if (null == _bodyPrefab || null == _headPrefab || null == _guidePrefab || null == mover || false == mover.TryGetMoveArea(out Rect area))
+        if (null == _bodyPrefab || null == _guidePrefab || null == mover || false == mover.TryGetMoveArea(out Rect area))
         {
             return;
         }
@@ -137,7 +129,6 @@ public class VisitorParadeAttackStyle : AttackStyle
             for (int i = 0; i < visitors.Count; i++)
             {
                 GameManager.Pool.DespawnSprite(visitors[i].Body);
-                GameManager.Pool.DespawnSprite(visitors[i].Head);
             }
 
             for (int i = 0; i < lanes.Count; i++)
@@ -186,7 +177,6 @@ public class VisitorParadeAttackStyle : AttackStyle
     private void SpawnVisitors(List<Lane> lanes, List<Visitor> visitors)
     {
         Color hidden = new Color(_visitorColor.r, _visitorColor.g, _visitorColor.b, 0f);
-        Vector2 headSize = new Vector2(_headSize, _headSize);
 
         for (int lane = 0; lane < lanes.Count; lane++)
         {
@@ -201,7 +191,6 @@ public class VisitorParadeAttackStyle : AttackStyle
                     visitors.Add(new Visitor
                     {
                         Body = GameManager.Pool.SpawnSprite(_bodyPrefab, lanes[lane].Origin, 0f, _bodySize, hidden),
-                        Head = GameManager.Pool.SpawnSprite(_headPrefab, lanes[lane].Origin, 0f, headSize, hidden),
                         Lane = lane,
                         Start = distance,
                     });
@@ -237,7 +226,6 @@ public class VisitorParadeAttackStyle : AttackStyle
 
     private void MoveVisitors(List<Lane> lanes, List<Visitor> visitors, float elapsed, float alpha)
     {
-        Vector3 headOffset = new Vector3(0f, (_bodySize.y + _headSize) * 0.5f, 0f);
         float walked = _walkSpeed * elapsed;
 
         for (int i = 0; i < visitors.Count; i++)
@@ -251,9 +239,7 @@ public class VisitorParadeAttackStyle : AttackStyle
             Color color = new Color(_visitorColor.r, _visitorColor.g, _visitorColor.b, _visitorColor.a * alpha * edge);
 
             visitor.Body.transform.position = point;
-            visitor.Head.transform.position = point + headOffset;
             visitor.Body.color = color;
-            visitor.Head.color = color;
             visitor.IsFaded = edge < 0.5f;
             visitors[i] = visitor;
         }

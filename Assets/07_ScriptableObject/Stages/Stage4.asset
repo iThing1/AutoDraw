@@ -17,4 +17,4 @@ MonoBehaviour:
   _blankCanvas: {fileID: 2800000, guid: 3f7b792a8ea0e4245ba9a0ff5c380267, type: 3}
   _saveKey: Stage4
   _rewardPoints: 4
-  _clearSkillId: 
+  _clearSkillId: spotlight

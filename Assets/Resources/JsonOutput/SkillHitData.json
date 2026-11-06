@@ -2,5 +2,6 @@
 {"_id":"paint_bomb.fragment","_minDamage":6,"_maxDamage":9,"_criticalChance":0.15,"_criticalMultiplier":2},
 {"_id":"black_square.turret","_minDamage":4,"_maxDamage":6,"_criticalChance":0.1,"_criticalMultiplier":2},
 {"_id":"black_square.finale","_minDamage":24,"_maxDamage":30,"_criticalChance":0.3,"_criticalMultiplier":2},
-{"_id":"ink_hands.grab","_minDamage":5,"_maxDamage":7,"_criticalChance":0.15,"_criticalMultiplier":2}
+{"_id":"ink_hands.grab","_minDamage":5,"_maxDamage":7,"_criticalChance":0.15,"_criticalMultiplier":2},
+{"_id":"spotlight.burst","_minDamage":22,"_maxDamage":28,"_criticalChance":0.2,"_criticalMultiplier":2}
 ]}

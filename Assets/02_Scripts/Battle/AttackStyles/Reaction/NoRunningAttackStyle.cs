@@ -11,7 +11,8 @@ public class NoRunningAttackStyle : UtilityReactionAttackStyle
     [Header("감시")]
     [SerializeField, Min(0.1f)] private float _watchDuration = 6f;
     [SerializeField] private GameObject _signPrefab;
-    [SerializeField] private Vector2 _signSize = new Vector2(1.2f, 1.2f);
+    [SerializeField] private Vector2 _signSize = new Vector2(1.6f, 1.6f);
+    [SerializeField] private Color _signColor = new Color(0.85f, 0.1f, 0.1f, 1f);
     [SerializeField] private Vector3 _signOffset = new Vector3(0f, 2.6f, 0f);
     [SerializeField] private GameObject _markerPrefab;
     [SerializeField, Min(0.1f)] private float _markerRadius = 1.1f;
@@ -54,7 +55,7 @@ public class NoRunningAttackStyle : UtilityReactionAttackStyle
         }
 
         float diameter = _markerRadius * 2f;
-        SpriteRenderer sign = GameManager.Pool.SpawnSprite(_signPrefab, context.Owner.Body.position + _signOffset, 0f, _signSize, _watchColor);
+        SpriteRenderer sign = GameManager.Pool.SpawnSprite(_signPrefab, context.Owner.Body.position + _signOffset, 0f, _signSize, _signColor);
         SpriteRenderer marker = GameManager.Pool.SpawnSprite(_markerPrefab, context.Target.FollowTransform.position, 0f, new Vector2(diameter, diameter), _watchColor);
         List<UniTask> alarms = ListPool<UniTask>.Get();
 

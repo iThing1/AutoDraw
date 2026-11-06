@@ -10,7 +10,7 @@ public class CollectionLabelAttackStyle : AttackStyle
 {
     [Header("라벨")]
     [SerializeField] private GameObject _labelPrefab;
-    [SerializeField] private Vector2 _labelSize = new Vector2(0.9f, 0.5f);
+    [SerializeField] private Vector2 _labelSize = new Vector2(1.1f, 1.1f);
     [SerializeField] private Vector3 _labelOffset = new Vector3(0f, 1.6f, 0f);
     [SerializeField] private Color _labelColor = new Color(0.95f, 0.92f, 0.82f, 1f);
     [SerializeField] private Color _urgentColor = new Color(0.85f, 0.1f, 0.1f, 1f);

@@ -36,10 +36,8 @@ MonoBehaviour:
     _min: 4.5
     _max: 7
   _edgeFade: 1.5
-  _bodyPrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
-  _headPrefab: {fileID: 8300000000000000001, guid: e1e45536d5bd8b7d369d86443b9685c2, type: 3}
-  _bodySize: {x: 0.6, y: 1.1}
-  _headSize: 0.45
+  _bodyPrefab: {fileID: 8300000000000000001, guid: 2a9e09c2bb2020f42b29c91e8b87727a, type: 3}
+  _bodySize: {x: 1.6, y: 1.6}
   _visitorColor: {r: 0.08, g: 0.08, b: 0.11, a: 0.85}
   _bobHeight: 0.06
   _bobSpeed: 10

@@ -12,5 +12,4 @@ public enum UISoundKind
     // 잠긴 것을 고르거나, 쓸 수 없을 때 눌렀다.
     Error,
     WeaponSwitch,
-    SkillReady,
 }

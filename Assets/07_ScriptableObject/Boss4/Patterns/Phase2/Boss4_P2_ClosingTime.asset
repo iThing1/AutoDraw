@@ -20,9 +20,9 @@ MonoBehaviour:
   _stopsMovement: 1
   _tell: 0
   _tellDuration: 0.5
-  _fieldSize: {x: 20, y: 12}
-  _columns: 4
-  _rows: 3
+  _fieldSize: {x: 64, y: 36}
+  _columns: 12
+  _rows: 9
   _tilePrefab: {fileID: 8300000000000000001, guid: f8208a202bad560c15b2f60e038663a5, type: 3}
   _tileGap: 0.3
   _rounds:

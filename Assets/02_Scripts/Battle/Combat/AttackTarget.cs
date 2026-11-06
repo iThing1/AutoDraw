@@ -85,6 +85,13 @@ public class AttackTarget
         return Vector2.Distance(center, _unit.Body.position) + _bodyRadius <= radius;
     }
 
+    public bool IsInsideRect(Vector3 center, Vector2 size)
+    {
+        Vector3 body = _unit.Body.position;
+
+        return Mathf.Abs(body.x - center.x) + _bodyRadius <= size.x * 0.5f && Mathf.Abs(body.y - center.y) + _bodyRadius <= size.y * 0.5f;
+    }
+
     // 한꺼번에 떨어지는 여러 원 중 하나에라도 들었는지.
     public bool IsInAnyBlast(IReadOnlyList<Vector3> centers, float radius)
     {

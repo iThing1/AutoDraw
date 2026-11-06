@@ -16,7 +16,7 @@ public sealed class GimmickFrame
 
     private readonly SpriteRenderer[] _edges = new SpriteRenderer[EDGE_COUNT];
     private readonly SpriteRenderer _fill;
-    private readonly Vector2 _size;
+    private Vector2 _size;
     private readonly float _edgeWidth;
     private Vector3 _center;
 
@@ -49,6 +49,12 @@ public sealed class GimmickFrame
         PlaceEdge(_edges[1], center - halfHeight, 0f, horizontal);
         PlaceEdge(_edges[2], center + halfWidth, VERTICAL_ANGLE, vertical);
         PlaceEdge(_edges[3], center - halfWidth, VERTICAL_ANGLE, vertical);
+    }
+
+    public void Fit(Rect rect)
+    {
+        _size = rect.size;
+        Place(rect.center);
     }
 
     public bool Contains(Vector3 position)

@@ -6,7 +6,7 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.Pool;
 
-// 폐관 시간. 플레이어 둘레를 천장 조명 칸으로 나누고, 차례마다 정해진 무늬대로 조명을 깜빡이다 꺼서 어두워진 칸을 친다.
+// 폐관 시간. 판 전체를 천장 조명 칸으로 나누고, 차례마다 정해진 무늬대로 조명을 깜빡이다 꺼서 어두워진 칸을 친다.
 // 비상구 한 칸만 남기고 모두 끄는 정전 차례는 빨간 예고 규칙대로 막을 수 없다.
 [CreateAssetMenu(fileName = "ClosingTimeAttackStyle", menuName = "Scriptable Objects/AttackStyle/ClosingTime")]
 public class ClosingTimeAttackStyle : AttackStyle
@@ -19,9 +19,10 @@ public class ClosingTimeAttackStyle : AttackStyle
     }
 
     [Header("구역")]
-    [SerializeField] private Vector2 _fieldSize = new Vector2(20f, 12f);
-    [SerializeField, Min(1)] private int _columns = 4;
-    [SerializeField, Min(1)] private int _rows = 3;
+    // 구역 밖은 맞지 않으므로 판을 다 덮어야 걸어 나가서 피할 수 없다.
+    [SerializeField] private Vector2 _fieldSize = new Vector2(64f, 36f);
+    [SerializeField, Min(1)] private int _columns = 12;
+    [SerializeField, Min(1)] private int _rows = 9;
     [SerializeField] private GameObject _tilePrefab;
     [SerializeField, Min(0f)] private float _tileGap = 0.3f;
 

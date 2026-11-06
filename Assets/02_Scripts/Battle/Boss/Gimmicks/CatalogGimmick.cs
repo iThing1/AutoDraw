@@ -19,7 +19,9 @@ public class CatalogGimmick : PunishingBossGimmick
     [SerializeField] private Color _edgeColor = new Color(0.62f, 0.48f, 0.2f, 0.7f);
     [SerializeField] private Color _showColor = new Color(0.95f, 0.78f, 0.25f, 0.45f);
     [SerializeField] private Color _warnColor = new Color(0.55f, 0.25f, 0.85f, 0.5f);
-    [SerializeField] private Color _clearedColor = new Color(0.1f, 0.1f, 0.12f, 0.25f);
+    // 이미 터진 칸은 안전하다는 힌트. 다른 패턴의 비상구와 같은 초록이다.
+    [SerializeField] private Color _clearedColor = new Color(0.3f, 0.95f, 0.45f, 0.4f);
+    [SerializeField] private Color _clearedEdgeColor = new Color(0.3f, 0.95f, 0.45f, 0.95f);
 
     [Header("순서")]
     [SerializeField, Min(1)] private int _rounds = 2;
@@ -121,11 +123,12 @@ public class CatalogGimmick : PunishingBossGimmick
         }
     }
 
-    private static void ResetTiles(List<GimmickFrame> tiles)
+    private void ResetTiles(List<GimmickFrame> tiles)
     {
         for (int i = 0; i < tiles.Count; i++)
         {
             tiles[i].SetFill(0f);
+            tiles[i].SetEdgeColor(_edgeColor);
         }
     }
 
@@ -184,6 +187,7 @@ public class CatalogGimmick : PunishingBossGimmick
             }
 
             tile.SetFillColor(_clearedColor);
+            tile.SetEdgeColor(_clearedEdgeColor);
 
             await UniTask.Delay(TimeSpan.FromSeconds(_detonateGap), cancellationToken: token);
         }

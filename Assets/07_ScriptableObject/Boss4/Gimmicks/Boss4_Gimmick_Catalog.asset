@@ -28,7 +28,8 @@ MonoBehaviour:
   _edgeColor: {r: 0.62, g: 0.48, b: 0.2, a: 0.7}
   _showColor: {r: 0.95, g: 0.78, b: 0.25, a: 0.45}
   _warnColor: {r: 0.55, g: 0.25, b: 0.85, a: 0.5}
-  _clearedColor: {r: 0.1, g: 0.1, b: 0.12, a: 0.25}
+  _clearedColor: {r: 0.3, g: 0.95, b: 0.45, a: 0.4}
+  _clearedEdgeColor: {r: 0.3, g: 0.95, b: 0.45, a: 0.95}
   _rounds: 2
   _showDuration: 0.35
   _showGap: 0.1

@@ -4,7 +4,7 @@ using System.Threading;
 using UnityEngine;
 
 // 보안 레이저. 판 모서리 발사기에서 레이저가 판 전체를 부채꼴로 쓸고 지나간다.
-// 빨간 예고 규칙대로 막을 수 없어, 레이저가 올 때 대시로 뚫고 지나가야 한다.
+// 레이저가 닿는 순간 방패로 막거나 대시로 뚫고 지나간다.
 [CreateAssetMenu(fileName = "LaserHazardPattern", menuName = "Scriptable Objects/Hazard/Laser")]
 public class LaserHazardPattern : HazardPattern
 {
@@ -15,7 +15,8 @@ public class LaserHazardPattern : HazardPattern
     [Header("예고")]
     [SerializeField] private AudioClip _warningSound;
     [SerializeField] private GameObject _telegraphPrefab;
-    [SerializeField] private Color _telegraphColor = new Color(0.85f, 0.1f, 0.1f, 0.4f);
+    // 빨간 예고는 막을 수 없다는 뜻이므로 쓰지 않는다.
+    [SerializeField] private Color _telegraphColor = new Color(0.25f, 0.75f, 1f, 0.4f);
     [SerializeField, Min(0f)] private float _warnDuration = 0.8f;
 
     [Header("레이저")]
@@ -24,7 +25,7 @@ public class LaserHazardPattern : HazardPattern
     [SerializeField, Min(0.1f)] private float _sweepDuration = 2.4f;
     [SerializeField, Min(0.05f)] private float _thickness = 0.35f;
     [SerializeField] private GameObject _beamPrefab;
-    [SerializeField] private Color _beamColor = new Color(1f, 0.15f, 0.15f, 0.9f);
+    [SerializeField] private Color _beamColor = new Color(0.35f, 0.85f, 1f, 0.9f);
     [SerializeField] private GameObject _emitterPrefab;
     [SerializeField, Min(0.1f)] private float _emitterSize = 0.8f;
     [SerializeField] private Color _emitterColor = new Color(0.2f, 0.22f, 0.26f, 1f);
@@ -105,7 +106,7 @@ public class LaserHazardPattern : HazardPattern
         }
     }
 
-    // 한 번 쓸고 지나가는 동안 한 번만 맞는다. 대시 중이면 피하고, 다시 닿으면 그때 맞는다.
+    // 한 번 쓸고 지나가는 동안 한 번만 맞는다. 막으면 그 쓸기는 끝난 셈이고, 대시 중이면 피하되 다시 닿으면 그때 맞는다.
     private async UniTask MoveBeamAsync(AttackContext context, Vector3 origin, float length, float from, float to, SpriteRenderer beam,
         CancellationToken token)
     {
@@ -126,7 +127,7 @@ public class LaserHazardPattern : HazardPattern
 
                 Vector3 hitPoint = target.GetAimPoint(Vector3.zero);
                 GameManager.Feedback.PlayImpact(_impact, hitPoint);
-                context.Damage.StrikeUnblockable(_hit, hitPoint);
+                context.Damage.Strike(_hit, hitPoint, 0f);
             }
 
             await UniTask.Yield(PlayerLoopTiming.Update, token);

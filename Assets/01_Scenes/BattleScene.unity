@@ -1034,9 +1034,6 @@ MonoBehaviour:
     - _kind: 8
       _clip: {fileID: 8300000, guid: f6abb264e6544cc3ab5c32813549058d, type: 3}
       _pitch: 1.3
-    - _kind: 9
-      _clip: {fileID: 8300000, guid: 6c59daa7c3264782b3e72988eb127a3e, type: 3}
-      _pitch: 1
 --- !u!4 &2132573752
 Transform:
   m_ObjectHideFlags: 0

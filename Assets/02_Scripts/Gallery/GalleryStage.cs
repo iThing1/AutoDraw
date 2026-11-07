@@ -15,6 +15,16 @@ public class GalleryStage : MonoBehaviour, IPausable
     [SerializeField] private GalleryFrame[] _frames;
     [SerializeField] private GalleryHudUI _hudPrefab;
 
+    [Header("전시실")]
+    [SerializeField] private RoomData _room;
+    [SerializeField] private GalleryDoor _door;
+    [SerializeField] private RoomCompleteSettings _roomComplete = new();
+
+    [Header("액자 열림 연출")]
+    [SerializeField, Min(0f)] private float _frameOpenedMoveDuration = 1f;
+    [SerializeField, Min(0f)] private float _frameOpenedHoldDuration = 0.9f;
+    [SerializeField] private AudioClip _frameOpenedSound;
+
     [Header("진입 연출")]
     [SerializeField, Min(0f)] private float _approachDuration = 0.8f;
     [SerializeField] private Ease _approachEase = Ease.InOutSine;
@@ -41,6 +51,7 @@ public class GalleryStage : MonoBehaviour, IPausable
     private GalleryPalettes _palettes;
     // 돌아왔을 때 이 액자 앞에서 물러나며 시작하려고 기억해 둔다.
     private GalleryFrame _enteredFrame;
+    private RoomCompleteCutscene _roomCompleteCutscene;
 
     // 들어갈 스테이지를 고르면 알린다. 화면을 가리고 스테이지를 만드는 것은 받는 쪽이 한다.
     public event Action<StageData> OnStageChosen;
@@ -60,6 +71,12 @@ public class GalleryStage : MonoBehaviour, IPausable
         _player.SavePose();
 
         _palettes = new GalleryPalettes(GetComponentsInChildren<PaletteItem>(true));
+        _roomCompleteCutscene = new RoomCompleteCutscene(_player, _roomComplete);
+
+        if (null == _room)
+        {
+            Debug.LogError("갤러리 : 전시실 데이터가 지정되지 않아 순서 잠금과 완성 연출 없이 진행합니다.");
+        }
     }
 
     private void OnDestroy()
@@ -72,12 +89,30 @@ public class GalleryStage : MonoBehaviour, IPausable
     {
         gameObject.SetActive(true);
 
-        for (int i = 0; i < _frames.Length; i++)
+        PlayerProgress progress = GameManager.Player.Progress;
+        GalleryFrame returnedFrame = _enteredFrame;
+        GalleryFrame openedFrame = RefreshFrames(progress);
+
+        _enteredFrame = null;
+
+        // 액자에서 돌아왔을 때만 새로 열린 것이다. 처음 들어올 때는 모든 액자가 잠긴 상태에서 시작한다.
+        if (null == returnedFrame)
         {
-            _frames[i].Refresh();
+            openedFrame = null;
+        }
+        else if (null != openedFrame)
+        {
+            openedFrame.KeepClothForUnveil();
         }
 
-        _palettes.Refresh(GameManager.Player.Progress);
+        RefreshDoor(progress);
+
+        if (IsRoomCompletePending(progress))
+        {
+            _door.KeepLockForUnlock();
+        }
+
+        _palettes.Refresh(progress);
         _player.RestorePose();
 
         _hud = GameManager.UI.Open(_hudPrefab, UILayer.HUD);
@@ -86,14 +121,40 @@ public class GalleryStage : MonoBehaviour, IPausable
         SetCursorLocked(true);
         GameManager.Sound.PlayBgm(_bgm, _bgmFadeDuration);
 
-        if (null == _enteredFrame)
+        ArriveAsync(returnedFrame, openedFrame, destroyCancellationToken).Forget();
+    }
+
+    // 이번에 잠김이 풀린 액자를 돌려준다.
+    private GalleryFrame RefreshFrames(PlayerProgress progress)
+    {
+        GalleryFrame openedFrame = null;
+
+        for (int i = 0; i < _frames.Length; i++)
         {
-            SetControlEnabled(true);
-            return;
+            GalleryFrame frame = _frames[i];
+            bool wasLocked = frame.IsLocked;
+
+            frame.Refresh(null == _room || _room.IsOpen(frame.Stage, progress));
+
+            if (wasLocked && false == frame.IsLocked)
+            {
+                openedFrame = frame;
+            }
         }
 
-        ReturnFromFrameAsync(_enteredFrame, destroyCancellationToken).Forget();
-        _enteredFrame = null;
+        return openedFrame;
+    }
+
+    private void RefreshDoor(PlayerProgress progress)
+    {
+        bool isComplete = null != _room && _room.IsComplete(progress);
+
+        _door.Refresh(isComplete, isComplete && false == progress.IsDoorVisited(_room.SaveKey));
+    }
+
+    private bool IsRoomCompletePending(PlayerProgress progress)
+    {
+        return null != _room && _room.IsComplete(progress) && false == progress.IsRoomCompleted(_room.SaveKey);
     }
 
     // 전투의 결과 버튼을 누를 수 있게 커서를 다시 보인다.
@@ -125,6 +186,21 @@ public class GalleryStage : MonoBehaviour, IPausable
     public void EnterFrame(GalleryFrame frame)
     {
         EnterFrameAsync(frame, destroyCancellationToken).Forget();
+    }
+
+    // 다음 전시실이 생기면 여기서 옮겨 간다. 지금은 안내만 띄운다. 문은 전시실을 모두 채워야 열려 _room이 늘 있다.
+    public void UseDoor()
+    {
+        PlayerProgress progress = GameManager.Player.Progress;
+
+        if (false == progress.IsDoorVisited(_room.SaveKey))
+        {
+            progress.MarkDoorVisited(_room.SaveKey);
+            GameManager.SavePlayer();
+            RefreshDoor(progress);
+        }
+
+        _hud.ShowNotice(_room.NextRoomNotice);
     }
 
     public void OpenLoadout()
@@ -177,14 +253,61 @@ public class GalleryStage : MonoBehaviour, IPausable
         OnStageChosen?.Invoke(frame.Stage);
     }
 
-    private async UniTaskVoid ReturnFromFrameAsync(GalleryFrame frame, CancellationToken token)
+    // 처음 들어오면 전시실 이름을 알리고, 액자에서 돌아오면 물러난 뒤 조작을 돌려준다. 보지 못한 완성 연출은 어느 쪽이든 먼저 튼다.
+    private async UniTaskVoid ArriveAsync(GalleryFrame returnedFrame, GalleryFrame openedFrame, CancellationToken token)
     {
         SetControlEnabled(false);
-        _player.PlaceCameraAt(frame.ViewPoint);
 
-        await _player.MoveCameraHomeAsync(_returnDuration, _returnEase, token);
+        if (null != returnedFrame)
+        {
+            _player.PlaceCameraAt(returnedFrame.ViewPoint);
+            await _player.MoveCameraHomeAsync(_returnDuration, _returnEase, token);
+
+            if (null != openedFrame)
+            {
+                await PlayFrameOpenedAsync(openedFrame, token);
+            }
+        }
+
+        await PlayRoomCompleteIfNeededAsync(token);
+
+        if (null == returnedFrame && null != _room)
+        {
+            _hud.ShowNotice(_room.DisplayName);
+        }
 
         SetControlEnabled(true);
+    }
+
+    // 새로 열린 액자를 비춰 천을 걷어 내고 제자리로 돌아온다.
+    private async UniTask PlayFrameOpenedAsync(GalleryFrame frame, CancellationToken token)
+    {
+        await _player.MoveCameraToAsync(frame.ShowcasePosition, frame.ViewPoint.rotation, _frameOpenedMoveDuration, _returnEase, token);
+
+        GameManager.Sound.PlaySfx(_frameOpenedSound);
+        _hud.ShowFrameOpened(frame.Label);
+
+        await frame.PlayUnveilAsync(token);
+        frame.PlayShine();
+        await GameManager.TimeScale.WaitRealtimeAsync(_frameOpenedHoldDuration, token);
+        await _player.MoveCameraHomeAsync(_frameOpenedMoveDuration, _returnEase, token);
+    }
+
+    // 완성 기록이 없을 때만 튼다. 끝까지 본 뒤에 기록해, 연출 도중 게임을 끄면 다음에 들어올 때 다시 보여 준다.
+    private async UniTask PlayRoomCompleteIfNeededAsync(CancellationToken token)
+    {
+        PlayerProgress progress = GameManager.Player.Progress;
+
+        if (false == IsRoomCompletePending(progress))
+        {
+            return;
+        }
+
+        await _roomCompleteCutscene.PlayAsync(_room, _frames, _door, token);
+
+        progress.MarkRoomCompleted(_room.SaveKey);
+        GameManager.SavePlayer();
+        RefreshDoor(progress);
     }
 
     // Esc는 열린 창(장비, 특성 트리)부터 닫는다.

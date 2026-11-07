@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e01ec416f80b84c4584eaa41ef1cec7c, type: 3}
+  m_Name: Room_Gallery
+  m_EditorClassIdentifier: Assembly-CSharp::RoomData
+  _displayName: Room 1 - Gallery
+  _saveKey: room_gallery
+  _stages:
+  - {fileID: 11400000, guid: 471b5d067c364a6f809fde2e0ed82b1b, type: 2}
+  - {fileID: 11400000, guid: b0b96a3f0ac81e7ac00a7a4913c8df66, type: 2}
+  - {fileID: 11400000, guid: 323a235e3b9642b6a8612ccacb89fa9b, type: 2}
+  - {fileID: 11400000, guid: bd1e42a14612ba64cb2bd9fc83cc2a81, type: 2}
+  _completeTitle: ROOM COMPLETE
+  _completeSubtitle: NEXT ROOM - MUSEUM, COMING SOON
+  _nextRoomNotice: MUSEUM - COMING SOON

@@ -2,7 +2,7 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 
-// 갤러리 화면 가운데 조준점과, 바라보는 물건의 이름·상호작용 키 안내, 팔레트를 주웠을 때의 알림.
+// 갤러리 화면 가운데 조준점과, 바라보는 물건의 이름·상호작용 키 안내, 화면 알림.
 public class GalleryHudUI : MonoBehaviour
 {
     [SerializeField] private GameObject _crosshair;
@@ -16,6 +16,8 @@ public class GalleryHudUI : MonoBehaviour
     [SerializeField] private TMP_Text _noticeText;
     // {0}은 남은 팔레트 수.
     [SerializeField] private string _paletteFoundFormat = "PALETTE FOUND  x{0}";
+    // {0}은 새로 열린 스테이지 이름.
+    [SerializeField] private string _frameOpenedFormat = "NEW EXHIBIT  {0}";
     [SerializeField, Min(0f)] private float _noticeHoldDuration = 1.5f;
     [SerializeField, Min(0f)] private float _noticeFadeDuration = 0.4f;
 
@@ -40,7 +42,22 @@ public class GalleryHudUI : MonoBehaviour
     public void ShowPaletteFound(int availablePalettes)
     {
         _noticeText.SetText(_paletteFoundFormat, availablePalettes);
+        PlayNotice();
+    }
 
+    public void ShowFrameOpened(string stageName)
+    {
+        ShowNotice(string.Format(_frameOpenedFormat, stageName));
+    }
+
+    public void ShowNotice(string text)
+    {
+        _noticeText.text = text;
+        PlayNotice();
+    }
+
+    private void PlayNotice()
+    {
         _notice.DOKill();
         _notice.alpha = 1f;
         _notice.DOFade(0f, _noticeFadeDuration)

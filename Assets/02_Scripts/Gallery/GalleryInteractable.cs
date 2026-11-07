@@ -1,16 +1,23 @@
+using DG.Tweening;
 using UnityEngine;
 
 // 갤러리에서 바라보고 상호작용 키로 고르는 물건. 콜라이더와 같은 오브젝트에 둔다. 바라보는 동안 렌더러 하나의 색을 바꿔 강조한다.
 public abstract class GalleryInteractable : MonoBehaviour
 {
-    private static readonly int BASE_COLOR_ID = Shader.PropertyToID("_BaseColor");
+    protected const string LOCKED_LABEL = "LOCKED";
+    protected static readonly int BASE_COLOR_ID = Shader.PropertyToID("_BaseColor");
 
     // HUD 안내에 "[키] 이 문구"로 보인다.
     [SerializeField] private string _actionLabel = "ENTER";
 
     [Header("강조")]
     [SerializeField] private Renderer _highlightRenderer;
-    [SerializeField] private Color _highlightColor = new Color(0.85f, 0.65f, 0.3f, 1f);
+    // 재질 색 대신 그림에 곱해진다. 어두운 그림을 밝히려면 1을 넘겨야 한다.
+    [SerializeField, ColorUsage(false, true)] private Color _highlightColor = new Color(0.85f, 0.65f, 0.3f, 1f);
+
+    [Header("잠김")]
+    [SerializeField, Min(0f)] private float _lockedShakeDuration = 0.3f;
+    [SerializeField, Min(0f)] private float _lockedShakeStrength = 0.04f;
 
     private MaterialPropertyBlock _highlightBlock;
     private Color _baseColor;
@@ -32,6 +39,12 @@ public abstract class GalleryInteractable : MonoBehaviour
 
         _highlightBlock = new MaterialPropertyBlock();
         _baseColor = _highlightRenderer.sharedMaterial.GetColor(BASE_COLOR_ID);
+    }
+
+    protected virtual void PlayLocked()
+    {
+        transform.DOComplete();
+        transform.DOShakePosition(_lockedShakeDuration, _lockedShakeStrength);
     }
 
     public void SetHighlighted(bool isHighlighted)

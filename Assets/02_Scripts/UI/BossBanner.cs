@@ -10,6 +10,7 @@ public class BossBanner : MonoBehaviour
     [SerializeField] private RectTransform _content;
     [SerializeField] private TMP_Text _titleText;
     [SerializeField] private TMP_Text _subtitleText;
+    [SerializeField] private GameObject _backdrop;
 
     private Vector2 _contentPosition;
 
@@ -23,6 +24,7 @@ public class BossBanner : MonoBehaviour
     {
         _titleText.text = title;
         _subtitleText.text = subtitle;
+        _backdrop.SetActive(settings.ShowsBackdrop);
 
         _content.anchoredPosition = _contentPosition;
         _content.localScale = Vector3.one * settings.StartScale;

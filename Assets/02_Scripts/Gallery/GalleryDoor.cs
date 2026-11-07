@@ -19,7 +19,9 @@ public class GalleryDoor : GalleryInteractable
     [Header("자물쇠")]
     [SerializeField] private Transform _lock;
     [SerializeField] private Transform _lockShackle;
-    [SerializeField] private Color _lockColor = new Color(1f, 0.87f, 0.6f, 1f);
+    // 잠긴 문을 눌렀을 때 고리를 축으로 흔들리는 각도.
+    [SerializeField] private float _lockSwingAngle = 16f;
+    [SerializeField, Min(0f)] private float _lockSwingDuration = 0.7f;
     [SerializeField, Min(0f)] private float _shackleLift = 0.1f;
     [SerializeField, Min(0f)] private float _shackleDuration = 0.25f;
     [SerializeField, Min(0f)] private float _unlockHoldDuration = 0.35f;
@@ -48,13 +50,13 @@ public class GalleryDoor : GalleryInteractable
         MaterialPropertyBlock block = new MaterialPropertyBlock();
         block.SetColor(BASE_COLOR_ID, _alertColor);
         _alertMark.SetPropertyBlock(block);
+    }
 
-        block.SetColor(BASE_COLOR_ID, _lockColor);
-
-        foreach (Renderer part in _lock.GetComponentsInChildren<Renderer>(true))
-        {
-            part.SetPropertyBlock(block);
-        }
+    protected override void PlayLocked()
+    {
+        _lock.DOComplete();
+        _lock.DOPunchRotation(new Vector3(0f, 0f, _lockSwingAngle), _lockSwingDuration, 5, 0.6f)
+            .SetLink(_lock.gameObject);
     }
 
     public void Refresh(bool isOpen, bool showsAlert)

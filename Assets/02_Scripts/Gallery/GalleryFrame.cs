@@ -14,7 +14,7 @@ public class GalleryFrame : GalleryInteractable
 
     [Header("모양")]
     [SerializeField] private Renderer _painting;
-    [SerializeField] private GameObject _cloth;
+    [SerializeField] private Cloth _curtain;
     // 들어갈 때 카메라가 다가가 멈추는 자리. 그림이 화면을 거의 채우는 거리에 둔다.
     [SerializeField] private Transform _viewPoint;
 
@@ -23,10 +23,10 @@ public class GalleryFrame : GalleryInteractable
     [SerializeField] private string _clearedNameplateFormat = "{0}\n<size=60%>CLEARED</size>";
 
     [Header("열림 연출")]
-    [SerializeField, Min(0f)] private float _unveilDuration = 0.6f;
-    // 천이 접히며 내려가는 거리. 천 높이의 절반쯤이면 아랫단으로 모인다.
-    [SerializeField, Min(0f)] private float _unveilDrop = 0.55f;
-    [SerializeField] private Ease _unveilEase = Ease.InQuad;
+    // 천이 바닥 아래로 사라질 만큼의 시간.
+    [SerializeField, Min(0f)] private float _unveilDuration = 0.75f;
+    // 떨어질 때 액자를 뚫지 않게 앞으로 미는 가속도.
+    [SerializeField, Min(0f)] private float _unveilPull = 6f;
 
     [Header("전시 연출")]
     // 액자 틀과 이름표까지 보이도록 ViewPoint에서 물러나는 거리.
@@ -67,7 +67,7 @@ public class GalleryFrame : GalleryInteractable
     {
         _isOpen = null != _stage && isOpen;
 
-        _cloth.SetActive(IsLocked);
+        _curtain.gameObject.SetActive(IsLocked);
         _painting.gameObject.SetActive(false == IsLocked);
 
         if (IsLocked)
@@ -90,29 +90,32 @@ public class GalleryFrame : GalleryInteractable
     // 막 열린 액자는 연출을 볼 때까지 천을 덮어 둔다.
     public void KeepClothForUnveil()
     {
-        _cloth.SetActive(true);
+        _curtain.gameObject.SetActive(true);
     }
 
+    // 고정을 모두 풀어 천을 떨어뜨린다. 다음에 다시 덮일 수 있게 끝나면 되돌린다.
     public async UniTask PlayUnveilAsync(CancellationToken token)
     {
-        Transform cloth = _cloth.transform;
-        Vector3 position = cloth.localPosition;
-        Vector3 scale = cloth.localScale;
+        ClothSkinningCoefficient[] pinned = _curtain.coefficients;
+        ClothSkinningCoefficient[] released = (ClothSkinningCoefficient[])pinned.Clone();
 
-        Sequence unveil = DOTween.Sequence()
-            .Join(cloth.DOLocalMoveY(position.y - _unveilDrop, _unveilDuration))
-            .Join(cloth.DOScaleY(0f, _unveilDuration))
-            .SetEase(_unveilEase);
+        for (int i = 0; i < released.Length; i++)
+        {
+            released[i].maxDistance = float.MaxValue;
+        }
+
+        _curtain.coefficients = released;
+        _curtain.externalAcceleration = -transform.forward * _unveilPull;
 
         try
         {
-            await unveil.ToUniTaskKillOnCancel(token);
+            await GameManager.TimeScale.WaitRealtimeAsync(_unveilDuration, token);
         }
         finally
         {
-            _cloth.SetActive(false);
-            cloth.localPosition = position;
-            cloth.localScale = scale;
+            _curtain.externalAcceleration = Vector3.zero;
+            _curtain.coefficients = pinned;
+            _curtain.gameObject.SetActive(false);
         }
     }
 

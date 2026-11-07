@@ -12,7 +12,8 @@ public abstract class GalleryInteractable : MonoBehaviour
 
     [Header("강조")]
     [SerializeField] private Renderer _highlightRenderer;
-    [SerializeField] private Color _highlightColor = new Color(0.85f, 0.65f, 0.3f, 1f);
+    // 재질 색 대신 그림에 곱해진다. 어두운 그림을 밝히려면 1을 넘겨야 한다.
+    [SerializeField, ColorUsage(false, true)] private Color _highlightColor = new Color(0.85f, 0.65f, 0.3f, 1f);
 
     [Header("잠김")]
     [SerializeField, Min(0f)] private float _lockedShakeDuration = 0.3f;
@@ -40,7 +41,7 @@ public abstract class GalleryInteractable : MonoBehaviour
         _baseColor = _highlightRenderer.sharedMaterial.GetColor(BASE_COLOR_ID);
     }
 
-    protected void PlayLocked()
+    protected virtual void PlayLocked()
     {
         transform.DOComplete();
         transform.DOShakePosition(_lockedShakeDuration, _lockedShakeStrength);

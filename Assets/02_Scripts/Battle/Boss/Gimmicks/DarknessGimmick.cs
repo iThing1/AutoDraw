@@ -11,7 +11,7 @@ public class DarknessGimmick : BossGimmick
     private const int REPOSITION_TRY_COUNT = 8;
 
     [Header("어둠")]
-    // 가운데가 뚫린 흰 덮개(04_Texture/DarknessHole). 유닛(보스 포함)을 덮고 탄 아래에 그리도록 프리팹에서 Unit 층 1000번에 둔다.
+    // 가운데가 뚫린 흰 덮개(04_Texture/Battle/DarknessHole). 유닛(보스 포함)을 덮고 탄 아래에 그리도록 프리팹에서 Unit 층 1000번에 둔다.
     [SerializeField] private GameObject _darknessPrefab;
     [SerializeField, Min(0f)] private float _duration = 9f;
     [SerializeField, Min(0f)] private float _fadeDuration = 0.8f;

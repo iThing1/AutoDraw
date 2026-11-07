@@ -1,11 +1,12 @@
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using System.Threading;
 using TMPro;
 using UnityEngine;
 
-// 갤러리 벽의 액자. 스테이지가 비어 있으면 천으로 덮인 잠긴 액자이고, 깬 스테이지는 완성된 그림으로 바뀐다.
+// 갤러리 벽의 액자. 스테이지가 비어 있거나 아직 열리지 않았으면 천으로 덮인 잠긴 액자이고, 깬 스테이지는 완성된 그림으로 바뀐다.
 public class GalleryFrame : GalleryInteractable
 {
-    private const string LOCKED_LABEL = "LOCKED";
     private static readonly int BASE_MAP_ID = Shader.PropertyToID("_BaseMap");
 
     // 비워 두면 잠긴 액자가 된다.
@@ -21,16 +22,19 @@ public class GalleryFrame : GalleryInteractable
     [SerializeField] private TMP_Text _nameplate;
     [SerializeField] private string _clearedNameplateFormat = "{0}\n<size=60%>CLEARED</size>";
 
-    [Header("잠김")]
-    [SerializeField, Min(0f)] private float _lockedShakeDuration = 0.3f;
-    [SerializeField, Min(0f)] private float _lockedShakeStrength = 0.04f;
+    [Header("열림 연출")]
+    [SerializeField, Min(0f)] private float _unveilDuration = 0.6f;
+    // 천이 접히며 내려가는 거리. 천 높이의 절반쯤이면 아랫단으로 모인다.
+    [SerializeField, Min(0f)] private float _unveilDrop = 0.55f;
+    [SerializeField] private Ease _unveilEase = Ease.InQuad;
 
     private MaterialPropertyBlock _propertyBlock;
     private Texture2D _savedPainting;
     private bool _isPaintingLoaded;
+    private bool _isOpen;
 
     public StageData Stage { get { return _stage; } }
-    public override bool IsLocked { get { return null == _stage; } }
+    public override bool IsLocked { get { return false == _isOpen; } }
     public Transform ViewPoint { get { return _viewPoint; } }
     public override string Label { get { return IsLocked ? LOCKED_LABEL : _stage.DisplayName; } }
 
@@ -46,8 +50,11 @@ public class GalleryFrame : GalleryInteractable
         ReleaseSavedPainting();
     }
 
-    public void Refresh()
+    // 열어도 되는지는 전시실이 판단해 넘겨준다.
+    public void Refresh(bool isOpen)
     {
+        _isOpen = null != _stage && isOpen;
+
         _cloth.SetActive(IsLocked);
         _painting.gameObject.SetActive(false == IsLocked);
 
@@ -66,6 +73,35 @@ public class GalleryFrame : GalleryInteractable
         // 그림을 찍지 못하고 깬 경우에도 맞도록, 깼는지는 그림 파일이 아닌 진행 기록으로 본다.
         bool isCleared = GameManager.Player.Progress.IsCleared(_stage.SaveKey);
         _nameplate.text = isCleared ? string.Format(_clearedNameplateFormat, _stage.DisplayName) : _stage.DisplayName;
+    }
+
+    // 막 열린 액자는 연출을 볼 때까지 천을 덮어 둔다.
+    public void KeepClothForUnveil()
+    {
+        _cloth.SetActive(true);
+    }
+
+    public async UniTask PlayUnveilAsync(CancellationToken token)
+    {
+        Transform cloth = _cloth.transform;
+        Vector3 position = cloth.localPosition;
+        Vector3 scale = cloth.localScale;
+
+        Sequence unveil = DOTween.Sequence()
+            .Join(cloth.DOLocalMoveY(position.y - _unveilDrop, _unveilDuration))
+            .Join(cloth.DOScaleY(0f, _unveilDuration))
+            .SetEase(_unveilEase);
+
+        try
+        {
+            await unveil.ToUniTaskKillOnCancel(token);
+        }
+        finally
+        {
+            _cloth.SetActive(false);
+            cloth.localPosition = position;
+            cloth.localScale = scale;
+        }
     }
 
     public void MarkPaintingChanged()
@@ -105,11 +141,5 @@ public class GalleryFrame : GalleryInteractable
         }
 
         gallery.EnterFrame(this);
-    }
-
-    private void PlayLocked()
-    {
-        transform.DOComplete();
-        transform.DOShakePosition(_lockedShakeDuration, _lockedShakeStrength);
     }
 }

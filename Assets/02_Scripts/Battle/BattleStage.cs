@@ -324,14 +324,22 @@ public class BattleStage : MonoBehaviour, IPausable
 
             _canPause = true;
 
-            // 먼저 쓰러진 쪽의 순서 번호다. 0은 보스, 1은 플레이어다.
-            int defeatedIndex = await UniTask.WhenAny(
-                _boss.Health.WaitForDeathAsync(token),
-                _player.Health.WaitForDeathAsync(token));
+            int defeatedIndex;
+
+            try
+            {
+                // 먼저 쓰러진 쪽의 순서 번호다. 0은 보스, 1은 플레이어다.
+                defeatedIndex = await UniTask.WhenAny(
+                    _boss.Health.WaitForDeathAsync(token),
+                    _player.Health.WaitForDeathAsync(token));
+            }
+            finally
+            {
+                // 스테이지가 파괴되면 이 대기가 링크된 소스보다 먼저 취소된다. 여기서 끊지 않으면 Dispose로 링크만 풀려 공격과 이동이 계속 돈다.
+                battleSource.Cancel();
+            }
 
             _canPause = false;
-
-            battleSource.Cancel();
 
             if (null != _bossPhases)
             {

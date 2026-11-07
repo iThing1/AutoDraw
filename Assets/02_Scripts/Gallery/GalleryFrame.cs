@@ -28,6 +28,17 @@ public class GalleryFrame : GalleryInteractable
     [SerializeField, Min(0f)] private float _unveilDrop = 0.55f;
     [SerializeField] private Ease _unveilEase = Ease.InQuad;
 
+    [Header("전시 연출")]
+    // 액자 틀과 이름표까지 보이도록 ViewPoint에서 물러나는 거리.
+    [SerializeField, Min(0f)] private float _showcaseDistance = 1.15f;
+    [SerializeField] private GameObject _shine;
+    [SerializeField] private RectTransform _shineSweep;
+    // 빛줄기가 그림 양쪽 바깥에서 시작하고 끝나는 거리. 캔버스 단위다.
+    [SerializeField, Min(0f)] private float _shineTravel = 1300f;
+    [SerializeField, Min(0f)] private float _shineDuration = 0.7f;
+    [SerializeField] private Ease _shineEase = Ease.InOutSine;
+    [SerializeField] private AudioClip _shineSound;
+
     private MaterialPropertyBlock _propertyBlock;
     private Texture2D _savedPainting;
     private bool _isPaintingLoaded;
@@ -36,6 +47,7 @@ public class GalleryFrame : GalleryInteractable
     public StageData Stage { get { return _stage; } }
     public override bool IsLocked { get { return false == _isOpen; } }
     public Transform ViewPoint { get { return _viewPoint; } }
+    public Vector3 ShowcasePosition { get { return _viewPoint.position - _viewPoint.forward * _showcaseDistance; } }
     public override string Label { get { return IsLocked ? LOCKED_LABEL : _stage.DisplayName; } }
 
     protected override void Awake()
@@ -102,6 +114,20 @@ public class GalleryFrame : GalleryInteractable
             cloth.localPosition = position;
             cloth.localScale = scale;
         }
+    }
+
+    public void PlayShine()
+    {
+        GameManager.Sound.PlaySfx(_shineSound);
+
+        _shineSweep.DOKill();
+        _shineSweep.anchoredPosition = new Vector2(-_shineTravel, 0f);
+        _shine.SetActive(true);
+
+        _shineSweep.DOAnchorPosX(_shineTravel, _shineDuration)
+            .SetEase(_shineEase)
+            .SetLink(gameObject)
+            .OnComplete(() => _shine.SetActive(false));
     }
 
     public void MarkPaintingChanged()

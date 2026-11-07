@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-// 전시실의 그림을 모두 채우면 한 번 튼다. 깬 순서대로 그림을 둘러본 뒤 제자리로 돌아와 완성을 알린다.
+// 전시실의 그림을 모두 채우면 한 번 튼다. 깬 순서대로 그림을 둘러보고 문의 잠금이 풀린 뒤 제자리로 돌아와 완성을 알린다.
 public class RoomCompleteCutscene
 {
     private readonly GalleryPlayer _player;
@@ -15,7 +15,7 @@ public class RoomCompleteCutscene
         _settings = settings;
     }
 
-    public async UniTask PlayAsync(RoomData room, GalleryFrame[] frames, CancellationToken token)
+    public async UniTask PlayAsync(RoomData room, GalleryFrame[] frames, GalleryDoor door, CancellationToken token)
     {
         CinematicUI cinematicUI = GameManager.UI.Cinematic;
         CinematicSettings cinematic = _settings.Cinematic;
@@ -24,10 +24,14 @@ public class RoomCompleteCutscene
         await cinematicUI.Letterbox.ShowAsync(cinematic.LetterboxHeightRatio, cinematic.LetterboxInDuration, cinematic.LetterboxEase, token);
 
         await TourPaintingsAsync(room.Stages, frames, token);
+
+        await _player.MoveCameraToAsync(door.ViewPoint, _settings.MoveDuration, _settings.MoveEase, token);
+        await door.PlayUnlockAsync(token);
+
         await _player.MoveCameraHomeAsync(_settings.HomeDuration, _settings.MoveEase, token);
 
         GameManager.Sound.PlaySfx(_settings.Banner.Sound);
-        await cinematicUI.BossBanner.PlayAsync(room.CompleteTitle, room.CompleteSubtitle, _settings.Banner, token);
+        await cinematicUI.BossBanner.PlayAsync(room.CompleteTitle, room.CompleteSubtitle, _settings.Banner, token, true);
 
         GameManager.Sound.PlaySfx(cinematic.ExitSound);
         await cinematicUI.Letterbox.HideAsync(cinematic.LetterboxOutDuration, cinematic.LetterboxEase, token);
@@ -45,7 +49,8 @@ public class RoomCompleteCutscene
                 continue;
             }
 
-            await _player.MoveCameraToAsync(frame.ViewPoint, _settings.MoveDuration, _settings.MoveEase, token);
+            await _player.MoveCameraToAsync(frame.ShowcasePosition, frame.ViewPoint.rotation, _settings.MoveDuration, _settings.MoveEase, token);
+            frame.PlayShine();
             await GameManager.TimeScale.WaitRealtimeAsync(_settings.HoldDuration, token);
         }
     }

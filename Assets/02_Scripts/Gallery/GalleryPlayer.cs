@@ -119,11 +119,16 @@ public class GalleryPlayer : MonoBehaviour
     // 카메라만 액자 앞 자리로 옮겨, 그림이 화면을 채우며 그 안으로 들어가는 것처럼 보이게 한다.
     public UniTask MoveCameraToAsync(Transform viewPoint, float duration, Ease ease, CancellationToken token)
     {
+        return MoveCameraToAsync(viewPoint.position, viewPoint.rotation, duration, ease, token);
+    }
+
+    public UniTask MoveCameraToAsync(Vector3 position, Quaternion rotation, float duration, Ease ease, CancellationToken token)
+    {
         _camera.DOKill();
 
         Sequence move = DOTween.Sequence()
-            .Join(_camera.DOMove(viewPoint.position, duration))
-            .Join(_camera.DORotateQuaternion(viewPoint.rotation, duration))
+            .Join(_camera.DOMove(position, duration))
+            .Join(_camera.DORotateQuaternion(rotation, duration))
             .SetEase(ease);
 
         return move.ToUniTaskKillOnCancel(token);

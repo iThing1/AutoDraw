@@ -13,6 +13,8 @@ public class BannerSettings
     [SerializeField] private Ease _inEase = Ease.OutBack;
     [SerializeField] private Ease _outEase = Ease.InQuad;
     [SerializeField] private AudioClip _sound;
+    // 배경이 어두운 곳에서 글자가 묻히지 않게 뒤에 띠를 깐다.
+    [SerializeField] private bool _showsBackdrop;
 
     public float InDuration { get { return _inDuration; } }
     public float HoldDuration { get { return _holdDuration; } }
@@ -22,4 +24,5 @@ public class BannerSettings
     public Ease InEase { get { return _inEase; } }
     public Ease OutEase { get { return _outEase; } }
     public AudioClip Sound { get { return _sound; } }
+    public bool ShowsBackdrop { get { return _showsBackdrop; } }
 }

@@ -120,7 +120,7 @@ public class GalleryDoor : GalleryInteractable
             _lockShackle.localPosition = shacklePosition;
         }
 
-        Refresh(true, true);
+        _lock.gameObject.SetActive(false);
     }
 
     public override void Interact(GalleryStage gallery)
@@ -131,6 +131,6 @@ public class GalleryDoor : GalleryInteractable
             return;
         }
 
-        gallery.UseDoor(this);
+        gallery.UseDoor();
     }
 }

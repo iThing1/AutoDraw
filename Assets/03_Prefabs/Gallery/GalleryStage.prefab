@@ -95,6 +95,9 @@ MonoBehaviour:
   _hudPrefab: {fileID: 6410000000000000004, guid: 9193cd84328e4dde8813e267c37768d8, type: 3}
   _room: {fileID: 11400000, guid: efe4a9ed95272624faef9c8d3f431e1a, type: 2}
   _door: {fileID: 5810000000000001002}
+  _roomComplete:
+    _banner:
+      _showsBackdrop: 1
   _frameOpenedHoldDuration: 0.9
   _frameOpenedSound: {fileID: 8300000, guid: 1ee52c30744f60342bfcad71ce695ab5, type: 3}
   _approachDuration: 0.8

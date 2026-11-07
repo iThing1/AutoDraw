@@ -31,7 +31,7 @@ public class RoomCompleteCutscene
         await _player.MoveCameraHomeAsync(_settings.HomeDuration, _settings.MoveEase, token);
 
         GameManager.Sound.PlaySfx(_settings.Banner.Sound);
-        await cinematicUI.BossBanner.PlayAsync(room.CompleteTitle, room.CompleteSubtitle, _settings.Banner, token, true);
+        await cinematicUI.BossBanner.PlayAsync(room.CompleteTitle, room.CompleteSubtitle, _settings.Banner, token);
 
         GameManager.Sound.PlaySfx(cinematic.ExitSound);
         await cinematicUI.Letterbox.HideAsync(cinematic.LetterboxOutDuration, cinematic.LetterboxEase, token);

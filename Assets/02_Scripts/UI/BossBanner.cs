@@ -10,7 +10,6 @@ public class BossBanner : MonoBehaviour
     [SerializeField] private RectTransform _content;
     [SerializeField] private TMP_Text _titleText;
     [SerializeField] private TMP_Text _subtitleText;
-    // 배경이 어두운 곳에서 글자가 묻히지 않게 뒤에 까는 띠.
     [SerializeField] private GameObject _backdrop;
 
     private Vector2 _contentPosition;
@@ -21,11 +20,11 @@ public class BossBanner : MonoBehaviour
         _canvasGroup.alpha = 0f;
     }
 
-    public async UniTask PlayAsync(string title, string subtitle, BannerSettings settings, CancellationToken token, bool showsBackdrop = false)
+    public async UniTask PlayAsync(string title, string subtitle, BannerSettings settings, CancellationToken token)
     {
         _titleText.text = title;
         _subtitleText.text = subtitle;
-        _backdrop.SetActive(showsBackdrop);
+        _backdrop.SetActive(settings.ShowsBackdrop);
 
         _content.anchoredPosition = _contentPosition;
         _content.localScale = Vector3.one * settings.StartScale;

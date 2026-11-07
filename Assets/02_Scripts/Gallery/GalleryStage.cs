@@ -107,7 +107,7 @@ public class GalleryStage : MonoBehaviour, IPausable
 
         RefreshDoor(progress);
 
-        if (null != returnedFrame && IsRoomCompletePending(progress))
+        if (IsRoomCompletePending(progress))
         {
             _door.KeepLockForUnlock();
         }
@@ -189,12 +189,17 @@ public class GalleryStage : MonoBehaviour, IPausable
     }
 
     // 다음 전시실이 생기면 여기서 옮겨 간다. 지금은 안내만 띄운다. 문은 전시실을 모두 채워야 열려 _room이 늘 있다.
-    public void UseDoor(GalleryDoor door)
+    public void UseDoor()
     {
-        GameManager.Player.Progress.MarkDoorVisited(_room.SaveKey);
-        GameManager.SavePlayer();
+        PlayerProgress progress = GameManager.Player.Progress;
 
-        door.Refresh(true, false);
+        if (false == progress.IsDoorVisited(_room.SaveKey))
+        {
+            progress.MarkDoorVisited(_room.SaveKey);
+            GameManager.SavePlayer();
+            RefreshDoor(progress);
+        }
+
         _hud.ShowNotice(_room.NextRoomNotice);
     }
 
@@ -248,7 +253,7 @@ public class GalleryStage : MonoBehaviour, IPausable
         OnStageChosen?.Invoke(frame.Stage);
     }
 
-    // 처음 들어오면 전시실 이름을 알리고, 액자에서 돌아오면 물러난 뒤 조작을 돌려준다.
+    // 처음 들어오면 전시실 이름을 알리고, 액자에서 돌아오면 물러난 뒤 조작을 돌려준다. 보지 못한 완성 연출은 어느 쪽이든 먼저 튼다.
     private async UniTaskVoid ArriveAsync(GalleryFrame returnedFrame, GalleryFrame openedFrame, CancellationToken token)
     {
         SetControlEnabled(false);
@@ -262,10 +267,11 @@ public class GalleryStage : MonoBehaviour, IPausable
             {
                 await PlayFrameOpenedAsync(openedFrame, token);
             }
-
-            await PlayRoomCompleteIfNeededAsync(token);
         }
-        else if (null != _room)
+
+        await PlayRoomCompleteIfNeededAsync(token);
+
+        if (null == returnedFrame && null != _room)
         {
             _hud.ShowNotice(_room.DisplayName);
         }
@@ -287,7 +293,7 @@ public class GalleryStage : MonoBehaviour, IPausable
         await _player.MoveCameraHomeAsync(_frameOpenedMoveDuration, _returnEase, token);
     }
 
-    // 완성 기록이 없을 때만 튼다. 끝까지 본 뒤에 기록해, 연출 도중 게임을 끄면 다음에 돌아올 때 다시 보여 준다.
+    // 완성 기록이 없을 때만 튼다. 끝까지 본 뒤에 기록해, 연출 도중 게임을 끄면 다음에 들어올 때 다시 보여 준다.
     private async UniTask PlayRoomCompleteIfNeededAsync(CancellationToken token)
     {
         PlayerProgress progress = GameManager.Player.Progress;
